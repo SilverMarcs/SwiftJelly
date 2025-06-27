@@ -84,6 +84,9 @@ struct ContinueWatchingCard: View {
     let item: MediaItem
     @EnvironmentObject private var dataManager: DataManager
     @State private var showPlayer = false
+#if os(macOS)
+    @Environment(\.openWindow) private var openWindow
+#endif
 
     private var server: Server? {
         guard let currentUser = dataManager.currentUser else { return nil }
@@ -95,7 +98,14 @@ struct ContinueWatchingCard: View {
 
     var body: some View {
         Button {
+#if os(macOS)
+            if let server, let user {
+                let data = ContinueWatchingPlayerWindowData(item: item, serverId: server.id, userId: user.id)
+                openWindow(id: "continue-watching-player", value: data)
+            }
+#else
             showPlayer = true
+#endif
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 // Landscape Image with Progress Bar
@@ -158,24 +168,22 @@ struct ContinueWatchingCard: View {
             .frame(width: 300)
         }
         .buttonStyle(.plain)
+#if !os(macOS)
         .sheet(isPresented: $showPlayer) {
             if let server, let user, let url = item.playbackURL(for: server, user: user) {
                 VLCVideoPlayer(
                     configuration: .init(
                         url: url,
                         autoPlay: true,
-                        startSeconds: .seconds(Int64(item.startTimeSeconds)))
-//                    ),
-//                    proxy: nil,
-//                    onTicksUpdated: { _, _ in },
-//                    onStateUpdated: { _, _ in },
-//                    loggingInfo: nil
+                        startSeconds: .seconds(Int64(item.startTimeSeconds))
+                    )
                 )
             } else {
                 Text("Unable to play this item.")
                     .padding()
             }
         }
+#endif
     }
 
     private var landscapeImageURL: URL? {
