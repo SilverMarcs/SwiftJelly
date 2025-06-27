@@ -10,3 +10,4 @@ use latest swiftui features
 use latest swift concurrency features
 never write any tests
 never check for compile errors or problems
+keep styling to a minimal in swiftui. We are simply creating mvp now

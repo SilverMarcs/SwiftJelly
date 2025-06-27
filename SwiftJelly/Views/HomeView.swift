@@ -9,13 +9,30 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        VStack {
-            Text("Home")
-                .font(.largeTitle)
-                .foregroundStyle(.primary)
-            Text("This is the Home tab.")
-                .foregroundStyle(.secondary)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Continue Watching Section
+                    ContinueWatchingView()
+                    
+                    // Other sections can be added here
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Other Content")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal)
+                        
+                        Text("More sections will be added here")
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
+                    }
+                    
+                    Spacer(minLength: 100)
+                }
+                .padding(.top)
+            }
+            .navigationTitle("Home")
+            .toolbarTitleDisplayMode(.inlineLarge)
         }
-        .padding()
     }
 }

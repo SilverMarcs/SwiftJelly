@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct SwiftJellyApp: App {
+    @StateObject private var dataManager = DataManager.shared
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(dataManager)
         }
     }
 }
