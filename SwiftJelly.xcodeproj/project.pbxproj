@@ -6,8 +6,33 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		083128B92E0EE2320096527C /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128B82E0EE2320096527C /* VLCUI */; };
+		083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); };
+		083128BE2E0EE24E0096527C /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
+		083128C02E0EE24E0096527C /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		083128C12E0EE24E0096527C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				083128C02E0EE24E0096527C /* MobileVLCKit.xcframework in Embed Frameworks */,
+				083128BE2E0EE24E0096527C /* VLCKit.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		083128A92E0EE1F70096527C /* SwiftJelly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftJelly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		083128BB2E0EE24E0096527C /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = Carthage/Build/VLCKit.xcframework; sourceTree = "<group>"; };
+		083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/Build/MobileVLCKit.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +48,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */,
+				083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */,
+				083128B92E0EE2320096527C /* VLCUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				083128AB2E0EE1F70096527C /* SwiftJelly */,
+				083128BA2E0EE24E0096527C /* Frameworks */,
 				083128AA2E0EE1F70096527C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,6 +74,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		083128BA2E0EE24E0096527C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */,
+				083128BB2E0EE24E0096527C /* VLCKit.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -55,6 +93,7 @@
 				083128A52E0EE1F70096527C /* Sources */,
 				083128A62E0EE1F70096527C /* Frameworks */,
 				083128A72E0EE1F70096527C /* Resources */,
+				083128C12E0EE24E0096527C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -65,6 +104,7 @@
 			);
 			name = SwiftJelly;
 			packageProductDependencies = (
+				083128B82E0EE2320096527C /* VLCUI */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -94,6 +134,9 @@
 			);
 			mainGroup = 083128A02E0EE1F70096527C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
 			projectDirPath = "";
@@ -251,7 +294,17 @@
 				DEVELOPMENT_TEAM = 2L782RMCG7;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -294,7 +347,17 @@
 				DEVELOPMENT_TEAM = 2L782RMCG7;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -349,6 +412,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LePips/VLCUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.7.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		083128B82E0EE2320096527C /* VLCUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */;
+			productName = VLCUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 083128A12E0EE1F70096527C /* Project object */;
 }

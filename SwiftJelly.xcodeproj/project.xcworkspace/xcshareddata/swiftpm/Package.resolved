@@ -1,0 +1,15 @@
+{
+  "originHash" : "2796adf0d399f672675dc2980142b823275aa40bad87d98471acff06f2b80386",
+  "pins" : [
+    {
+      "identity" : "vlcui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LePips/VLCUI",
+      "state" : {
+        "revision" : "e72985db8f1e837c1e3801a63e45b01b254bef94",
+        "version" : "0.7.2"
+      }
+    }
+  ],
+  "version" : 3
+}
