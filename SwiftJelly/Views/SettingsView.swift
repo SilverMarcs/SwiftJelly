@@ -8,14 +8,15 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @StateObject private var dataManager = DataManager.shared
+    
     var body: some View {
-        VStack {
-            Text("Settings")
-                .font(.largeTitle)
-                .foregroundStyle(.primary)
-            Text("This is the Settings tab.")
-                .foregroundStyle(.secondary)
+        NavigationStack {
+            ServerListView()
+            
+            if let currentUser = dataManager.currentUser {
+                LoggedInView(user: currentUser)
+            }
         }
-        .padding()
     }
 }

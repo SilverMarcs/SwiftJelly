@@ -8,16 +8,26 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab: Tabs = .home
+    
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape")
-                }
+        TabView(selection: $selectedTab) {
+            Tab("Home", systemImage: "house", value: .home) {
+                HomeView()
+            }
+            
+            Tab("Settings", systemImage: "gear", value: .settings) {
+                SettingsView()
+            }
         }
+        .tabViewStyle(.sidebarAdaptable)
+        #if !os(macOS)
+        .tabBarMinimizeBehavior(.onScrollDown)
+        #endif
     }
+}
+
+enum Tabs: Hashable {
+    case home
+    case settings
 }
