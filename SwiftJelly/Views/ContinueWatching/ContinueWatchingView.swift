@@ -22,7 +22,6 @@ struct ContinueWatchingView: View {
                 
                 if continueWatchingManager.isLoading {
                     ProgressView()
-                        .scaleEffect(0.8)
                 }
             }
             .padding(.horizontal)
@@ -34,23 +33,7 @@ struct ContinueWatchingView: View {
                     .padding(.horizontal)
             }
             
-            if continueWatchingManager.items.isEmpty && !continueWatchingManager.isLoading {
-                VStack(spacing: 8) {
-                    Image(systemName: "tv.slash")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.secondary)
-                    
-                    Text("No items to continue watching")
-                        .foregroundStyle(.secondary)
-                        .font(.headline)
-                    
-                    Text("Start watching something to see it here")
-                        .foregroundStyle(.tertiary)
-                        .font(.caption)
-                }
-                .frame(height: 200)
-                .frame(maxWidth: .infinity)
-            } else {
+            if !continueWatchingManager.items.isEmpty && !continueWatchingManager.isLoading {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
                         ForEach(continueWatchingManager.items) { item in
@@ -68,7 +51,6 @@ struct ContinueWatchingView: View {
                     }
                     .padding(.horizontal)
                 }
-                .frame(height: 200)
             }
         }
         .task {

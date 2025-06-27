@@ -54,7 +54,7 @@ struct ContinueWatchingCard: View {
                 }
 
                 // Title and Info
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(item.displayTitle)
                         .font(.headline)
                         .lineLimit(1)

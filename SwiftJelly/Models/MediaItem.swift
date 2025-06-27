@@ -1,26 +1,3 @@
-// MARK: - Playback URL Helper
-import Foundation
-import SwiftUI
-
-extension MediaItem {
-    /// Returns the direct video stream URL for this item, if possible.
-    /// - Parameters:
-    ///   - server: The server object (must have base url)
-    ///   - user: The user object (must have access token)
-    ///   - additionalParams: Any additional query params (optional)
-    func playbackURL(for server: Server, user: User, additionalParams: [String: String] = [:]) -> URL? {
-        guard let token = user.accessToken else { return nil }
-        var components = URLComponents(url: server.url, resolvingAgainstBaseURL: false)
-        components?.path += "/Videos/\(id)/stream"
-        var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "static", value: "true"),
-            URLQueryItem(name: "api_key", value: token)
-        ]
-        for (k, v) in additionalParams { queryItems.append(URLQueryItem(name: k, value: v)) }
-        components?.queryItems = queryItems
-        return components?.url
-    }
-}
 //
 //  MediaItem.swift
 //  SwiftJelly
@@ -159,6 +136,19 @@ struct MediaItem: Identifiable, Codable, Hashable {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy"
         return formatter.string(from: premiereDate)
+    }
+    
+    func playbackURL(for server: Server, user: User, additionalParams: [String: String] = [:]) -> URL? {
+        guard let token = user.accessToken else { return nil }
+        var components = URLComponents(url: server.url, resolvingAgainstBaseURL: false)
+        components?.path += "/Videos/\(id)/stream"
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "static", value: "true"),
+            URLQueryItem(name: "api_key", value: token)
+        ]
+        for (k, v) in additionalParams { queryItems.append(URLQueryItem(name: k, value: v)) }
+        components?.queryItems = queryItems
+        return components?.url
     }
 }
 
