@@ -10,38 +10,19 @@ import SwiftUI
 struct ProgressBarOverlay: View {
     let title: String
     let progress: Double
-    
+
     var body: some View {
-        VStack(spacing: 4) {
-            HStack {
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.white)
-                
-                Spacer()
-            }
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(.white)
             
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Color.black.opacity(0.3))
-                        .frame(height: 4)
-                    
-                    Rectangle()
-                        .fill(Color.white)
-                        .frame(width: geometry.size.width * progress, height: 4)
-                }
-            }
-            .frame(height: 4)
+            ProgressView(value: progress)
+                .progressViewStyle(LinearProgressViewStyle(tint: .white))
+                .frame(height: 4)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
         }
-        .padding(12)
-        .background(
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.7)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .padding(8)
     }
 }

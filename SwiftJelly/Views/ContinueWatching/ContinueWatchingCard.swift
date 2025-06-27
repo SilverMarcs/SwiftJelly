@@ -19,6 +19,7 @@ struct ContinueWatchingCard: View {
         guard let currentUser = dataManager.currentUser else { return nil }
         return dataManager.servers.first { $0.id == currentUser.serverID }
     }
+    
     private var user: User? {
         dataManager.currentUser
     }
