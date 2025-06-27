@@ -12,6 +12,7 @@
 		083128BE2E0EE24E0096527C /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
 		083128C02E0EE24E0096527C /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128C52E0EE3F50096527C /* JellyfinAPI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +51,7 @@
 			files = (
 				083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */,
 				083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */,
+				083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */,
 				083128B92E0EE2320096527C /* VLCUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,6 +107,7 @@
 			name = SwiftJelly;
 			packageProductDependencies = (
 				083128B82E0EE2320096527C /* VLCUI */,
+				083128C52E0EE3F50096527C /* JellyfinAPI */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -136,6 +139,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */,
+				083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -422,6 +426,14 @@
 				minimumVersion = 0.7.2;
 			};
 		};
+		083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jellyfin/jellyfin-sdk-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -429,6 +441,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */;
 			productName = VLCUI;
+		};
+		083128C52E0EE3F50096527C /* JellyfinAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
+			productName = JellyfinAPI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
