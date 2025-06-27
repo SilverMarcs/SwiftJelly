@@ -9,44 +9,35 @@ import SwiftUI
 import VLCUI
 
 struct ContinueWatchingView: View {
-    @StateObject private var continueWatchingManager = ContinueWatchingManager()
-    
+    @StateObject private var homeViewModel = HomeViewModel()
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Continue Watching")
                     .font(.title2)
                     .fontWeight(.semibold)
-                
+
                 Spacer()
-                
-                if continueWatchingManager.isLoading {
+
+                if homeViewModel.isLoading {
                     ProgressView()
                 }
             }
             .padding(.horizontal)
-            
-            if let error = continueWatchingManager.error {
+
+            if let error = homeViewModel.error {
                 Text("Error: \(error)")
                     .foregroundStyle(.red)
                     .font(.caption)
                     .padding(.horizontal)
             }
-            
-            if !continueWatchingManager.items.isEmpty && !continueWatchingManager.isLoading {
+
+            if !homeViewModel.resumeItems.isEmpty && !homeViewModel.isLoading {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
-                        ForEach(continueWatchingManager.items) { item in
+                        ForEach(homeViewModel.resumeItems, id: \ .id) { item in
                             ContinueWatchingCard(item: item)
-                                .contextMenu {
-                                    Button {
-                                        Task {
-                                            await continueWatchingManager.markAsPlayed(item)
-                                        }
-                                    } label: {
-                                        Label("Mark as Played", systemImage: "checkmark.circle")
-                                    }
-                                }
                         }
                     }
                     .padding(.horizontal)
@@ -54,10 +45,10 @@ struct ContinueWatchingView: View {
             }
         }
         .task {
-            await continueWatchingManager.loadContinueWatching()
+            await homeViewModel.loadResumeItems()
         }
         .refreshable {
-            await continueWatchingManager.loadContinueWatching()
+            await homeViewModel.loadResumeItems()
         }
     }
 }
