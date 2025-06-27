@@ -45,7 +45,7 @@ struct ContinueWatchingCard: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(width: 300, height: 168)
+                .frame(width: 270, height: 168)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(alignment: .bottom) {
                     ProgressBarOverlay(
@@ -74,7 +74,7 @@ struct ContinueWatchingCard: View {
                     }
                 }
             }
-            .frame(width: 300)
+            .frame(width: 270)
         }
         .buttonStyle(.plain)
 #if !os(macOS)

@@ -47,8 +47,8 @@ struct ContinueWatchingView: View {
         .task {
             await homeViewModel.loadResumeItems()
         }
-        .refreshable {
-            await homeViewModel.loadResumeItems()
-        }
+//        .refreshable {
+//            await homeViewModel.loadResumeItems()
+//        }
     }
 }

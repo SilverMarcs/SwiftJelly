@@ -23,5 +23,6 @@ struct ProgressBarOverlay: View {
                 .frame(height: 4)
                 .clipShape(RoundedRectangle(cornerRadius: 2))
         }
+        .padding(8)
     }
 }
