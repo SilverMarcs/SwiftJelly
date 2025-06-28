@@ -1,5 +1,5 @@
 //
-//  ContinueWatchingCard.swift
+//  MediaPlaybackCard.swift
 //  SwiftJelly
 //
 //  Created by Zabir Raihan on 28/06/2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 import JellyfinAPI
 
-struct ContinueWatchingCard: View {
+struct MediaPlaybackCard: View {
     let item: BaseItemDto
     @EnvironmentObject private var dataManager: DataManager
     @State private var showPlayer = false
@@ -29,8 +29,8 @@ struct ContinueWatchingCard: View {
         Button {
 #if os(macOS)
             if let server, let user {
-                let data = ContinueWatchingPlayerWindowData(item: item, serverId: server.id, userId: user.id)
-                openWindow(id: "continue-watching-player", value: data)
+                let data = MediaPlayerWindowData(item: item, serverId: server.id, userId: user.id)
+                openWindow(id: "media-player", value: data)
             }
 #else
             showPlayer = true

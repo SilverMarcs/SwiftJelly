@@ -4,17 +4,17 @@ import JellyfinAPI
 import VLCUI
 
 
-struct ContinueWatchingPlayerWindowView: View {
+struct MediaPlayerWindowView: View {
     let item: BaseItemDto
     let server: Server
     let user: User
-    @StateObject private var viewModel: ContinueWatchingPlayerViewModel
+    @StateObject private var viewModel: MediaPlayerViewModel
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var isSeeking = false
     @State private var seekValue: Double = 0
 
     init(item: BaseItemDto, server: Server, user: User) {
-        _viewModel = StateObject(wrappedValue: ContinueWatchingPlayerViewModel(item: item, server: server, user: user))
+        _viewModel = StateObject(wrappedValue: MediaPlayerViewModel(item: item, server: server, user: user))
         self.item = item
         self.server = server
         self.user = user

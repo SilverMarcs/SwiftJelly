@@ -3,7 +3,7 @@ import JellyfinAPI
 import Combine
 import VLCUI
 
-class ContinueWatchingPlayerViewModel: ObservableObject {
+class MediaPlayerViewModel: ObservableObject {
     @Published var playbackPosition: Int = 0
     @Published var duration: Int = 1
     @Published var isPlaying: Bool = false

@@ -17,11 +17,11 @@ struct SwiftJellyApp: App {
                 .environmentObject(dataManager)
         }
 #if os(macOS)
-        WindowGroup("Continue Watching Player", id: "continue-watching-player", for: ContinueWatchingPlayerWindowData.self) { $data in
+        WindowGroup("Media Player", id: "media-player", for: MediaPlayerWindowData.self) { $data in
             if let data = data,
                let server = dataManager.servers.first(where: { $0.id == data.serverId }),
                let user = dataManager.users.first(where: { $0.id == data.userId }) {
-                ContinueWatchingPlayerWindowView(item: data.item, server: server, user: user)
+                MediaPlayerWindowView(item: data.item, server: server, user: user)
             } else {
                 Text("Unable to open player window.")
             }

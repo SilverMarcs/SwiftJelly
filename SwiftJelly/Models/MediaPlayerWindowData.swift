@@ -3,7 +3,7 @@ import SwiftUI
 
 import JellyfinAPI
 
-struct ContinueWatchingPlayerWindowData: Codable, Hashable, Identifiable {
+struct MediaPlayerWindowData: Codable, Hashable, Identifiable {
     let id: String // BaseItemDto.id
     let item: BaseItemDto
     let serverId: String
