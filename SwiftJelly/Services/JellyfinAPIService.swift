@@ -68,7 +68,7 @@ class JellyfinAPIService {
         let response = try await context.client.send(request)
         
         // Filter to only supported collection types
-        let supportedTypes: [CollectionType] = [.movies, .tvshows, .music, .books, .photos]
+        let supportedTypes: [CollectionType] = [.movies, .tvshows]
         return (response.value.items ?? []).filter { item in
             guard let collectionType = item.collectionType else { return false }
             return supportedTypes.contains(collectionType)

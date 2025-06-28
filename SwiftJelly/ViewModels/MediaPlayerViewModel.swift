@@ -44,6 +44,7 @@ class MediaPlayerViewModel: ObservableObject {
                     isPaused: !isPlaying
                 )
             } catch {
+                print("Error reporting playback progress: \(error)")
 //                handleError(error)
             }
         }
@@ -55,6 +56,7 @@ class MediaPlayerViewModel: ObservableObject {
                 let positionTicks = Int64(playbackPosition * 10_000_000)
                 try await apiService.reportPlaybackStopped(for: item, positionTicks: positionTicks)
             } catch {
+                print("Error reporting playback stopped: \(error)")
 //                handleError(error)
             }
         }
