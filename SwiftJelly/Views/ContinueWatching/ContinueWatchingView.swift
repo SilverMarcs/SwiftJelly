@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import JellyfinAPI
 import VLCUI
 
 struct ContinueWatchingView: View {
-    @StateObject private var homeViewModel = HomeViewModel()
+    @State private var resumeItems: [BaseItemDto] = []
+    @State private var isLoading = false
+
+    private let apiService = JellyfinAPIService.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -20,23 +24,16 @@ struct ContinueWatchingView: View {
 
                 Spacer()
 
-                if homeViewModel.isLoading {
+                if isLoading {
                     ProgressView()
                 }
             }
             .padding(.horizontal)
 
-            if let error = homeViewModel.error {
-                Text("Error: \(error)")
-                    .foregroundStyle(.red)
-                    .font(.caption)
-                    .padding(.horizontal)
-            }
-
-            if !homeViewModel.resumeItems.isEmpty && !homeViewModel.isLoading {
+            if !resumeItems.isEmpty && !isLoading {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
-                        ForEach(homeViewModel.resumeItems, id: \ .id) { item in
+                        ForEach(resumeItems, id: \ .id) { item in
                             ContinueWatchingCard(item: item)
                         }
                     }
@@ -45,10 +42,19 @@ struct ContinueWatchingView: View {
             }
         }
         .task {
-            await homeViewModel.loadResumeItems()
+            await loadResumeItems()
         }
-//        .refreshable {
-//            await homeViewModel.loadResumeItems()
-//        }
+    }
+
+    private func loadResumeItems() async {
+        isLoading = true
+
+        do {
+            resumeItems = try await apiService.loadResumeItems()
+        } catch {
+            print("Error loading resume items: \(error.localizedDescription)")
+        }
+
+        isLoading = false
     }
 }

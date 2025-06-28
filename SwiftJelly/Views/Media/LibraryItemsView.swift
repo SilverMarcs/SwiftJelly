@@ -10,26 +10,23 @@ import JellyfinAPI
 
 struct LibraryItemsView: View {
     let library: BaseItemDto
-    @StateObject private var viewModel: LibraryItemsViewModel
-    
+    @State private var items: [BaseItemDto] = []
+    @State private var isLoading = false
+
+    private let apiService = JellyfinAPIService.shared
     private let columns = [
         GridItem(.adaptive(minimum: 120), spacing: 12)
     ]
-    
-    init(library: BaseItemDto) {
-        self.library = library
-        self._viewModel = StateObject(wrappedValue: LibraryItemsViewModel(library: library))
-    }
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                if viewModel.isLoading {
+                if isLoading {
                     ProgressView("Loading...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(viewModel.items, id: \.id) { item in
+                        ForEach(items, id: \.id) { item in
                             Button {
                                 // TODO: Navigate to item detail view
                                 // For now, no action on tap as requested
@@ -45,12 +42,24 @@ struct LibraryItemsView: View {
             .navigationTitle(library.name ?? "Library")
             .toolbarTitleDisplayMode(.inlineLarge)
             .task {
-                await viewModel.loadItems()
+                await loadItems()
             }
             .refreshable {
-                await viewModel.loadItems()
+                await loadItems()
             }
         }
+    }
+
+    private func loadItems() async {
+        isLoading = true
+
+        do {
+            items = try await apiService.loadLibraryItems(for: library)
+        } catch {
+            print("Error loading library items: \(error.localizedDescription)")
+        }
+
+        isLoading = false
     }
 }
 

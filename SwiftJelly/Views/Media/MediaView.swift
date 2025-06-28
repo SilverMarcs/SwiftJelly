@@ -9,31 +9,26 @@ import SwiftUI
 import JellyfinAPI
 
 struct MediaView: View {
-    @StateObject private var viewModel = MediaViewModel()
+    @State private var libraries: [BaseItemDto] = []
+    @State private var isLoading = false
     @EnvironmentObject private var dataManager: DataManager
-    
+
+    private let apiService = JellyfinAPIService.shared
     private let columns = [
         GridItem(.adaptive(minimum: 150), spacing: 16)
     ]
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    if viewModel.isLoading {
+                    if isLoading {
                         ProgressView()
                     }
-                    
-                    if let error = viewModel.error {
-                        Text("Error: \(error)")
-                            .foregroundStyle(.red)
-                            .font(.caption)
-                            .padding(.horizontal)
-                    }
-                    
-                    if !viewModel.libraries.isEmpty && !viewModel.isLoading {
+
+                    if !libraries.isEmpty && !isLoading {
                         LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(viewModel.libraries, id: \.id) { library in
+                            ForEach(libraries, id: \.id) { library in
                                 NavigationLink(destination: LibraryItemsView(library: library)) {
                                     LibraryCard(library: library)
                                 }
@@ -46,9 +41,21 @@ struct MediaView: View {
             }
             .navigationTitle("Media Libraries")
             .task {
-                await viewModel.loadLibraries()
+                await loadLibraries()
             }
         }
+    }
+
+    private func loadLibraries() async {
+        isLoading = true
+
+        do {
+            libraries = try await apiService.loadLibraries()
+        } catch {
+            print("Error loading libraries: \(error.localizedDescription)")
+        }
+
+        isLoading = false
     }
 }
 
