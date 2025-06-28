@@ -16,6 +16,10 @@ struct ContentView: View {
                 HomeView()
             }
             
+            Tab("Media", systemImage: "film", value: .media) {
+                MediaView()
+            }
+            
             Tab("Settings", systemImage: "gear", value: .settings) {
                 SettingsView()
             }
@@ -29,5 +33,6 @@ struct ContentView: View {
 
 enum Tabs: Hashable {
     case home
+    case media
     case settings
 }

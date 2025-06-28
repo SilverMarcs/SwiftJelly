@@ -37,7 +37,7 @@ struct ContinueWatchingCard: View {
 #endif
         } label: {
             VStack(alignment: .leading, spacing: 8) {
-                AsyncImage(url: primaryImageURL) { image in
+                AsyncImage(url: ImageURLProvider.landscapeImageURL(for: item)) { image in
                     image
                         .resizable()
                         .aspectRatio(16/9, contentMode: .fill)
@@ -54,23 +54,27 @@ struct ContinueWatchingCard: View {
                     )
                 }
 
+                HStack(alignment: .top) {
                 // Title and Info
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.name ?? "Unknown")
-                        .font(.headline)
-                        .lineLimit(1)
-
-                    if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
-                        Text(parentTitle)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.name ?? "Unknown")
+                            .font(.headline)
                             .lineLimit(1)
+                        
+                        if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
+                            Text(parentTitle)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
                     }
-
+                    
+                    Spacer()
+                    
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
                         Text("S\(season)E\(episode)")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -86,99 +90,7 @@ struct ContinueWatchingCard: View {
 #endif
     }
 
-    private var primaryImageURL: URL? {
-        guard let server = server,
-              let user = user,
-              let client = dataManager.jellyfinClient(for: user, server: server),
-              let id = item.id else { return nil }
 
-        // Use proper Jellyfin API image URL generation like the old project
-        let maxWidth: CGFloat = 600
-
-        // For episodes, try to get landscape images (thumb/backdrop) from series
-        if item.type == .episode, let seriesId = item.seriesID {
-            // Try thumb image from series first
-            if let thumbTag = getImageTag(for: .thumb, from: item) {
-                let parameters = Paths.GetItemImageParameters(
-                    maxWidth: Int(maxWidth),
-                    tag: thumbTag
-                )
-                let request = Paths.getItemImage(
-                    itemID: seriesId,
-                    imageType: ImageType.thumb.rawValue,
-                    parameters: parameters
-                )
-                return client.fullURL(with: request)
-            }
-
-            // Try backdrop image from series
-            if let backdropTag = item.backdropImageTags?.first {
-                let parameters = Paths.GetItemImageParameters(
-                    maxWidth: Int(maxWidth),
-                    tag: backdropTag
-                )
-                let request = Paths.getItemImage(
-                    itemID: seriesId,
-                    imageType: ImageType.backdrop.rawValue,
-                    parameters: parameters
-                )
-                return client.fullURL(with: request)
-            }
-        }
-
-        // For other items or fallback, try thumb first, then backdrop, then primary
-        if let thumbTag = getImageTag(for: .thumb, from: item) {
-            let parameters = Paths.GetItemImageParameters(
-                maxWidth: Int(maxWidth),
-                tag: thumbTag
-            )
-            let request = Paths.getItemImage(
-                itemID: id,
-                imageType: ImageType.thumb.rawValue,
-                parameters: parameters
-            )
-            return client.fullURL(with: request)
-        }
-
-        if let backdropTag = item.backdropImageTags?.first {
-            let parameters = Paths.GetItemImageParameters(
-                maxWidth: Int(maxWidth),
-                tag: backdropTag
-            )
-            let request = Paths.getItemImage(
-                itemID: id,
-                imageType: ImageType.backdrop.rawValue,
-                parameters: parameters
-            )
-            return client.fullURL(with: request)
-        }
-
-        if let primaryTag = getImageTag(for: .primary, from: item) {
-            let parameters = Paths.GetItemImageParameters(
-                maxWidth: Int(maxWidth),
-                tag: primaryTag
-            )
-            let request = Paths.getItemImage(
-                itemID: id,
-                imageType: ImageType.primary.rawValue,
-                parameters: parameters
-            )
-            return client.fullURL(with: request)
-        }
-
-        return nil
-    }
-
-    private func getImageTag(for type: ImageType, from item: BaseItemDto) -> String? {
-        switch type {
-        case .backdrop:
-            return item.backdropImageTags?.first
-        case .screenshot:
-            return item.screenshotImageTags?.first
-        default:
-            return item.imageTags?[type.rawValue]
-        }
-    }
 
     private var progressLabel: String {
         if let played = item.userData?.isPlayed, played {
