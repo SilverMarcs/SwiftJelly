@@ -18,34 +18,38 @@ struct LibraryItemsView: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                if isLoading {
-                    ProgressView("Loading...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(items, id: \.id) { item in
-                            Button {
-                                // TODO: Navigate to item detail view
-                                // For now, no action on tap as requested
-                            } label: {
-                                MediaCard(item: item)
+        ScrollView {
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(items) { item in
+                        NavigationLink {
+                            switch item.type {
+                            case .movie:
+                                MovieDetailView(movie: item)
+                            case .series:
+                                ShowDetailView(show: item)
+                            default:
+                                Text("Unsupported item type")
                             }
-                            .buttonStyle(.plain)
+                        } label: {
+                            MediaCard(item: item)
                         }
+                        .buttonStyle(.plain)
                     }
-                    .padding()
                 }
+                .padding()
             }
-            .navigationTitle(library.name ?? "Library")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .task {
-                await loadItems()
-            }
-            .refreshable {
-                await loadItems()
-            }
+        }
+        .navigationTitle(library.name ?? "Library")
+        .toolbarTitleDisplayMode(.inlineLarge)
+        .task {
+            await loadItems()
+        }
+        .refreshable {
+            await loadItems()
         }
     }
 

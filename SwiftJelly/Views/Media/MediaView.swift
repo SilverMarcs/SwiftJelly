@@ -20,22 +20,22 @@ struct MediaView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    if isLoading {
-                        ProgressView()
-                    }
+                if isLoading {
+                    ProgressView()
+                }
 
-                    if !libraries.isEmpty && !isLoading {
-                        LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(libraries, id: \.id) { library in
-                                NavigationLink(destination: LibraryItemsView(library: library)) {
-                                    LibraryCard(library: library)
-                                }
-                                .buttonStyle(.plain)
+                if !libraries.isEmpty && !isLoading {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(libraries, id: \.id) { library in
+                            NavigationLink {
+                                LibraryItemsView(library: library)
+                            } label: {
+                                LibraryCard(library: library)
                             }
+                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal)
                     }
+                    .padding(.horizontal)
                 }
             }
             .navigationTitle("Media Libraries")

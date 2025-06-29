@@ -1,0 +1,98 @@
+import SwiftUI
+import JellyfinAPI
+
+struct ShowDetailView: View {
+    let show: BaseItemDto
+    @State private var seasons: [BaseItemDto] = []
+    @State private var selectedSeason: BaseItemDto?
+    @State private var episodes: [BaseItemDto] = []
+    @State private var isLoading = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                AsyncImage(url: ImageURLProvider.landscapeImageURL(for: show)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(16/9, contentMode: .fit)
+                } placeholder: {
+                    ProgressView()
+                        .frame(height: 180)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(.bottom, 8)
+                
+                Text(show.name ?? "Show")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                if let overview = show.overview {
+                    Text(overview)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+                
+                if !seasons.isEmpty {
+                    Picker("Season", selection: $selectedSeason) {
+                        ForEach(seasons) { season in
+                            Text(season.name ?? "Season").tag(season as BaseItemDto?)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.vertical, 8)
+                }
+                
+                if !episodes.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(episodes) { episode in
+                                PlayableCard(item: episode)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+            }
+            .padding()
+        }
+        .navigationTitle(show.name ?? "Show")
+        .toolbarTitleDisplayMode(.inline)
+        .task {
+            await loadSeasons()
+        }
+        .task(id: selectedSeason) {
+            await loadEpisodes(for: selectedSeason)
+        }
+    }
+    
+    private func loadSeasons() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let loadedSeasons = try await JFAPI.shared.loadSeasons(for: show)
+            self.seasons = loadedSeasons
+            // Select most recent season with watched episodes, else first
+            if let recent = loadedSeasons.first(where: {
+                ($0.userData?.isPlayed == true) || (($0.userData?.playCount ?? 0) > 0)
+            }) {
+                self.selectedSeason = recent
+            } else {
+                self.selectedSeason = loadedSeasons.first
+            }
+            if let selected = self.selectedSeason {
+                await loadEpisodes(for: selected)
+            }
+        } catch {
+            // handle error
+        }
+    }
+    
+    private func loadEpisodes(for season: BaseItemDto?) async {
+        guard let season else { episodes = []; return }
+        do {
+            self.episodes = try await JFAPI.shared.loadEpisodes(for: show, season: season)
+        } catch {
+            self.episodes = []
+        }
+    }
+}
