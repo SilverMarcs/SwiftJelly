@@ -64,7 +64,7 @@ extension JFAPI {
 
         let request = Paths.reportPlaybackStart(startInfo)
         _ = try await context.client.send(request)
-        print("Sent playback start report for \(item.name ?? "Unknown")")
+//        print("Sent playback start report for \(item.name ?? "Unknown")")
     }
 
     /// Reports playback progress to the Jellyfin server
@@ -91,7 +91,7 @@ extension JFAPI {
 
         let request = Paths.reportPlaybackProgress(progressInfo)
         _ = try await context.client.send(request)
-        print("Sent playback progress report for \(item.name ?? "Unknown") at \(positionTicks / 10_000_000)s")
+//        print("Sent playback progress report for \(item.name ?? "Unknown") at \(positionTicks / 10_000_000)s")
     }
 
     /// Reports playback stop to the Jellyfin server
@@ -111,6 +111,6 @@ extension JFAPI {
 
         let request = Paths.reportPlaybackStopped(stopInfo)
         _ = try await context.client.send(request)
-        print("Sent playback stop report for \(item.name ?? "Unknown")")
+//        print("Sent playback stop report for \(item.name ?? "Unknown")")
     }
 }
