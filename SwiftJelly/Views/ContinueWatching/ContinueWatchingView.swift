@@ -34,7 +34,7 @@ struct ContinueWatchingView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 16) {
                         ForEach(resumeItems, id: \ .id) { item in
-                            MediaPlaybackCard(item: item)
+                            PlayableCard(item: item)
                         }
                     }
                     .padding(.horizontal)

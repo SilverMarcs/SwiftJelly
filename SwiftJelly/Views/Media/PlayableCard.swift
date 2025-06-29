@@ -1,5 +1,5 @@
 //
-//  MediaPlaybackCard.swift
+//  PlayableCard.swift
 //  SwiftJelly
 //
 //  Created by Zabir Raihan on 28/06/2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 import JellyfinAPI
 
-struct MediaPlaybackCard: View {
+struct PlayableCard: View {
     let item: BaseItemDto
     @State private var showPlayer = false
 #if os(macOS)
