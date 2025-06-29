@@ -4,7 +4,7 @@ import JellyfinAPI
 import VLCUI
 
 
-struct MediaPlayerWindowView: View {
+struct MediaPlayerView: View {
     let item: BaseItemDto
     let server: Server
     let user: User

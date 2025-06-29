@@ -57,7 +57,7 @@ struct UserLoginView: View {
         isLoggingIn = true
         Task {
             do {
-                let user = try await JellyfinAPIService.shared.authenticateUser(
+                let user = try await JFAPI.shared.authenticateUser(
                     username: username,
                     password: password,
                     server: server

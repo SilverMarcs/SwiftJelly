@@ -1,5 +1,5 @@
 //
-//  JellyfinAPIService+Auth.swift
+//  JFAPI+Auth.swift
 //  SwiftJelly
 //
 //  Created by Zabir Raihan on 29/06/2025.
@@ -9,7 +9,7 @@ import Foundation
 import JellyfinAPI
 import Get
 
-extension JellyfinAPIService {
+extension JFAPI {
     /// Authenticates a user with the given credentials and server, returning a User on success
     /// - Parameters:
     ///   - username: The username to authenticate
@@ -35,7 +35,7 @@ extension JellyfinAPIService {
         let authResult = response.value
         guard let accessToken = authResult.accessToken,
               let userData = authResult.user else {
-            throw JellyfinAPIError.loginFailed
+            throw JFAPIError.loginFailed
         }
         return User(
             id: userData.id ?? UUID().uuidString,

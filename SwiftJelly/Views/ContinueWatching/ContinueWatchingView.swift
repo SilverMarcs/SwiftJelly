@@ -13,7 +13,7 @@ struct ContinueWatchingView: View {
     @State private var resumeItems: [BaseItemDto] = []
     @State private var isLoading = false
 
-    private let apiService = JellyfinAPIService.shared
+    private let api = JFAPI.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -50,7 +50,7 @@ struct ContinueWatchingView: View {
         isLoading = true
 
         do {
-            resumeItems = try await apiService.loadResumeItems()
+            resumeItems = try await api.loadResumeItems()
         } catch {
             print("Error loading resume items: \(error.localizedDescription)")
         }

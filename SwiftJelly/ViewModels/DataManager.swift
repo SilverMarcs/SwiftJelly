@@ -8,11 +8,9 @@
 import Foundation
 import SwiftUI
 import Combine
-
 import JellyfinAPI
 
 class DataManager: ObservableObject {
-    
     @Published var servers: [Server] = []
     @Published var users: [User] = []
     @Published var currentUser: User?

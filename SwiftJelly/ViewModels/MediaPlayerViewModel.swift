@@ -15,7 +15,7 @@ class MediaPlayerViewModel: ObservableObject {
     let server: Server
     let user: User
     let proxy: VLCVideoPlayer.Proxy = .init()
-    private let apiService = JellyfinAPIService.shared
+    private let api = JFAPI.shared
     private var updateTask: Task<Void, Never>?
     private var lastSentPosition: Int = 0
 
@@ -38,7 +38,7 @@ class MediaPlayerViewModel: ObservableObject {
         Task {
             do {
                 let positionTicks = Int64(seconds * 10_000_000) // Convert seconds to ticks (1 second = 10,000,000 ticks)
-                try await apiService.reportPlaybackProgress(
+                try await api.reportPlaybackProgress(
                     for: item,
                     positionTicks: positionTicks,
                     isPaused: !isPlaying
@@ -54,7 +54,7 @@ class MediaPlayerViewModel: ObservableObject {
         Task {
             do {
                 let positionTicks = Int64(playbackPosition * 10_000_000)
-                try await apiService.reportPlaybackStopped(for: item, positionTicks: positionTicks)
+                try await api.reportPlaybackStopped(for: item, positionTicks: positionTicks)
             } catch {
                 print("Error reporting playback stopped: \(error)")
 //                handleError(error)

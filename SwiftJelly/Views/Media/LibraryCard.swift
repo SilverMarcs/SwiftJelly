@@ -11,7 +11,6 @@ import Get
 
 struct LibraryCard: View {
     let library: BaseItemDto
-    // No longer need DataManager or server/user logic here
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -21,11 +20,8 @@ struct LibraryCard: View {
                     .aspectRatio(1, contentMode: .fill)
             } placeholder: {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.3))
                     .overlay {
-                        Image(systemName: iconName)
-                            .font(.title)
-                            .foregroundStyle(.secondary)
+                        ProgressView()
                     }
             }
             .frame(width: 150, height: 150)
@@ -37,24 +33,5 @@ struct LibraryCard: View {
                 .multilineTextAlignment(.leading)
         }
         .frame(width: 150)
-    }
-    
-    // No longer need primaryImageURL or getImageTag, handled by ImageURLProvider
-    
-    private var iconName: String {
-        switch library.collectionType {
-        case .movies:
-            return "film"
-        case .tvshows:
-            return "tv"
-        case .music:
-            return "music.note"
-        case .books:
-            return "book"
-        case .photos:
-            return "photo"
-        default:
-            return "folder"
-        }
     }
 }

@@ -19,12 +19,8 @@ struct MediaCard: View {
                     .aspectRatio(2/3, contentMode: .fill)
             } placeholder: {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.3))
-                    .aspectRatio(2/3, contentMode: .fit)
                     .overlay {
-                        Image(systemName: iconName)
-                            .font(.title2)
-                            .foregroundStyle(.secondary)
+                        ProgressView()
                     }
             }
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -51,36 +47,4 @@ struct MediaCard: View {
             }
         }
     }
-    
-    private var iconName: String {
-        switch item.type {
-        case .movie:
-            return "film"
-        case .series:
-            return "tv"
-        case .episode:
-            return "tv"
-        case .musicAlbum:
-            return "music.note"
-        case .book:
-            return "book"
-        case .photo:
-            return "photo"
-        default:
-            return "questionmark"
-        }
-    }
 }
-//
-//#Preview {
-//    let sampleItem = BaseItemDto(
-//        id: "sample-id", name: "Sample Movie",
-//        type: .movie,
-//        productionYear: 2023,
-//        overview: "This is a sample movie description that shows how the card looks with text."
-//    )
-//    
-//    MediaCard(item: sampleItem)
-//        .frame(width: 120)
-//        .padding()
-//}

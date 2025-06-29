@@ -13,7 +13,6 @@ struct LibraryItemsView: View {
     @State private var items: [BaseItemDto] = []
     @State private var isLoading = false
 
-    private let apiService = JellyfinAPIService.shared
     private let columns = [
         GridItem(.adaptive(minimum: 120), spacing: 12)
     ]
@@ -54,7 +53,7 @@ struct LibraryItemsView: View {
         isLoading = true
 
         do {
-            items = try await apiService.loadLibraryItems(for: library)
+            items = try await JFAPI.shared.loadLibraryItems(for: library)
         } catch {
             print("Error loading library items: \(error.localizedDescription)")
         }
@@ -62,14 +61,3 @@ struct LibraryItemsView: View {
         isLoading = false
     }
 }
-
-//#Preview {
-//    let sampleLibrary = BaseItemDto(
-//        name: "Movies",
-//        id: "movies-library",
-//        collectionType: .movies
-//    )
-//    
-//    LibraryItemsView(library: sampleLibrary)
-//        .environmentObject(DataManager.shared)
-//}

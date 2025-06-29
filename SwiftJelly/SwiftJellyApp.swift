@@ -21,7 +21,7 @@ struct SwiftJellyApp: App {
             if let data = data,
                let server = dataManager.servers.first(where: { $0.id == data.serverId }),
                let user = dataManager.users.first(where: { $0.id == data.userId }) {
-                MediaPlayerWindowView(item: data.item, server: server, user: user)
+                MediaPlayerView(item: data.item, server: server, user: user)
             } else {
                 Text("Unable to open player window.")
             }

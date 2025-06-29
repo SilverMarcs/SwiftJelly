@@ -1,5 +1,5 @@
 //
-//  JellyfinAPIService+Library.swift
+//  JFAPI+Library.swift
 //  SwiftJelly
 //
 //  Created by Zabir Raihan on 29/06/2025.
@@ -9,7 +9,7 @@ import Foundation
 import JellyfinAPI
 import Get
 
-extension JellyfinAPIService {
+extension JFAPI {
     /// Loads user libraries/views
     /// - Returns: Array of BaseItemDto representing user libraries
     func loadLibraries() async throws -> [BaseItemDto] {

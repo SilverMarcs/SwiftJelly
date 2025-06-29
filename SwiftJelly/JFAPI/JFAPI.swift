@@ -1,5 +1,5 @@
 //
-//  JellyfinAPIService.swift
+//  JFAPI.swift
 //  SwiftJelly
 //
 //  Created by Zabir Raihan on 28/06/2025.
@@ -10,8 +10,8 @@ import JellyfinAPI
 import Get
 
 /// Service class that handles common Jellyfin API operations
-class JellyfinAPIService {
-    static let shared = JellyfinAPIService()
+class JFAPI {
+    static let shared = JFAPI()
     private let dataManager: DataManager = .shared
     private init() {}
 
@@ -20,7 +20,7 @@ class JellyfinAPIService {
         guard let currentUser = dataManager.currentUser,
               let server = dataManager.servers.first(where: { $0.id == currentUser.serverID }),
               let accessToken = currentUser.accessToken else {
-            throw JellyfinAPIError.setupFailed
+            throw JFAPIError.setupFailed
         }
         let configuration = JellyfinClient.Configuration(
             url: server.url,
@@ -36,7 +36,7 @@ class JellyfinAPIService {
     func getAPIContext() throws -> APIContext {
         guard let currentUser = dataManager.currentUser,
               let server = dataManager.servers.first(where: { $0.id == currentUser.serverID }) else {
-            throw JellyfinAPIError.setupFailed
+            throw JFAPIError.setupFailed
         }
         let client = try getClient()
         return APIContext(user: currentUser, server: server, client: client)
@@ -50,8 +50,8 @@ class JellyfinAPIService {
     }
 }
 
-/// Custom errors for JellyfinAPIService
-enum JellyfinAPIError: LocalizedError {
+/// Custom errors for JFAPI
+enum JFAPIError: LocalizedError {
     case setupFailed
     case loginFailed
     

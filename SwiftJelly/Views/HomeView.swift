@@ -12,12 +12,10 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    // Continue Watching Section
                     ContinueWatchingView()
 
                     Spacer(minLength: 100)
                 }
-//                .padding(.top)
             }
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)

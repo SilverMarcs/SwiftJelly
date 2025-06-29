@@ -13,7 +13,6 @@ struct MediaView: View {
     @State private var isLoading = false
     @EnvironmentObject private var dataManager: DataManager
 
-    private let apiService = JellyfinAPIService.shared
     private let columns = [
         GridItem(.adaptive(minimum: 150), spacing: 16)
     ]
@@ -50,7 +49,7 @@ struct MediaView: View {
         isLoading = true
 
         do {
-            libraries = try await apiService.loadLibraries()
+            libraries = try await JFAPI.shared.loadLibraries()
         } catch {
             print("Error loading libraries: \(error.localizedDescription)")
         }
