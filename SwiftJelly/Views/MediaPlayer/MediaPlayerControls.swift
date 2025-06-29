@@ -10,31 +10,35 @@ import VLCUI
 
 /// Reusable media player control buttons (play/pause, seek forward/backward)
 struct MediaPlayerControls: View {
-    let isPlaying: Bool
-    let onPlayPause: () -> Void
-    let onSeekBackward: () -> Void
-    let onSeekForward: () -> Void
-    
+    @ObservedObject var playbackState: PlaybackStateManager
+    var proxy: VLCVideoPlayer.Proxy
+
     var body: some View {
         HStack(spacing: 40) {
-            Button(action: onSeekBackward) {
+            Button(action: { proxy.jumpBackward(5) }) {
                 Image(systemName: "gobackward.5")
                     .font(.system(size: 32))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .buttonStyle(.glass)
-            
-            Button(action: onPlayPause) {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+
+            Button(action: {
+                if playbackState.isPlaying {
+                    proxy.pause()
+                } else {
+                    proxy.play()
+                }
+            }) {
+                Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 40))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .buttonStyle(.glass)
-            
-            Button(action: onSeekForward) {
+
+            Button(action: { proxy.jumpForward(5) }) {
                 Image(systemName: "goforward.5")
                     .font(.system(size: 32))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .buttonStyle(.glass)
         }

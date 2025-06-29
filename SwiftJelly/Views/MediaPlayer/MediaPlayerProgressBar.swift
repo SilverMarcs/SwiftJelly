@@ -6,35 +6,42 @@
 //
 
 import SwiftUI
+import VLCUI
 
 /// Reusable media player progress bar with time labels and seek slider
 struct MediaPlayerProgressBar: View {
-    let currentSeconds: Int
-    let totalSeconds: Int
-    let seekValue: Double
-    let isSeeking: Bool
-    let onSeekValueChanged: (Double) -> Void
-    let onSeekingChanged: (Bool) -> Void
-    
+    @ObservedObject var playbackState: PlaybackStateManager
+    var proxy: VLCVideoPlayer.Proxy
+
     var body: some View {
         HStack {
-            Text(currentSeconds.formattedTime)
+            Text(playbackState.currentSeconds.formattedTime)
                 .font(.caption)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .monospacedDigit()
-            
+
             Slider(
                 value: Binding(
-                    get: { isSeeking ? seekValue : Double(currentSeconds) },
-                    set: onSeekValueChanged
+                    get: { playbackState.isSeeking ? playbackState.seekValue : Double(playbackState.currentSeconds) },
+                    set: { newValue in
+                        playbackState.startSeeking(to: newValue)
+                    }
                 ),
-                in: 0...Double(totalSeconds),
-                onEditingChanged: onSeekingChanged
+                in: 0...Double(playbackState.totalSeconds),
+                onEditingChanged: { editing in
+                    if editing {
+                        // User started seeking
+                    } else {
+                        // User finished seeking
+                        let seekPosition = playbackState.endSeeking()
+                        proxy.setSeconds(.seconds(Int64(seekPosition)))
+                    }
+                }
             )
-            
-            Text(totalSeconds.formattedTime)
+
+            Text(playbackState.totalSeconds.formattedTime)
                 .font(.caption)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .monospacedDigit()
         }
         .padding(.horizontal)

@@ -33,57 +33,28 @@ struct MediaPlayerView: View {
                         let seconds = Int(duration.components.seconds)
                         let totalDuration = playbackInfo.length / 1000
                         playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-
-                        // Report progress periodically during playback
                         if playbackState.isPlaying {
                             sessionManager.reportProgress(currentSeconds: seconds)
                         }
                     }
 
-                    // Center controls overlay
+                    // Pass state and proxy to controls
                     MediaPlayerControls(
-                        isPlaying: playbackState.isPlaying,
-                        onPlayPause: {
-                            if playbackState.isPlaying {
-                                proxy.pause()
-                            } else {
-                                proxy.play()
-                            }
-                        },
-                        onSeekBackward: {
-                            proxy.jumpBackward(5)
-                        },
-                        onSeekForward: {
-                            proxy.jumpForward(5)
-                        }
+                        playbackState: playbackState,
+                        proxy: proxy
                     )
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 MediaPlayerProgressBar(
-                    currentSeconds: playbackState.currentSeconds,
-                    totalSeconds: playbackState.totalSeconds,
-                    seekValue: playbackState.seekValue,
-                    isSeeking: playbackState.isSeeking,
-                    onSeekValueChanged: { newValue in
-                        playbackState.startSeeking(to: newValue)
-                    },
-                    onSeekingChanged: { editing in
-                        if editing {
-                            // User started seeking
-                        } else {
-                            // User finished seeking
-                            let seekPosition = playbackState.endSeeking()
-                            proxy.setSeconds(.seconds(Int64(seekPosition)))
-                        }
-                    }
+                    playbackState: playbackState,
+                    proxy: proxy
                 )
             }
             .background(.black)
             .onDisappear {
                 sessionManager.stopPlayback(at: playbackState.currentSeconds)
             }
-
         } else {
             Text("Unable to play this item.")
                 .padding()
