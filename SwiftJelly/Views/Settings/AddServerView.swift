@@ -25,6 +25,7 @@ struct AddServerView: View {
                         .textContentType(.URL)
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle("Add Server")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {

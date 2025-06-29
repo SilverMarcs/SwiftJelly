@@ -11,20 +11,11 @@ import Get
 
 struct LibraryCard: View {
     let library: BaseItemDto
-    @EnvironmentObject private var dataManager: DataManager
-    
-    private var server: Server? {
-        guard let currentUser = dataManager.currentUser else { return nil }
-        return dataManager.servers.first { $0.id == currentUser.serverID }
-    }
-    
-    private var user: User? {
-        dataManager.currentUser
-    }
+    // No longer need DataManager or server/user logic here
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: ImageURLProvider.primaryImageURL(for: library, maxWidth: 300)) { image in
+            AsyncImage(url: ImageURLProvider.portraitImageURL(for: library, maxWidth: 300)) { image in
                 image
                     .resizable()
                     .aspectRatio(1, contentMode: .fill)
@@ -48,40 +39,7 @@ struct LibraryCard: View {
         .frame(width: 150)
     }
     
-    private var primaryImageURL: URL? {
-        guard let server = server,
-              let user = user,
-              let client = dataManager.jellyfinClient(for: user, server: server),
-              let id = library.id else { return nil }
-        
-        let maxWidth: CGFloat = 300
-        
-        if let primaryTag = getImageTag(for: .primary, from: library) {
-            let parameters = Paths.GetItemImageParameters(
-                maxWidth: Int(maxWidth),
-                tag: primaryTag
-            )
-            let request = Paths.getItemImage(
-                itemID: id,
-                imageType: ImageType.primary.rawValue,
-                parameters: parameters
-            )
-            return client.fullURL(with: request)
-        }
-        
-        return nil
-    }
-    
-    private func getImageTag(for type: ImageType, from item: BaseItemDto) -> String? {
-        switch type {
-        case .backdrop:
-            return item.backdropImageTags?.first
-        case .screenshot:
-            return item.screenshotImageTags?.first
-        default:
-            return item.imageTags?[type.rawValue]
-        }
-    }
+    // No longer need primaryImageURL or getImageTag, handled by ImageURLProvider
     
     private var iconName: String {
         switch library.collectionType {

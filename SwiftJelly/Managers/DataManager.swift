@@ -12,22 +12,6 @@ import Combine
 import JellyfinAPI
 
 class DataManager: ObservableObject {
-    // Provide a configured JellyfinClient for a user/server
-    func jellyfinClient(for user: User, server: Server) -> JellyfinClient? {
-        guard let accessToken = user.accessToken else { return nil }
-        let configuration = JellyfinClient.Configuration(
-            url: server.url,
-            client: "SwiftJelly",
-            deviceName: "SwiftJelly",
-            deviceID: user.id,
-            version: "1.0"
-        )
-        let client = JellyfinClient(
-            configuration: configuration,
-            accessToken: accessToken
-        )
-        return client
-    }
     
     @Published var servers: [Server] = []
     @Published var users: [User] = []

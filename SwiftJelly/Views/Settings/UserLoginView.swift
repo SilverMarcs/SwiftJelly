@@ -29,7 +29,9 @@ struct UserLoginView: View {
             }
             
             Section {
-                Button(action: login) {
+                Button(role: .confirm) {
+                    login()
+                } label: {
                     HStack {
                         if isLoggingIn {
                             ProgressView()
@@ -41,6 +43,7 @@ struct UserLoginView: View {
                 .disabled(username.isEmpty || isLoggingIn)
             }
         }
+        .formStyle(.grouped)
         .navigationTitle("Login")
         .toolbarTitleDisplayMode(.inline)
         .alert("Error", isPresented: $showingAlert) {
@@ -52,55 +55,22 @@ struct UserLoginView: View {
     
     private func login() {
         isLoggingIn = true
-        
         Task {
             do {
-                let client = createJellyfinClient()
-                
-                let authRequest = Paths.authenticateUserByName(
-                    AuthenticateUserByName(
-                        pw: password.isEmpty ? nil : password, username: username
-                    )
+                let user = try await JellyfinAPIService.shared.authenticateUser(
+                    username: username,
+                    password: password,
+                    server: server
                 )
-                
-                let response = try await client.send(authRequest)
-                let authResult = response.value
-                
-                if let accessToken = authResult.accessToken,
-                   let userData = authResult.user {
-                    let user = User(
-                        id: userData.id ?? UUID().uuidString,
-                        serverID: server.id,
-                        username: username,
-                        accessToken: accessToken
-                    )
-                    
-                    dataManager.addUser(user)
-                    dataManager.signIn(user: user)
-                    
-                    // Navigate to logged in view
-                    // This will be handled by the ContentView based on currentUser state
-                } else {
-                    alertMessage = "Login failed - no access token received"
-                    showingAlert = true
-                }
+                dataManager.addUser(user)
+                dataManager.signIn(user: user)
+                // Navigation handled by ContentView
                 isLoggingIn = false
-                
             } catch {
                 alertMessage = error.localizedDescription
                 showingAlert = true
                 isLoggingIn = false
             }
         }
-    }
-    
-    private func createJellyfinClient() -> JellyfinClient {
-        let configuration = JellyfinClient.Configuration(url: server.url,
-                                                         client: "client",
-                                                         deviceName: "deviceName",
-                                                         deviceID: "deviceID",
-                                                         version: "version")
-        
-        return JellyfinClient(configuration: configuration)
     }
 }

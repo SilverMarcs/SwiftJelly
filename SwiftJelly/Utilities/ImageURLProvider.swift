@@ -9,8 +9,6 @@ import Foundation
 import JellyfinAPI
 
 struct ImageURLProvider {
-    private let dataManager: DataManager = .shared
-    
     /// Generates the primary image URL for a BaseItemDto with fallback logic
     /// - Parameters:
     ///   - item: The BaseItemDto to get image for
@@ -22,11 +20,13 @@ struct ImageURLProvider {
         maxWidth: CGFloat = 600,
         preferredType: ImageType = .primary
     ) -> URL? {
-        guard let currentUser = dataManager.currentUser,
-              let server = dataManager.servers.first(where: { $0.id == currentUser.serverID }),
-              let client = dataManager.jellyfinClient(for: currentUser, server: server),
-              let id = item.id else { return nil }
-        
+        guard let id = item.id else { return nil }
+        let client: JellyfinClient
+        do {
+            client = try JellyfinAPIService.shared.getClient()
+        } catch {
+            return nil
+        }
         // For episodes, try to get landscape images (thumb/backdrop) from series
         if item.type == .episode, let seriesId = item.seriesID {
             // Try thumb image from series first
@@ -42,7 +42,6 @@ struct ImageURLProvider {
                 )
                 return client.fullURL(with: request)
             }
-            
             // Try backdrop image from series
             if let backdropTag = item.backdropImageTags?.first {
                 let parameters = Paths.GetItemImageParameters(
@@ -57,7 +56,6 @@ struct ImageURLProvider {
                 return client.fullURL(with: request)
             }
         }
-        
         // Try preferred type first
         if let preferredTag = getImageTag(for: preferredType, from: item) {
             let parameters = Paths.GetItemImageParameters(
@@ -71,12 +69,10 @@ struct ImageURLProvider {
             )
             return client.fullURL(with: request)
         }
-        
         // Fallback order: thumb -> backdrop -> primary
         let fallbackTypes: [ImageType] = [.thumb, .backdrop, .primary]
         for imageType in fallbackTypes {
-            if imageType == preferredType { continue } // Skip if already tried
-            
+            if imageType == preferredType { continue }
             if let tag = getImageTag(for: imageType, from: item) {
                 let parameters = Paths.GetItemImageParameters(
                     maxWidth: Int(maxWidth),
@@ -90,7 +86,6 @@ struct ImageURLProvider {
                 return client.fullURL(with: request)
             }
         }
-        
         return nil
     }
     
