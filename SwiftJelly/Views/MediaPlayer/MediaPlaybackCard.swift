@@ -10,28 +10,15 @@ import JellyfinAPI
 
 struct MediaPlaybackCard: View {
     let item: BaseItemDto
-    @EnvironmentObject private var dataManager: DataManager
     @State private var showPlayer = false
 #if os(macOS)
     @Environment(\.openWindow) private var openWindow
 #endif
 
-    private var server: Server? {
-        guard let currentUser = dataManager.currentUser else { return nil }
-        return dataManager.servers.first { $0.id == currentUser.serverID }
-    }
-    
-    private var user: User? {
-        dataManager.currentUser
-    }
-
     var body: some View {
         Button {
 #if os(macOS)
-            if let server, let user {
-                let data = MediaPlayerWindowData(item: item, serverId: server.id, userId: user.id)
-                openWindow(id: "media-player", value: data)
-            }
+            openWindow(id: "media-player", value: item)
 #else
             showPlayer = true
 #endif

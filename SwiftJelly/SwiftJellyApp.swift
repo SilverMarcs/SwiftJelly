@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import JellyfinAPI
 
 @main
 struct SwiftJellyApp: App {
@@ -17,11 +18,9 @@ struct SwiftJellyApp: App {
                 .environmentObject(dataManager)
         }
 #if os(macOS)
-        WindowGroup("Media Player", id: "media-player", for: MediaPlayerWindowData.self) { $data in
-            if let data = data,
-               let server = dataManager.servers.first(where: { $0.id == data.serverId }),
-               let user = dataManager.users.first(where: { $0.id == data.userId }) {
-                MediaPlayerView(item: data.item, server: server, user: user)
+        WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
+            if let item = item {
+                MediaPlayerView(item: item)
             } else {
                 Text("Unable to open player window.")
             }
