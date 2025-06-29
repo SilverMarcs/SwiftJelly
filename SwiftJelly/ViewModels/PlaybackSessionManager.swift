@@ -13,55 +13,36 @@ import Combine
 class PlaybackSessionManager: ObservableObject {
     @Published private(set) var playSessionID: String = ""
     @Published private(set) var hasSentStart: Bool = false
-    
-    private var progressReportTask: Task<Void, Never>?
     private let item: BaseItemDto
-    
+
     init(item: BaseItemDto) {
         self.item = item
         self.playSessionID = JFAPI.shared.generatePlaySessionID()
     }
-    
-    deinit {
-        progressReportTask?.cancel()
-    }
-    
+
     // MARK: - Public Methods
-    
-    /// Starts the playback session and begins progress reporting
+
+    /// Starts the playback session and sends start report
     func startPlayback(at positionSeconds: Int) {
         guard !hasSentStart else { return }
-        
         hasSentStart = true
         sendStartReport(positionSeconds: positionSeconds)
     }
-    
+
     /// Reports playback pause
     func pausePlayback(at positionSeconds: Int) {
-        stopProgressReporting()
         sendPauseReport(positionSeconds: positionSeconds)
     }
-    
-    /// Reports playback resume and restarts progress reporting
+
+    /// Reports playback resume
     func resumePlayback(at positionSeconds: Int) {
         sendResumeReport(positionSeconds: positionSeconds)
-        startProgressReporting(currentSeconds: positionSeconds)
     }
-    
+
     /// Reports playback stop and cleans up session
     func stopPlayback(at positionSeconds: Int) {
-        stopProgressReporting()
-        
         if hasSentStart {
             sendStopReport(positionSeconds: positionSeconds)
-        }
-    }
-    
-    /// Updates progress reporting with current position (called periodically during playback)
-    func updateProgress(currentSeconds: Int, isPlaying: Bool) {
-        if isPlaying && hasSentStart {
-            // Progress reporting is handled by the periodic task
-            // This method can be used for any additional logic if needed
         }
     }
     
@@ -75,7 +56,6 @@ class PlaybackSessionManager: ObservableObject {
                     positionTicks: positionSeconds.toPositionTicks,
                     playSessionID: playSessionID
                 )
-                startProgressReporting(currentSeconds: positionSeconds)
             } catch {
                 print("Failed to send start report: \(error)")
             }
@@ -126,44 +106,5 @@ class PlaybackSessionManager: ObservableObject {
         }
     }
     
-    private func startProgressReporting(currentSeconds: Int) {
-        stopProgressReporting()
-
-        progressReportTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
-
-                guard !Task.isCancelled,
-                      let self = self,
-                      self.hasSentStart else { break }
-
-                // Note: In a real implementation, we'd get the current position from the player
-                // For now, we'll rely on the periodic updates from the view
-                // This task mainly serves as a heartbeat to keep the session alive
-            }
-        }
-    }
-
-    /// Call this method periodically during playback to report progress
-    func reportProgress(currentSeconds: Int) {
-        guard hasSentStart else { return }
-
-        Task {
-            do {
-                try await JFAPI.shared.reportPlaybackProgress(
-                    for: item,
-                    positionTicks: currentSeconds.toPositionTicks,
-                    isPaused: false,
-                    playSessionID: playSessionID
-                )
-            } catch {
-                print("Failed to send progress report: \(error)")
-            }
-        }
-    }
-    
-    private func stopProgressReporting() {
-        progressReportTask?.cancel()
-        progressReportTask = nil
-    }
+    // No periodic reporting or progress task anymore
 }

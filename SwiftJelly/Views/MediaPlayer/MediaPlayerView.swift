@@ -26,7 +26,7 @@ struct MediaPlayerView: View {
                     url: url,
                     autoPlay: true,
                     startSeconds: .seconds(Int64(startTimeSeconds)),
-//                    subtitleSize: .absolute(5)
+                    subtitleSize: .absolute(24)
                 )
             )
             .proxy(proxy)
@@ -38,9 +38,6 @@ struct MediaPlayerView: View {
                 let seconds = Int(duration.components.seconds)
                 let totalDuration = info.length / 1000
                 playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                if playbackState.isPlaying {
-                    sessionManager.reportProgress(currentSeconds: seconds)
-                }
                 playbackInfo = info
             }
             .contentShape(Rectangle())
@@ -76,7 +73,6 @@ struct MediaPlayerView: View {
                 if controlsVisible {
                     VStack {
                         MediaPlayerInfoBar(item: item, proxy: proxy, playbackInfo: playbackInfo)
-                        
                         MediaPlayerProgressBar(
                             playbackState: playbackState,
                             proxy: proxy
@@ -101,6 +97,22 @@ struct MediaPlayerView: View {
             .background(.black)
             .onDisappear {
                 sessionManager.stopPlayback(at: playbackState.currentSeconds)
+            }
+            .onKeyPress(.space) {
+                if playbackState.isPlaying {
+                    proxy.pause()
+                } else {
+                    proxy.play()
+                }
+                return .handled
+            }
+            .onKeyPress(.leftArrow) {
+                proxy.jumpBackward(5)
+                return .handled
+            }
+            .onKeyPress(.rightArrow) {
+                proxy.jumpForward(5)
+                return .handled
             }
         } else {
             Text("Unable to play this item.")
