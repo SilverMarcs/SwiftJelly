@@ -11,17 +11,17 @@ import JellyfinAPI
 struct PlayableCard: View {
     let item: BaseItemDto
     @State private var showPlayer = false
-#if os(macOS)
+    #if os(macOS)
     @Environment(\.openWindow) private var openWindow
-#endif
+    #endif
 
     var body: some View {
         Button {
-#if os(macOS)
+            #if os(macOS)
             openWindow(id: "media-player", value: item)
-#else
+            #else
             showPlayer = true
-#endif
+            #endif
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 AsyncImage(url: ImageURLProvider.landscapeImageURL(for: item)) { image in
@@ -42,12 +42,12 @@ struct PlayableCard: View {
                 }
 
                 HStack(alignment: .top) {
-                // Title and Info
+                    // Title and Info
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.name ?? "Unknown")
                             .font(.headline)
                             .lineLimit(1)
-                        
+
                         if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
                             Text(parentTitle)
                                 .font(.caption)
@@ -55,9 +55,9 @@ struct PlayableCard: View {
                                 .lineLimit(1)
                         }
                     }
-                    
+
                     Spacer()
-                    
+
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
                         Text("S\(season)E\(episode)")
                             .font(.caption)
@@ -68,13 +68,11 @@ struct PlayableCard: View {
             .frame(width: 270)
         }
         .buttonStyle(.plain)
-#if !os(macOS)
-        .sheet(isPresented: $showPlayer) {
-            // TODO: Implement playback using BaseItemDto props and your player logic
-            Text("Playback not implemented for BaseItemDto yet.")
-                .padding()
+        #if !os(macOS)
+        .fullScreenCover(isPresented: $showPlayer) {
+            MediaPlayerView(item: item)
         }
-#endif
+        #endif
     }
 
 

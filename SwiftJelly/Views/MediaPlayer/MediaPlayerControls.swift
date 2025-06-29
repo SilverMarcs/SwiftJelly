@@ -17,30 +17,36 @@ struct MediaPlayerControls: View {
         HStack(spacing: 40) {
             Button(action: { proxy.jumpBackward(5) }) {
                 Image(systemName: "gobackward.5")
-                    .font(.system(size: 32))
+                    .font(.system(size: 25))
                     .foregroundStyle(.white)
+                    .padding(10)
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.plain)
+            .glassEffect(.regular, in: .rect(cornerRadius: 30))
 
-            Button(action: {
+            Button {
                 if playbackState.isPlaying {
                     proxy.pause()
                 } else {
                     proxy.play()
                 }
-            }) {
+            } label: {
                 Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 40))
                     .foregroundStyle(.white)
+                    .padding(15)
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.plain)
+            .glassEffect(.regular, in: .rect(cornerRadius: 30))
 
             Button(action: { proxy.jumpForward(5) }) {
                 Image(systemName: "goforward.5")
-                    .font(.system(size: 32))
+                    .font(.system(size: 25))
                     .foregroundStyle(.white)
+                    .padding(10)
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.plain)
+            .glassEffect(.regular, in: .rect(cornerRadius: 30))
         }
     }
 }

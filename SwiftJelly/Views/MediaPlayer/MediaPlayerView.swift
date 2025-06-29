@@ -4,12 +4,14 @@ import VLCUI
 
 struct MediaPlayerView: View {
     let item: BaseItemDto
+    
+    @Environment(\.dismiss) private var dismiss
 
     @State private var proxy: VLCVideoPlayer.Proxy = .init()
     @StateObject private var playbackState = PlaybackStateManager()
     @StateObject private var sessionManager: PlaybackSessionManager
 
-    @State private var controlsVisible: Bool = true
+    @State private var controlsVisible: Bool = false
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
 
     init(item: BaseItemDto) {
@@ -23,7 +25,8 @@ struct MediaPlayerView: View {
                 configuration: .init(
                     url: url,
                     autoPlay: true,
-                    startSeconds: .seconds(Int64(startTimeSeconds))
+                    startSeconds: .seconds(Int64(startTimeSeconds)),
+//                    subtitleSize: .absolute(5)
                 )
             )
             .proxy(proxy)
@@ -82,6 +85,19 @@ struct MediaPlayerView: View {
                     .padding()
                 }
             }
+            #if !os(macOS)
+            .overlay(alignment: .topTrailing) {
+                if controlsVisible {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .buttonStyle(.glass)
+                    .padding()
+                }
+            }
+            #endif
             .background(.black)
             .onDisappear {
                 sessionManager.stopPlayback(at: playbackState.currentSeconds)

@@ -25,6 +25,7 @@ struct SwiftJellyApp: App {
                 Text("Unable to open player window.")
             }
         }
+        .restorationBehavior(.disabled)
 #endif
     }
 }
