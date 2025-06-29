@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		083128B92E0EE2320096527C /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128B82E0EE2320096527C /* VLCUI */; };
+		0806E40C2E11CA2F00CF6DC0 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0806E40B2E11CA2F00CF6DC0 /* VLCUI */; };
+		0806E4B52E11D21800CF6DC0 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0806E4B42E11D21800CF6DC0 /* VLCUI */; };
 		083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); };
 		083128BE2E0EE24E0096527C /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
@@ -49,10 +50,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0806E4B52E11D21800CF6DC0 /* VLCUI in Frameworks */,
+				0806E40C2E11CA2F00CF6DC0 /* VLCUI in Frameworks */,
 				083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */,
 				083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */,
 				083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */,
-				083128B92E0EE2320096527C /* VLCUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,8 +108,9 @@
 			);
 			name = SwiftJelly;
 			packageProductDependencies = (
-				083128B82E0EE2320096527C /* VLCUI */,
 				083128C52E0EE3F50096527C /* JellyfinAPI */,
+				0806E40B2E11CA2F00CF6DC0 /* VLCUI */,
+				0806E4B42E11D21800CF6DC0 /* VLCUI */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -138,8 +141,8 @@
 			mainGroup = 083128A02E0EE1F70096527C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */,
 				083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
+				0806E4B32E11D21800CF6DC0 /* XCRemoteSwiftPackageReference "VLCUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -418,12 +421,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */ = {
+		0806E4B32E11D21800CF6DC0 /* XCRemoteSwiftPackageReference "VLCUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/LePips/VLCUI";
+			repositoryURL = "https://github.com/SilverMarcs/VLCUI";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.7.2;
+				branch = main;
+				kind = branch;
 			};
 		};
 		083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
@@ -437,9 +440,13 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		083128B82E0EE2320096527C /* VLCUI */ = {
+		0806E40B2E11CA2F00CF6DC0 /* VLCUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 083128B72E0EE2320096527C /* XCRemoteSwiftPackageReference "VLCUI" */;
+			productName = VLCUI;
+		};
+		0806E4B42E11D21800CF6DC0 /* VLCUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0806E4B32E11D21800CF6DC0 /* XCRemoteSwiftPackageReference "VLCUI" */;
 			productName = VLCUI;
 		};
 		083128C52E0EE3F50096527C /* JellyfinAPI */ = {
