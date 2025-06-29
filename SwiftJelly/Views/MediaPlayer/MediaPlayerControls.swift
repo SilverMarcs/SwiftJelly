@@ -20,10 +20,10 @@ struct MediaPlayerControls: View {
                     .font(.system(size: 25))
                     .foregroundStyle(.white)
                     .padding(10)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .glassEffect(.regular, in: .rect(cornerRadius: 30))
-            .contentShape(Rectangle())
 
             Button {
                 if playbackState.isPlaying {
@@ -36,20 +36,21 @@ struct MediaPlayerControls: View {
                     .font(.system(size: 40))
                     .foregroundStyle(.white)
                     .padding(15)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .glassEffect(.regular, in: .rect(cornerRadius: 30))
-            .contentShape(Rectangle())
+            
 
             Button(action: { proxy.jumpForward(5) }) {
                 Image(systemName: "goforward.5")
                     .font(.system(size: 25))
                     .foregroundStyle(.white)
                     .padding(10)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .glassEffect(.regular, in: .rect(cornerRadius: 30))
-            .contentShape(Rectangle())
         }
     }
 }

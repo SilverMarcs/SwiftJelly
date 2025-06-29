@@ -40,6 +40,8 @@ struct MediaPlayerView: View {
                 playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
                 playbackInfo = info
             }
+//            .aspectRatio(item.aspectRatio?.toCGFloatRatio() ?? 16/9, contentMode: .fit)
+            .navigationTitle(item.name ?? "Media Player")
             .contentShape(Rectangle())
             .gesture(
                 TapGesture(count: 2)
@@ -59,7 +61,6 @@ struct MediaPlayerView: View {
                         }
                     }
             )
-            // Overlay for media controls (center)
             .overlay(alignment: .center) {
                 if controlsVisible {
                     MediaPlayerControls(
@@ -68,11 +69,11 @@ struct MediaPlayerView: View {
                     )
                 }
             }
-            // Overlay for info bar and progress bar (bottom)
             .overlay(alignment: .bottom) {
                 if controlsVisible {
                     VStack {
                         MediaPlayerInfoBar(item: item, proxy: proxy, playbackInfo: playbackInfo)
+                        
                         MediaPlayerProgressBar(
                             playbackState: playbackState,
                             proxy: proxy

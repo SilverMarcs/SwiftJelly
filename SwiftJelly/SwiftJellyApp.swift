@@ -26,6 +26,7 @@ struct SwiftJellyApp: App {
             }
         }
         .restorationBehavior(.disabled)
+        .windowResizability(.contentSize)
 #endif
     }
 }
