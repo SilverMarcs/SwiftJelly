@@ -29,7 +29,8 @@ struct MediaCard: View {
                 Text(item.name ?? "Unknown")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .lineLimit(2)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
                     .multilineTextAlignment(.leading)
                 
                 if let year = item.productionYear {

@@ -27,39 +27,6 @@ class MediaPlayerViewModel: ObservableObject {
 
     func updatePlaybackPosition(_ seconds: Int) {
         playbackPosition = seconds
-        // Only send update every 5 seconds or on stop
-        if abs(seconds - lastSentPosition) >= 5 {
-            lastSentPosition = seconds
-            sendWatchTimeToServer(seconds: seconds)
-        }
-    }
-
-    func sendWatchTimeToServer(seconds: Int) {
-        Task {
-            do {
-                let positionTicks = Int64(seconds * 10_000_000) // Convert seconds to ticks (1 second = 10,000,000 ticks)
-                try await api.reportPlaybackProgress(
-                    for: item,
-                    positionTicks: positionTicks,
-                    isPaused: !isPlaying
-                )
-            } catch {
-                print("Error reporting playback progress: \(error)")
-//                handleError(error)
-            }
-        }
-    }
-
-    func reportPlaybackStopped() {
-        Task {
-            do {
-                let positionTicks = Int64(playbackPosition * 10_000_000)
-                try await api.reportPlaybackStopped(for: item, positionTicks: positionTicks)
-            } catch {
-                print("Error reporting playback stopped: \(error)")
-//                handleError(error)
-            }
-        }
     }
 
     func setSubtitleTracks(_ tracks: [MediaTrack]) {

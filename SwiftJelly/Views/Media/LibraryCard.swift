@@ -11,20 +11,20 @@ import Get
 
 struct LibraryCard: View {
     let library: BaseItemDto
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: ImageURLProvider.portraitImageURL(for: library, maxWidth: 300)) { image in
+            AsyncImage(url: ImageURLProvider.landscapeImageURL(for: library, maxWidth: 400)) { image in
                 image
                     .resizable()
-                    .aspectRatio(1, contentMode: .fill)
+                    .aspectRatio(16/9, contentMode: .fill)
             } placeholder: {
                 RoundedRectangle(cornerRadius: 12)
                     .overlay {
                         ProgressView()
                     }
             }
-            .frame(width: 150, height: 150)
+            .aspectRatio(16/9, contentMode: .fill)
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
             Text(library.name ?? "Unknown Library")
@@ -32,6 +32,5 @@ struct LibraryCard: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
         }
-        .frame(width: 150)
     }
 }
