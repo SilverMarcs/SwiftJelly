@@ -9,6 +9,9 @@ struct MediaPlayerView: View {
     @StateObject private var playbackState = PlaybackStateManager()
     @StateObject private var sessionManager: PlaybackSessionManager
 
+    @State private var controlsVisible: Bool = true
+    @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
+
     init(item: BaseItemDto) {
         self.item = item
         self._sessionManager = StateObject(wrappedValue: PlaybackSessionManager(item: item))
@@ -16,40 +19,68 @@ struct MediaPlayerView: View {
 
     var body: some View {
         if let url = playbackURL {
-            VStack(spacing: 0) {
-                ZStack {
-                    VLCVideoPlayer(
-                        configuration: .init(
-                            url: url,
-                            autoPlay: true,
-                            startSeconds: .seconds(Int64(startTimeSeconds))
-                        )
-                    )
-                    .proxy(proxy)
-                    .onStateUpdated { state, _ in
-                        handleStateChange(state)
+            VLCVideoPlayer(
+                configuration: .init(
+                    url: url,
+                    autoPlay: true,
+                    startSeconds: .seconds(Int64(startTimeSeconds))
+                )
+            )
+            .proxy(proxy)
+            .onStateUpdated { state, info in
+                handleStateChange(state)
+                playbackInfo = info
+            }
+            .onSecondsUpdated { duration, info in
+                let seconds = Int(duration.components.seconds)
+                let totalDuration = info.length / 1000
+                playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
+                if playbackState.isPlaying {
+                    sessionManager.reportProgress(currentSeconds: seconds)
+                }
+                playbackInfo = info
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                TapGesture(count: 2)
+                    .onEnded {
+                        #if os(macOS)
+                        if let window = NSApplication.shared.keyWindow {
+                            window.toggleFullScreen(nil)
+                        }
+                        #endif
                     }
-                    .onSecondsUpdated { duration, playbackInfo in
-                        let seconds = Int(duration.components.seconds)
-                        let totalDuration = playbackInfo.length / 1000
-                        playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                        if playbackState.isPlaying {
-                            sessionManager.reportProgress(currentSeconds: seconds)
+            )
+            .simultaneousGesture(
+                TapGesture(count: 1)
+                    .onEnded {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            controlsVisible.toggle()
                         }
                     }
-
-                    // Pass state and proxy to controls
+            )
+            // Overlay for media controls (center)
+            .overlay(alignment: .center) {
+                if controlsVisible {
                     MediaPlayerControls(
                         playbackState: playbackState,
                         proxy: proxy
                     )
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                MediaPlayerProgressBar(
-                    playbackState: playbackState,
-                    proxy: proxy
-                )
+            }
+            // Overlay for info bar and progress bar (bottom)
+            .overlay(alignment: .bottom) {
+                if controlsVisible {
+                    VStack {
+                        MediaPlayerInfoBar(item: item, proxy: proxy, playbackInfo: playbackInfo)
+                        
+                        MediaPlayerProgressBar(
+                            playbackState: playbackState,
+                            proxy: proxy
+                        )
+                    }
+                    .padding()
+                }
             }
             .background(.black)
             .onDisappear {

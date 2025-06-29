@@ -44,7 +44,5 @@ struct MediaPlayerProgressBar: View {
                 .foregroundStyle(.white)
                 .monospacedDigit()
         }
-        .padding(.horizontal)
-        .padding(.bottom, 10)
     }
 }
