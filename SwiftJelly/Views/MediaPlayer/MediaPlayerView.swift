@@ -61,6 +61,15 @@ struct MediaPlayerView: View {
                         }
                     }
             )
+            .overlay {
+                if controlsVisible
+                {
+                    Color.black.opacity(0.5)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.2), value: controlsVisible)
+                        .allowsHitTesting(false)
+                }
+            }
             .overlay(alignment: .center) {
                 if controlsVisible {
                     MediaPlayerControls(
@@ -94,6 +103,7 @@ struct MediaPlayerView: View {
                     .padding()
                 }
             }
+            .ignoresSafeArea(edges: .vertical)
             #endif
             .background(.black)
             .onDisappear {

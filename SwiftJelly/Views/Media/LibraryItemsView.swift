@@ -13,10 +13,18 @@ struct LibraryItemsView: View {
     @State private var items: [BaseItemDto] = []
     @State private var isLoading = false
 
-    private let columns = [
-        GridItem(.adaptive(minimum: 120), spacing: 12)
-    ]
+    private static var defaultSize: CGFloat {
+        #if os(macOS)
+        120
+        #else
+        105
+        #endif
+    }
 
+    private let columns = [
+        GridItem(.adaptive(minimum: defaultSize), spacing: 12)
+    ]
+    
     var body: some View {
         ScrollView {
             if isLoading {
@@ -44,7 +52,7 @@ struct LibraryItemsView: View {
             }
         }
         .navigationTitle(library.name ?? "Library")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(.inline)
         .task {
             await loadItems()
         }

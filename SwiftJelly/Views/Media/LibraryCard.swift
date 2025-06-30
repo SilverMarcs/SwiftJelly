@@ -13,24 +13,17 @@ struct LibraryCard: View {
     let library: BaseItemDto
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: ImageURLProvider.landscapeImageURL(for: library, maxWidth: 400)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(16/9, contentMode: .fill)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 12)
-                    .overlay {
-                        ProgressView()
-                    }
-            }
-            .aspectRatio(16/9, contentMode: .fill)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-
-            Text(library.name ?? "Unknown Library")
-                .font(.headline)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
+        AsyncImage(url: ImageURLProvider.landscapeImageURL(for: library, maxWidth: 400)) { image in
+            image
+                .resizable()
+                .aspectRatio(16/9, contentMode: .fill)
+        } placeholder: {
+            RoundedRectangle(cornerRadius: 12)
+                .overlay {
+                    ProgressView()
+                }
         }
+        .aspectRatio(16/9, contentMode: .fill)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

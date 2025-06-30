@@ -16,7 +16,7 @@ struct ContentView: View {
                 HomeView()
             }
             
-            Tab("Media", systemImage: "film", value: .media) {
+            Tab("Libraries", systemImage: "film", value: .media) {
                 MediaView()
             }
             
