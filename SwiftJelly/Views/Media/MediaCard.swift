@@ -34,7 +34,7 @@ struct MediaCard: View {
                     .multilineTextAlignment(.leading)
                 
                 if let year = item.productionYear {
-                    Text("\(year)")
+                    Text("\(String(year))")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

@@ -14,8 +14,17 @@ struct MediaView: View {
     @EnvironmentObject private var dataManager: DataManager
 
     private let columns = [
-        GridItem(.adaptive(minimum: 240), spacing: 16)
+        GridItem(.adaptive(minimum: defaultSize), spacing: 16)
     ]
+    
+    /// Default size for library cards
+    static var defaultSize: CGFloat {
+        #if os(macOS)
+        260
+        #else
+        240
+        #endif
+    }
 
     var body: some View {
         NavigationStack {

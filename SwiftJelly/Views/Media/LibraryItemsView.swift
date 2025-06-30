@@ -15,7 +15,7 @@ struct LibraryItemsView: View {
 
     private static var defaultSize: CGFloat {
         #if os(macOS)
-        120
+        140
         #else
         105
         #endif

@@ -16,7 +16,7 @@ struct ProgressBarOverlay: View {
             if item.userData?.isPlayed == true {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.subheadline)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.accent)
                 if let progress = progressPercentage, progress > 0, progress < 1 {
                     ProgressView(value: progress)
                         .controlSize(.small)
@@ -24,11 +24,10 @@ struct ProgressBarOverlay: View {
                 }
                 Text(item.runTimeTicks != nil ? formatDuration(item.runTimeTicks!) : "--")
                     .font(.subheadline)
-                    .foregroundStyle(.primary)
+                
             } else {
                 Image(systemName: "play.fill")
                     .font(.subheadline)
-                    .foregroundStyle(.primary)
                 
                 if let progress = progressPercentage, progress > 0, progress < 1 {
                     ProgressView(value: progress)
@@ -38,7 +37,6 @@ struct ProgressBarOverlay: View {
                 
                 Text(item.runTimeTicks != nil ? formatDuration(item.runTimeTicks!) : "--")
                     .font(.subheadline)
-                    .foregroundStyle(.primary)
             }
             
             Spacer()

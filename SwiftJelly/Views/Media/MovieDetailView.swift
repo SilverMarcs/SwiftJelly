@@ -30,7 +30,7 @@ struct MovieDetailView: View {
                     }
                     
                     if let year = movie.productionYear {
-                        Text("Year: \(year)")
+                        Text("Year: \(String(year))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }

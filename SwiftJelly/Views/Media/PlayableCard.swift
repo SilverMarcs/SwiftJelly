@@ -52,27 +52,21 @@ struct PlayableCard: View {
                 }
 
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(item.name ?? "Unknown")
-                            .font(.headline)
+                    if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
+                        Text(parentTitle)
+                            .font(.subheadline)
                             .lineLimit(1)
-                        
-                        if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
-                            Text(parentTitle)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
                     }
                     
                     Spacer()
-                    
+                        
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
                         Text("S\(season)E\(episode)")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.horizontal, 5)
             }
             .frame(width: 270)
         }
