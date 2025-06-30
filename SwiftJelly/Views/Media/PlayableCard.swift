@@ -10,10 +10,10 @@ import JellyfinAPI
 
 struct PlayableCard: View {
     let item: BaseItemDto
-    @State private var showPlayer = false
     #if os(macOS)
     @Environment(\.openWindow) private var openWindow
     #endif
+    @State private var showPlayer = false
 
     var body: some View {
         Button {
