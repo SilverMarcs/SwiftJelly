@@ -52,8 +52,12 @@ struct PlayableCard: View {
                 }
 
                 HStack(alignment: .top) {
-                    if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
+                    if let parentTitle = item.seriesName ?? item.album {
                         Text(parentTitle)
+                            .font(.subheadline)
+                            .lineLimit(1)
+                    } else {
+                        Text(item.name ?? "Unknown")
                             .font(.subheadline)
                             .lineLimit(1)
                     }

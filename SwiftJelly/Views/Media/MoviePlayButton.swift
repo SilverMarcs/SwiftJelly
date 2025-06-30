@@ -49,11 +49,11 @@ struct MoviePlayButton: View {
                     
                     if let remaining = timeRemaining {
                         Text(remaining)
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                 } else {
-                    Image(systemName: "play")
+                    Image(systemName: "play.fill")
                         .imageScale(.large)
                     
                     Text("Play")

@@ -15,23 +15,38 @@ struct SubtitlePicker: View {
     @State private var selectedIndex: Int = 0
 
     var body: some View {
-        Picker(selection: $selectedIndex) {
-            ForEach(tracks, id: \.index) { track in
-                Text(track.title.isEmpty ? "Track \(track.index + 1)" : track.title).tag(track.index)
+        Menu {
+            if tracks.isEmpty {
+                Text("No subtitles available")
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker(selection: $selectedIndex) {
+                    ForEach(tracks, id: \.index) { track in
+                        Text(track.title.isEmpty ? "Track \(track.index + 1)" : track.title).tag(track.index)
+                    }
+                } label: {
+                    Label(selected?.title ?? "Disabled", systemImage: "captions.bubble")
+                        .labelStyle(.titleOnly)
+                }
+                .onAppear {
+                    if let selected = selected {
+                        selectedIndex = selected.index
+                    }
+                }
+                .onChange(of: selectedIndex) {
+                    proxy.setSubtitleTrack(.absolute(selectedIndex))
+                }
             }
         } label: {
             Label("Subtitles", systemImage: "captions.bubble")
+                .imageScale(.large)
+                .foregroundStyle(.secondary)
         }
-        .labelsHidden()
+        .labelStyle(.iconOnly)
+        .menuIndicator(.hidden)
+        .menuStyle(.button)
+        .controlSize(.large)
+        .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
-        .buttonStyle(.bordered)
-        .onAppear {
-            if let selected = selected {
-                selectedIndex = selected.index
-            }
-        }
-        .onChange(of: selectedIndex) {
-            proxy.setSubtitleTrack(.absolute(selectedIndex))
-        }
     }
 }
