@@ -10,50 +10,56 @@ struct ShowDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 14) {
                 AsyncImage(url: ImageURLProvider.landscapeImageURL(for: show)) { image in
                     image
                         .resizable()
                         .aspectRatio(16/9, contentMode: .fit)
                 } placeholder: {
                     ProgressView()
-                        .frame(height: 180)
+                        .frame(height: 120)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.bottom, 8)
+                .backgroundExtensionEffect()
                 
-                Text(show.name ?? "Show")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                if let overview = show.overview {
-                    Text(overview)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                
-                if !seasons.isEmpty {
-                    Picker("Season", selection: $selectedSeason) {
-                        ForEach(seasons) { season in
-                            Text(season.name ?? "Season").tag(season as BaseItemDto?)
-                        }
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(show.name ?? "Show")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    if let overview = show.overview {
+                        Text(overview)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
-                    .pickerStyle(.segmented)
-                    .padding(.vertical, 8)
                 }
+                .padding(.horizontal)
                 
-                if !episodes.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(episodes) { episode in
-                                PlayableCard(item: episode)
+                VStack(alignment: .leading, spacing: 12) {
+                    if !seasons.isEmpty {
+                        Picker("Season", selection: $selectedSeason) {
+                            ForEach(seasons) { season in
+                                Text(season.name ?? "Season").tag(season as BaseItemDto?)
                             }
                         }
-                        .padding(.vertical, 4)
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+                    }
+                    
+                
+                    if !episodes.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(episodes) { episode in
+                                    PlayableCard(item: episode)
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.bottom)
+                        }
                     }
                 }
             }
-            .padding()
         }
         .navigationTitle(show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)

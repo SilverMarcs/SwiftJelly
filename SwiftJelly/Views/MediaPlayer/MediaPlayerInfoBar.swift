@@ -12,7 +12,7 @@ struct MediaPlayerInfoBar: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 5) {
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
-                        Text("S\(season), E\(episode)")
+                        Text("S\(season)E\(episode)")
                     }
                     
                     Text("•")

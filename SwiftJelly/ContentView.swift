@@ -23,6 +23,10 @@ struct ContentView: View {
             Tab("Settings", systemImage: "gear", value: .settings) {
                 SettingsView()
             }
+            
+//            Tab("Settings", systemImage: "gear", value: .settings) {
+//                SettingsView()
+//            }
         }
         .tabViewStyle(.sidebarAdaptable)
         #if !os(macOS)
