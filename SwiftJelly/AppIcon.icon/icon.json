@@ -1,0 +1,43 @@
+{
+  "fill" : "automatic",
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "blend-mode" : "darken",
+          "fill" : {
+            "linear-gradient" : [
+              "extended-srgb:0.00000,0.47843,1.00000,1.00000",
+              "display-p3:0.31131,0.65297,0.97289,1.00000"
+            ]
+          },
+          "glass" : true,
+          "hidden" : false,
+          "image-name" : "Jellyfin_-_icon-transparent.svg.png",
+          "name" : "Jellyfin_-_icon-transparent.svg",
+          "position" : {
+            "scale" : 0.8,
+            "translation-in-points" : [
+              0,
+              -7
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

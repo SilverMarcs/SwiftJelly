@@ -23,6 +23,8 @@ struct SubtitlePicker: View {
             Label("Subtitles", systemImage: "captions.bubble")
         }
         .labelsHidden()
+        .buttonBorderShape(.capsule)
+        .buttonStyle(.bordered)
         .onAppear {
             if let selected = selected {
                 selectedIndex = selected.index

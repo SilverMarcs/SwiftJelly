@@ -28,7 +28,7 @@ struct ShowDetailView: View {
                 
                 if let overview = show.overview {
                     Text(overview)
-                        .font(.body)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 

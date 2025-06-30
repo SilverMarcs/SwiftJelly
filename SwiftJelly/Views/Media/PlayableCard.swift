@@ -59,7 +59,7 @@ struct PlayableCard: View {
                     Spacer()
 
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
-                        Text("S\(season)E\(episode)")
+                        Text("S\(season), E\(episode)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

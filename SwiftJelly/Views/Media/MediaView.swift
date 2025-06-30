@@ -39,6 +39,7 @@ struct MediaView: View {
                 }
             }
             .navigationTitle("Media Libraries")
+            .toolbarTitleDisplayMode(.inlineLarge)
             .task {
                 await loadLibraries()
             }
