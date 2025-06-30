@@ -39,12 +39,12 @@ struct MediaCard: View {
                         .foregroundStyle(.secondary)
                 }
                 
-                if let overview = item.overview, !overview.isEmpty {
-                    Text(overview)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(2)
-                }
+//                if let overview = item.overview, !overview.isEmpty {
+//                    Text(overview)
+//                        .font(.caption2)
+//                        .foregroundStyle(.tertiary)
+//                        .lineLimit(2)
+//                }
             }
         }
     }

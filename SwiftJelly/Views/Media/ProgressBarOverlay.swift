@@ -50,6 +50,7 @@ struct ProgressBarOverlay: View {
             }
             .buttonStyle(.plain)
         }
+        .foregroundStyle(.white)
     }
     
     private func formatDuration(_ ticks: Int) -> String {

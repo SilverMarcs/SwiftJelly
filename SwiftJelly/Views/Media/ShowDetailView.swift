@@ -17,14 +17,14 @@ struct ShowDetailView: View {
                         .aspectRatio(16/9, contentMode: .fit)
                 } placeholder: {
                     ProgressView()
-                        .frame(height: 120)
+                        .frame(height: 150)
                 }
                 .backgroundExtensionEffect()
                 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(show.name ?? "Show")
-                        .font(.title)
-                        .fontWeight(.bold)
+//                    Text(show.name ?? "Show")
+//                        .font(.title)
+//                        .fontWeight(.bold)
                     
                     if let overview = show.overview {
                         Text(overview)
@@ -61,6 +61,7 @@ struct ShowDetailView: View {
                 }
             }
         }
+        .ignoresSafeArea(edges: .top)
         .navigationTitle(show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)
         .task {

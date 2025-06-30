@@ -35,23 +35,38 @@ struct PlayableCard: View {
                 .frame(width: 270, height: 168)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay(alignment: .bottom) {
-                    ProgressBarOverlay(item: item)
-                        .padding(.bottom, 6)
-                        .padding(.horizontal, 8)
+                    ZStack(alignment: .bottom) {
+                        // Subtle black-to-transparent gradient for blending
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.black.opacity(0.9), Color.clear]),
+                            startPoint: .bottom,
+                            endPoint: .top
+                        )
+                        .frame(height: 80)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        
+                        ProgressBarOverlay(item: item)
+                            .padding(.bottom, 6)
+                            .padding(.horizontal, 8)
+                    }
                 }
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.name ?? "Unknown")
-                        .font(.headline)
-                        .lineLimit(1)
-
-                    if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
-                        Text(parentTitle)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.name ?? "Unknown")
+                            .font(.headline)
                             .lineLimit(1)
+                        
+                        if let parentTitle = item.seriesName ?? item.album ?? item.parentID {
+                            Text(parentTitle)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
                     }
-
+                    
+                    Spacer()
+                    
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
                         Text("S\(season)E\(episode)")
                             .font(.caption)

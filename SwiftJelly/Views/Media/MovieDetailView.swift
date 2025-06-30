@@ -13,35 +13,38 @@ struct MovieDetailView: View {
                         .aspectRatio(16/9, contentMode: .fit)
                 } placeholder: {
                     ProgressView()
-                        .frame(height: 180)
+                        .frame(height: 150)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.bottom, 8)
+                .backgroundExtensionEffect()
                 
-                Text(movie.name ?? "Movie")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                if let overview = movie.overview {
-                    Text(overview)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+
+                VStack(alignment: .leading, spacing: 12) {
+//                    Text(movie.name ?? "Movie")
+//                        .font(.title2)
+//                        .fontWeight(.bold)
+                    
+                    if let overview = movie.overview {
+                        Text(overview)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    if let year = movie.productionYear {
+                        Text("Year: \(year)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    if let duration = movie.runTimeTicks {
+                        Text("Duration: \(duration / 10_000_000 / 60) min")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                
-                if let year = movie.productionYear {
-                    Text("Year: \(year)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                
-                if let duration = movie.runTimeTicks {
-                    Text("Duration: \(duration / 10_000_000 / 60) min")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+                .padding(.horizontal)
             }
-            .padding()
         }
+        .ignoresSafeArea(edges: .top)
         .navigationTitle(movie.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
     }
