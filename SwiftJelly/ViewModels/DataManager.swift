@@ -12,19 +12,17 @@ import JellyfinAPI
 
 class DataManager: ObservableObject {
     @Published var servers: [Server] = []
-    @Published var users: [User] = []
-    @Published var currentUser: User?
-    
+    @Published var currentServer: Server?
+
     static let shared = DataManager()
-    
+
     private let serversKey = "SavedServers"
-    private let usersKey = "SavedUsers"
-    private let currentUserKey = "CurrentUser"
+    private let currentServerKey = "CurrentServer"
     
     init() {
         loadData()
     }
-    
+
     func addServer(_ server: Server) {
         servers.append(server)
         saveServers()
@@ -34,91 +32,73 @@ class DataManager: ObservableObject {
         if let index = servers.firstIndex(where: { $0.id == server.id }) {
             servers[index] = server
             saveServers()
+
+            // Update current server if it's the one being updated
+            if currentServer?.id == server.id {
+                currentServer = server
+                saveCurrentServer()
+            }
         }
     }
-    
+
     func removeServer(_ server: Server) {
         servers.removeAll { $0.id == server.id }
-        users.removeAll { $0.serverID == server.id }
-        if currentUser?.serverID == server.id {
-            currentUser = nil
-            saveCurrentUser()
+        if currentServer?.id == server.id {
+            currentServer = nil
+            saveCurrentServer()
         }
         saveServers()
-        saveUsers()
     }
     
-    func addUser(_ user: User) {
-        users.append(user)
-        saveUsers()
+    func authenticateServer(_ server: Server, username: String, accessToken: String, jellyfinUserID: String) {
+        var updatedServer = server
+        updatedServer.username = username
+        updatedServer.accessToken = accessToken
+        updatedServer.jellyfinUserID = jellyfinUserID
+        updateServer(updatedServer)
     }
-    
-    func updateUserToken(_ user: User, token: String) {
-        if let index = users.firstIndex(where: { $0.id == user.id }) {
-            users[index].accessToken = token
-            saveUsers()
-        }
+
+    func signIn(server: Server) {
+        currentServer = server
+        saveCurrentServer()
     }
-    
-    func signIn(user: User) {
-        currentUser = user
-        saveCurrentUser()
-    }
-    
+
     func signOut() {
-        currentUser = nil
-        saveCurrentUser()
-    }
-    
-    func getServer(for user: User) -> Server? {
-        return servers.first { $0.id == user.serverID }
+        currentServer = nil
+        saveCurrentServer()
     }
     
     private func loadData() {
         loadServers()
-        loadUsers()
-        loadCurrentUser()
+        loadCurrentServer()
     }
-    
+
     private func loadServers() {
         if let data = UserDefaults.standard.data(forKey: serversKey),
            let servers = try? JSONDecoder().decode([Server].self, from: data) {
             self.servers = servers
         }
     }
-    
+
     private func saveServers() {
         if let data = try? JSONEncoder().encode(servers) {
             UserDefaults.standard.set(data, forKey: serversKey)
         }
     }
-    
-    private func loadUsers() {
-        if let data = UserDefaults.standard.data(forKey: usersKey),
-           let users = try? JSONDecoder().decode([User].self, from: data) {
-            self.users = users
+
+    private func loadCurrentServer() {
+        if let data = UserDefaults.standard.data(forKey: currentServerKey),
+           let server = try? JSONDecoder().decode(Server.self, from: data) {
+            self.currentServer = server
         }
     }
-    
-    private func saveUsers() {
-        if let data = try? JSONEncoder().encode(users) {
-            UserDefaults.standard.set(data, forKey: usersKey)
-        }
-    }
-    
-    private func loadCurrentUser() {
-        if let data = UserDefaults.standard.data(forKey: currentUserKey),
-           let user = try? JSONDecoder().decode(User.self, from: data) {
-            self.currentUser = user
-        }
-    }
-    
-    private func saveCurrentUser() {
-        if let currentUser = currentUser,
-           let data = try? JSONEncoder().encode(currentUser) {
-            UserDefaults.standard.set(data, forKey: currentUserKey)
+
+    private func saveCurrentServer() {
+        if let currentServer = currentServer,
+           let data = try? JSONEncoder().encode(currentServer) {
+            UserDefaults.standard.set(data, forKey: currentServerKey)
         } else {
-            UserDefaults.standard.removeObject(forKey: currentUserKey)
+            UserDefaults.standard.removeObject(forKey: currentServerKey)
         }
     }
 }

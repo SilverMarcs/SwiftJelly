@@ -62,6 +62,8 @@ struct ShowDetailView: View {
                         .scrollPosition($episodeScrollPosition)
                     }
                 }
+                
+                Spacer(minLength: 50)
             }
         }
         .ignoresSafeArea(edges: .top)

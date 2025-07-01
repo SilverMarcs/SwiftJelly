@@ -10,12 +10,12 @@ import JellyfinAPI
 import Get
 
 extension JFAPI {
-    /// Loads Next Up items for the current user (episodes to continue watching)
+    /// Loads Next Up items for the current server (episodes to continue watching)
     /// - Returns: Array of BaseItemDto representing next up items
     func loadNextUpItems(limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetNextUpParameters()
-        parameters.userID = context.user.id
+        parameters.userID = context.server.jellyfinUserID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.limit = limit

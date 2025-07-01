@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import JellyfinAPI
 
 struct ServerFormView: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,8 +17,11 @@ struct ServerFormView: View {
     
     @State private var serverName: String = ""
     @State private var serverURL: String = ""
+    @State private var username: String = ""
+    @State private var password: String = ""
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var isAuthenticating = false
     
     var body: some View {
         Form {
@@ -25,6 +29,12 @@ struct ServerFormView: View {
                 TextField("Server Name", text: $serverName)
                 TextField("Server URL", text: $serverURL)
                     .textContentType(.URL)
+            }
+
+            Section("Authentication") {
+                TextField("Username", text: $username)
+                    .disableAutocorrection(true)
+                SecureField("Password", text: $password)
             }
         }
         .formStyle(.grouped)
@@ -38,7 +48,7 @@ struct ServerFormView: View {
                 Button(serverToEdit == nil ? "Add" : "Save") {
                     saveServer()
                 }
-                .disabled(serverName.isEmpty || serverURL.isEmpty)
+                .disabled(serverName.isEmpty || serverURL.isEmpty || (serverToEdit == nil && (username.isEmpty || isAuthenticating)))
             }
         }
         .alert("Error", isPresented: $showingAlert) {
@@ -50,6 +60,8 @@ struct ServerFormView: View {
             if let server = serverToEdit {
                 serverName = server.name
                 serverURL = server.url.absoluteString
+                username = server.username ?? ""
+                // Don't populate password for security
             }
         }
     }
@@ -60,16 +72,63 @@ struct ServerFormView: View {
             showingAlert = true
             return
         }
+
         if var editing = serverToEdit {
+            // For editing existing server
             editing.name = serverName
             editing.url = url
-            dataManager.updateServer(editing)
-            onSave?(editing)
+
+            // If username/password provided, authenticate
+            if !username.isEmpty && !password.isEmpty {
+                authenticateAndSave(server: editing)
+            } else {
+                // Just update server details without authentication
+                editing.username = username.isEmpty ? editing.username : username
+                dataManager.updateServer(editing)
+                onSave?(editing)
+                dismiss()
+            }
         } else {
+            // For new server, authentication is required
             let server = Server(name: serverName, url: url)
-            dataManager.addServer(server)
-            onSave?(server)
+            authenticateAndSave(server: server)
         }
-        dismiss()
+    }
+
+    private func authenticateAndSave(server: Server) {
+        isAuthenticating = true
+        Task {
+            do {
+                let authResult = try await JFAPI.shared.authenticateUser(
+                    username: username,
+                    password: password,
+                    server: server
+                )
+
+                await MainActor.run {
+                    var authenticatedServer = server
+                    authenticatedServer.username = authResult.username
+                    authenticatedServer.accessToken = authResult.accessToken
+                    authenticatedServer.jellyfinUserID = authResult.jellyfinUserID
+
+                    if serverToEdit != nil {
+                        dataManager.updateServer(authenticatedServer)
+                    } else {
+                        dataManager.addServer(authenticatedServer)
+                        dataManager.signIn(server: authenticatedServer)
+                    }
+
+                    onSave?(authenticatedServer)
+                    isAuthenticating = false
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    alertMessage = error.localizedDescription
+                    showingAlert = true
+                    isAuthenticating = false
+                }
+            }
+        }
     }
 }

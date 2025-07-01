@@ -10,13 +10,13 @@ import JellyfinAPI
 import Get
 
 extension JFAPI {
-    /// Authenticates a user with the given credentials and server, returning a User on success
+    /// Authenticates a user with the given credentials and server, returning authentication data on success
     /// - Parameters:
     ///   - username: The username to authenticate
     ///   - password: The password to authenticate
     ///   - server: The server to authenticate against
-    /// - Returns: User if authentication is successful
-    func authenticateUser(username: String, password: String, server: Server) async throws -> User {
+    /// - Returns: AuthenticationResult if authentication is successful
+    func authenticateUser(username: String, password: String, server: Server) async throws -> AuthenticationResult {
         let configuration = JellyfinClient.Configuration(
             url: server.url,
             client: "SwiftJelly",
@@ -37,11 +37,17 @@ extension JFAPI {
               let userData = authResult.user else {
             throw JFAPIError.loginFailed
         }
-        return User(
-            id: userData.id ?? UUID().uuidString,
-            serverID: server.id,
+        return AuthenticationResult(
             username: username,
-            accessToken: accessToken
+            accessToken: accessToken,
+            jellyfinUserID: userData.id ?? UUID().uuidString
         )
+    }
+
+    /// Result type for authentication
+    struct AuthenticationResult {
+        let username: String
+        let accessToken: String
+        let jellyfinUserID: String
     }
 }

@@ -12,11 +12,12 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationStack {
-            ServerListView()
             
-//            if let currentUser = dataManager.currentUser {
-//                LoggedInView(user: currentUser)
-//            }
+            if let currentServer = dataManager.currentServer, currentServer.isAuthenticated {
+                LoggedInView(server: currentServer)
+            } else {
+                ServerListView()
+            }
         }
     }
 }

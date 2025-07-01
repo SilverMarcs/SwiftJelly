@@ -21,7 +21,7 @@ extension JFAPI {
         var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "Static", value: "true"),
             URLQueryItem(name: "mediaSourceId", value: id),
-            URLQueryItem(name: "api_key", value: context.user.accessToken)
+            URLQueryItem(name: "api_key", value: context.server.accessToken)
         ]
         queryItems.append(URLQueryItem(name: "deviceId", value: "deviceId"))
         components?.queryItems = queryItems

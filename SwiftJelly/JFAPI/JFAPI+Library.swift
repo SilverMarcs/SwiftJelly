@@ -14,7 +14,7 @@ extension JFAPI {
     /// - Returns: Array of BaseItemDto representing user libraries
     func loadLibraries() async throws -> [BaseItemDto] {
         let context = try getAPIContext()
-        let parameters = Paths.GetUserViewsParameters(userID: context.user.id)
+        let parameters = Paths.GetUserViewsParameters(userID: context.server.jellyfinUserID ?? "")
         let request = Paths.getUserViews(parameters: parameters)
         let response = try await context.client.send(request)
         // Filter to only supported collection types
@@ -52,7 +52,7 @@ extension JFAPI {
             // For other types, include common media types
             parameters.includeItemTypes = [.movie, .series, .musicAlbum, .book, .photo]
         }
-        let request = Paths.getItemsByUserID(userID: context.user.id, parameters: parameters)
+        let request = Paths.getItemsByUserID(userID: context.server.jellyfinUserID ?? "", parameters: parameters)
         let response = try await context.client.send(request)
         return response.value.items ?? []
     }

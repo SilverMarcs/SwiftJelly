@@ -16,15 +16,40 @@ struct ServerListView: View {
         List {
             ForEach(dataManager.servers) { server in
                 HStack {
-                    NavigationLink(destination: UserLoginView(server: server)) {
-                        Label {
-                            Text(server.name)
-                            Text(server.url.absoluteString)
-                        } icon: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
                             Image(systemName: "server.rack")
+                            Text(server.name)
+                                .font(.headline)
+
+                            if server.isAuthenticated {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.caption)
+                            }
+                        }
+
+                        Text(server.url.absoluteString)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        if let username = server.username {
+                            Text("User: \(username)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
                     }
+
                     Spacer()
+
+                    if server.isAuthenticated {
+                        Button("Sign In") {
+                            dataManager.signIn(server: server)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+
                     Button {
                         editingServer = server
                     } label: {
@@ -32,6 +57,7 @@ struct ServerListView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                .padding(.vertical, 4)
             }
             .onDelete(perform: deleteServers)
         }

@@ -10,12 +10,12 @@ import JellyfinAPI
 import Get
 
 extension JFAPI {
-    /// Loads resume items for the current user, returning only the most recent episode per show (and all movies)
+    /// Loads resume items for the current server, returning only the most recent episode per show (and all movies)
     /// - Returns: Array of BaseItemDto representing resume items (max 20, one per show for episodes)
     func loadResumeItems() async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetResumeItemsParameters()
-        parameters.userID = context.user.id
+        parameters.userID = context.server.jellyfinUserID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.includeItemTypes = [.movie, .episode]
