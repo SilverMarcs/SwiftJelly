@@ -11,94 +11,54 @@ import Combine
 import JellyfinAPI
 
 class DataManager: ObservableObject {
-    @Published var servers: [Server] = []
-    @Published var currentServer: Server?
+    @Published var server: Server?
 
     static let shared = DataManager()
 
-    private let serversKey = "SavedServers"
-    private let currentServerKey = "CurrentServer"
-    
+    private let serverKey = "SavedServer"
+
     init() {
-        loadData()
+        loadServer()
     }
 
-    func addServer(_ server: Server) {
-        servers.append(server)
-        saveServers()
+    func setServer(_ server: Server) {
+        self.server = server
+        saveServer()
     }
 
-    func updateServer(_ server: Server) {
-        if let index = servers.firstIndex(where: { $0.id == server.id }) {
-            servers[index] = server
-            saveServers()
-
-            // Update current server if it's the one being updated
-            if currentServer?.id == server.id {
-                currentServer = server
-                saveCurrentServer()
-            }
-        }
+    func updateServer(_ updatedServer: Server) {
+        self.server = updatedServer
+        saveServer()
     }
 
-    func removeServer(_ server: Server) {
-        servers.removeAll { $0.id == server.id }
-        if currentServer?.id == server.id {
-            currentServer = nil
-            saveCurrentServer()
-        }
-        saveServers()
-    }
-    
-    func authenticateServer(_ server: Server, username: String, accessToken: String, jellyfinUserID: String) {
-        var updatedServer = server
-        updatedServer.username = username
-        updatedServer.accessToken = accessToken
-        updatedServer.jellyfinUserID = jellyfinUserID
-        updateServer(updatedServer)
+    func clearServer() {
+        self.server = nil
+        UserDefaults.standard.removeObject(forKey: serverKey)
     }
 
-    func signIn(server: Server) {
-        currentServer = server
-        saveCurrentServer()
+    func authenticateServer(username: String, accessToken: String, jellyfinUserID: String) {
+        guard var currentServer = server else { return }
+        currentServer.username = username
+        currentServer.accessToken = accessToken
+        currentServer.jellyfinUserID = jellyfinUserID
+        updateServer(currentServer)
     }
 
-    func signOut() {
-        currentServer = nil
-        saveCurrentServer()
-    }
-    
-    private func loadData() {
-        loadServers()
-        loadCurrentServer()
+    var isAuthenticated: Bool {
+        return server?.isAuthenticated ?? false
     }
 
-    private func loadServers() {
-        if let data = UserDefaults.standard.data(forKey: serversKey),
-           let servers = try? JSONDecoder().decode([Server].self, from: data) {
-            self.servers = servers
-        }
-    }
-
-    private func saveServers() {
-        if let data = try? JSONEncoder().encode(servers) {
-            UserDefaults.standard.set(data, forKey: serversKey)
-        }
-    }
-
-    private func loadCurrentServer() {
-        if let data = UserDefaults.standard.data(forKey: currentServerKey),
+    private func loadServer() {
+        if let data = UserDefaults.standard.data(forKey: serverKey),
            let server = try? JSONDecoder().decode(Server.self, from: data) {
-            self.currentServer = server
+            self.server = server
         }
     }
 
-    private func saveCurrentServer() {
-        if let currentServer = currentServer,
-           let data = try? JSONEncoder().encode(currentServer) {
-            UserDefaults.standard.set(data, forKey: currentServerKey)
-        } else {
-            UserDefaults.standard.removeObject(forKey: currentServerKey)
+    private func saveServer() {
+        if let server = server,
+           let data = try? JSONEncoder().encode(server) {
+            UserDefaults.standard.set(data, forKey: serverKey)
         }
     }
 }

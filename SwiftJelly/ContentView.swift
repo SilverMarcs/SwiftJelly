@@ -17,12 +17,14 @@ struct ContentView: View {
             }
             
             Tab("Libraries", systemImage: "film", value: .media) {
-                MediaView()
+                LibraryView()
             }
             
+            #if os(macOS)
             Tab("Settings", systemImage: "gear", value: .settings) {
                 SettingsView()
             }
+            #endif
             
             Tab(value: .search, role: .search) {
                 Text("TBI")

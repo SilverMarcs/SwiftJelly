@@ -17,16 +17,16 @@ class JFAPI {
 
     /// Returns a configured JellyfinClient for the current server, or throws if not available
     func getClient() throws -> JellyfinClient {
-        guard let currentServer = dataManager.currentServer,
-              currentServer.isAuthenticated,
-              let accessToken = currentServer.accessToken else {
+        guard let server = dataManager.server,
+              server.isAuthenticated,
+              let accessToken = server.accessToken else {
             throw JFAPIError.setupFailed
         }
         let configuration = JellyfinClient.Configuration(
-            url: currentServer.url,
+            url: server.url,
             client: "SwiftJelly",
             deviceName: "SwiftJelly",
-            deviceID: currentServer.id,
+            deviceID: server.id,
             version: "1.0"
         )
         return JellyfinClient(configuration: configuration, accessToken: accessToken)
@@ -34,12 +34,12 @@ class JFAPI {
 
     /// Returns the API context (server, client) or throws if not available
     func getAPIContext() throws -> APIContext {
-        guard let currentServer = dataManager.currentServer,
-              currentServer.isAuthenticated else {
+        guard let server = dataManager.server,
+              server.isAuthenticated else {
             throw JFAPIError.setupFailed
         }
         let client = try getClient()
-        return APIContext(server: currentServer, client: client)
+        return APIContext(server: server, client: client)
     }
 
     /// Result type for API setup

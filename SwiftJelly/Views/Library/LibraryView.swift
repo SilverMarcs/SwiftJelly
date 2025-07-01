@@ -1,5 +1,5 @@
 //
-//  MediaView.swift
+//  LibraryView.swift
 //  SwiftJelly
 //
 //  Created by Zabir Raihan on 28/06/2025.
@@ -8,10 +8,9 @@
 import SwiftUI
 import JellyfinAPI
 
-struct MediaView: View {
+struct LibraryView: View {
     @State private var libraries: [BaseItemDto] = []
     @State private var isLoading = false
-    @EnvironmentObject private var dataManager: DataManager
 
     private let columns = [
         GridItem(.adaptive(minimum: defaultSize), spacing: 16)
@@ -47,15 +46,17 @@ struct MediaView: View {
                     .padding(.horizontal)
                 }
             }
-            .navigationTitle("Libraries")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                SettingsToolbar()
-            }
             .task {
                 await loadLibraries()
             }
         }
+        .navigationTitle("Libraries")
+        .toolbarTitleDisplayMode(.inlineLarge)
+        #if !os(macOS)
+        .toolbar {
+            SettingsToolbar()
+        }
+        #endif
     }
 
     private func loadLibraries() async {
@@ -69,9 +70,4 @@ struct MediaView: View {
 
         isLoading = false
     }
-}
-
-#Preview {
-    MediaView()
-        .environmentObject(DataManager.shared)
 }
