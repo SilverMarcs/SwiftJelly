@@ -21,7 +21,7 @@ struct SettingsView: View {
                         HStack {
                             Label {
                                 if let server = dataManager.server {
-                                    Text("Server: \(server.name)")
+                                    Text("\(server.name)")
                                     Text(server.url.absoluteString)
                                 } else {
                                     Text("Configure Server")

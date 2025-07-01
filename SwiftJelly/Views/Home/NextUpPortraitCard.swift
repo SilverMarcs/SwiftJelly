@@ -25,7 +25,7 @@ struct NextUpPortraitCard: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(width: 120, height: 180)
+                .frame(width: 144, height: 216)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
                 Text(item.seriesName ?? item.album ?? "Unknown Show")
@@ -39,7 +39,7 @@ struct NextUpPortraitCard: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 120)
+            .frame(width: 144)
         }
         .buttonStyle(.plain)
         #if !os(macOS)
