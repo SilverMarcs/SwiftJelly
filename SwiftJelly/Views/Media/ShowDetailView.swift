@@ -61,7 +61,9 @@ struct ShowDetailView: View {
                 }
             }
         }
+        #if os(macOS)
         .ignoresSafeArea(edges: .top)
+        #endif
         .navigationTitle(show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)
         .task {

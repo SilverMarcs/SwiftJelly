@@ -29,6 +29,13 @@ class DataManager: ObservableObject {
         servers.append(server)
         saveServers()
     }
+
+    func updateServer(_ server: Server) {
+        if let index = servers.firstIndex(where: { $0.id == server.id }) {
+            servers[index] = server
+            saveServers()
+        }
+    }
     
     func removeServer(_ server: Server) {
         servers.removeAll { $0.id == server.id }

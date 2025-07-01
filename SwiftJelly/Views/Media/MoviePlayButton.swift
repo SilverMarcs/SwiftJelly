@@ -61,7 +61,6 @@ struct MoviePlayButton: View {
                 }
             }
         }
-        .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
         .controlSize(.extraLarge)
         .tint(.white)
@@ -69,6 +68,9 @@ struct MoviePlayButton: View {
         .fullScreenCover(isPresented: $showPlayer) {
             MediaPlayerView(item: item)
         }
+        .buttonStyle(.glass)
+        #else
+        .buttonStyle(.glassProminent)
         #endif
     }
 }
