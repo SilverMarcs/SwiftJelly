@@ -11,10 +11,10 @@ struct ShowDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                AsyncImage(url: ImageURLProvider.landscapeImageURL(for: show)) { image in
+                AsyncImage(url: imageUrl) { image in
                     image
                         .resizable()
-                        .aspectRatio(16/9, contentMode: .fit)
+                        .aspectRatio(aspectRatio, contentMode: .fit)
                 } placeholder: {
                     ProgressView()
                         .frame(height: 150)
@@ -61,9 +61,9 @@ struct ShowDetailView: View {
                 }
             }
         }
-        #if os(macOS)
+//        #if os(macOS)
         .ignoresSafeArea(edges: .top)
-        #endif
+//        #endif
         .navigationTitle(show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)
         .task {
@@ -103,5 +103,21 @@ struct ShowDetailView: View {
         } catch {
             self.episodes = []
         }
+    }
+    
+    var imageUrl: URL? {
+        #if os(macOS)
+        ImageURLProvider.landscapeImageURL(for: show)
+        #else
+        ImageURLProvider.portraitImageURL(for: show)
+        #endif
+    }
+    
+    var aspectRatio: CGFloat {
+        #if os(macOS)
+        return 16 / 9
+        #else
+        return 9 / 13
+        #endif
     }
 }

@@ -50,7 +50,6 @@ struct MoviePlayButton: View {
                     if let remaining = timeRemaining {
                         Text(remaining)
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
                     }
                 } else {
                     Image(systemName: "play.fill")
@@ -63,13 +62,13 @@ struct MoviePlayButton: View {
         }
         .buttonBorderShape(.capsule)
         .controlSize(.extraLarge)
-        .tint(.white)
         #if !os(macOS)
         .fullScreenCover(isPresented: $showPlayer) {
             MediaPlayerView(item: item)
         }
         .buttonStyle(.glass)
         #else
+        .tint(.white)
         .buttonStyle(.glassProminent)
         #endif
     }

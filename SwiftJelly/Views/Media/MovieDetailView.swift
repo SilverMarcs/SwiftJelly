@@ -8,10 +8,10 @@ struct MovieDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ZStack(alignment: .bottomLeading) {
-                    AsyncImage(url: ImageURLProvider.landscapeImageURL(for: movie)) { image in
+                    AsyncImage(url: imageUrl) { image in
                         image
                             .resizable()
-                            .aspectRatio(16/9, contentMode: .fit)
+                            .aspectRatio(aspectRatio, contentMode: .fit)
                     } placeholder: {
                         ProgressView()
                             .frame(height: 150)
@@ -43,10 +43,26 @@ struct MovieDetailView: View {
                 .padding(.horizontal)
             }
         }
-        #if os(macOS)
+//        #if os(macOS)
         .ignoresSafeArea(edges: .top)
-        #endif
+//        #endif
         .navigationTitle(movie.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
+    }
+    
+    var imageUrl: URL? {
+        #if os(macOS)
+        ImageURLProvider.landscapeImageURL(for: movie)
+        #else
+        ImageURLProvider.portraitImageURL(for: movie)
+        #endif
+    }
+    
+    var aspectRatio: CGFloat {
+        #if os(macOS)
+        return 16 / 9
+        #else
+        return 9 / 13
+        #endif
     }
 }
