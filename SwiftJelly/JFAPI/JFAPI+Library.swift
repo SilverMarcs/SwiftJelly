@@ -14,12 +14,11 @@ extension JFAPI {
     /// - Returns: Array of BaseItemDto representing user libraries
     func loadLibraries() async throws -> [BaseItemDto] {
         let context = try getAPIContext()
-        let parameters = Paths.GetUserViewsParameters(userID: context.server.jellyfinUserID ?? "")
+        let parameters = Paths.GetUserViewsParameters(userID: context.userID)
         let request = Paths.getUserViews(parameters: parameters)
-        let response = try await context.client.send(request)
-        // Filter to only supported collection types
+        let items = try await send(request).items ?? []
         let supportedTypes: [CollectionType] = [.movies, .tvshows]
-        return (response.value.items ?? []).filter { item in
+        return items.filter { item in
             guard let collectionType = item.collectionType else { return false }
             return supportedTypes.contains(collectionType)
         }
@@ -36,7 +35,6 @@ extension JFAPI {
         parameters.fields = .MinimumFields
         parameters.sortBy = [ItemSortBy.sortName.rawValue]
         parameters.sortOrder = [SortOrder.ascending]
-        // Filter by item types based on library collection type
         switch library.collectionType {
         case .movies:
             parameters.includeItemTypes = [.movie]
@@ -49,11 +47,9 @@ extension JFAPI {
         case .photos:
             parameters.includeItemTypes = [.photo]
         default:
-            // For other types, include common media types
             parameters.includeItemTypes = [.movie, .series, .musicAlbum, .book, .photo]
         }
-        let request = Paths.getItemsByUserID(userID: context.server.jellyfinUserID ?? "", parameters: parameters)
-        let response = try await context.client.send(request)
-        return response.value.items ?? []
+        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
+        return try await send(request).items ?? []
     }
 }

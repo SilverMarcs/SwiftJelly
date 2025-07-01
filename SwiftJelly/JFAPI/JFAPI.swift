@@ -46,6 +46,16 @@ class JFAPI {
     struct APIContext {
         let server: Server
         let client: JellyfinClient
+        var userID: String {
+            server.jellyfinUserID ?? ""
+        }
+    }
+
+    /// Generic helper to send a request using the current API context
+    func send<T>(_ request: Request<T>) async throws -> T where T: Decodable {
+        let context = try getAPIContext()
+        let response = try await context.client.send(request)
+        return response.value
     }
 }
 

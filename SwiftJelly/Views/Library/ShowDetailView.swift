@@ -63,7 +63,7 @@ struct ShowDetailView: View {
                     }
                 }
                 
-                Spacer(minLength: 50)
+                Spacer(minLength: 30)
             }
         }
         .ignoresSafeArea(edges: .top)

@@ -15,14 +15,12 @@ extension JFAPI {
     func loadResumeItems() async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetResumeItemsParameters()
-        parameters.userID = context.server.jellyfinUserID
+        parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.includeItemTypes = [.movie, .episode]
         parameters.limit = 100 // fetch more to allow grouping, then limit to 20 after grouping
-        let request = Paths.getResumeItems(parameters: parameters)
-        let response = try await context.client.send(request)
-        let items = response.value.items ?? []
+        let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
         // Group episodes by seriesID, pick most recent per show; include all movies
         var mostRecentEpisodes: [String: BaseItemDto] = [:]

@@ -15,12 +15,11 @@ extension JFAPI {
     func loadNextUpItems(limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetNextUpParameters()
-        parameters.userID = context.server.jellyfinUserID
+        parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.limit = limit
         let request = Paths.getNextUp(parameters: parameters)
-        let response = try await context.client.send(request)
-        return response.value.items ?? []
+        return try await send(request).items ?? []
     }
 }
