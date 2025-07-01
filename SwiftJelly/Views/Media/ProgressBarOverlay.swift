@@ -41,12 +41,13 @@ struct ProgressBarOverlay: View {
             
             Spacer()
             
-            Button(action: {}) {
-                Image(systemName: "ellipsis")
-                    .font(.title3)
-                    .foregroundStyle(.primary)
-            }
-            .buttonStyle(.plain)
+//            Button(action: {}) {
+//                Image(systemName: "ellipsis")
+//                    .font(.title3)
+//                    .foregroundStyle(.primary)
+//                    .contentShape(.rect)
+//            }
+//            .buttonStyle(.plain)
         }
         .foregroundStyle(.white)
     }

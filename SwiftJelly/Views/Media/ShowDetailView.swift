@@ -7,6 +7,7 @@ struct ShowDetailView: View {
     @State private var selectedSeason: BaseItemDto?
     @State private var episodes: [BaseItemDto] = []
     @State private var isLoading = false
+    @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     
     var body: some View {
         ScrollView {
@@ -45,25 +46,25 @@ struct ShowDetailView: View {
                         .pickerStyle(.segmented)
                         .padding(.horizontal)
                     }
-                    
-                
+
                     if !episodes.isEmpty {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 15) {
                                 ForEach(episodes) { episode in
                                     PlayableCard(item: episode)
+                                        .id(episode.id)
                                 }
                             }
                             .padding(.horizontal)
                             .padding(.bottom)
+                            .scrollTargetLayout()
                         }
+                        .scrollPosition($episodeScrollPosition)
                     }
                 }
             }
         }
-//        #if os(macOS)
         .ignoresSafeArea(edges: .top)
-//        #endif
         .navigationTitle(show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)
         .task {
@@ -71,6 +72,18 @@ struct ShowDetailView: View {
         }
         .task(id: selectedSeason) {
             await loadEpisodes(for: selectedSeason)
+        }
+        .task(id: episodes) {
+            // Find the latest episode with watch time
+            if let latest = episodes.filter({
+                let ticks = $0.userData?.playbackPositionTicks ?? 0
+                return ticks > 0
+            }).sorted(by: { ($0.userData?.lastPlayedDate ?? .distantPast) > ($1.userData?.lastPlayedDate ?? .distantPast) }).first,
+               let id = latest.id {
+                withAnimation {
+                    episodeScrollPosition.scrollTo(id: id, anchor: .trailing)
+                }
+            }
         }
     }
     
