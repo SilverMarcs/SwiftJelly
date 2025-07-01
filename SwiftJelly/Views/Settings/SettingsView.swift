@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var dataManager = DataManager.shared
     @State private var showingServerSettings = false
 
     var body: some View {
         NavigationStack {
             Form {
-                Section {
+                Section("Server") {
                     NavigationLink {
                         ServerSettingsView()
                     } label: {
@@ -52,7 +53,19 @@ struct SettingsView: View {
             }
             .formStyle(.grouped)
             .navigationTitle("Settings")
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbarTitleDisplayMode(.inline)
+            #if !os(macOS)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            
+                    }
+                }
+            }
+            #endif
         }
     }
 }

@@ -32,24 +32,10 @@ struct ServerSettingsView: View {
                     TextField("Username", text: $username)
                     SecureField("Password", text: $password)
                 }
-                
-                if let server = dataManager.server {
-                    Section {
-                        LabeledContent("Status") {
-                            if server.isAuthenticated {
-                                Label("Authenticated", systemImage: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                            } else {
-                                Label("Not Authenticated", systemImage: "xmark.circle.fill")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-                    .sectionActions {
-                        Button("Clear Server", role: .destructive) {
-                            dataManager.clearServer()
-                            clearForm()
-                        }
+                .sectionActions {
+                    Button("Clear Server", role: .destructive) {
+                        dataManager.clearServer()
+                        clearForm()
                     }
                 }
             }
@@ -57,6 +43,18 @@ struct ServerSettingsView: View {
             .navigationTitle("Server Settings")
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: toolbarPlacemen) {
+                    if let server = dataManager.server, server.isAuthenticated {
+                        Label("Authenticated", systemImage: "checkmark.circle.fill")
+                            .labelStyle(.titleAndIcon)
+                            .foregroundColor(.green)
+                    } else {
+                        Label("Not Authenticated", systemImage: "xmark.circle.fill")
+                            .labelStyle(.titleAndIcon) 
+                            .foregroundColor(.red)
+                    }
+                }
+                
                 ToolbarItem(placement: .confirmationAction) {
                     Button(role: .confirm) {
                         saveAndAuthenticate()
@@ -66,7 +64,6 @@ struct ServerSettingsView: View {
                                 .controlSize(.small)
                         } else {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(.accent)
                         }
                     }
                     .disabled(serverName.isEmpty || serverURL.isEmpty || username.isEmpty || password.isEmpty || isAuthenticating)
@@ -81,6 +78,14 @@ struct ServerSettingsView: View {
                 loadCurrentServerData()
             }
         }
+    }
+    
+    var toolbarPlacemen: ToolbarItemPlacement {
+        #if os(iOS)
+        return .title
+        #else
+        return .principal
+        #endif
     }
     
     private func loadCurrentServerData() {
