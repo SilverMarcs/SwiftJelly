@@ -13,7 +13,7 @@ struct HomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     ContinueWatchingView()
-
+                    NextUpView()
                     Spacer(minLength: 100)
                 }
             }

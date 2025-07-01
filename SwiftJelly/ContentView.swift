@@ -24,9 +24,9 @@ struct ContentView: View {
                 SettingsView()
             }
             
-//            Tab("Settings", systemImage: "gear", value: .settings) {
-//                SettingsView()
-//            }
+            Tab(value: .search, role: .search) {
+                Text("TBI")
+            }
         }
         .tabViewStyle(.sidebarAdaptable)
         #if !os(macOS)
@@ -39,4 +39,5 @@ enum Tabs: Hashable {
     case home
     case media
     case settings
+    case search
 }

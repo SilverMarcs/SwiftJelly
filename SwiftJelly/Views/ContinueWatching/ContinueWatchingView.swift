@@ -16,29 +16,22 @@ struct ContinueWatchingView: View {
     private let api = JFAPI.shared
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Continue Watching")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-
-                Spacer()
-
-                if isLoading {
-                    ProgressView()
-                }
-            }
-            .padding(.horizontal)
-
+        ScrollView(.horizontal, showsIndicators: false) {
             if !resumeItems.isEmpty && !isLoading {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHStack(spacing: 16) {
-                        ForEach(resumeItems, id: \ .id) { item in
-                            PlayableCard(item: item)
-                        }
+                LazyHStack(spacing: 16) {
+                    ForEach(resumeItems, id: \ .id) { item in
+                        PlayableCard(item: item)
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal)
+                
+            } else if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Text("No items to continue watching")
+                    .foregroundStyle(.secondary)
+                    .padding()
             }
         }
         .task {

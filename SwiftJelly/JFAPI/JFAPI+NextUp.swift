@@ -1,0 +1,26 @@
+//
+//  JFAPI+NextUp.swift
+//  SwiftJelly
+//
+//  Created by Copilot on 01/07/2025.
+//
+
+import Foundation
+import JellyfinAPI
+import Get
+
+extension JFAPI {
+    /// Loads Next Up items for the current user (episodes to continue watching)
+    /// - Returns: Array of BaseItemDto representing next up items
+    func loadNextUpItems(limit: Int = 20) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetNextUpParameters()
+        parameters.userID = context.user.id
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        parameters.limit = limit
+        let request = Paths.getNextUp(parameters: parameters)
+        let response = try await context.client.send(request)
+        return response.value.items ?? []
+    }
+}
