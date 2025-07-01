@@ -20,9 +20,9 @@ struct ContentView: View {
                 MediaView()
             }
             
-            Tab("Settings", systemImage: "gear", value: .settings) {
-                SettingsView()
-            }
+        //    Tab("Settings", systemImage: "gear", value: .settings) {
+        //        SettingsView()
+        //    }
             
             Tab(value: .search, role: .search) {
                 Text("TBI")

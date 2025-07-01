@@ -17,7 +17,8 @@ struct SwiftJellyApp: App {
             ContentView()
                 .environmentObject(dataManager)
         }
-#if os(macOS)
+        
+        #if os(macOS)
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
             if let item = item {
                 MediaPlayerView(item: item)
@@ -27,6 +28,10 @@ struct SwiftJellyApp: App {
         }
         .restorationBehavior(.disabled)
         .windowResizability(.contentSize)
-#endif
+        
+//        Settings {
+//            SettingsView()
+//        }
+        #endif
     }
 }

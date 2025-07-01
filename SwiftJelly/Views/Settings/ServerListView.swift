@@ -35,6 +35,7 @@ struct ServerListView: View {
             }
             .onDelete(perform: deleteServers)
         }
+        .listStyle(.inset)
         .navigationTitle("Servers")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {

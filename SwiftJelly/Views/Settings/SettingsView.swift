@@ -14,9 +14,9 @@ struct SettingsView: View {
         NavigationStack {
             ServerListView()
             
-            if let currentUser = dataManager.currentUser {
-                LoggedInView(user: currentUser)
-            }
+//            if let currentUser = dataManager.currentUser {
+//                LoggedInView(user: currentUser)
+//            }
         }
     }
 }

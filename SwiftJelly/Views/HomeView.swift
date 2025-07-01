@@ -19,6 +19,9 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar {
+                SettingsToolbar()
+            }
         }
     }
 }
