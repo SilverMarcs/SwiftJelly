@@ -6,6 +6,7 @@ struct MediaPlayerInfoBar: View {
     let item: BaseItemDto
     let proxy: VLCVideoPlayer.Proxy
     let playbackInfo: VLCVideoPlayer.PlaybackInformation?
+    @ObservedObject var subtitleManager: SubtitleManager
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -34,7 +35,7 @@ struct MediaPlayerInfoBar: View {
             
             Spacer()
             
-            SubtitlePicker(proxy: proxy, tracks: playbackInfo?.subtitleTracks ?? [], selected: playbackInfo?.currentSubtitleTrack)
+            UnifiedSubtitlePicker(subtitleManager: subtitleManager)
             
 //            AudioTrackPicker(proxy: proxy, tracks: playbackInfo?.audioTracks ?? [], selected: playbackInfo?.currentAudioTrack)
         }

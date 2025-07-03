@@ -10,49 +10,83 @@ struct MediaPlayerView: View {
     @State private var proxy: VLCVideoPlayer.Proxy = .init()
     @StateObject private var playbackState = PlaybackStateManager()
     @StateObject private var sessionManager: PlaybackSessionManager
+    @StateObject private var subtitleManager: SubtitleManager
 
     @State private var controlsVisible: Bool = false
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
+    
+    @State private var hasLoadedSubs = false
+    @State private var isSubtitlesReady = false
+    
 
     init(item: BaseItemDto) {
         self.item = item
         self._sessionManager = StateObject(wrappedValue: PlaybackSessionManager(item: item))
+        self._subtitleManager = StateObject(wrappedValue: SubtitleManager(item: item))
     }
 
     var body: some View {
         if let url = playbackURL {
-            VLCVideoPlayer(
-                configuration: .init(
-                    url: url,
-                    autoPlay: true,
-                    startSeconds: .seconds(Int64(startTimeSeconds)),
-                    subtitleSize: .absolute(24)
+            ZStack {
+            if isSubtitlesReady {
+                VLCVideoPlayer(
+                    configuration: .init(
+                        url: url,
+                        autoPlay: true,
+                        startSeconds: .seconds(Int64(startTimeSeconds)),
+                        subtitleSize: .absolute(24),
+                        playbackChildren: subtitleManager.getPlaybackChildren()
+                    )
                 )
-            )
-            .proxy(proxy)
-            .onStateUpdated { state, info in
-                handleStateChange(state)
-                playbackInfo = info
+                .proxy(proxy)
+                .onStateUpdated { state, info in
+                    handleStateChange(state)
+                    playbackInfo = info
+                    subtitleManager.updateFromPlaybackInfo(info)
+                }
+                .onSecondsUpdated { duration, info in
+                    let seconds = Int(duration.components.seconds)
+                    let totalDuration = info.length / 1000
+                    playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
+                    playbackInfo = info
+                    subtitleManager.updateFromPlaybackInfo(info)
+                    
+                    if !hasLoadedSubs {
+                        Task {
+                            await subtitleManager.loadEmbeddedSubtitles(embeddedTracks: info.subtitleTracks)
+                            hasLoadedSubs = true
+                        }
+                    }
+                }
+                .onAppear {
+                    subtitleManager.setVLCProxy(proxy)
+                }
+            } else {
+                // Show loading view while subtitles are being loaded
+                ZStack {
+                    Color.black
+                    ProgressView("Loading subtitles...")
+                        .foregroundStyle(.white)
+                }
+                .task {
+                    await subtitleManager.loadExternalSubtitles()
+                    isSubtitlesReady = true
+                }
             }
-            .onSecondsUpdated { duration, info in
-                let seconds = Int(duration.components.seconds)
-                let totalDuration = info.length / 1000
-                playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                playbackInfo = info
             }
 //            .aspectRatio(item.aspectRatio?.toCGFloatRatio() ?? 16/9, contentMode: .fit)
             .navigationTitle(item.name ?? "Media Player")
             .contentShape(Rectangle())
+#if os(macOS)
             .gesture(
                 TapGesture(count: 2)
                     .onEnded {
-                        #if os(macOS)
                         if let window = NSApplication.shared.keyWindow {
                             window.toggleFullScreen(nil)
                         }
-                        #endif
                     }
             )
+#endif
             .simultaneousGesture(
                 TapGesture(count: 1)
                     .onEnded {
@@ -81,7 +115,12 @@ struct MediaPlayerView: View {
             .overlay(alignment: .bottom) {
                 if controlsVisible {
                     VStack {
-                        MediaPlayerInfoBar(item: item, proxy: proxy, playbackInfo: playbackInfo)
+                        MediaPlayerInfoBar(
+                            item: item, 
+                            proxy: proxy, 
+                            playbackInfo: playbackInfo,
+                            subtitleManager: subtitleManager
+                        )
                         
                         MediaPlayerProgressBar(
                             playbackState: playbackState,
