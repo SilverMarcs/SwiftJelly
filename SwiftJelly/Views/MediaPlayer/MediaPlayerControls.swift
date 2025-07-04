@@ -18,7 +18,6 @@ struct MediaPlayerControls: View {
             Button(action: { proxy.jumpBackward(10) }) {
                 Image(systemName: "gobackward.5")
                     .font(.system(size: 25))
-                    .foregroundStyle(.white)
                     .padding(10)
                     .contentShape(Rectangle())
             }
@@ -34,7 +33,6 @@ struct MediaPlayerControls: View {
             } label: {
                 Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 40))
-                    .foregroundStyle(.white)
                     .padding(15)
                     .contentShape(Rectangle())
             }
@@ -45,7 +43,6 @@ struct MediaPlayerControls: View {
             Button(action: { proxy.jumpForward(10) }) {
                 Image(systemName: "goforward.5")
                     .font(.system(size: 25))
-                    .foregroundStyle(.white)
                     .padding(10)
                     .contentShape(Rectangle())
             }

@@ -26,6 +26,7 @@ struct SwiftJellyApp: App {
                 Text("Unable to open player window.")
             }
         }
+        .windowStyle(.hiddenTitleBar)
         .restorationBehavior(.disabled)
         .windowResizability(.contentSize)
         

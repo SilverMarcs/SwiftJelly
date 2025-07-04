@@ -14,9 +14,9 @@ struct MediaPlayerInfoBar: View {
                 HStack(spacing: 5) {
                     if let season = item.parentIndexNumber, let episode = item.indexNumber {
                         Text("S\(season)E\(episode)")
+                        
+                        Text("•")
                     }
-                    
-                    Text("•")
                     
                     if let showName = item.seriesName, !showName.isEmpty {
                         Text(showName)
@@ -30,7 +30,6 @@ struct MediaPlayerInfoBar: View {
                 Text(item.name ?? "Unknown")
                     .font(.title.bold())
                     .lineLimit(1)
-                    .foregroundStyle(.white)
             }
             
             Spacer()

@@ -17,7 +17,6 @@ struct MediaPlayerProgressBar: View {
         HStack {
             Text(playbackState.currentSeconds.formattedTime)
                 .font(.caption)
-                .foregroundStyle(.white)
                 .monospacedDigit()
 
             Slider(
@@ -41,7 +40,6 @@ struct MediaPlayerProgressBar: View {
 
             Text(playbackState.totalSeconds.formattedTime)
                 .font(.caption)
-                .foregroundStyle(.white)
                 .monospacedDigit()
         }
     }

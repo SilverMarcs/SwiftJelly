@@ -16,9 +16,14 @@ struct MediaPlayerView: View {
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var hasLoadedEmbeddedSubs = false
     
+    let playbackURL: URL?
+    let startTimeSeconds: Int
+    
 
     init(item: BaseItemDto) {
         self.item = item
+        self.playbackURL = try? JFAPI.shared.getPlaybackURL(for: item)
+        self.startTimeSeconds = JFAPI.shared.getStartTimeSeconds(for: item)
         self._sessionManager = StateObject(wrappedValue: PlaybackSessionManager(item: item))
         self._subtitleManager = StateObject(wrappedValue: SubtitleManager(item: item))
     }
@@ -70,7 +75,7 @@ struct MediaPlayerView: View {
             }
 //            .aspectRatio(item.aspectRatio?.toCGFloatRatio() ?? 16/9, contentMode: .fit)
             .navigationTitle(item.name ?? "Media Player")
-            .contentShape(Rectangle())
+//            .contentShape(Rectangle())
 #if os(macOS)
             .gesture(
                 TapGesture(count: 2)
@@ -136,40 +141,21 @@ struct MediaPlayerView: View {
                     .padding()
                 }
             }
-            .ignoresSafeArea(edges: .vertical)
             #endif
+            .ignoresSafeArea(edges: .vertical)
             .background(.black)
             .onDisappear {
                 sessionManager.stopPlayback(at: playbackState.currentSeconds)
             }
-            .onKeyPress(.space) {
-                if playbackState.isPlaying {
-                    proxy.pause()
-                } else {
-                    proxy.play()
-                }
-                return .handled
-            }
-            .onKeyPress(.leftArrow) {
-                proxy.jumpBackward(10)
-                return .handled
-            }
-            .onKeyPress(.rightArrow) {
-                proxy.jumpForward(10)
-                return .handled
-            }
+            .mediaPlayerKeyboardShortcuts(
+                playbackState: playbackState,
+                proxy: proxy
+            )
+            .preferredColorScheme(.dark)
         } else {
             Text("Unable to play this item.")
                 .padding()
         }
-    }
-
-    private var playbackURL: URL? {
-        try? JFAPI.shared.getPlaybackURL(for: item)
-    }
-
-    private var startTimeSeconds: Int {
-        JFAPI.shared.getStartTimeSeconds(for: item)
     }
 
     private func handleStateChange(_ state: VLCVideoPlayer.State) {
