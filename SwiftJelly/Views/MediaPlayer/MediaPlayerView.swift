@@ -4,8 +4,6 @@ import VLCUI
 
 struct MediaPlayerView: View {
     let item: BaseItemDto
-    
-    @Environment(\.dismiss) private var dismiss
 
     @State private var proxy: VLCVideoPlayer.Proxy = .init()
     @StateObject private var playbackState = PlaybackStateManager()
@@ -18,7 +16,6 @@ struct MediaPlayerView: View {
     
     let playbackURL: URL?
     let startTimeSeconds: Int
-    
 
     init(item: BaseItemDto) {
         self.item = item
@@ -53,7 +50,6 @@ struct MediaPlayerView: View {
                         playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
                         playbackInfo = info
                         subtitleManager.updateFromPlaybackInfo(info)
-                        
                         if !hasLoadedEmbeddedSubs {
                             subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
                             hasLoadedEmbeddedSubs = true
@@ -75,7 +71,6 @@ struct MediaPlayerView: View {
             }
 //            .aspectRatio(item.aspectRatio?.toCGFloatRatio() ?? 16/9, contentMode: .fit)
             .navigationTitle(item.name ?? "Media Player")
-//            .contentShape(Rectangle())
 #if os(macOS)
             .gesture(
                 TapGesture(count: 2)
@@ -94,64 +89,24 @@ struct MediaPlayerView: View {
                         }
                     }
             )
-            .overlay {
-                if controlsVisible
-                {
-                    Color.black.opacity(0.5)
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.2), value: controlsVisible)
-                        .allowsHitTesting(false)
-                }
-            }
-            .overlay(alignment: .center) {
-                if controlsVisible {
-                    MediaPlayerControls(
-                        playbackState: playbackState,
-                        proxy: proxy
-                    )
-                }
-            }
-            .overlay(alignment: .bottom) {
-                if controlsVisible {
-                    VStack {
-                        MediaPlayerInfoBar(
-                            item: item, 
-                            proxy: proxy, 
-                            playbackInfo: playbackInfo,
-                            subtitleManager: subtitleManager
-                        )
-                        
-                        MediaPlayerProgressBar(
-                            playbackState: playbackState,
-                            proxy: proxy
-                        )
-                    }
-                    .padding()
-                }
-            }
-            #if !os(macOS)
-            .overlay(alignment: .topTrailing) {
-                if controlsVisible {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .buttonStyle(.pla)
-                    .padding()
-                }
-            }
-            #endif
             .ignoresSafeArea(edges: .vertical)
             .background(.black)
             .onDisappear {
                 sessionManager.stopPlayback(at: playbackState.currentSeconds)
             }
+            .preferredColorScheme(.dark)
             .mediaPlayerKeyboardShortcuts(
                 playbackState: playbackState,
                 proxy: proxy
             )
-            .preferredColorScheme(.dark)
+            .mediaPlayerOverlays(
+                controlsVisible: $controlsVisible,
+                item: item,
+                proxy: proxy,
+                playbackState: playbackState,
+                playbackInfo: playbackInfo,
+                subtitleManager: subtitleManager,
+            )
         } else {
             Text("Unable to play this item.")
                 .padding()
@@ -181,5 +136,4 @@ struct MediaPlayerView: View {
             sessionManager.stopPlayback(at: playbackState.currentSeconds)
         }
     }
-
 }
