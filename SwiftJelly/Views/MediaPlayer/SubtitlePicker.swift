@@ -1,40 +1,34 @@
-//
-//  SubtitlePicker.swift
-//  SwiftJelly
-//
-//  Created by Zabir Raihan on 30/06/2025.
-//
-
 import SwiftUI
 import VLCUI
 
 struct SubtitlePicker: View {
-    let proxy: VLCVideoPlayer.Proxy
-    let tracks: [MediaTrack]
-    let selected: MediaTrack?
-    @State private var selectedIndex: Int = 0
-
+    @ObservedObject var subtitleManager: SubtitleManager
+    
+    private var allSubtitles: [Subtitle] {
+        subtitleManager.availableSubtitles
+    }
+    
     var body: some View {
         Menu {
-            if tracks.isEmpty {
+            if subtitleManager.isLoading {
+                Text("Loading subtitles...")
+                    .foregroundStyle(.secondary)
+            } else if allSubtitles.isEmpty {
                 Text("No subtitles available")
                     .foregroundStyle(.secondary)
             } else {
-                Picker(selection: $selectedIndex) {
-                    ForEach(tracks, id: \.index) { track in
-                        Text(track.title.isEmpty ? "Track \(track.index + 1)" : track.title).tag(track.index)
+                ForEach(allSubtitles, id: \.index) { subtitle in
+                    Button {
+                        subtitleManager.selectSubtitle(subtitle)
+                    } label: {
+                        if subtitleManager.selectedSubtitle?.index == subtitle.index {
+                            Label(subtitle.title, systemImage: "checkmark")
+                                .labelStyle(.titleAndIcon)
+                        } else {
+                            Label(subtitle.title, systemImage: "captions.bubble")
+                                .labelStyle(.titleOnly)
+                        }
                     }
-                } label: {
-                    Label(selected?.title ?? "Disabled", systemImage: "captions.bubble")
-                        .labelStyle(.titleOnly)
-                }
-                .onAppear {
-                    if let selected = selected {
-                        selectedIndex = selected.index
-                    }
-                }
-                .onChange(of: selectedIndex) {
-                    proxy.setSubtitleTrack(.absolute(selectedIndex))
                 }
             }
         } label: {
@@ -45,8 +39,8 @@ struct SubtitlePicker: View {
         .labelStyle(.iconOnly)
         .menuIndicator(.hidden)
         .menuStyle(.button)
-        .controlSize(.large)
         .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
+        .controlSize(.extraLarge)
     }
 }

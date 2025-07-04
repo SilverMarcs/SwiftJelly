@@ -4,11 +4,10 @@ import VLCUI
 import Get
 
 extension JFAPI {
-    /// Fetches all subtitle streams (both embedded and external) for a media item from Jellyfin server
-    /// This calls getPostedPlaybackInfo to get the proper external subtitle delivery URLs
+    /// Fetches external subtitle streams for a media item from Jellyfin server
     /// - Parameter item: The BaseItemDto to get subtitle streams for
-    /// - Returns: Array of MediaStream subtitle tracks with properly populated deliveryURL
-    func getAllSubtitleStreams(for item: BaseItemDto) async throws -> [MediaStream] {
+    /// - Returns: Array of MediaStream subtitle tracks with deliveryURL
+    func getExternalSubtitleStreams(for item: BaseItemDto) async throws -> [MediaStream] {
         guard let itemId = item.id else { return [] }
         
         let context = try getAPIContext()
@@ -38,56 +37,36 @@ extension JFAPI {
         
         let response = try await context.client.send(request)
         
-        // Get subtitle streams from the response (they will have proper deliveryURL populated)
+        // Get only external subtitle streams (those with deliveryURL)
         guard let mediaSources = response.value.mediaSources else { return [] }
         
-        var subtitleStreams: [MediaStream] = []
+        var externalSubtitles: [MediaStream] = []
         for mediaSource in mediaSources {
             if let streams = mediaSource.mediaStreams {
-                let subtitles = streams.filter { $0.type == .subtitle }
-                subtitleStreams.append(contentsOf: subtitles)
+                let subtitles = streams.filter { $0.type == .subtitle && $0.deliveryURL != nil }
+                externalSubtitles.append(contentsOf: subtitles)
             }
         }
         
-        return subtitleStreams
-    }
-    
-    /// Gets combined subtitle tracks (both embedded and external)
-    /// - Parameters:
-    ///   - item: The BaseItemDto to get subtitles for
-    ///   - embeddedTracks: VLC MediaTrack array from embedded subtitles
-    /// - Returns: Array of UnifiedSubtitle containing both embedded and external subtitles
-    func getCombinedSubtitles(for item: BaseItemDto, embeddedTracks: [MediaTrack]) async throws -> [UnifiedSubtitle] {
-        // Get all subtitle streams from Jellyfin (includes both embedded and external)
-        let allStreams = try await getAllSubtitleStreams(for: item)
-        
-        // Convert Jellyfin streams to UnifiedSubtitle
-        // External subtitles will have deliveryURL, embedded ones won't
-        let jellyfinSubtitles = allStreams.map { UnifiedSubtitle(from: $0) }
-        
-        // For embedded subtitles, prefer VLC MediaTrack info when available
-        // VLC provides better track information for embedded subtitles
-        var combinedSubtitles: [UnifiedSubtitle] = []
-        
-        // Add VLC embedded tracks first (they have better info)
-        combinedSubtitles.append(contentsOf: embeddedTracks.map { UnifiedSubtitle(from: $0) })
-        
-        // Add external subtitles from Jellyfin
-        let externalSubtitles = jellyfinSubtitles.filter { $0.isExternal }
-        combinedSubtitles.append(contentsOf: externalSubtitles)
-        
-        return combinedSubtitles
+        return externalSubtitles
     }
     
     /// Creates VLC PlaybackChildren for external subtitles
-    /// - Parameters:
-    ///   - subtitles: Array of UnifiedSubtitle containing external subtitles
+    /// - Parameter item: The BaseItemDto to get external subtitles for
     /// - Returns: Array of VLC PlaybackChild for external subtitles
-    func createSubtitlePlaybackChildren(from subtitles: [UnifiedSubtitle]) throws -> [VLCVideoPlayer.PlaybackChild] {
+    func createExternalSubtitlePlaybackChildren(for item: BaseItemDto) async throws -> [VLCVideoPlayer.PlaybackChild] {
         let context = try getAPIContext()
+        let externalStreams = try await getExternalSubtitleStreams(for: item)
         
-        return subtitles.compactMap { subtitle in
-            subtitle.asPlaybackChild(client: context.client)
+        return externalStreams.compactMap { stream in
+            guard let deliveryURL = stream.deliveryURL,
+                  let fullURL = context.client.fullURL(with: deliveryURL) else { return nil }
+            
+            return VLCVideoPlayer.PlaybackChild(
+                url: fullURL,
+                type: .subtitle,
+                enforce: false
+            )
         }
     }
 }

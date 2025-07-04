@@ -14,9 +14,7 @@ struct MediaPlayerView: View {
 
     @State private var controlsVisible: Bool = false
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
-    
-    @State private var hasLoadedSubs = false
-    @State private var isSubtitlesReady = false
+    @State private var hasLoadedEmbeddedSubs = false
     
 
     init(item: BaseItemDto) {
@@ -28,51 +26,47 @@ struct MediaPlayerView: View {
     var body: some View {
         if let url = playbackURL {
             ZStack {
-            if isSubtitlesReady {
-                VLCVideoPlayer(
-                    configuration: .init(
-                        url: url,
-                        autoPlay: true,
-                        startSeconds: .seconds(Int64(startTimeSeconds)),
-                        subtitleSize: .absolute(24),
-                        playbackChildren: subtitleManager.getPlaybackChildren()
+                if !subtitleManager.isLoading {
+                    VLCVideoPlayer(
+                        configuration: .init(
+                            url: url,
+                            autoPlay: true,
+                            startSeconds: .seconds(Int64(startTimeSeconds)),
+                            subtitleSize: .absolute(24),
+                            playbackChildren: subtitleManager.getPlaybackChildren()
+                        )
                     )
-                )
-                .proxy(proxy)
-                .onStateUpdated { state, info in
-                    handleStateChange(state)
-                    playbackInfo = info
-                    subtitleManager.updateFromPlaybackInfo(info)
-                }
-                .onSecondsUpdated { duration, info in
-                    let seconds = Int(duration.components.seconds)
-                    let totalDuration = info.length / 1000
-                    playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                    playbackInfo = info
-                    subtitleManager.updateFromPlaybackInfo(info)
-                    
-                    if !hasLoadedSubs {
-                        Task {
-                            await subtitleManager.loadEmbeddedSubtitles(embeddedTracks: info.subtitleTracks)
-                            hasLoadedSubs = true
+                    .proxy(proxy)
+                    .onStateUpdated { state, info in
+                        handleStateChange(state)
+                        playbackInfo = info
+                        subtitleManager.updateFromPlaybackInfo(info)
+                    }
+                    .onSecondsUpdated { duration, info in
+                        let seconds = Int(duration.components.seconds)
+                        let totalDuration = info.length / 1000
+                        playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
+                        playbackInfo = info
+                        subtitleManager.updateFromPlaybackInfo(info)
+                        
+                        if !hasLoadedEmbeddedSubs {
+                            subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
+                            hasLoadedEmbeddedSubs = true
                         }
                     }
-                }
-                .onAppear {
-                    subtitleManager.setVLCProxy(proxy)
-                }
-            } else {
-                // Show loading view while subtitles are being loaded
-                ZStack {
-                    Color.black
-                    ProgressView("Loading subtitles...")
-                        .foregroundStyle(.white)
-                }
-                .task {
-                    await subtitleManager.loadExternalSubtitles()
-                    isSubtitlesReady = true
+                    .onAppear {
+                        subtitleManager.setVLCProxy(proxy)
+                    }
+                } else {
+                    ZStack {
+                        Color.black
+                        ProgressView("Loading subtitles...")
+                            .foregroundStyle(.white)
+                    }
                 }
             }
+            .task {
+                await subtitleManager.loadExternalSubtitles()
             }
 //            .aspectRatio(item.aspectRatio?.toCGFloatRatio() ?? 16/9, contentMode: .fit)
             .navigationTitle(item.name ?? "Media Player")
@@ -138,7 +132,7 @@ struct MediaPlayerView: View {
                     } label: {
                         Image(systemName: "xmark")
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.pla)
                     .padding()
                 }
             }
@@ -157,11 +151,11 @@ struct MediaPlayerView: View {
                 return .handled
             }
             .onKeyPress(.leftArrow) {
-                proxy.jumpBackward(5)
+                proxy.jumpBackward(10)
                 return .handled
             }
             .onKeyPress(.rightArrow) {
-                proxy.jumpForward(5)
+                proxy.jumpForward(10)
                 return .handled
             }
         } else {

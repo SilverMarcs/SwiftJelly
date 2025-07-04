@@ -35,7 +35,7 @@ struct MediaPlayerInfoBar: View {
             
             Spacer()
             
-            UnifiedSubtitlePicker(subtitleManager: subtitleManager)
+            SubtitlePicker(subtitleManager: subtitleManager)
             
 //            AudioTrackPicker(proxy: proxy, tracks: playbackInfo?.audioTracks ?? [], selected: playbackInfo?.currentAudioTrack)
         }

@@ -15,7 +15,7 @@ struct MediaPlayerControls: View {
 
     var body: some View {
         HStack(spacing: 40) {
-            Button(action: { proxy.jumpBackward(5) }) {
+            Button(action: { proxy.jumpBackward(10) }) {
                 Image(systemName: "gobackward.5")
                     .font(.system(size: 25))
                     .foregroundStyle(.white)
@@ -42,7 +42,7 @@ struct MediaPlayerControls: View {
             .glassEffect(.regular, in: .rect(cornerRadius: 30))
             
 
-            Button(action: { proxy.jumpForward(5) }) {
+            Button(action: { proxy.jumpForward(10) }) {
                 Image(systemName: "goforward.5")
                     .font(.system(size: 25))
                     .foregroundStyle(.white)
