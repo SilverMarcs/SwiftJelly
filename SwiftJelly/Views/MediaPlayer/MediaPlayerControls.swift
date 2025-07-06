@@ -19,10 +19,10 @@ struct MediaPlayerControls: View {
                 Image(systemName: "gobackward.5")
                     .font(.system(size: 25))
                     .padding(10)
-                    .contentShape(Rectangle())
+//                    .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .glassEffect(.regular, in: .rect(cornerRadius: 30))
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
 
             Button {
                 if playbackState.isPlaying {
@@ -32,22 +32,22 @@ struct MediaPlayerControls: View {
                 }
             } label: {
                 Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
+                    .contentTransition(.symbolEffect(.replace))
                     .font(.system(size: 40))
                     .padding(15)
-                    .contentShape(Rectangle())
+//                    .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .glassEffect(.regular, in: .rect(cornerRadius: 30))
-            
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
 
             Button(action: { proxy.jumpForward(10) }) {
                 Image(systemName: "goforward.5")
                     .font(.system(size: 25))
                     .padding(10)
-                    .contentShape(Rectangle())
+//                    .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .glassEffect(.regular, in: .rect(cornerRadius: 30))
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
         }
     }
 }

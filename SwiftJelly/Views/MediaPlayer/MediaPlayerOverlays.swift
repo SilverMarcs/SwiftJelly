@@ -54,7 +54,7 @@ struct MediaPlayerOverlays: ViewModifier {
                     } label: {
                         Image(systemName: "xmark")
                     }
-                    .buttonStyle(.pla)
+//                    .buttonStyle(.plain)
                     .padding()
                 }
             }
