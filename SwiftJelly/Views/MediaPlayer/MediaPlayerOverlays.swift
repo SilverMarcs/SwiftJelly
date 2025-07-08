@@ -16,6 +16,7 @@ struct MediaPlayerOverlays: ViewModifier {
             .overlay {
                 if controlsVisible {
                     Color.black.opacity(0.5)
+                        .ignoresSafeArea()
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.2), value: controlsVisible)
                         .allowsHitTesting(false)
