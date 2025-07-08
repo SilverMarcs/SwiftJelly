@@ -43,18 +43,6 @@ struct ServerSettingsView: View {
             .navigationTitle("Server Settings")
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: toolbarPlacemen) {
-                    if let server = dataManager.server, server.isAuthenticated {
-                        Label("Authenticated", systemImage: "checkmark.circle.fill")
-                            .labelStyle(.titleAndIcon)
-                            .foregroundColor(.green)
-                    } else {
-                        Label("Not Authenticated", systemImage: "xmark.circle.fill")
-                            .labelStyle(.titleAndIcon) 
-                            .foregroundColor(.red)
-                    }
-                }
-                
                 ToolbarItem(placement: .confirmationAction) {
                     Button(role: .confirm) {
                         saveAndAuthenticate()
@@ -78,14 +66,6 @@ struct ServerSettingsView: View {
                 loadCurrentServerData()
             }
         }
-    }
-    
-    var toolbarPlacemen: ToolbarItemPlacement {
-        #if os(iOS)
-        return .title
-        #else
-        return .principal
-        #endif
     }
     
     private func loadCurrentServerData() {

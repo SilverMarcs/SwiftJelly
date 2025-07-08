@@ -9,22 +9,22 @@
 /* Begin PBXBuildFile section */
 		0806E40C2E11CA2F00CF6DC0 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0806E40B2E11CA2F00CF6DC0 /* VLCUI */; };
 		0806E4B52E11D21800CF6DC0 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0806E4B42E11D21800CF6DC0 /* VLCUI */; };
-		083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); };
-		083128BE2E0EE24E0096527C /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BB2E0EE24E0096527C /* VLCKit.xcframework */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
-		083128C02E0EE24E0096527C /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128C52E0EE3F50096527C /* JellyfinAPI */; };
+		08E208CB2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
+		08E208CC2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		08E208CF2E1CCDA800CC8482 /* VLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */; platformFilters = (macos, ); };
+		08E208D02E1CCDA800CC8482 /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		083128C12E0EE24E0096527C /* Embed Frameworks */ = {
+		08E208CD2E1CCDA200CC8482 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				083128C02E0EE24E0096527C /* MobileVLCKit.xcframework in Embed Frameworks */,
-				083128BE2E0EE24E0096527C /* VLCKit.xcframework in Embed Frameworks */,
+				08E208D02E1CCDA800CC8482 /* VLCKit.xcframework in Embed Frameworks */,
+				08E208CC2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -35,6 +35,9 @@
 		083128A92E0EE1F70096527C /* SwiftJelly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftJelly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		083128BB2E0EE24E0096527C /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = Carthage/Build/VLCKit.xcframework; sourceTree = "<group>"; };
 		083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/Build/MobileVLCKit.xcframework; sourceTree = "<group>"; };
+		08E208C62E1CCD5300CC8482 /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = "Carthage/VLCKit - binary package/VLCKit.xcframework"; sourceTree = "<group>"; };
+		08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/MobileVLCKit.xcframework; sourceTree = "<group>"; };
+		08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = Carthage/VLCKit.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -50,10 +53,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				08E208CB2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Frameworks */,
 				0806E4B52E11D21800CF6DC0 /* VLCUI in Frameworks */,
+				08E208CF2E1CCDA800CC8482 /* VLCKit.xcframework in Frameworks */,
 				0806E40C2E11CA2F00CF6DC0 /* VLCUI in Frameworks */,
-				083128BD2E0EE24E0096527C /* VLCKit.xcframework in Frameworks */,
-				083128BF2E0EE24E0096527C /* MobileVLCKit.xcframework in Frameworks */,
 				083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -81,6 +84,9 @@
 		083128BA2E0EE24E0096527C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */,
+				08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */,
+				08E208C62E1CCD5300CC8482 /* VLCKit.xcframework */,
 				083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */,
 				083128BB2E0EE24E0096527C /* VLCKit.xcframework */,
 			);
@@ -97,7 +103,7 @@
 				083128A52E0EE1F70096527C /* Sources */,
 				083128A62E0EE1F70096527C /* Frameworks */,
 				083128A72E0EE1F70096527C /* Resources */,
-				083128C12E0EE24E0096527C /* Embed Frameworks */,
+				08E208CD2E1CCDA200CC8482 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
