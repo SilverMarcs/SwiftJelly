@@ -23,7 +23,7 @@ struct HomeView: View {
                     } else {
                         ContinueWatchingView(items: resumeItems)
                         NextUpView(items: nextUpItems)
-                        Spacer(minLength: 100)
+//                        Spacer(minLength: 100)
                     }
                 }
             }
