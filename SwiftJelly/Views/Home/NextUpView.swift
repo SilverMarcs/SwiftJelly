@@ -8,7 +8,7 @@ struct NextUpView: View {
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Next Up")
-                    .font(.title.bold())
+                    .font(.title2.bold())
                     .padding(.horizontal)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -17,7 +17,7 @@ struct NextUpView: View {
                             NextUpPortraitCard(item: item)
                         }
                     }
-                    .padding(.horizontal)
+                    .scenePadding(.horizontal)
                 }
             }
         }

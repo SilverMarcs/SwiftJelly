@@ -22,8 +22,8 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity, minHeight: 200)
                     } else {
                         ContinueWatchingView(items: resumeItems)
+                        
                         NextUpView(items: nextUpItems)
-//                        Spacer(minLength: 100)
                     }
                 }
             }

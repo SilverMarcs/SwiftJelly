@@ -30,6 +30,7 @@ struct LibraryView: View {
             ScrollView {
                 if isLoading {
                     ProgressView()
+                        .frame(maxWidth: .infinity, minHeight: 200)
                 }
 
                 if !libraries.isEmpty && !isLoading {
@@ -43,20 +44,20 @@ struct LibraryView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.horizontal)
+                    .scenePadding(.horizontal)
                 }
             }
+            .navigationTitle("Libraries")
+            .toolbarTitleDisplayMode(.inlineLarge)
             .task {
                 await loadLibraries()
             }
+            #if !os(macOS)
+            .toolbar {
+                SettingsToolbar()
+            }
+            #endif
         }
-        .navigationTitle("Libraries")
-        .toolbarTitleDisplayMode(.inlineLarge)
-        #if !os(macOS)
-        .toolbar {
-            SettingsToolbar()
-        }
-        #endif
     }
 
     private func loadLibraries() async {

@@ -13,14 +13,14 @@ struct ContinueWatchingView: View {
     let items: [BaseItemDto]
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            if !items.isEmpty {
+        if !items.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(items, id: \ .id) { item in
                         PlayableCard(item: item)
                     }
                 }
-                .padding(.horizontal)
+                .scenePadding(.horizontal)
             }
         }
     }
