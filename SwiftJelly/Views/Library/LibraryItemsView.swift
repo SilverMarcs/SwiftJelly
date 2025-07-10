@@ -54,7 +54,9 @@ struct LibraryItemsView: View {
         .navigationTitle(library.name ?? "Library")
         .toolbarTitleDisplayMode(.inline)
         .task {
-            await loadItems()
+            if items.isEmpty {
+                await loadItems()
+            }
         }
         .refreshable {
             await loadItems()

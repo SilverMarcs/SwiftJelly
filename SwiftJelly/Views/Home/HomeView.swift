@@ -40,7 +40,9 @@ struct HomeView: View {
                 await loadAll()
             }
             .task {
-                await loadAll()
+                if continueWatchingItems.isEmpty {
+                    await loadAll()
+                }
             }
         }
     }

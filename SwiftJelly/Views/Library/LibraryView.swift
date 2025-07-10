@@ -13,17 +13,8 @@ struct LibraryView: View {
     @State private var isLoading = false
 
     private let columns = [
-        GridItem(.adaptive(minimum: defaultSize), spacing: 16)
+        GridItem(.adaptive(minimum: 250), spacing: 16)
     ]
-    
-    /// Default size for library cards
-    static var defaultSize: CGFloat {
-        #if os(macOS)
-        260
-        #else
-        240
-        #endif
-    }
 
     var body: some View {
         NavigationStack {
@@ -39,7 +30,8 @@ struct LibraryView: View {
                             NavigationLink {
                                 LibraryItemsView(library: library)
                             } label: {
-                                LibraryCard(library: library)
+                                LandscapeImageView(item: library)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
                             .buttonStyle(.plain)
                         }
@@ -50,7 +42,9 @@ struct LibraryView: View {
             .navigationTitle("Libraries")
             .toolbarTitleDisplayMode(.inlineLarge)
             .task {
-                await loadLibraries()
+                if libraries.isEmpty {
+                    await loadLibraries()
+                }
             }
             #if !os(macOS)
             .toolbar {
