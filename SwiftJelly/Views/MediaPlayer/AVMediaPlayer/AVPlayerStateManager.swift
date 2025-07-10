@@ -7,18 +7,17 @@
 
 import Foundation
 import AVFoundation
-import Combine
 import JellyfinAPI
 
 /// Simple state manager for AVPlayer with progress reporting
-class AVPlayerStateManager: ObservableObject {
-    @Published var isPlaying: Bool = false
-    @Published var currentSeconds: Int = 0
-    @Published var totalSeconds: Int = 1
+@Observable class AVPlayerStateManager {
+    var isPlaying: Bool = false
+    var currentSeconds: Int = 0
+    var totalSeconds: Int = 1
     
-    private let reporter: PlaybackReporter
-    private var timeObserverToken: Any?
-    private var player: AVPlayer?
+    @ObservationIgnored private let reporter: PlaybackReporter
+    @ObservationIgnored private var timeObserverToken: Any?
+    @ObservationIgnored private var player: AVPlayer?
     
     init(item: BaseItemDto) {
         self.reporter = PlaybackReporter(item: item)

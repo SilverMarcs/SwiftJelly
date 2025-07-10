@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ServerList: View {
-    @ObservedObject private var dataManager = DataManager.shared
+    private var dataManager = DataManager.shared
     @State private var showAddSheet = false
     
     var body: some View {

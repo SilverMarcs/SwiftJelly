@@ -18,7 +18,7 @@ struct AVPlayerMac: NSViewRepresentable {
         view.player = player
         view.controlsStyle = .floating
         view.allowsPictureInPicturePlayback = true
-        view.showsFullScreenToggleButton = true
+//        view.showsFullScreenToggleButton = true
         
         // Set up state manager
         stateManager.setPlayer(player)

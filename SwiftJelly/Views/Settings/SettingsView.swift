@@ -10,7 +10,6 @@ import Kingfisher
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var dataManager = DataManager.shared
     @State private var showingServerSettings = false
     @State private var deleteAlertPresented = false
     @State private var cacheSize: String = "Calculating..."

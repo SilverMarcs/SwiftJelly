@@ -5,7 +5,7 @@ import JellyfinAPI
 struct AVMediaPlayerView: View {
     let item: BaseItemDto
     @State private var player: AVPlayer
-    @StateObject private var stateManager: AVPlayerStateManager
+    private var stateManager: AVPlayerStateManager
     
     let startTimeSeconds: Int
     
@@ -14,7 +14,7 @@ struct AVMediaPlayerView: View {
         self.startTimeSeconds = JFAPI.shared.getStartTimeSeconds(for: item)
         let playbackURL = try? JFAPI.shared.getPlaybackURL(for: item)
         
-        self._stateManager = StateObject(wrappedValue: AVPlayerStateManager(item: item))
+        self.stateManager = AVPlayerStateManager(item: item)
         self._player = State(initialValue: AVPlayer(url: playbackURL!))
     }
     

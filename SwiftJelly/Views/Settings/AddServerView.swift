@@ -3,7 +3,7 @@ import JellyfinAPI
 
 struct AddServerView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var dataManager = DataManager.shared
+    private var dataManager = DataManager.shared
     @State private var serverName = ""
     @State private var serverURL = ""
     @State private var username = ""

@@ -7,17 +7,16 @@
 
 import Foundation
 import SwiftUI
-import Combine
 import JellyfinAPI
 
-class DataManager: ObservableObject {
-    @Published var servers: [Server] = []
-    @Published var activeServerID: String?
+@Observable class DataManager {
+    var servers: [Server] = []
+    var activeServerID: String?
     
     static let shared = DataManager()
 
-    private let serversKey = "SavedServers"
-    private let activeServerKey = "ActiveServerID"
+    @ObservationIgnored private let serversKey = "SavedServers"
+    @ObservationIgnored private let activeServerKey = "ActiveServerID"
 
     init() {
         loadServers()
