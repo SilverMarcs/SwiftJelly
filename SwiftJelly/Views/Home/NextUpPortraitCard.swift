@@ -3,19 +3,9 @@ import JellyfinAPI
 
 struct NextUpPortraitCard: View {
     let item: BaseItemDto
-    #if os(macOS)
-    @Environment(\.openWindow) private var openWindow
-    #endif
-    @State private var showPlayer = false
 
     var body: some View {
-        Button {
-            #if os(macOS)
-            openWindow(id: "media-player", value: item)
-            #else
-            showPlayer = true
-            #endif
-        } label: {
+        PlayMediaButton(item: item) {
             VStack(alignment: .leading) {
                 AsyncImage(url: showPortraitURL) { image in
                     image
@@ -42,11 +32,6 @@ struct NextUpPortraitCard: View {
             .frame(width: 144)
         }
         .buttonStyle(.plain)
-        #if !os(macOS)
-        .fullScreenCover(isPresented: $showPlayer) {
-            MediaPlayerView(item: item)
-        }
-        #endif
     }
     
     private var showPortraitURL: URL? {

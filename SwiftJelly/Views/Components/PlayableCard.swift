@@ -10,19 +10,10 @@ import JellyfinAPI
 
 struct PlayableCard: View {
     let item: BaseItemDto
-    #if os(macOS)
-    @Environment(\.openWindow) private var openWindow
-    #endif
     @State private var showPlayer = false
 
     var body: some View {
-        Button {
-            #if os(macOS)
-            openWindow(id: "media-player", value: item)
-            #else
-            showPlayer = true
-            #endif
-        } label: {
+        PlayMediaButton(item: item) {
             VStack(alignment: .leading, spacing: 8) {
                 AsyncImage(url: ImageURLProvider.landscapeImageURL(for: item)) { image in
                     image
@@ -75,10 +66,5 @@ struct PlayableCard: View {
             .frame(width: 270)
         }
         .buttonStyle(.plain)
-        #if !os(macOS)
-        .fullScreenCover(isPresented: $showPlayer) {
-            MediaPlayerView(item: item)
-        }
-        #endif
     }
 }

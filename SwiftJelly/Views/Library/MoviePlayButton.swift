@@ -3,10 +3,6 @@ import JellyfinAPI
 
 struct MoviePlayButton: View {
     let item: BaseItemDto
-    #if os(macOS)
-    @Environment(\.openWindow) private var openWindow
-    #endif
-    @State private var showPlayer = false
 
     private var progress: Double? {
         guard let ticks = item.userData?.playbackPositionTicks, let runtime = item.runTimeTicks, runtime > 0 else { return nil }
@@ -24,13 +20,7 @@ struct MoviePlayButton: View {
     }
 
     var body: some View {
-        Button {
-            #if os(macOS)
-            openWindow(id: "media-player", value: item)
-            #else
-            showPlayer = true
-            #endif
-        } label: {
+        PlayMediaButton(item: item) {
             HStack(spacing: 8) {
                 if item.userData?.isPlayed == true {
                     Image(systemName: "play.fill")
@@ -62,14 +52,6 @@ struct MoviePlayButton: View {
         }
         .buttonBorderShape(.capsule)
         .controlSize(.extraLarge)
-        #if !os(macOS)
-        .fullScreenCover(isPresented: $showPlayer) {
-            MediaPlayerView(item: item)
-        }
         .buttonStyle(.glass)
-        #else
-        .tint(.white)
-        .buttonStyle(.glassProminent)
-        #endif
     }
 }
