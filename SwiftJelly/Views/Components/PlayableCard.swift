@@ -9,7 +9,10 @@ import SwiftUI
 import JellyfinAPI
 
 struct PlayableCard: View {
+    @Environment(\.refresh) var refresh
+    
     let item: BaseItemDto
+    var showNavigationContextMenu: Bool = true
     @State private var showPlayer = false
 
     var body: some View {
@@ -20,7 +23,6 @@ struct PlayableCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(alignment: .bottom) {
                         ZStack(alignment: .bottom) {
-                            // Subtle black-to-transparent gradient for blending
                             LinearGradient(
                                 gradient: Gradient(colors: [Color.black.opacity(0.9), Color.clear]),
                                 startPoint: .bottom,
@@ -63,5 +65,33 @@ struct PlayableCard: View {
             .frame(width: 270)
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            if showNavigationContextMenu {
+                Section {
+                    NavigationLink {
+                        switch item.type {
+                        case .movie:
+                            MovieDetailView(id: item.id ?? "")
+                        case .episode, .series:
+                            ShowDetailView(id: item.seriesID ?? "")
+                        default:
+                            Text("Unsupported item type")
+                        }
+                    } label: {
+                        PlayableItemTypeLabel(item: item)
+                    }
+                }
+            }
+            
+            Button {
+                Task {
+                    try? await JFAPI.shared.toggleItemPlayedStatus(item: item)
+                    await refresh()
+                }
+            } label: {
+                Label(item.userData?.isPlayed == true ? "Mark as Unwatched" : "Mark as Watched",
+                      systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye")
+            }
+        }
     }
 }

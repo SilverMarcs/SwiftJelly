@@ -23,6 +23,7 @@ struct HomeView: View {
                 } else {
                     VStack(spacing: 24) {
                         ContinueWatchingView(items: continueWatchingItems)
+                            .environment(\.refresh, refreshContinueWatching)
                         
                         LatestMediaView(items: latestMovies, header: "Movies")
                         
@@ -69,5 +70,17 @@ struct HomeView: View {
             print(error.localizedDescription)
         }
         isLoading = false
+    }
+
+    private func refreshContinueWatching() async {
+        do {
+            let items = try await JFAPI.shared.loadContinueWatchingSmart()
+            
+            withAnimation {
+                continueWatchingItems = items
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 }

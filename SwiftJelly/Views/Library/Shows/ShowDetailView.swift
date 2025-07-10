@@ -53,8 +53,9 @@ struct ShowDetailView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 15) {
                                 ForEach(episodes) { episode in
-                                    PlayableCard(item: episode)
+                                    PlayableCard(item: episode, showNavigationContextMenu: false)
                                         .id(episode.id)
+                                        .environment(\.refresh, fetchShow)
                                 }
                             }
                             .padding(.horizontal)
