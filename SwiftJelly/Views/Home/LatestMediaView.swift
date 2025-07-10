@@ -18,9 +18,9 @@ struct LatestMediaView: View {
                         NavigationLink {
                             switch item.type {
                             case .movie:
-                                MovieDetailView(movie: item)
+                                MovieDetailView(id: item.id ?? "")
                             case .series:
-                                ShowDetailView(show: item)
+                                ShowDetailView(id: item.id ?? "")
                             default:
                                 Text("Unsupported item type")
                             }

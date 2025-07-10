@@ -33,19 +33,7 @@ struct LibraryItemsView: View {
             } else {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(items) { item in
-                        NavigationLink {
-                            switch item.type {
-                            case .movie:
-                                MovieDetailView(movie: item)
-                            case .series:
-                                ShowDetailView(show: item)
-                            default:
-                                Text("Unsupported item type")
-                            }
-                        } label: {
-                            MediaCard(item: item)
-                        }
-                        .buttonStyle(.plain)
+                        MediaNavigationLink(item: item)
                     }
                 }
                 .scenePadding(.horizontal)
