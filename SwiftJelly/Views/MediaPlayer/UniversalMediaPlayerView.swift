@@ -12,7 +12,8 @@ struct UniversalMediaPlayerView: View {
         if AVPlayerSupportChecker.isSupported(item: item) {
             AVMediaPlayerView(item: item)
         } else {
-            VLCPlayerView(item: item)
+//            VLCPlayerView(item: item)
+            Text("Playing MKV is currently not supported")
         }
     }
 }

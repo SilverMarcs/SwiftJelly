@@ -7,7 +7,6 @@
 
 import SwiftUI
 import JellyfinAPI
-import VLCUI
 
 struct ContinueWatchingView: View {
     let items: [BaseItemDto]
