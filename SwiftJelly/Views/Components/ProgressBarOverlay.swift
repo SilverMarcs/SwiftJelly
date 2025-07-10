@@ -26,9 +26,15 @@ struct ProgressBarOverlay: View {
 private struct ProgressIcon: View {
     let isPlayed: Bool
     var body: some View {
-        Image(systemName: isPlayed ? "checkmark.circle.fill" : "play.fill")
-            .font(.subheadline)
-            .foregroundStyle(isPlayed ? .accent : .white)
+        if isPlayed {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.subheadline)
+                .foregroundStyle(.white, .accent)
+        } else {
+            Image(systemName: "play.fill")
+                .font(.subheadline)
+                .foregroundStyle(.white)
+        }
     }
 }
 

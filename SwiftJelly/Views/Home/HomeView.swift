@@ -23,16 +23,15 @@ struct HomeView: View {
                 } else {
                     VStack(spacing: 24) {
                         ContinueWatchingView(items: continueWatchingItems)
-                            .scenePadding(.horizontal)
                         
                         LatestMediaView(items: latestMovies, header: "Movies")
-                            .scenePadding(.horizontal)
                         
                         LatestMediaView(items: latestShows, header: "Shows")
-                            .scenePadding()
+                            .scenePadding(.bottom)
                     }
                 }
             }
+            .contentMargins(.horizontal, 15)
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {

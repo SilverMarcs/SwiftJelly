@@ -20,11 +20,12 @@ struct SwiftJellyApp: App {
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
             if let item = item {
                 UniversalMediaPlayerView(item: item)
+                    .ignoresSafeArea()
+                    .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             } else {
                 Text("Unable to open player window.")
             }
         }
-        .windowStyle(.hiddenTitleBar)
         .restorationBehavior(.disabled)
         .windowResizability(.contentSize)
         

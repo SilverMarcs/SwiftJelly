@@ -18,9 +18,26 @@ struct AVMediaPlayerView: View {
         self._player = State(initialValue: AVPlayer(url: playbackURL!))
     }
     
+    #if os(macOS)
+    var navigationTitle: String {
+        if let seriesName = item.seriesName {
+            var title = seriesName
+            if let season = item.parentIndexNumber, let episode = item.indexNumber {
+                title += " • S\(season)E\(episode)"
+            }
+            return title
+        } else if let movieTitle = item.name {
+            return movieTitle
+        } else {
+            return "Now Playing"
+        }
+    }
+    #endif
+    
     var body: some View {
         #if os(macOS)
         AVPlayerMac(player: player, startTimeSeconds: startTimeSeconds, stateManager: stateManager)
+            .navigationTitle(navigationTitle)
             .onDisappear {
                 stateManager.stopPlayback()
             }
