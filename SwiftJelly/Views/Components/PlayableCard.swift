@@ -34,6 +34,10 @@ struct PlayableCard: View {
                                 .padding(.horizontal, 8)
                         }
                     }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(.background.quinary, lineWidth: 1)
+                    }
 
                 HStack(alignment: .top) {
                     if let parentTitle = item.seriesName ?? item.album {

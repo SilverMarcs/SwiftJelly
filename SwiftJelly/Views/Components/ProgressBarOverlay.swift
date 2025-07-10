@@ -14,7 +14,10 @@ struct ProgressBarOverlay: View {
     var body: some View {
         HStack(spacing: 12) {
             ProgressIcon(isPlayed: item.userData?.isPlayed ?? false)
+            
             ProgressGauge(progress: item.playbackProgress)
+                .offset(y: 1)
+            
             Text(item.totalDurationString ?? "--")
                 .font(.subheadline)
             Spacer()
@@ -51,6 +54,7 @@ private struct ProgressGauge: View {
             } maximumValueLabel: {
                 EmptyView()
             }
+            .controlSize(.mini)
             .gaugeStyle(.accessoryLinearCapacity)
             .frame(width: 60)
         }

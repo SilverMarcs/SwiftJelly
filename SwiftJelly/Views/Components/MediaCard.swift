@@ -15,7 +15,11 @@ struct MediaCard: View {
         VStack(alignment: .leading, spacing: 8) {
             PortraitImageView(item: item)
                 .aspectRatio(2/3, contentMode: .fill)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(.background.quinary, lineWidth: 1)
+                }
                 .overlay(alignment: .topTrailing) {
                     if item.userData?.isPlayed ?? false {
                         Image(systemName: "checkmark.circle.fill")

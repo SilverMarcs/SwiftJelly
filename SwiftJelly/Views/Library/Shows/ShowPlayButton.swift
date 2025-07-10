@@ -57,6 +57,7 @@ struct ShowPlayButton: View {
                                 EmptyView()
                             }
                             .gaugeStyle(.accessoryLinearCapacity)
+                            .controlSize(.mini)
                             .frame(width: 40)
                         }
                         if let remaining = episode.timeRemainingString {
