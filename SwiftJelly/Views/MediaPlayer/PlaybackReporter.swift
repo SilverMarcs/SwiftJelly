@@ -1,54 +1,29 @@
 //
-//  PlaybackSessionManager.swift
+//  PlaybackReporter.swift
 //  SwiftJelly
 //
-//  Created by Zabir Raihan on 29/06/2025.
+//  Created by Zabir Raihan on 10/07/2025.
 //
 
 import Foundation
 import JellyfinAPI
-import Combine
 
-/// Manages playback session reporting to Jellyfin server
-class PlaybackSessionManager: ObservableObject {
-    @Published private(set) var playSessionID: String = ""
-    @Published private(set) var hasSentStart: Bool = false
+/// Handles playback session reporting to Jellyfin server
+class PlaybackReporter {
+    let playSessionID: String
     private let item: BaseItemDto
-
+    private var hasSentStart: Bool = false
+    
     init(item: BaseItemDto) {
         self.item = item
         self.playSessionID = JFAPI.shared.generatePlaySessionID()
     }
-
-    // MARK: - Public Methods
-
+    
     /// Starts the playback session and sends start report
-    func startPlayback(at positionSeconds: Int) {
+    func reportStart(positionSeconds: Int) {
         guard !hasSentStart else { return }
         hasSentStart = true
-        sendStartReport(positionSeconds: positionSeconds)
-    }
-
-    /// Reports playback pause
-    func pausePlayback(at positionSeconds: Int) {
-        sendPauseReport(positionSeconds: positionSeconds)
-    }
-
-    /// Reports playback resume
-    func resumePlayback(at positionSeconds: Int) {
-        sendResumeReport(positionSeconds: positionSeconds)
-    }
-
-    /// Reports playback stop and cleans up session
-    func stopPlayback(at positionSeconds: Int) {
-        if hasSentStart {
-            sendStopReport(positionSeconds: positionSeconds)
-        }
-    }
-    
-    // MARK: - Private Methods
-    
-    private func sendStartReport(positionSeconds: Int) {
+        
         Task {
             do {
                 try await JFAPI.shared.reportPlaybackStart(
@@ -62,7 +37,10 @@ class PlaybackSessionManager: ObservableObject {
         }
     }
     
-    private func sendPauseReport(positionSeconds: Int) {
+    /// Reports playback pause
+    func reportPause(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        
         Task {
             do {
                 try await JFAPI.shared.reportPlaybackProgress(
@@ -77,7 +55,10 @@ class PlaybackSessionManager: ObservableObject {
         }
     }
     
-    private func sendResumeReport(positionSeconds: Int) {
+    /// Reports playback resume
+    func reportResume(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        
         Task {
             do {
                 try await JFAPI.shared.reportPlaybackProgress(
@@ -92,7 +73,10 @@ class PlaybackSessionManager: ObservableObject {
         }
     }
     
-    private func sendStopReport(positionSeconds: Int) {
+    /// Reports playback stop
+    func reportStop(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        
         Task {
             do {
                 try await JFAPI.shared.reportPlaybackStopped(
@@ -106,5 +90,7 @@ class PlaybackSessionManager: ObservableObject {
         }
     }
     
-    // No periodic reporting or progress task anymore
+    var hasStarted: Bool {
+        hasSentStart
+    }
 }

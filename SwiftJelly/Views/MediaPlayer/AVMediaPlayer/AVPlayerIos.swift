@@ -11,6 +11,7 @@ import AVKit
 struct AVPlayerIos: UIViewControllerRepresentable {
     let player: AVPlayer
     let startTimeSeconds: Int
+    let stateManager: AVPlayerStateManager
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
@@ -19,6 +20,10 @@ struct AVPlayerIos: UIViewControllerRepresentable {
         controller.exitsFullScreenWhenPlaybackEnds = true
         controller.modalPresentationStyle = .fullScreen
         controller.allowsPictureInPicturePlayback = true
+        
+        // Set up state manager
+        stateManager.setPlayer(player)
+        
         return controller
     }
     
@@ -26,9 +31,5 @@ struct AVPlayerIos: UIViewControllerRepresentable {
         let time = CMTime(seconds: Double(startTimeSeconds), preferredTimescale: 1)
         uiViewController.player?.seek(to: time)
         uiViewController.player?.play()
-        // Enter fullscreen if not already
-//        if let presented = uiViewController.presentedViewController as? AVPlayerViewController, !presented.isBeingPresented {
-//            uiViewController.present(presented, animated: true)
-//        }
     }
 }

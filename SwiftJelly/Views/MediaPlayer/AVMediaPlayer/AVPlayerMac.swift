@@ -11,6 +11,7 @@ import AVKit
 struct AVPlayerMac: NSViewRepresentable {
     let player: AVPlayer
     let startTimeSeconds: Int
+    let stateManager: AVPlayerStateManager
     
     func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
@@ -18,6 +19,10 @@ struct AVPlayerMac: NSViewRepresentable {
         view.controlsStyle = .floating
         view.allowsPictureInPicturePlayback = true
         view.showsFullScreenToggleButton = true
+        
+        // Set up state manager
+        stateManager.setPlayer(player)
+        
         return view
     }
     

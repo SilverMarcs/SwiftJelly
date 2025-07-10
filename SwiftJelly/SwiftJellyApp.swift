@@ -11,12 +11,9 @@ import Kingfisher
 
 @main
 struct SwiftJellyApp: App {
-//    @StateObject private var dataManager = DataManager.shared
-    
     var body: some Scene {
         WindowGroup {
             ContentView()
-//                .environmentObject(dataManager)
         }
         
         #if os(macOS)
@@ -39,7 +36,7 @@ struct SwiftJellyApp: App {
     
     init() {
         ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 60 // 60 MB
-        ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 200 // 300 MB
-        ImageCache.default.diskStorage.config.expiration = .days(2) // 2 day
+        ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 200 // 200 MB
+        ImageCache.default.diskStorage.config.expiration = .days(5) // 5 day
     }
 }
