@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 import VLCUI
 
-struct MediaPlayerInfoBar: View {
+struct VLCPlayerInfoBar: View {
     let item: BaseItemDto
     let proxy: VLCVideoPlayer.Proxy
     let playbackInfo: VLCVideoPlayer.PlaybackInformation?
@@ -34,7 +34,7 @@ struct MediaPlayerInfoBar: View {
             
             Spacer()
             
-            SubtitlePicker(subtitleManager: subtitleManager)
+            VLCSubtitlePicker(subtitleManager: subtitleManager)
             
 //            AudioTrackPicker(proxy: proxy, tracks: playbackInfo?.audioTracks ?? [], selected: playbackInfo?.currentAudioTrack)
         }

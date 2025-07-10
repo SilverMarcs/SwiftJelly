@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 import VLCUI
 
-struct MediaPlayerOverlays: ViewModifier {
+struct VLCPlayerOverlays: ViewModifier {
     @Environment(\.dismiss) var dismiss
     @Binding var controlsVisible: Bool
     let item: BaseItemDto
@@ -24,7 +24,7 @@ struct MediaPlayerOverlays: ViewModifier {
             }
             .overlay(alignment: .center) {
                 if controlsVisible {
-                    MediaPlayerControls(
+                    VLCPlayerControls(
                         playbackState: playbackState,
                         proxy: proxy
                     )
@@ -33,13 +33,13 @@ struct MediaPlayerOverlays: ViewModifier {
             .overlay(alignment: .bottom) {
                 if controlsVisible {
                     VStack {
-                        MediaPlayerInfoBar(
+                        VLCPlayerInfoBar(
                             item: item,
                             proxy: proxy,
                             playbackInfo: playbackInfo,
                             subtitleManager: subtitleManager
                         )
-                        MediaPlayerProgressBar(
+                        VLCPlayerProgressBar(
                             playbackState: playbackState,
                             proxy: proxy
                         )
@@ -72,7 +72,7 @@ extension View {
         playbackInfo: VLCVideoPlayer.PlaybackInformation?,
         subtitleManager: SubtitleManager,
     ) -> some View {
-        self.modifier(MediaPlayerOverlays(
+        self.modifier(VLCPlayerOverlays(
             controlsVisible: controlsVisible,
             item: item,
             proxy: proxy,

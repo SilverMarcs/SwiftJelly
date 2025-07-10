@@ -17,7 +17,7 @@ struct UniversalMediaPlayerView: View {
             if AVPlayerSupportChecker.isSupported(item: item, url: url) {
                 AVMediaPlayerView(item: item, startTimeSeconds: startTimeSeconds)
             } else {
-                MediaPlayerView(item: item)
+                VLCPlayerView(item: item)
             }
         } else {
             Text("Unable to play this item.")

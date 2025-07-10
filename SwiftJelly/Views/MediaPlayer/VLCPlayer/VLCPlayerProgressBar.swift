@@ -9,7 +9,7 @@ import SwiftUI
 import VLCUI
 
 /// Reusable media player progress bar with time labels and seek slider
-struct MediaPlayerProgressBar: View {
+struct VLCPlayerProgressBar: View {
     @ObservedObject var playbackState: PlaybackStateManager
     var proxy: VLCVideoPlayer.Proxy
 

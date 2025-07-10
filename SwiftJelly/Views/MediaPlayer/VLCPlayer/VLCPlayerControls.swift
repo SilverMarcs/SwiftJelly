@@ -9,7 +9,7 @@ import SwiftUI
 import VLCUI
 
 /// Reusable media player control buttons (play/pause, seek forward/backward)
-struct MediaPlayerControls: View {
+struct VLCPlayerControls: View {
     @ObservedObject var playbackState: PlaybackStateManager
     var proxy: VLCVideoPlayer.Proxy
 

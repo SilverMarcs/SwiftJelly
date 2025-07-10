@@ -1,7 +1,7 @@
 import SwiftUI
 import VLCUI
 
-struct MediaPlayerKeyboardShortcuts: ViewModifier {
+struct VLCPlayerKeyboardShortcuts: ViewModifier {
     let playbackState: PlaybackStateManager
     let proxy: VLCVideoPlayer.Proxy
     
@@ -31,7 +31,7 @@ extension View {
         playbackState: PlaybackStateManager,
         proxy: VLCVideoPlayer.Proxy
     ) -> some View {
-        modifier(MediaPlayerKeyboardShortcuts(
+        modifier(VLCPlayerKeyboardShortcuts(
             playbackState: playbackState,
             proxy: proxy
         ))

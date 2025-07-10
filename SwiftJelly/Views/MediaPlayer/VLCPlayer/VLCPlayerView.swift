@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 import VLCUI
 
-struct MediaPlayerView: View {
+struct VLCPlayerView: View {
     let item: BaseItemDto
 
     @State private var proxy: VLCVideoPlayer.Proxy = .init()

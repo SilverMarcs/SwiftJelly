@@ -1,7 +1,7 @@
 import SwiftUI
 import VLCUI
 
-struct SubtitlePicker: View {
+struct VLCSubtitlePicker: View {
     @ObservedObject var subtitleManager: SubtitleManager
     
     private var allSubtitles: [Subtitle] {
