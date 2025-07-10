@@ -32,7 +32,7 @@ struct MediaPlayerControls: View {
                 }
             } label: {
                 Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
-                    .contentTransition(.symbolEffect(.replace))
+//                    .contentTransition(.symbolEffect(.replace))
                     .font(.system(size: 40))
                     .padding(15)
 //                    .contentShape(Rectangle())

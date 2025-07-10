@@ -48,7 +48,7 @@ struct LibraryItemsView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding()
+                .scenePadding(.horizontal)
             }
         }
         .navigationTitle(library.name ?? "Library")
