@@ -22,6 +22,10 @@ struct ShowDetailView: View {
                     }
                 }
                 .backgroundExtensionEffect()
+                .overlay(alignment: .bottomLeading) {
+                    ShowPlayButton(show: show, episodes: episodes)
+                        .padding(16)
+                }
                 
                 VStack(alignment: .leading, spacing: 12) {
                     if let overview = show.overview {

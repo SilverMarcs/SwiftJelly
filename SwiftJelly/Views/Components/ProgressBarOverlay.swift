@@ -13,42 +13,40 @@ struct ProgressBarOverlay: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            if item.userData?.isPlayed == true {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.subheadline)
-                    .foregroundStyle(.accent)
-                if let progress = item.playbackProgress, progress > 0, progress < 1 {
-                    ProgressView(value: progress)
-                        .controlSize(.small)
-                        .frame(width: 60)
-                }
-                Text(item.totalDurationString ?? "--")
-                    .font(.subheadline)
-                
-            } else {
-                Image(systemName: "play.fill")
-                    .font(.subheadline)
-                
-                if let progress = item.playbackProgress, progress > 0, progress < 1 {
-                    ProgressView(value: progress)
-                        .controlSize(.small)
-                        .frame(width: 60)
-                }
-                
-                Text(item.totalDurationString ?? "--")
-                    .font(.subheadline)
-            }
-            
+            ProgressIcon(isPlayed: item.userData?.isPlayed ?? false)
+            ProgressGauge(progress: item.playbackProgress)
+            Text(item.totalDurationString ?? "--")
+                .font(.subheadline)
             Spacer()
-            
-//            Button(action: {}) {
-//                Image(systemName: "ellipsis")
-//                    .font(.title3)
-//                    .foregroundStyle(.primary)
-//                    .contentShape(.rect)
-//            }
-//            .buttonStyle(.plain)
         }
         .foregroundStyle(.white)
+    }
+}
+
+private struct ProgressIcon: View {
+    let isPlayed: Bool
+    var body: some View {
+        Image(systemName: isPlayed ? "checkmark.circle.fill" : "play.fill")
+            .font(.subheadline)
+            .foregroundStyle(isPlayed ? .accent : .white)
+    }
+}
+
+private struct ProgressGauge: View {
+    let progress: Double?
+    var body: some View {
+        if let progress, progress > 0, progress < 1 {
+            Gauge(value: progress) {
+                EmptyView()
+            } currentValueLabel: {
+                EmptyView()
+            } minimumValueLabel: {
+                EmptyView()
+            } maximumValueLabel: {
+                EmptyView()
+            }
+            .gaugeStyle(.accessoryLinearCapacity)
+            .frame(width: 60)
+        }
     }
 }
