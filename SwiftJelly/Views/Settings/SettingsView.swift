@@ -20,31 +20,9 @@ struct SettingsView: View {
             Form {
                 Section("Server") {
                     NavigationLink {
-                        ServerSettingsView()
+                        ServerList()
                     } label: {
-                        HStack {
-                            Label {
-                                if let server = dataManager.server {
-                                    Text("\(server.name)")
-                                    Text(server.url.absoluteString)
-                                } else {
-                                    Text("Configure Server")
-                                }
-                                
-                            } icon: {
-                                Image(systemName: "server.rack")
-                            }
-                            
-                            Spacer()
-                            
-                            if dataManager.isAuthenticated {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
-                            } else {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.red)
-                            }
-                        }
+                        Label("Servers", systemImage: "server.rack")
                     }
                 }
 
@@ -71,6 +49,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .scrollDisabled(true)
             .task {
                 calculateCacheSize()
             }

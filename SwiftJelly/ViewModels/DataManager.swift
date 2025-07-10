@@ -11,54 +11,59 @@ import Combine
 import JellyfinAPI
 
 class DataManager: ObservableObject {
-    @Published var server: Server?
-
+    @Published var servers: [Server] = []
+    @Published var activeServerID: String?
+    
     static let shared = DataManager()
 
-    private let serverKey = "SavedServer"
+    private let serversKey = "SavedServers"
+    private let activeServerKey = "ActiveServerID"
 
     init() {
-        loadServer()
+        loadServers()
     }
 
-    func setServer(_ server: Server) {
-        self.server = server
-        saveServer()
+    var server: Server? {
+        servers.first(where: { $0.id == activeServerID })
     }
 
-    func updateServer(_ updatedServer: Server) {
-        self.server = updatedServer
-        saveServer()
+    func addServer(_ server: Server) {
+        servers.append(server)
+        saveServers()
     }
 
-    func clearServer() {
-        self.server = nil
-        UserDefaults.standard.removeObject(forKey: serverKey)
-    }
-
-    func authenticateServer(username: String, accessToken: String, jellyfinUserID: String) {
-        guard var currentServer = server else { return }
-        currentServer.username = username
-        currentServer.accessToken = accessToken
-        currentServer.jellyfinUserID = jellyfinUserID
-        updateServer(currentServer)
-    }
-
-    var isAuthenticated: Bool {
-        return server?.isAuthenticated ?? false
-    }
-
-    private func loadServer() {
-        if let data = UserDefaults.standard.data(forKey: serverKey),
-           let server = try? JSONDecoder().decode(Server.self, from: data) {
-            self.server = server
+    func updateServer(_ server: Server) {
+        if let idx = servers.firstIndex(where: { $0.id == server.id }) {
+            servers[idx] = server
+            saveServers()
         }
     }
 
-    private func saveServer() {
-        if let server = server,
-           let data = try? JSONEncoder().encode(server) {
-            UserDefaults.standard.set(data, forKey: serverKey)
+    func deleteServer(_ server: Server) {
+        servers.removeAll { $0.id == server.id }
+        if activeServerID == server.id {
+            activeServerID = servers.first?.id
         }
+        saveServers()
+    }
+
+    func selectServer(_ server: Server) {
+        activeServerID = server.id
+        saveServers()
+    }
+
+    private func loadServers() {
+        if let data = UserDefaults.standard.data(forKey: serversKey),
+           let decoded = try? JSONDecoder().decode([Server].self, from: data) {
+            self.servers = decoded
+        }
+        self.activeServerID = UserDefaults.standard.string(forKey: activeServerKey) ?? servers.first?.id
+    }
+
+    private func saveServers() {
+        if let data = try? JSONEncoder().encode(servers) {
+            UserDefaults.standard.set(data, forKey: serversKey)
+        }
+        UserDefaults.standard.set(activeServerID, forKey: activeServerKey)
     }
 }
