@@ -18,8 +18,7 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, minHeight: 200)
+
                 } else {
                     VStack(spacing: 24) {
                         ContinueWatchingView(items: continueWatchingItems)

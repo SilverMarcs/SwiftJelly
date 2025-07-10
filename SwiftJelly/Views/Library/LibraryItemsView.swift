@@ -28,8 +28,7 @@ struct LibraryItemsView: View {
     var body: some View {
         ScrollView {
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                UniversalProgressView()
             } else {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(items) { item in

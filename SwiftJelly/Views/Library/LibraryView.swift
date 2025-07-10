@@ -20,8 +20,7 @@ struct LibraryView: View {
         NavigationStack {
             ScrollView {
                 if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, minHeight: 200)
+                    UniversalProgressView()
                 }
 
                 if !libraries.isEmpty && !isLoading {

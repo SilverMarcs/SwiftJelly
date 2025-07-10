@@ -20,7 +20,13 @@ struct ProgressBarOverlay: View {
             
             Text(item.totalDurationString ?? "--")
                 .font(.subheadline)
+            
             Spacer()
+            
+            if let season = item.parentIndexNumber, let episode = item.indexNumber {
+                Text("S\(season)E\(episode)")
+                    .font(.subheadline)
+            }
         }
         .foregroundStyle(.white)
     }

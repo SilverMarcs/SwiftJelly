@@ -46,8 +46,7 @@ struct MovieDetailView: View {
                 }
                 .scenePadding(.bottom)
             } else if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                UniversalProgressView()
             }
         }
         .ignoresSafeArea(edges: .top)

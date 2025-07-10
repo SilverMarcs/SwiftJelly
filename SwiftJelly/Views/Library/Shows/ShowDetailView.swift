@@ -53,7 +53,7 @@ struct ShowDetailView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 15) {
                                 ForEach(episodes) { episode in
-                                    PlayableCard(item: episode, showNavigationContextMenu: false)
+                                    PlayableCard(item: episode, showNavigation: false)
                                         .id(episode.id)
                                         .environment(\.refresh, fetchShow)
                                 }
@@ -68,8 +68,7 @@ struct ShowDetailView: View {
                 .scenePadding(.bottom)
                 
             } else if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                UniversalProgressView()
             }
         }
         .ignoresSafeArea(edges: .top)
