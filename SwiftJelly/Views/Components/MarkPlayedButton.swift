@@ -3,12 +3,7 @@ import JellyfinAPI
 
 struct MarkPlayedButton: View {
     let item: BaseItemDto
-    @State private var isPlayed: Bool
-    
-    init(item: BaseItemDto) {
-        self.item = item
-        self._isPlayed = State(initialValue: item.userData?.isPlayed == true)
-    }
+    @Environment(\.refresh) private var refresh
     
     var body: some View {
         Button {
@@ -18,16 +13,14 @@ struct MarkPlayedButton: View {
         } label: {
             Image(systemName: "checkmark")
                 .font(.title2)
-                .foregroundStyle(isPlayed ? .accent : .secondary)
+                .foregroundStyle((item.userData?.isPlayed == true) ? .accent : .secondary)
         }
     }
     
     private func togglePlayedStatus() async {
         do {
             try await JFAPI.shared.toggleItemPlayedStatus(item: item)
-            await MainActor.run {
-                isPlayed.toggle()
-            }
+            await refresh()
         } catch {
             print("Error toggling played status: \(error)")
         }

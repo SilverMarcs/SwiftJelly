@@ -26,6 +26,7 @@ struct ShowDetailView: View {
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         ShowPlayButton(show: show, episodes: episodes)
+                            .environment(\.refresh, fetchShow)
                             .padding(16)
                     }
                     
@@ -35,10 +36,7 @@ struct ShowDetailView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
-                    }
-                    .padding(.horizontal)
                     
-                    VStack(alignment: .leading, spacing: 12) {
                         if !seasons.isEmpty {
                             Picker("Season", selection: $selectedSeason) {
                                 ForEach(seasons) { season in
@@ -47,26 +45,27 @@ struct ShowDetailView: View {
                             }
                             .labelsHidden()
                             .pickerStyle(.segmented)
-                            .padding(.horizontal)
-                        }
-
-                        if !episodes.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 15) {
-                                    ForEach(episodes) { episode in
-                                        PlayableCard(item: episode)
-                                            .id(episode.id)
-                                    }
-                                }
-                                .padding(.horizontal)
-                                .padding(.bottom)
-                                .scrollTargetLayout()
-                            }
-                            .scrollPosition($episodeScrollPosition)
                         }
                     }
+                    .scenePadding(.horizontal)
+
+                    if !episodes.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(episodes) { episode in
+                                    PlayableCard(item: episode)
+                                        .id(episode.id)
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.bottom)
+                            .scrollTargetLayout()
+                        }
+                        .scrollPosition($episodeScrollPosition)
+                    }
                 }
-                    .scenePadding(.bottom)
+                .scenePadding(.bottom)
+                
             } else if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -85,6 +84,9 @@ struct ShowDetailView: View {
             }
         }
         .task {
+            await fetchShow()
+        }
+        .refreshable {
             await fetchShow()
         }
         .task(id: selectedSeason) {

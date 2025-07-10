@@ -21,6 +21,7 @@ struct MovieDetailView: View {
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         MoviePlayButton(item: movie)
+                            .environment(\.refresh, fetchMovie)
                             .padding(16)
                     }
                 
@@ -41,8 +42,9 @@ struct MovieDetailView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    .padding(.horizontal)
+                    .scenePadding(.horizontal)
                 }
+                .scenePadding(.bottom)
             } else if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -61,6 +63,9 @@ struct MovieDetailView: View {
             }
         }
         .task {
+            await fetchMovie()
+        }
+        .refreshable {
             await fetchMovie()
         }
     }
