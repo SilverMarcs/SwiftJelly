@@ -20,7 +20,6 @@ struct ContinueWatchingView: View {
                         PlayableCard(item: item)
                     }
                 }
-                .scenePadding(.horizontal)
             }
         }
     }

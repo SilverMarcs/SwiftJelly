@@ -1,19 +1,20 @@
 import SwiftUI
 import JellyfinAPI
+import Kingfisher
 
 struct PortraitImageView: View {
     let item: BaseItemDto
     
     var body: some View {
-        AsyncImage(url: ImageURLProvider.portraitImageURL(for: item)) { image in
-            image
-                .resizable()
-                .aspectRatio(2/3, contentMode: .fill)
-        } placeholder: {
-            RoundedRectangle(cornerRadius: 8)
-                .overlay {
-                    ProgressView()
-                }
-        }
+        KFImage(ImageURLProvider.portraitImageURL(for: item))
+            .placeholder {
+                Rectangle()
+                    .fill(.background.secondary)
+                    .overlay {
+                        ProgressView()
+                    }
+            }
+            .resizable()
+            .aspectRatio(2/3, contentMode: .fill)
     }
 }

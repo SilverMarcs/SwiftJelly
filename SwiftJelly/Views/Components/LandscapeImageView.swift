@@ -7,18 +7,21 @@
 
 import SwiftUI
 import JellyfinAPI
+import Kingfisher
 
 struct LandscapeImageView: View {
     let item: BaseItemDto
     
     var body: some View {
-        AsyncImage(url: ImageURLProvider.landscapeImageURL(for: item)) { image in
-            image
-                .resizable()
-                .aspectRatio(16/9, contentMode: .fill)
-        } placeholder: {
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
+        KFImage(ImageURLProvider.landscapeImageURL(for: item))
+            .placeholder {
+                Rectangle()
+                    .fill(.background.secondary)
+                    .overlay {
+                        ProgressView()
+                    }
+            }
+            .resizable()
+            .aspectRatio(16/9, contentMode: .fill)
     }
 }

@@ -15,13 +15,12 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    if isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, minHeight: 200)
-                    } else {
-                        ContinueWatchingView(items: continueWatchingItems)
-                    }
+                if isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                } else {
+                    ContinueWatchingView(items: continueWatchingItems)
+                        .scenePadding(.horizontal)
                 }
             }
             .navigationTitle("Home")

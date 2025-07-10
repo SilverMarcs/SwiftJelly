@@ -7,15 +7,16 @@
 
 import SwiftUI
 import JellyfinAPI
+import Kingfisher
 
 @main
 struct SwiftJellyApp: App {
-    @StateObject private var dataManager = DataManager.shared
+//    @StateObject private var dataManager = DataManager.shared
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(dataManager)
+//                .environmentObject(dataManager)
         }
         
         #if os(macOS)
@@ -34,5 +35,11 @@ struct SwiftJellyApp: App {
 //            SettingsView()
 //        }
         #endif
+    }
+    
+    init() {
+        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 60 // 60 MB
+        ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 200 // 300 MB
+        ImageCache.default.diskStorage.config.expiration = .days(2) // 2 day
     }
 }
