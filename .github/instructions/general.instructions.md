@@ -1,3 +1,6 @@
+---
+applyTo: '**'
+---
 No need to run xcode build
 Use latest swift and swiftui
 for exampel prefer navigationstack insted of navigationview.

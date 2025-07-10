@@ -10,6 +10,8 @@ import JellyfinAPI
 
 struct HomeView: View {
     @State private var continueWatchingItems: [BaseItemDto] = []
+    @State private var latestMovies: [BaseItemDto] = []
+    @State private var latestShows: [BaseItemDto] = []
     @State private var isLoading = false
 
     var body: some View {
@@ -19,8 +21,16 @@ struct HomeView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 200)
                 } else {
-                    ContinueWatchingView(items: continueWatchingItems)
-                        .scenePadding(.horizontal)
+                    VStack(spacing: 24) {
+                        ContinueWatchingView(items: continueWatchingItems)
+                            .scenePadding(.horizontal)
+                        
+                        LatestMediaView(items: latestMovies, header: "Movies")
+                            .scenePadding(.horizontal)
+                        
+                        LatestMediaView(items: latestShows, header: "Shows")
+                            .scenePadding()
+                    }
                 }
             }
             .navigationTitle("Home")
@@ -40,7 +50,7 @@ struct HomeView: View {
                 await loadAll()
             }
             .task {
-                if continueWatchingItems.isEmpty {
+                if continueWatchingItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
                     await loadAll()
                 }
             }
@@ -49,9 +59,13 @@ struct HomeView: View {
 
     private func loadAll() async {
         isLoading = true
+        async let continueWatching = JFAPI.shared.loadContinueWatchingSmart()
+        async let allItems = JFAPI.shared.loadRecentlyAddedItems(limit: 10)
         do {
-            let items = try await JFAPI.shared.loadContinueWatchingSmart()
-            continueWatchingItems = items
+            continueWatchingItems = try await continueWatching
+            let items = try await allItems
+            latestMovies = Array(items.filter { $0.type == .movie }.prefix(5))
+            latestShows = Array(items.filter { $0.type == .series }.prefix(5))
         } catch {
             print(error.localizedDescription)
         }
