@@ -50,13 +50,15 @@ struct SettingsView: View {
 
                 Section("Images") {
                     LabeledContent {
-                        Button {
+                        Button(role: .destructive) {
                             deleteAlertPresented = true
                         } label: {
                             Text("Delete")
                         }
+                        .tint(.red)
+                        .buttonStyle(.borderedProminent)
                     } label: {
-                        Label("Image Cache (\(cacheSize)", systemImage: "trash")
+                        Label("Image Cache (\(cacheSize))", systemImage: "trash")
                     }
                     .alert("Clear Image Cache", isPresented: $deleteAlertPresented) {
                         Button("Clear", role: .destructive) {
