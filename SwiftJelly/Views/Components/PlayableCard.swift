@@ -31,8 +31,8 @@ struct PlayableCard: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         
                         ProgressBarOverlay(item: item)
-                            .padding(.bottom, 6)
-                            .padding(.horizontal, 8)
+                            .padding(.horizontal, 10)
+                            .padding(.bottom, 8)
                     }
                 }
                 .overlay {

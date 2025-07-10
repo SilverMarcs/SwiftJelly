@@ -30,20 +30,12 @@ struct MediaCard: View {
                     }
                 }
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.name ?? "Unknown")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .multilineTextAlignment(.leading)
-                
-                if let year = item.productionYear {
-                    Text("\(String(year))")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Text(item.name ?? "Unknown")
+                .font(.caption)
+                .fontWeight(.medium)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .multilineTextAlignment(.leading)
         }
     }
 }
