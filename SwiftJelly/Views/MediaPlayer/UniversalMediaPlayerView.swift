@@ -15,7 +15,7 @@ struct UniversalMediaPlayerView: View {
     var body: some View {
         if let url = playbackURL {
             if AVPlayerSupportChecker.isSupported(item: item, url: url) {
-                AVMediaPlayerView(url: url, startTimeSeconds: startTimeSeconds)
+                AVMediaPlayerView(item: item, startTimeSeconds: startTimeSeconds)
             } else {
                 MediaPlayerView(item: item)
             }

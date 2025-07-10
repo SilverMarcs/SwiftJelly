@@ -3,14 +3,15 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerView: View {
-    let url: URL
+    let item: BaseItemDto
     let startTimeSeconds: Int
     @State private var player: AVPlayer
     
-    init(url: URL, startTimeSeconds: Int) {
-        self.url = url
+    init(item: BaseItemDto, startTimeSeconds: Int) {
+        self.item = item
         self.startTimeSeconds = startTimeSeconds
-        self._player = State(initialValue: AVPlayer(url: url))
+        let playbackURL = try? JFAPI.shared.getPlaybackURL(for: item)
+        self._player = State(initialValue: AVPlayer(url: playbackURL!))
     }
     
     var body: some View {
