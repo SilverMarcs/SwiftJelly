@@ -42,9 +42,7 @@ struct MovieDetailView: View {
                 .padding(.horizontal)
             }
         }
-//        #if os(macOS)
         .ignoresSafeArea(edges: .top)
-//        #endif
         .navigationTitle(movie.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
     }

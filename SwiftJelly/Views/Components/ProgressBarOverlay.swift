@@ -17,25 +17,25 @@ struct ProgressBarOverlay: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.subheadline)
                     .foregroundStyle(.accent)
-                if let progress = progressPercentage, progress > 0, progress < 1 {
+                if let progress = item.playbackProgress, progress > 0, progress < 1 {
                     ProgressView(value: progress)
                         .controlSize(.small)
                         .frame(width: 60)
                 }
-                Text(item.runTimeTicks != nil ? formatDuration(item.runTimeTicks!) : "--")
+                Text(item.totalDurationString ?? "--")
                     .font(.subheadline)
                 
             } else {
                 Image(systemName: "play.fill")
                     .font(.subheadline)
                 
-                if let progress = progressPercentage, progress > 0, progress < 1 {
+                if let progress = item.playbackProgress, progress > 0, progress < 1 {
                     ProgressView(value: progress)
                         .controlSize(.small)
                         .frame(width: 60)
                 }
                 
-                Text(item.runTimeTicks != nil ? formatDuration(item.runTimeTicks!) : "--")
+                Text(item.totalDurationString ?? "--")
                     .font(.subheadline)
             }
             
@@ -50,19 +50,5 @@ struct ProgressBarOverlay: View {
 //            .buttonStyle(.plain)
         }
         .foregroundStyle(.white)
-    }
-    
-    private func formatDuration(_ ticks: Int) -> String {
-        let seconds = ticks / 10_000_000
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute]
-        formatter.unitsStyle = .abbreviated
-        return formatter.string(from: TimeInterval(seconds)) ?? "--"
-    }
-
-    private var progressPercentage: Double? {
-        guard let ticks = item.userData?.playbackPositionTicks, let runtime = item.runTimeTicks, runtime > 0 else { return nil }
-        let percent = Double(ticks) / Double(runtime)
-        return percent > 1 ? 1 : percent
     }
 }
