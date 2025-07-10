@@ -10,7 +10,8 @@ import SwiftUI
 struct UniversalProgressView: View {
     var body: some View {
         ProgressView()
-            .frame(maxWidth: .infinity, minHeight: 200)
+            .controlSize(.large)
+            .fullScreenFrame()
     }
 }
 

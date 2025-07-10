@@ -12,42 +12,19 @@ struct LibraryItemsView: View {
     let library: BaseItemDto
     @State private var items: [BaseItemDto] = []
     @State private var isLoading = false
-
-    private static var defaultSize: CGFloat {
-        #if os(macOS)
-        140
-        #else
-        105
-        #endif
-    }
-
-    private let columns = [
-        GridItem(.adaptive(minimum: defaultSize), spacing: 12)
-    ]
     
     var body: some View {
-        ScrollView {
-            if isLoading {
-                UniversalProgressView()
-            } else {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(items) { item in
-                        MediaNavigationLink(item: item)
-                    }
+        MediaGrid(items: items, isLoading: isLoading)
+            .navigationTitle(library.name ?? "Library")
+            .toolbarTitleDisplayMode(.inline)
+            .task {
+                if items.isEmpty {
+                    await loadItems()
                 }
-                .scenePadding(.horizontal)
             }
-        }
-        .navigationTitle(library.name ?? "Library")
-        .toolbarTitleDisplayMode(.inline)
-        .task {
-            if items.isEmpty {
+            .refreshable {
                 await loadItems()
             }
-        }
-        .refreshable {
-            await loadItems()
-        }
     }
 
     private func loadItems() async {

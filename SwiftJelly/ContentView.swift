@@ -27,7 +27,7 @@ struct ContentView: View {
             #endif
             
             Tab(value: .search, role: .search) {
-                Text("TBI")
+                SearchView()
             }
         }
         .tabViewStyle(.sidebarAdaptable)
