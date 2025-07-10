@@ -6,34 +6,32 @@ struct ShowPlayButton: View {
     let episodes: [BaseItemDto]
 
     private var nextEpisode: BaseItemDto? {
-        // Find the latest episode with progress
-        let sorted = episodes.sorted { (a, b) in
-            let aTicks = a.userData?.playbackPositionTicks ?? 0
-            let bTicks = b.userData?.playbackPositionTicks ?? 0
-            if aTicks > 0 && bTicks > 0 {
-                // Both have progress, pick the latest played
-                return (a.userData?.lastPlayedDate ?? .distantPast) > (b.userData?.lastPlayedDate ?? .distantPast)
-            } else if aTicks > 0 {
-                return true
-            } else if bTicks > 0 {
-                return false
-            } else {
-                // Neither has progress, sort by episode number
-                return (a.indexNumber ?? 0) < (b.indexNumber ?? 0)
-            }
+        // Sort episodes by episode number for proper order
+        let sortedEpisodes = episodes.sorted { (a, b) in
+            (a.indexNumber ?? 0) < (b.indexNumber ?? 0)
         }
-        if let lastWatched = sorted.first(where: { ($0.userData?.playbackPositionTicks ?? 0) > 0 }) {
-            // If fully watched, go to next
-            if let idx = episodes.firstIndex(where: { $0.id == lastWatched.id }) {
-                if let progress = lastWatched.playbackProgress, progress >= 0.95, idx + 1 < episodes.count {
-                    return episodes[idx + 1]
-                } else {
-                    return lastWatched
-                }
-            }
+        
+        // Find episode with in-progress playback (not fully watched)
+        if let inProgressEpisode = sortedEpisodes.first(where: { episode in
+            let hasProgress = (episode.userData?.playbackPositionTicks ?? 0) > 0
+            let isFullyWatched = episode.userData?.isPlayed == true || 
+                               (episode.playbackProgress ?? 0) >= 0.95
+            return hasProgress && !isFullyWatched
+        }) {
+            return inProgressEpisode
         }
-        // If none watched, return first
-        return episodes.first
+        
+        // Find first unwatched episode
+        if let firstUnwatched = sortedEpisodes.first(where: { episode in
+            let isWatched = episode.userData?.isPlayed == true || 
+                           (episode.playbackProgress ?? 0) >= 0.95
+            return !isWatched
+        }) {
+            return firstUnwatched
+        }
+        
+        // If all episodes are watched, return the last episode
+        return sortedEpisodes.last
     }
 
     var body: some View {
