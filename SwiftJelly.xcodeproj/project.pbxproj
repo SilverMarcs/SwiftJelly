@@ -10,6 +10,7 @@
 		0806E40C2E11CA2F00CF6DC0 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0806E40B2E11CA2F00CF6DC0 /* VLCUI */; };
 		0806E4B52E11D21800CF6DC0 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0806E4B42E11D21800CF6DC0 /* VLCUI */; };
 		083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128C52E0EE3F50096527C /* JellyfinAPI */; };
+		084960D92E1FA02300CA183B /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 084960D82E1FA02300CA183B /* Kingfisher */; };
 		08E208CB2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
 		08E208CC2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		08E208CF2E1CCDA800CC8482 /* VLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */; platformFilters = (macos, ); };
@@ -53,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				084960D92E1FA02300CA183B /* Kingfisher in Frameworks */,
 				08E208CB2E1CCDA200CC8482 /* MobileVLCKit.xcframework in Frameworks */,
 				0806E4B52E11D21800CF6DC0 /* VLCUI in Frameworks */,
 				08E208CF2E1CCDA800CC8482 /* VLCKit.xcframework in Frameworks */,
@@ -117,6 +119,7 @@
 				083128C52E0EE3F50096527C /* JellyfinAPI */,
 				0806E40B2E11CA2F00CF6DC0 /* VLCUI */,
 				0806E4B42E11D21800CF6DC0 /* VLCUI */,
+				084960D82E1FA02300CA183B /* Kingfisher */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -149,6 +152,7 @@
 			packageReferences = (
 				083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 				0806E4B32E11D21800CF6DC0 /* XCRemoteSwiftPackageReference "VLCUI" */,
+				084960D72E1FA02300CA183B /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -443,6 +447,14 @@
 				minimumVersion = 0.5.2;
 			};
 		};
+		084960D72E1FA02300CA183B /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -459,6 +471,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
 			productName = JellyfinAPI;
+		};
+		084960D82E1FA02300CA183B /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 084960D72E1FA02300CA183B /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

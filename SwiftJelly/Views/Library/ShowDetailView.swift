@@ -14,13 +14,14 @@ struct ShowDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                if horizontalSizeClass == .compact {
-                    LandscapeImageView(item: show)
-                        .backgroundExtensionEffect()
-                } else {
-                    PortraitImageView(item: show)
-                        .backgroundExtensionEffect()
+                Group {
+                    if horizontalSizeClass == .compact {
+                        PortraitImageView(item: show)
+                    } else {
+                        LandscapeImageView(item: show)
+                    }
                 }
+                .backgroundExtensionEffect()
                 
                 VStack(alignment: .leading, spacing: 12) {
                     if let overview = show.overview {

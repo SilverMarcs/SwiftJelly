@@ -3,7 +3,6 @@ import JellyfinAPI
 import VLCUI
 import Combine
 
-@MainActor
 class SubtitleManager: ObservableObject {
     @Published var availableSubtitles: [Subtitle] = []
     @Published var selectedSubtitle: Subtitle?

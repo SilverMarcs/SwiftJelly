@@ -2,26 +2,25 @@ import SwiftUI
 import JellyfinAPI
 
 struct MovieDetailView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let movie: BaseItemDto
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                ZStack(alignment: .bottomLeading) {
-                    AsyncImage(url: imageUrl) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(aspectRatio, contentMode: .fit)
-                    } placeholder: {
-                        ProgressView()
-                            .frame(height: 150)
-                    }
-                    .backgroundExtensionEffect()
-                    .overlay(alignment: .bottomLeading) {
-                        MoviePlayButton(item: movie)
-                            .padding(16)
+                Group {
+                    if horizontalSizeClass == .compact {
+                        PortraitImageView(item: movie)
+                    } else {
+                        LandscapeImageView(item: movie)
                     }
                 }
+                .backgroundExtensionEffect()
+                .overlay(alignment: .bottomLeading) {
+                    MoviePlayButton(item: movie)
+                        .padding(16)
+                }
+            
 
                 VStack(alignment: .leading, spacing: 12) {
                     if let overview = movie.overview {
@@ -48,14 +47,6 @@ struct MovieDetailView: View {
 //        #endif
         .navigationTitle(movie.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
-    }
-    
-    var imageUrl: URL? {
-        #if os(macOS)
-        ImageURLProvider.landscapeImageURL(for: movie)
-        #else
-        ImageURLProvider.portraitImageURL(for: movie)
-        #endif
     }
     
     var aspectRatio: CGFloat {

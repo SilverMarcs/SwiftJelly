@@ -15,7 +15,7 @@ struct ImageURLProvider {
     ///   - maxWidth: Maximum width for the image (default: 600)
     ///   - preferredType: Preferred image type (default: .primary)
     /// - Returns: URL for the image or nil if not available
-    func primaryImageURL(
+    static func imageURL(
         for item: BaseItemDto,
         maxWidth: CGFloat = 600,
         preferredType: ImageType = .primary
@@ -90,24 +90,15 @@ struct ImageURLProvider {
     }
     
     /// Generates a portrait image URL specifically for library items
-    /// - Parameters:
-    ///   - item: The BaseItemDto to get image for
-    ///   - maxWidth: Maximum width for the image (default: 300)
-    /// - Returns: URL for the portrait image or nil if not available
-    func portraitImageURL(for item: BaseItemDto, maxWidth: CGFloat = 300) -> URL? {
-        return primaryImageURL(for: item, maxWidth: maxWidth, preferredType: .primary)
+    static func portraitImageURL(for item: BaseItemDto, maxWidth: CGFloat = 300) -> URL? {
+        imageURL(for: item, maxWidth: maxWidth, preferredType: .primary)
     }
-    
     /// Generates a landscape image URL specifically for continue watching cards
-    /// - Parameters:
-    ///   - item: The BaseItemDto to get image for
-    ///   - maxWidth: Maximum width for the image (default: 600)
-    /// - Returns: URL for the landscape image or nil if not available
-    func landscapeImageURL(for item: BaseItemDto, maxWidth: CGFloat = 600) -> URL? {
-        return primaryImageURL(for: item, maxWidth: maxWidth, preferredType: .thumb)
+    static func landscapeImageURL(for item: BaseItemDto, maxWidth: CGFloat = 600) -> URL? {
+        imageURL(for: item, maxWidth: maxWidth, preferredType: .thumb)
     }
     
-    private func getImageTag(for type: ImageType, from item: BaseItemDto) -> String? {
+    private static func getImageTag(for type: ImageType, from item: BaseItemDto) -> String? {
         switch type {
         case .backdrop:
             return item.backdropImageTags?.first
@@ -116,24 +107,5 @@ struct ImageURLProvider {
         default:
             return item.imageTags?[type.rawValue]
         }
-    }
-}
-
-// MARK: - Static convenience methods
-extension ImageURLProvider {
-    static func primaryImageURL(
-        for item: BaseItemDto,
-        maxWidth: CGFloat = 600,
-        preferredType: ImageType = .primary
-    ) -> URL? {
-        ImageURLProvider().primaryImageURL(for: item, maxWidth: maxWidth, preferredType: preferredType)
-    }
-    
-    static func portraitImageURL(for item: BaseItemDto, maxWidth: CGFloat = 300) -> URL? {
-        ImageURLProvider().portraitImageURL(for: item, maxWidth: maxWidth)
-    }
-    
-    static func landscapeImageURL(for item: BaseItemDto, maxWidth: CGFloat = 600) -> URL? {
-        ImageURLProvider().landscapeImageURL(for: item, maxWidth: maxWidth)
     }
 }

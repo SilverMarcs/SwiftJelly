@@ -20,6 +20,5 @@ struct LandscapeImageView: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }

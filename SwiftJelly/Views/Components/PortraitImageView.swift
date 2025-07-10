@@ -15,6 +15,5 @@ struct PortraitImageView: View {
                     ProgressView()
                 }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

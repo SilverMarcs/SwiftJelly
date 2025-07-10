@@ -101,24 +101,20 @@ struct ServerSettingsView: View {
                     password: password,
                     server: server
                 )
+            
+                var authenticatedServer = server
+                authenticatedServer.username = authResult.username
+                authenticatedServer.accessToken = authResult.accessToken
+                authenticatedServer.jellyfinUserID = authResult.jellyfinUserID
                 
-                await MainActor.run {
-                    var authenticatedServer = server
-                    authenticatedServer.username = authResult.username
-                    authenticatedServer.accessToken = authResult.accessToken
-                    authenticatedServer.jellyfinUserID = authResult.jellyfinUserID
-                    
-                    dataManager.setServer(authenticatedServer)
-                    
-                    isAuthenticating = false
-                    password = "" // Clear password for security
-                }
+                dataManager.setServer(authenticatedServer)
+                
+                isAuthenticating = false
+                password = "" // Clear password for security
             } catch {
-                await MainActor.run {
-                    isAuthenticating = false
-                    alertMessage = error.localizedDescription
-                    showingAlert = true
-                }
+                isAuthenticating = false
+                alertMessage = error.localizedDescription
+                showingAlert = true
             }
         }
     }
