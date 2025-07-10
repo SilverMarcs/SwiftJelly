@@ -2,6 +2,8 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowDetailView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
     let show: BaseItemDto
     @State private var seasons: [BaseItemDto] = []
     @State private var selectedSeason: BaseItemDto?
@@ -12,21 +14,15 @@ struct ShowDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                AsyncImage(url: imageUrl) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(aspectRatio, contentMode: .fit)
-                } placeholder: {
-                    ProgressView()
-                        .frame(height: 150)
+                if horizontalSizeClass == .compact {
+                    LandscapeImageView(item: show)
+                        .backgroundExtensionEffect()
+                } else {
+                    PortraitImageView(item: show)
+                        .backgroundExtensionEffect()
                 }
-                .backgroundExtensionEffect()
                 
                 VStack(alignment: .leading, spacing: 12) {
-//                    Text(show.name ?? "Show")
-//                        .font(.title)
-//                        .fontWeight(.bold)
-                    
                     if let overview = show.overview {
                         Text(overview)
                             .font(.subheadline)
@@ -107,6 +103,7 @@ struct ShowDetailView: View {
                 await loadEpisodes(for: selected)
             }
         } catch {
+            print(error.localizedDescription)
             // handle error
         }
     }
@@ -118,21 +115,5 @@ struct ShowDetailView: View {
         } catch {
             self.episodes = []
         }
-    }
-    
-    var imageUrl: URL? {
-        #if os(macOS)
-        ImageURLProvider.landscapeImageURL(for: show)
-        #else
-        ImageURLProvider.portraitImageURL(for: show)
-        #endif
-    }
-    
-    var aspectRatio: CGFloat {
-        #if os(macOS)
-        return 16 / 9
-        #else
-        return 9 / 13
-        #endif
     }
 }

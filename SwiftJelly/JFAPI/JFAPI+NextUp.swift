@@ -27,9 +27,7 @@ extension JFAPI {
                     showToResume[seriesID] = item
                 }
             case .movie:
-                if let id = item.id {
-                    movies.append(item)
-                }
+                movies.append(item)
             default:
                 continue
             }

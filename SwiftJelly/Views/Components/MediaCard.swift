@@ -13,17 +13,9 @@ struct MediaCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: ImageURLProvider.portraitImageURL(for: item)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(2/3, contentMode: .fill)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 8)
-                    .overlay {
-                        ProgressView()
-                    }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            PortraitImageView(item: item)
+                .aspectRatio(2/3, contentMode: .fill)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name ?? "Unknown")
@@ -38,13 +30,6 @@ struct MediaCard: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-                
-//                if let overview = item.overview, !overview.isEmpty {
-//                    Text(overview)
-//                        .font(.caption2)
-//                        .foregroundStyle(.tertiary)
-//                        .lineLimit(2)
-//                }
             }
         }
     }
