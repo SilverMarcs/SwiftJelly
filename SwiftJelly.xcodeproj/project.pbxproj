@@ -34,16 +34,27 @@
 
 /* Begin PBXFileReference section */
 		083128A92E0EE1F70096527C /* SwiftJelly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftJelly.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		083128BB2E0EE24E0096527C /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = Carthage/Build/VLCKit.xcframework; sourceTree = "<group>"; };
-		083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/Build/MobileVLCKit.xcframework; sourceTree = "<group>"; };
-		08E208C62E1CCD5300CC8482 /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = "Carthage/VLCKit - binary package/VLCKit.xcframework"; sourceTree = "<group>"; };
 		08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/MobileVLCKit.xcframework; sourceTree = "<group>"; };
 		08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = Carthage/VLCKit.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		084962382E1FBBA700CA183B /* Exceptions for "SwiftJelly" folder in "SwiftJelly" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			platformFiltersByRelativePath = {
+				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift = (ios, xros, );
+				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift = (macos, );
+			};
+			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		083128AB2E0EE1F70096527C /* SwiftJelly */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				084962382E1FBBA700CA183B /* Exceptions for "SwiftJelly" folder in "SwiftJelly" target */,
+			);
 			path = SwiftJelly;
 			sourceTree = "<group>";
 		};
@@ -88,9 +99,6 @@
 			children = (
 				08E208CE2E1CCDA800CC8482 /* VLCKit.xcframework */,
 				08E208CA2E1CCDA200CC8482 /* MobileVLCKit.xcframework */,
-				08E208C62E1CCD5300CC8482 /* VLCKit.xcframework */,
-				083128BC2E0EE24E0096527C /* MobileVLCKit.xcframework */,
-				083128BB2E0EE24E0096527C /* VLCKit.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

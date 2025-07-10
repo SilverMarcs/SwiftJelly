@@ -46,6 +46,9 @@ struct LibraryView: View {
                     await loadLibraries()
                 }
             }
+            .refreshable {
+                await loadLibraries()
+            }
             #if !os(macOS)
             .toolbar {
                 SettingsToolbar()

@@ -8,6 +8,7 @@ extension JFAPI {
         var parameters = Paths.GetSeasonsParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
+        parameters.fields = .MinimumFields
         let request = Paths.getSeasons(seriesID: show.id ?? "", parameters: parameters)
         return try await send(request).items ?? []
     }
@@ -18,6 +19,7 @@ extension JFAPI {
         parameters.userID = context.userID
         parameters.seasonID = season.id
         parameters.enableUserData = true
+        parameters.fields = .MinimumFields
         let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)
         return try await send(request).items ?? []
     }

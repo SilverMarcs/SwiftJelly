@@ -15,16 +15,12 @@ struct AVMediaPlayerView: View {
     }
     
     var body: some View {
-        VideoPlayer(player: player)
-            .onAppear {
-                let time = CMTime(seconds: Double(startTimeSeconds), preferredTimescale: 1)
-                player.seek(to: time)
-                player.play()
-            }
-            .onDisappear {
-                player.pause()
-            }
-            .background(.black)
-            .ignoresSafeArea(edges: .vertical)
+        #if os(iOS)
+        AVPlayerIos(player: player, startTimeSeconds: startTimeSeconds)
+            .ignoresSafeArea()
+        #elseif os(macOS)
+        AVPlayerMac(player: player, startTimeSeconds: startTimeSeconds)
+//            .ignoresSafeArea()
+        #endif
     }
 }

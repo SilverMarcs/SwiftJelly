@@ -57,6 +57,7 @@ struct MediaPlayerView: View {
                     }
                     .onAppear {
                         subtitleManager.setVLCProxy(proxy)
+                        
                     }
                 } else {
                     ZStack {
