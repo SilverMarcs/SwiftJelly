@@ -11,13 +11,11 @@ struct FullScreenFrameModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .frame(minHeight: {
-                #if os(iOS)
-                return UIScreen.main.bounds.height/2
-                #elseif os(macOS)
-                return NSScreen.main?.frame.height ?? 600
+            .frame(minHeight: {                
+                #if os(macOS)
+                return (NSScreen.main?.frame.height ?? 600)/2
                 #else
-                return 600
+                return UIScreen.main.bounds.height/2
                 #endif
             }())
     }

@@ -17,9 +17,10 @@ struct SearchView: View {
     var body: some View {
         NavigationStack {
             MediaGrid(items: filteredResults, isLoading: isLoading)
+                .contentMargins(.vertical, 10)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
-                .searchable(text: $query)
+                .searchable(text: $query, placement: .toolbarPrincipal)
                 .searchScopes($searchScope) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
