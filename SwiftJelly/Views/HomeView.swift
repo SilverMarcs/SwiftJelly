@@ -9,8 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct HomeView: View {
-    @State private var resumeItems: [BaseItemDto] = []
-    @State private var nextUpItems: [BaseItemDto] = []
+    @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var isLoading = false
 
     var body: some View {
@@ -21,9 +20,7 @@ struct HomeView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity, minHeight: 200)
                     } else {
-                        ContinueWatchingView(items: resumeItems)
-                        
-                        NextUpView(items: nextUpItems)
+                        ContinueWatchingView(items: continueWatchingItems)
                     }
                 }
             }
@@ -33,9 +30,8 @@ struct HomeView: View {
                 #if !os(macOS)
                 SettingsToolbar()
                 #else
-                // refresh button
                 Button {
-                    Task { loadAll }
+                    Task { await loadAll() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
@@ -52,12 +48,9 @@ struct HomeView: View {
 
     private func loadAll() async {
         isLoading = true
-        async let resume = JFAPI.shared.loadResumeItems()
-        async let nextUp = JFAPI.shared.loadNextUpItems()
         do {
-            let (resumeResult, nextUpResult) = try await (resume, nextUp)
-            resumeItems = resumeResult
-            nextUpItems = nextUpResult
+            let items = try await JFAPI.shared.loadContinueWatchingSmart()
+            continueWatchingItems = items
         } catch {
             print(error.localizedDescription)
         }
