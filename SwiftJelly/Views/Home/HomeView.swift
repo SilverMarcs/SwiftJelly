@@ -29,9 +29,9 @@ struct HomeView: View {
                         LatestMediaView(items: latestShows, header: "Shows")
                             .scenePadding(.bottom)
                     }
+                    .contentMargins(.horizontal, 15)
                 }
             }
-            .contentMargins(.horizontal, 15)
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {

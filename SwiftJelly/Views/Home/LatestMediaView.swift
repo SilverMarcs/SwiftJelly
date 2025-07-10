@@ -10,6 +10,7 @@ struct LatestMediaView: View {
             Text("Latest \(header)")
                 .font(.title2)
                 .bold()
+                .scenePadding(.leading)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
