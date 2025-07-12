@@ -26,17 +26,26 @@ struct SettingsView: View {
                 }
 
                 Section("Images") {
-                    LabeledContent {
-                        Button(role: .destructive) {
-                            deleteAlertPresented = true
-                        } label: {
-                            Text("Delete")
-                        }
-                        .tint(.red)
-                        .buttonStyle(.borderedProminent)
+                    Button {
+                        deleteAlertPresented = true
                     } label: {
-                        Label("Image Cache (\(cacheSize))", systemImage: "trash")
+                        HStack {
+                            Label {
+                                Text("Clear Image Cache")
+                                
+                            } icon: {
+                                Image(systemName: "trash")
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(cacheSize)")
+                        }
+                        .contentShape(.rect)
                     }
+                    #if os(macOS)
+                    .buttonStyle(.plain)
+                    #endif
                     .alert("Clear Image Cache", isPresented: $deleteAlertPresented) {
                         Button("Clear", role: .destructive) {
                             ImageCache.default.clearCache()

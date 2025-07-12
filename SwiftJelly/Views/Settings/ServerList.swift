@@ -22,6 +22,7 @@ struct ServerList: View {
                         Text(server.url.absoluteString)
                     } icon: {
                         Image(systemName: server.id == dataManager.activeServerID ? "checkmark.circle.fill" : "server.rack")
+                            .foregroundStyle(server.id == dataManager.activeServerID ? .green : .accent)
                     }
                 }
                 .buttonStyle(.plain)
