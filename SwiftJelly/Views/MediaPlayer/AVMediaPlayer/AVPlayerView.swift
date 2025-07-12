@@ -3,6 +3,7 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerView: View {
+    @Environment(\.refresh) var refresh
     let item: BaseItemDto
     @State private var player: AVPlayer
     private var stateManager: AVPlayerStateManager
@@ -40,12 +41,20 @@ struct AVMediaPlayerView: View {
             .navigationTitle(navigationTitle)
             .onDisappear {
                 stateManager.stopPlayback()
+                if let handler = RefreshHandlerContainer.shared.refresh {
+                    Task { await handler() }
+                    RefreshHandlerContainer.shared.refresh = nil
+                }
             }
         #else
         AVPlayerIos(player: player, startTimeSeconds: startTimeSeconds, stateManager: stateManager)
             .ignoresSafeArea()
             .onDisappear {
                 stateManager.stopPlayback()
+                if let handler = RefreshHandlerContainer.shared.refresh {
+                    Task { await handler() }
+                }
+                RefreshHandlerContainer.shared.refresh = nil
             }
         #endif
     }
