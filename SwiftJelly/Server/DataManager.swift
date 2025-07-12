@@ -13,7 +13,7 @@ import JellyfinAPI
     var servers: [Server] = []
     var activeServerID: String?
     
-    static let shared = DataManager()
+    @ObservationIgnored static let shared = DataManager()
 
     @ObservationIgnored private let serversKey = "SavedServers"
     @ObservationIgnored private let activeServerKey = "ActiveServerID"

@@ -13,7 +13,7 @@ import JellyfinAPI
 @Observable class AVPlayerStateManager {
     var isPlaying: Bool = false
     var currentSeconds: Int = 0
-    var totalSeconds: Int = 1
+    @ObservationIgnored var totalSeconds: Int = 1
     
     @ObservationIgnored private let reporter: PlaybackReporter
     @ObservationIgnored private var timeObserverToken: Any?

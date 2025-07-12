@@ -35,7 +35,6 @@ struct AddServerView: View {
                     } label: {
                         if isAuthenticating {
                             ProgressView()
-                                .controlSize(.small)
                         } else {
                             Image(systemName: "checkmark")
                         }
