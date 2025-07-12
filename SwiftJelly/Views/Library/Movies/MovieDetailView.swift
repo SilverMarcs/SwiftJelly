@@ -63,7 +63,9 @@ struct MovieDetailView: View {
             }
         }
         .task {
-            await fetchMovie()
+            if movie == nil {
+                await fetchMovie()
+            }
         }
         .refreshable {
             await fetchMovie()

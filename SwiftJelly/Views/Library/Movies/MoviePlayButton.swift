@@ -41,9 +41,6 @@ struct MoviePlayButton: View {
             .buttonStyle(.glass)
             
             MarkPlayedButton(item: item)
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .controlSize(.extraLarge)
         }
     }
 }

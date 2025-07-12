@@ -85,7 +85,9 @@ struct ShowDetailView: View {
             }
         }
         .task {
-            await fetchShow()
+            if show == nil {
+                await fetchShow()
+            }
         }
         .refreshable {
             await fetchShow()
@@ -121,6 +123,7 @@ struct ShowDetailView: View {
     
     private func loadSeasons() async {
         guard let show else { seasons = []; return }
+        guard seasons.isEmpty else { return } // Don't reload if already loaded
         isLoading = true
         defer { isLoading = false }
         do {

@@ -15,6 +15,9 @@ struct MarkPlayedButton: View {
                 .font(.title2)
                 .foregroundStyle((item.userData?.isPlayed == true) ? .accent : .secondary)
         }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.extraLarge)
     }
     
     private func togglePlayedStatus() async {

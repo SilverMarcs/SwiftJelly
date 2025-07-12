@@ -72,9 +72,6 @@ struct ShowPlayButton: View {
                 .buttonStyle(.glass)
                 
                 MarkPlayedButton(item: episode)
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.circle)
-                    .controlSize(.extraLarge)
             }
         }
     }
