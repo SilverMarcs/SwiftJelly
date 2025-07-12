@@ -26,6 +26,7 @@ struct ShowDetailView: View {
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         ShowPlayButton(show: show, episodes: episodes)
+                            .animation(.default, value: show)
                             .environment(\.refresh, fetchShow)
                             .padding(16)
                     }

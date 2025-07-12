@@ -21,6 +21,7 @@ struct MovieDetailView: View {
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         MoviePlayButton(item: movie)
+                            .animation(.default, value: movie)
                             .environment(\.refresh, fetchMovie)
                             .padding(16)
                     }
