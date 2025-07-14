@@ -7,26 +7,24 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @State private var selectedTab: Tabs = .home
-    
+struct ContentView: View {    
     var body: some View {
-        TabView(selection: $selectedTab) {
-            Tab("Home", systemImage: "house", value: .home) {
+        TabView {
+            Tab("Home", systemImage: "house") {
                 HomeView()
             }
             
-            Tab("Libraries", systemImage: "film", value: .media) {
+            Tab("Libraries", systemImage: "film") {
                 LibraryView()
             }
             
             #if os(macOS)
-            Tab("Settings", systemImage: "gear", value: .settings) {
+            Tab("Settings", systemImage: "gear") {
                 SettingsView()
             }
             #endif
             
-            Tab(value: .search, role: .search) {
+            Tab(role: .search) {
                 SearchView()
             }
         }
@@ -35,11 +33,4 @@ struct ContentView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         #endif
     }
-}
-
-enum Tabs: Hashable {
-    case home
-    case media
-    case settings
-    case search
 }
