@@ -8,6 +8,7 @@ struct PlayMediaButton<Label: View>: View {
     let label: () -> Label
     #if os(macOS)
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
     #endif
     @State private var showPlayer = false
 
@@ -15,6 +16,7 @@ struct PlayMediaButton<Label: View>: View {
         Button {
             RefreshHandlerContainer.shared.refresh = refresh
             #if os(macOS)
+            dismissWindow(id: "media-player") // ensure we close any open players first
             openWindow(id: "media-player", value: item)
             #else
             showPlayer = true
