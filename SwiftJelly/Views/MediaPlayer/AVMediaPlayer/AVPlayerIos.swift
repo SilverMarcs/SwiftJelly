@@ -18,7 +18,7 @@ struct AVPlayerIos: UIViewControllerRepresentable {
         controller.player = player
         controller.entersFullScreenWhenPlaybackBegins = true
         controller.exitsFullScreenWhenPlaybackEnds = true
-        controller.modalPresentationStyle = .fullScreen
+//        controller.modalPresentationStyle = .fullScreen
         controller.allowsPictureInPicturePlayback = true
         
         // Set up state manager
