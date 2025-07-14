@@ -1,0 +1,56 @@
+//
+//  PersonView.swift
+//  SwiftJelly
+//
+//  Created by Zabir Raihan on 14/07/2025.
+//
+
+import SwiftUI
+import JellyfinAPI
+import Kingfisher
+
+struct PersonView: View {
+    let person: BaseItemPerson
+    
+    var body: some View {
+        VStack(alignment: .center, spacing: 10) {
+            KFImage(ImageURLProvider.personImageURL(for: person))
+                .placeholder {
+                    Rectangle()
+                        .foregroundStyle(.quaternary)
+                        .overlay {
+                            Image(systemName: "person.fill")
+                                .font(.title)
+                                .foregroundStyle(.secondary)
+                        }
+                }
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 80, height: 80)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(.secondary, lineWidth: 1)
+                )
+            
+            VStack(spacing: 2) {
+                if let name = person.name {
+                    Text(name)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+                
+                if let role = person.role, !role.isEmpty {
+                    Text("as \(role)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+            }
+        }
+        .frame(width: 90)
+    }
+}

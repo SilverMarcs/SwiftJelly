@@ -34,6 +34,14 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
+            .task {
+                if continueWatchingItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
+                    await loadAll()
+                }
+            }
+            .refreshable {
+                await loadAll()
+            }
             .toolbar {
                 #if !os(macOS)
                 SettingsToolbar()
@@ -44,14 +52,6 @@ struct HomeView: View {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 #endif
-            }
-            .refreshable {
-                await loadAll()
-            }
-            .task {
-                if continueWatchingItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
-                    await loadAll()
-                }
             }
         }
     }

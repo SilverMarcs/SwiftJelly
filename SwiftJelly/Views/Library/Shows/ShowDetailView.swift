@@ -65,6 +65,11 @@ struct ShowDetailView: View {
                         }
                         .scrollPosition($episodeScrollPosition)
                     }
+                    
+                    if let people = show.people {
+                        PeopleScrollView(people: people)
+                            .contentMargins(.horizontal, 10)
+                    }
                 }
                 .scenePadding(.bottom)
                 

@@ -44,6 +44,11 @@ struct MovieDetailView: View {
                         }
                     }
                     .scenePadding(.horizontal)
+                    
+                    if let people = movie.people {
+                        PeopleScrollView(people: people)
+                            .contentMargins(.horizontal, 10)
+                    }
                 }
                 .scenePadding(.bottom)
             } else if isLoading {

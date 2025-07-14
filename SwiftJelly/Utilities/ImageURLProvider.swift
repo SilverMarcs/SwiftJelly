@@ -98,6 +98,38 @@ struct ImageURLProvider {
         imageURL(for: item, maxWidth: maxWidth, preferredType: .thumb)
     }
     
+    /// Generates image URL for a BaseItemPerson
+    /// - Parameters:
+    ///   - person: The BaseItemPerson to get image for
+    ///   - maxWidth: Maximum width for the image (default: 300)
+    /// - Returns: URL for the person's image or nil if not available
+    static func personImageURL(
+        for person: BaseItemPerson,
+        maxWidth: CGFloat = 300
+    ) -> URL? {
+        guard let id = person.id, let primaryImageTag = person.primaryImageTag else { return nil }
+        
+        let client: JellyfinClient
+        do {
+            client = try JFAPI.shared.getClient()
+        } catch {
+            return nil
+        }
+        
+        let parameters = Paths.GetItemImageParameters(
+            maxWidth: Int(maxWidth),
+            tag: primaryImageTag
+        )
+        
+        let request = Paths.getItemImage(
+            itemID: id,
+            imageType: ImageType.primary.rawValue,
+            parameters: parameters
+        )
+        
+        return client.fullURL(with: request)
+    }
+
     private static func getImageTag(for type: ImageType, from item: BaseItemDto) -> String? {
         switch type {
         case .backdrop:
