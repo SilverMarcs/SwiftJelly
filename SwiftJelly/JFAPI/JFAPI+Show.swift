@@ -3,7 +3,7 @@ import JellyfinAPI
 import Get
 
 extension JFAPI {
-    func loadSeasons(for show: BaseItemDto) async throws -> [BaseItemDto] {
+    static func loadSeasons(for show: BaseItemDto) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetSeasonsParameters()
         parameters.userID = context.userID
@@ -13,7 +13,7 @@ extension JFAPI {
         return try await send(request).items ?? []
     }
     
-    func loadEpisodes(for show: BaseItemDto, season: BaseItemDto) async throws -> [BaseItemDto] {
+    static func loadEpisodes(for show: BaseItemDto, season: BaseItemDto) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetEpisodesParameters()
         parameters.userID = context.userID

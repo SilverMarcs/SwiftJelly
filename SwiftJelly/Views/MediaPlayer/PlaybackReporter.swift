@@ -16,7 +16,7 @@ class PlaybackReporter {
     
     init(item: BaseItemDto) {
         self.item = item
-        self.playSessionID = JFAPI.shared.generatePlaySessionID()
+        self.playSessionID = JFAPI.generatePlaySessionID()
     }
     
     /// Starts the playback session and sends start report
@@ -26,7 +26,7 @@ class PlaybackReporter {
         
         Task {
             do {
-                try await JFAPI.shared.reportPlaybackStart(
+                try await JFAPI.reportPlaybackStart(
                     for: item,
                     positionTicks: positionSeconds.toPositionTicks,
                     playSessionID: playSessionID
@@ -43,7 +43,7 @@ class PlaybackReporter {
         
         Task {
             do {
-                try await JFAPI.shared.reportPlaybackProgress(
+                try await JFAPI.reportPlaybackProgress(
                     for: item,
                     positionTicks: positionSeconds.toPositionTicks,
                     isPaused: true,
@@ -61,7 +61,7 @@ class PlaybackReporter {
         
         Task {
             do {
-                try await JFAPI.shared.reportPlaybackProgress(
+                try await JFAPI.reportPlaybackProgress(
                     for: item,
                     positionTicks: positionSeconds.toPositionTicks,
                     isPaused: false,
@@ -79,7 +79,7 @@ class PlaybackReporter {
         
         Task {
             do {
-                try await JFAPI.shared.reportPlaybackStopped(
+                try await JFAPI.reportPlaybackStopped(
                     for: item,
                     positionTicks: positionSeconds.toPositionTicks,
                     playSessionID: playSessionID

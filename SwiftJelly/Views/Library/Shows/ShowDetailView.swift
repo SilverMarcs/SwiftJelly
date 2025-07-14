@@ -117,7 +117,7 @@ struct ShowDetailView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            show = try await JFAPI.shared.loadItem(by: id)
+            show = try await JFAPI.loadItem(by: id)
             await loadSeasons()
         } catch {
             show = nil
@@ -132,7 +132,7 @@ struct ShowDetailView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            let loadedSeasons = try await JFAPI.shared.loadSeasons(for: show)
+            let loadedSeasons = try await JFAPI.loadSeasons(for: show)
             self.seasons = loadedSeasons
             if let recent = loadedSeasons.first(where: {
                 ($0.userData?.isPlayed == true) || (($0.userData?.playCount ?? 0) > 0)
@@ -152,7 +152,7 @@ struct ShowDetailView: View {
     private func loadEpisodes(for season: BaseItemDto?) async {
         guard let show, let season else { episodes = []; return }
         do {
-            self.episodes = try await JFAPI.shared.loadEpisodes(for: show, season: season)
+            self.episodes = try await JFAPI.loadEpisodes(for: show, season: season)
         } catch {
             self.episodes = []
         }

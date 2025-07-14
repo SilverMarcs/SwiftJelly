@@ -12,7 +12,7 @@ import Get
 extension JFAPI {
     /// Loads user libraries/views
     /// - Returns: Array of BaseItemDto representing user libraries
-    func loadLibraries() async throws -> [BaseItemDto] {
+    static func loadLibraries() async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         let parameters = Paths.GetUserViewsParameters(userID: context.userID)
         let request = Paths.getUserViews(parameters: parameters)
@@ -26,7 +26,7 @@ extension JFAPI {
     /// Loads items for a specific library
     /// - Parameter library: The library to load items from
     /// - Returns: Array of BaseItemDto representing library items
-    func loadLibraryItems(for library: BaseItemDto) async throws -> [BaseItemDto] {
+    static func loadLibraryItems(for library: BaseItemDto) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.parentID = library.id
@@ -56,7 +56,7 @@ extension JFAPI {
     /// Loads recently added items
     /// - Parameter limit: Maximum number of items to return (default: 20)
     /// - Returns: Array of BaseItemDto representing recently added items
-    func loadRecentlyAddedItems(limit: Int = 20) async throws -> [BaseItemDto] {
+    static func loadRecentlyAddedItems(limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.enableUserData = true
@@ -76,7 +76,7 @@ extension JFAPI {
     ///   - library: The library to get latest items from
     ///   - limit: Maximum number of items to return (default: 12)
     /// - Returns: Array of BaseItemDto representing latest items in the library
-    func loadLatestMediaInLibrary(_ library: BaseItemDto, limit: Int = 12) async throws -> [BaseItemDto] {
+    static func loadLatestMediaInLibrary(_ library: BaseItemDto, limit: Int = 12) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetLatestMediaParameters()
         parameters.userID = context.userID

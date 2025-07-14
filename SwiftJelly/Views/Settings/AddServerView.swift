@@ -63,7 +63,7 @@ struct AddServerView: View {
         isAuthenticating = true
         Task {
             do {
-                let authResult = try await JFAPI.shared.authenticateUser(
+                let authResult = try await JFAPI.authenticateUser(
                     username: username,
                     password: password,
                     server: server

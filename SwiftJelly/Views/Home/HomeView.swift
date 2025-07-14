@@ -58,8 +58,8 @@ struct HomeView: View {
 
     private func loadAll() async {
         isLoading = true
-        async let continueWatching = JFAPI.shared.loadContinueWatchingSmart()
-        async let allItems = JFAPI.shared.loadRecentlyAddedItems(limit: 10)
+        async let continueWatching = JFAPI.loadContinueWatchingSmart()
+        async let allItems = JFAPI.loadRecentlyAddedItems(limit: 10)
         do {
             continueWatchingItems = try await continueWatching
             let items = try await allItems
@@ -73,7 +73,7 @@ struct HomeView: View {
 
     private func refreshContinueWatching() async {
         do {
-            let items = try await JFAPI.shared.loadContinueWatchingSmart()
+            let items = try await JFAPI.loadContinueWatchingSmart()
             
             withAnimation {
                 continueWatchingItems = items

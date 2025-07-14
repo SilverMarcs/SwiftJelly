@@ -13,11 +13,11 @@ struct AVMediaPlayerView: View {
     
     init(item: BaseItemDto) {
         self.item = item
-        self.startTimeSeconds = JFAPI.shared.getStartTimeSeconds(for: item)
+        self.startTimeSeconds = JFAPI.getStartTimeSeconds(for: item)
         
         // Move support checking here
         if AVPlayerSupportChecker.isSupported(item: item) {
-            if let playbackURL = try? JFAPI.shared.getPlaybackURL(for: item) {
+            if let playbackURL = try? JFAPI.getPlaybackURL(for: item) {
                 self.stateManager = AVPlayerStateManager(item: item)
                 self.player = AVPlayer(url: playbackURL)
             }

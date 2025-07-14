@@ -61,7 +61,7 @@ struct PlayableCard: View {
             
             Button {
                 Task {
-                    try? await JFAPI.shared.toggleItemPlayedStatus(item: item)
+                    try? await JFAPI.toggleItemPlayedStatus(item: item)
                     await refresh()
                 }
             } label: {

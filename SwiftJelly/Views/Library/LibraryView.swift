@@ -60,7 +60,7 @@ struct LibraryView: View {
         isLoading = true
 
         do {
-            libraries = try await JFAPI.shared.loadLibraries()
+            libraries = try await JFAPI.loadLibraries()
         } catch {
             print("Error loading libraries: \(error.localizedDescription)")
         }

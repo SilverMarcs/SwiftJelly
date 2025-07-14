@@ -31,7 +31,7 @@ struct LibraryItemsView: View {
         isLoading = true
 
         do {
-            items = try await JFAPI.shared.loadLibraryItems(for: library)
+            items = try await JFAPI.loadLibraryItems(for: library)
         } catch {
             print("Error loading library items: \(error.localizedDescription)")
         }

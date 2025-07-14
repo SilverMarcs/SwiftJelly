@@ -10,13 +10,11 @@ import JellyfinAPI
 import Get
 
 /// Service class that handles common Jellyfin API operations
-class JFAPI {
-    static let shared = JFAPI()
-    private let dataManager: DataManager = .shared
-    private init() {}
+struct JFAPI {
+    static let dataManager: DataManager = .shared
 
     /// Returns a configured JellyfinClient for the current server, or throws if not available
-    func getClient() throws -> JellyfinClient {
+    static func getClient() throws -> JellyfinClient {
         guard let server = dataManager.server,
               server.isAuthenticated,
               let accessToken = server.accessToken else {
@@ -33,7 +31,7 @@ class JFAPI {
     }
 
     /// Returns the API context (server, client) or throws if not available
-    func getAPIContext() throws -> APIContext {
+    static func getAPIContext() throws -> APIContext {
         guard let server = dataManager.server,
               server.isAuthenticated else {
             throw JFAPIError.setupFailed
@@ -52,7 +50,7 @@ class JFAPI {
     }
 
     /// Generic helper to send a request using the current API context
-    func send<T>(_ request: Request<T>) async throws -> T where T: Decodable {
+    static func send<T>(_ request: Request<T>) async throws -> T where T: Decodable {
         let context = try getAPIContext()
         let response = try await context.client.send(request)
         return response.value

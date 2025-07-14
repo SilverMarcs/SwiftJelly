@@ -16,7 +16,7 @@ extension JFAPI {
     ///   - password: The password to authenticate
     ///   - server: The server to authenticate against
     /// - Returns: AuthenticationResult if authentication is successful
-    func authenticateUser(username: String, password: String, server: Server) async throws -> AuthenticationResult {
+    static func authenticateUser(username: String, password: String, server: Server) async throws -> AuthenticationResult {
         let configuration = JellyfinClient.Configuration(
             url: server.url,
             client: "SwiftJelly",

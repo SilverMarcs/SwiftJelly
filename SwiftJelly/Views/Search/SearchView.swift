@@ -58,7 +58,7 @@ struct SearchView: View {
         isLoading = true
         
         do {
-            let items = try await JFAPI.shared.searchMedia(query: query)
+            let items = try await JFAPI.searchMedia(query: query)
             results = items
             isLoading = false
         } catch {

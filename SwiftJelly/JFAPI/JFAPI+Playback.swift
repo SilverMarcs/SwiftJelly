@@ -12,7 +12,7 @@ extension JFAPI {
     /// Generates a playback URL for a media item
     /// - Parameter item: The BaseItemDto to generate a playback URL for
     /// - Returns: URL for streaming the media item, or nil if unable to generate
-    func getPlaybackURL(for item: BaseItemDto) throws -> URL? {
+    static func getPlaybackURL(for item: BaseItemDto) throws -> URL? {
         guard let id = item.id else { return nil }
         let context = try getAPIContext()
 
@@ -31,14 +31,14 @@ extension JFAPI {
     /// Gets the start time in seconds for a media item based on playback position
     /// - Parameter item: The BaseItemDto to get start time for
     /// - Returns: Start time in seconds
-    func getStartTimeSeconds(for item: BaseItemDto) -> Int {
+    static func getStartTimeSeconds(for item: BaseItemDto) -> Int {
         guard let ticks = item.userData?.playbackPositionTicks else { return 0 }
         return Int(ticks / 10_000_000)
     }
 
     /// Generates a unique play session ID
     /// - Returns: A UUID string for the play session
-    func generatePlaySessionID() -> String {
+    static func generatePlaySessionID() -> String {
         return UUID().uuidString
     }
 
@@ -49,7 +49,7 @@ extension JFAPI {
     ///   - playSessionID: The play session ID
     ///   - audioStreamIndex: Index of the audio stream
     ///   - subtitleStreamIndex: Index of the subtitle stream
-    func reportPlaybackStart(for item: BaseItemDto, positionTicks: Int64, playSessionID: String, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
+    static func reportPlaybackStart(for item: BaseItemDto, positionTicks: Int64, playSessionID: String, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
         let context = try getAPIContext()
 
         let startInfo = PlaybackStartInfo(
@@ -75,7 +75,7 @@ extension JFAPI {
     ///   - playSessionID: The play session ID
     ///   - audioStreamIndex: Index of the audio stream
     ///   - subtitleStreamIndex: Index of the subtitle stream
-    func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64, isPaused: Bool, playSessionID: String, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
+    static func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64, isPaused: Bool, playSessionID: String, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
         let context = try getAPIContext()
 
         let progressInfo = PlaybackProgressInfo(
@@ -99,7 +99,7 @@ extension JFAPI {
     ///   - item: The item that was being played
     ///   - positionTicks: Final playback position in ticks
     ///   - playSessionID: The play session ID
-    func reportPlaybackStopped(for item: BaseItemDto, positionTicks: Int64, playSessionID: String) async throws {
+    static func reportPlaybackStopped(for item: BaseItemDto, positionTicks: Int64, playSessionID: String) async throws {
         let context = try getAPIContext()
 
         let stopInfo = PlaybackStopInfo(

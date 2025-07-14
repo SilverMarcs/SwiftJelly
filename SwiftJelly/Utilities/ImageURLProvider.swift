@@ -23,7 +23,7 @@ struct ImageURLProvider {
         guard let id = item.id else { return nil }
         let client: JellyfinClient
         do {
-            client = try JFAPI.shared.getClient()
+            client = try JFAPI.getClient()
         } catch {
             return nil
         }
@@ -111,7 +111,7 @@ struct ImageURLProvider {
         
         let client: JellyfinClient
         do {
-            client = try JFAPI.shared.getClient()
+            client = try JFAPI.getClient()
         } catch {
             return nil
         }

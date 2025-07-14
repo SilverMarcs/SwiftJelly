@@ -11,7 +11,7 @@ import Get
 
 extension JFAPI {
     /// Loads items for the Continue Watching section: for each show, if there is an in-progress episode, show that; otherwise, show the next up episode. Movies are always included. Deduplicates by show.
-    func loadContinueWatchingSmart() async throws -> [BaseItemDto] {
+    static func loadContinueWatchingSmart() async throws -> [BaseItemDto] {
         async let resumeItemsRaw = loadResumeItems()
         async let nextUpItemsRaw = loadNextUpItems(limit: 40)
         let resumeItems = try await resumeItemsRaw
@@ -52,7 +52,7 @@ extension JFAPI {
     
     /// Loads Next Up items for the current server (episodes to continue watching)
     /// - Returns: Array of BaseItemDto representing next up items without watch progress
-    func loadNextUpItems(limit: Int = 20) async throws -> [BaseItemDto] {
+    static func loadNextUpItems(limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetNextUpParameters()
         parameters.userID = context.userID
@@ -73,7 +73,7 @@ extension JFAPI {
         }
     }
     
-    func loadResumeItems() async throws -> [BaseItemDto] {
+    static func loadResumeItems() async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetResumeItemsParameters()
         parameters.userID = context.userID

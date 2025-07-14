@@ -6,7 +6,7 @@ extension JFAPI {
     /// Search for media (movies and shows) with a query string
     /// - Parameter query: The search string
     /// - Returns: Array of BaseItemDto matching the query (movies and shows only)
-    func searchMedia(query: String) async throws -> [BaseItemDto] {
+    static func searchMedia(query: String) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.enableUserData = true

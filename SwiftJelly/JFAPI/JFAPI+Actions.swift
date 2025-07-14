@@ -2,7 +2,7 @@ import Foundation
 import JellyfinAPI
 
 extension JFAPI {
-    func markItemPlayed(itemId: String) async throws {
+    static func markItemPlayed(itemId: String) async throws {
         let context = try getAPIContext()
         let request = Paths.markPlayedItem(
             itemID: itemId,
@@ -11,7 +11,7 @@ extension JFAPI {
         let _ = try await send(request)
     }
     
-    func markItemUnplayed(itemId: String) async throws {
+    static func markItemUnplayed(itemId: String) async throws {
         let context = try getAPIContext()
         let request = Paths.markUnplayedItem(
             itemID: itemId,
@@ -20,7 +20,7 @@ extension JFAPI {
         let _ = try await send(request)
     }
     
-    func toggleItemPlayedStatus(item: BaseItemDto) async throws {
+    static func toggleItemPlayedStatus(item: BaseItemDto) async throws {
         guard let itemId = item.id else { return }
         let isPlayed = item.userData?.isPlayed == true
         if isPlayed {

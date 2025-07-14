@@ -22,7 +22,7 @@ struct MarkPlayedButton: View {
     
     private func togglePlayedStatus() async {
         do {
-            try await JFAPI.shared.toggleItemPlayedStatus(item: item)
+            try await JFAPI.toggleItemPlayedStatus(item: item)
             await refresh()
         } catch {
             print("Error toggling played status: \(error)")

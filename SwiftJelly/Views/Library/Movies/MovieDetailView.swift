@@ -81,7 +81,7 @@ struct MovieDetailView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            movie = try await JFAPI.shared.loadItem(by: id)
+            movie = try await JFAPI.loadItem(by: id)
         } catch {
             // handle error
             movie = nil
