@@ -12,11 +12,28 @@
             ]
           },
           "glass" : true,
-          "hidden" : false,
+          "hidden" : true,
           "image-name" : "Jellyfin_-_icon-transparent.svg.png",
           "name" : "Jellyfin_-_icon-transparent.svg",
           "position" : {
             "scale" : 0.8,
+            "translation-in-points" : [
+              0,
+              -7
+            ]
+          }
+        },
+        {
+          "blend-mode" : "darken",
+          "fill" : {
+            "solid" : "srgb:1.00000,0.21569,0.37255,1.00000"
+          },
+          "glass" : true,
+          "hidden" : false,
+          "image-name" : "Jellyfin_-_icon-transparent.svg.png",
+          "name" : "Jellyfin_-_icon-transparent.svg",
+          "position" : {
+            "scale" : 0.75,
             "translation-in-points" : [
               0,
               -7
