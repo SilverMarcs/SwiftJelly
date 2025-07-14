@@ -2,13 +2,6 @@ import SwiftUI
 import JellyfinAPI
 
 struct SearchView: View {
-    enum SearchScope: String, CaseIterable, Identifiable {
-        case all = "All"
-        case movies = "Movies"
-        case shows = "Shows"
-        var id: String { rawValue }
-    }
-    
     @State private var query: String = ""
     @State private var searchScope: SearchScope = .all
     @State private var results: [BaseItemDto] = []
@@ -66,4 +59,11 @@ struct SearchView: View {
             isLoading = false
         }
     }
+}
+
+enum SearchScope: String, CaseIterable, Identifiable {
+    case all = "All"
+    case movies = "Movies"
+    case shows = "Shows"
+    var id: String { rawValue }
 }
