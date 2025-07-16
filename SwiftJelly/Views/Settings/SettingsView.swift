@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Kingfisher
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -48,8 +47,10 @@ struct SettingsView: View {
                     #endif
                     .alert("Clear Image Cache", isPresented: $deleteAlertPresented) {
                         Button("Clear", role: .destructive) {
-                            ImageCache.default.clearCache()
-                            calculateCacheSize()
+                            Task {
+                                await MemoryCache.shared.clearCache()
+                                await DiskCache.shared.clearCache()
+                            }
                         }
                         Button("Cancel", role: .cancel) { }
                     } message: {
@@ -58,9 +59,6 @@ struct SettingsView: View {
                 }
             }
             .scrollDisabled(true)
-            .task {
-                calculateCacheSize()
-            }
             .formStyle(.grouped)
             .navigationTitle("Settings")
             .toolbarTitleDisplayMode(.inline)
@@ -76,19 +74,6 @@ struct SettingsView: View {
                 }
             }
             #endif
-        }
-    }
-    
-    private func calculateCacheSize() {
-        ImageCache.default.calculateDiskStorageSize { result in
-            Task { @MainActor in
-                switch result {
-                case .success(let size):
-                    self.cacheSize = String(format: "%.2f MB", Double(size) / 1024 / 1024)
-                case .failure:
-                    self.cacheSize = "Unknown"
-                }
-            }
         }
     }
 }

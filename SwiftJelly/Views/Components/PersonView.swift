@@ -7,15 +7,16 @@
 
 import SwiftUI
 import JellyfinAPI
-import Kingfisher
 
 struct PersonView: View {
     let person: BaseItemPerson
     
     var body: some View {
         VStack(alignment: .center, spacing: 10) {
-            KFImage(ImageURLProvider.personImageURL(for: person))
-                .placeholder {
+            Group {
+                if let url = ImageURLProvider.personImageURL(for: person) {
+                    CachedImageView(url: url, targetSize: CGSize(width: 200, height: 200))
+                } else {
                     Rectangle()
                         .foregroundStyle(.quaternary)
                         .overlay {
@@ -24,14 +25,14 @@ struct PersonView: View {
                                 .foregroundStyle(.secondary)
                         }
                 }
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 80, height: 80)
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .stroke(.secondary, lineWidth: 1)
-                )
+            }
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 80, height: 80)
+            .clipShape(Circle())
+            .overlay(
+                Circle()
+                    .stroke(.secondary, lineWidth: 1)
+            )
             
             VStack(spacing: 2) {
                 if let name = person.name {

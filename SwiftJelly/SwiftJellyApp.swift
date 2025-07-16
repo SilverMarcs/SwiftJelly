@@ -7,7 +7,6 @@
 
 import SwiftUI
 import JellyfinAPI
-import Kingfisher
 
 @main
 struct SwiftJellyApp: App {
@@ -31,11 +30,5 @@ struct SwiftJellyApp: App {
 //            SettingsView()
 //        }
         #endif
-    }
-    
-    init() {
-        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 60 // 60 MB
-        ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 200 // 200 MB
-        ImageCache.default.diskStorage.config.expiration = .days(5) // 5 day
     }
 }

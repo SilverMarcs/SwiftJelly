@@ -11,7 +11,8 @@ struct UniversalProgressView: View {
     var body: some View {
         ProgressView()
             .controlSize(.large)
-            .fullScreenFrame()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .listRowSeparator(.hidden)
     }
 }
 

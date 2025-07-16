@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128C52E0EE3F50096527C /* JellyfinAPI */; };
-		084960D92E1FA02300CA183B /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 084960D82E1FA02300CA183B /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,7 +41,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				084960D92E1FA02300CA183B /* Kingfisher in Frameworks */,
 				083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,7 +85,6 @@
 			name = SwiftJelly;
 			packageProductDependencies = (
 				083128C52E0EE3F50096527C /* JellyfinAPI */,
-				084960D82E1FA02300CA183B /* Kingfisher */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -119,7 +116,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
-				084960D72E1FA02300CA183B /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -410,14 +406,6 @@
 				minimumVersion = 0.5.2;
 			};
 		};
-		084960D72E1FA02300CA183B /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.4.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -425,11 +413,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
 			productName = JellyfinAPI;
-		};
-		084960D82E1FA02300CA183B /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 084960D72E1FA02300CA183B /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
