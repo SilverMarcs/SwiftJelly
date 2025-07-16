@@ -8,15 +8,20 @@
 import SwiftUI
 
 struct CachedImageView: View {
-    private var loader: ImageLoader
+    private var loader: ImageLoader?
     #if os(macOS)
     @State private var image: NSImage?
     #else
     @State private var image: UIImage?
     #endif
     
-    init(url: URL, targetSize: CGSize) {
-        self.loader = ImageLoader(url: url, targetSize: targetSize)
+    init(url: URL?, targetSize: CGSize) {
+        // Only create loader if URL is valid
+        if let validURL = url {
+            self.loader = ImageLoader(url: validURL, targetSize: targetSize)
+        } else {
+            self.loader = nil
+        }
     }
     
     var body: some View {
@@ -25,19 +30,20 @@ struct CachedImageView: View {
                 #if os(macOS)
                 Image(nsImage: image)
                     .resizable()
-//                    .interpolation(.none)
+                    .transition(.opacity)
                 #else
                 Image(uiImage: image)
                     .resizable()
-                    .interpolation(.none)
                 #endif
             } else {
                 Rectangle()
                     .fill(.secondary)
             }
         }
-        .task(id: loader.url) {
-            image = try? await loader.loadAndGetImage()
+        .task(id: loader?.url) {
+            if let loader = loader {
+                image = try? await loader.loadAndGetImage()
+            }
         }
     }
 }
