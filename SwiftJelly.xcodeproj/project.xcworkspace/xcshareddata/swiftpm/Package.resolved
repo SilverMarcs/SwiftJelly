@@ -1,6 +1,15 @@
 {
-  "originHash" : "36620ee8949fe41e618d414d534abd13cc815ec5bf74219fcc28882240615c4b",
+  "originHash" : "6609dc465df0e09ac71f1fa6a52c40294661f592986183533505dde5e8345087",
   "pins" : [
+    {
+      "identity" : "cachedasyncimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SilverMarcs/CachedAsyncImage",
+      "state" : {
+        "branch" : "main",
+        "revision" : "bad0ce02b038249cdd9396ad8f09a3c4fb9bf028"
+      }
+    },
     {
       "identity" : "get",
       "kind" : "remoteSourceControl",

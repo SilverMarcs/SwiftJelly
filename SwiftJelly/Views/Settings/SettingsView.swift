@@ -6,12 +6,12 @@
 //
 
 import SwiftUI
+import CachedAsyncImage
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingServerSettings = false
     @State private var deleteAlertPresented = false
-    @State private var cacheSize: String = "Calculating..."
 
     var body: some View {
         NavigationStack {
@@ -38,7 +38,7 @@ struct SettingsView: View {
                             
                             Spacer()
                             
-                            Text("\(cacheSize)")
+                            Text("{Cache Size}")
                         }
                         .contentShape(.rect)
                     }

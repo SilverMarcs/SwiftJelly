@@ -7,6 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
+import CachedAsyncImage
 
 struct PersonView: View {
     let person: BaseItemPerson
@@ -15,7 +16,7 @@ struct PersonView: View {
         VStack(alignment: .center, spacing: 10) {
             Group {
                 if let url = ImageURLProvider.personImageURL(for: person) {
-                    CachedImageView(url: url, targetSize: CGSize(width: 200, height: 200))
+                    CachedAsyncImage(url: url, targetSize: CGSize(width: 200, height: 200))
                 } else {
                     Rectangle()
                         .foregroundStyle(.quaternary)

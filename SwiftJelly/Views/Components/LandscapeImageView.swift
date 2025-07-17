@@ -7,12 +7,13 @@
 
 import SwiftUI
 import JellyfinAPI
+import CachedAsyncImage
 
 struct LandscapeImageView: View {
     let item: BaseItemDto
     
     var body: some View {
-        CachedImageView(url: ImageURLProvider.landscapeImageURL(for: item), targetSize: CGSize(width: 1280, height: 720))
+        CachedAsyncImage(url: ImageURLProvider.landscapeImageURL(for: item), targetSize: CGSize(width: 1280, height: 720))
             .aspectRatio(16/9, contentMode: .fill)
     }
 }
