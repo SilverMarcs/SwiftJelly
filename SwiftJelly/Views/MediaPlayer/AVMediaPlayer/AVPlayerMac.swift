@@ -9,26 +9,24 @@ import SwiftUI
 import AVKit
 
 struct AVPlayerMac: NSViewRepresentable {
-    let player: AVPlayer
     let startTimeSeconds: Int
     let stateManager: AVPlayerStateManager
     
     func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
-        view.player = player
+        view.player = stateManager.player
         view.controlsStyle = .floating
-//        view.allowsPictureInPicturePlayback = true
         view.showsFullScreenToggleButton = true
         
-        // Set up state manager
-        stateManager.setPlayer(player)
+        // Do initial seek and play once
+        let time = CMTime(seconds: Double(startTimeSeconds), preferredTimescale: 1)
+        view.player?.seek(to: time)
+        view.player?.play()
         
         return view
     }
     
     func updateNSView(_ nsView: AVPlayerView, context: Context) {
-        let time = CMTime(seconds: Double(startTimeSeconds), preferredTimescale: 1)
-        nsView.player?.seek(to: time)
-        nsView.player?.play()
+        
     }
 }

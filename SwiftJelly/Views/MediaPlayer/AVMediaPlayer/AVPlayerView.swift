@@ -6,8 +6,7 @@ struct AVMediaPlayerView: View {
     @Environment(\.refresh) var refresh
     let item: BaseItemDto
     
-    private var player: AVPlayer?
-    private var stateManager: AVPlayerStateManager?
+    @State var stateManager: AVPlayerStateManager?
     
     let startTimeSeconds: Int
     
@@ -15,48 +14,44 @@ struct AVMediaPlayerView: View {
         self.item = item
         self.startTimeSeconds = JFAPI.getStartTimeSeconds(for: item)
         
-        // Move support checking here
         if AVPlayerSupportChecker.isSupported(item: item) {
-            if let playbackURL = try? JFAPI.getPlaybackURL(for: item) {
-                self.stateManager = AVPlayerStateManager(item: item)
-                self.player = AVPlayer(url: playbackURL)
-            }
+            self._stateManager = State(initialValue: AVPlayerStateManager(item: item))
         }
     }
 
     var body: some View {
-        if let player = player, stateManager != nil {
-            #if os(macOS)
-            AVPlayerMac(player: player, startTimeSeconds: startTimeSeconds, stateManager: stateManager!)
-                .ignoresSafeArea()
-                .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-                .aspectRatio(16/9, contentMode: .fit)
-                .gesture(WindowDragGesture())
-                .task {
-                    if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == "Media Player" }) {
-                        mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
-                        await MainActor.run {
-                            mediaPlayerWindow.title = item.derivedNavigationTitle
+        Group {
+            if let stateManager = stateManager {
+                #if os(macOS)
+                AVPlayerMac(startTimeSeconds: startTimeSeconds, stateManager: stateManager)
+                    .ignoresSafeArea()
+                    .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .gesture(WindowDragGesture())
+                    .task {
+                        if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == "Media Player" }) {
+                            mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
+                            await MainActor.run {
+                                mediaPlayerWindow.title = item.derivedNavigationTitle
+                            }
                         }
                     }
-                }
-                .onDisappear {
-                    cleanup()
-                }
-            #else
-            AVPlayerIos(player: player, startTimeSeconds: startTimeSeconds, stateManager: stateManager!)
-                .ignoresSafeArea()
-                .onDisappear {
-                    cleanup()
-                }
-            #endif
-        } else {
-            Text("Playing MKV is currently not supported")
+                #else
+                AVPlayerIos(startTimeSeconds: startTimeSeconds, stateManager: stateManager)
+                    .ignoresSafeArea()
+
+                #endif
+            } else {
+                Text("Playing MKV is currently not supported")
+            }
+        }
+        .onDisappear {
+            cleanup()
         }
     }
     
     func cleanup() {
-        stateManager?.stopPlayback()
+        stateManager?.stop()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }
         }
