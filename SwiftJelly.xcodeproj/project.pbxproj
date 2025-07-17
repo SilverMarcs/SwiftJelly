@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 083128C52E0EE3F50096527C /* JellyfinAPI */; };
+		08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08493C5B2E292DBC007F0D75 /* JellyfinAPI */; };
+		08493CDD2E293999007F0D75 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08493CDC2E293999007F0D75 /* JellyfinAPI */; };
 		08D5DCC82E28A0D90027D139 /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = 08D5DCC72E28A0D90027D139 /* CachedAsyncImage */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +43,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				083128C62E0EE3F50096527C /* JellyfinAPI in Frameworks */,
+				08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */,
+				08493CDD2E293999007F0D75 /* JellyfinAPI in Frameworks */,
 				08D5DCC82E28A0D90027D139 /* CachedAsyncImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,8 +88,9 @@
 			);
 			name = SwiftJelly;
 			packageProductDependencies = (
-				083128C52E0EE3F50096527C /* JellyfinAPI */,
 				08D5DCC72E28A0D90027D139 /* CachedAsyncImage */,
+				08493C5B2E292DBC007F0D75 /* JellyfinAPI */,
+				08493CDC2E293999007F0D75 /* JellyfinAPI */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -118,8 +121,8 @@
 			mainGroup = 083128A02E0EE1F70096527C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 				08D5DCC62E28A0D90027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
+				08493CDB2E293999007F0D75 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -402,12 +405,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
+		08493CDB2E293999007F0D75 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jellyfin/jellyfin-sdk-swift";
+			repositoryURL = "https://github.com/SilverMarcs/jellyfin-sdk-swift";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.2;
+				branch = main;
+				kind = branch;
 			};
 		};
 		08D5DCC62E28A0D90027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */ = {
@@ -421,9 +424,13 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		083128C52E0EE3F50096527C /* JellyfinAPI */ = {
+		08493C5B2E292DBC007F0D75 /* JellyfinAPI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 083128C42E0EE3F50096527C /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
+			productName = JellyfinAPI;
+		};
+		08493CDC2E293999007F0D75 /* JellyfinAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 08493CDB2E293999007F0D75 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
 			productName = JellyfinAPI;
 		};
 		08D5DCC72E28A0D90027D139 /* CachedAsyncImage */ = {
