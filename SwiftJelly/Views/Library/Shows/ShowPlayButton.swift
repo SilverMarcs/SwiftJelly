@@ -5,6 +5,7 @@ struct ShowPlayButton: View {
     let show: BaseItemDto
     let seasons: [BaseItemDto]
     
+    @Environment(\.refresh) var refresh
     @State private var nextEpisode: BaseItemDto?
     @State private var isLoading = false
 
@@ -54,6 +55,7 @@ struct ShowPlayButton: View {
         } else {
             ProgressView()
                 .task(id: seasons) {
+                    nextEpisode = nil // Reset state
                     await findNextEpisode()
                 }
         }

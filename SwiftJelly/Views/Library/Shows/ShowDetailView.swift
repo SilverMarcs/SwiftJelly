@@ -11,6 +11,7 @@ struct ShowDetailView: View {
     @State private var episodes: [BaseItemDto] = []
     @State private var isLoading = false
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
+    @State private var refreshTrigger = UUID()
     
     var body: some View {
         ScrollView {
@@ -27,7 +28,8 @@ struct ShowDetailView: View {
                     .overlay(alignment: .bottomLeading) {
                         ShowPlayButton(show: show, seasons: seasons)
                             .animation(.default, value: show)
-                            .environment(\.refresh, fetchShow)
+                            .environment(\.refresh, fullRefresh)
+                            .id("show-play-\(refreshTrigger)") // Force recreation when refresh trigger changes
                             .padding(16)
                     }
                     
@@ -60,8 +62,8 @@ struct ShowDetailView: View {
                             HStack(spacing: 15) {
                                 ForEach(episodes) { episode in
                                     PlayableCard(item: episode, showNavigation: false)
-                                        .id(episode.id)
-                                        .environment(\.refresh, fetchShow)
+                                        .id("episode-\(episode.id ?? "")-\(refreshTrigger)")
+                                        .environment(\.refresh, fullRefresh)
                                 }
                             }
                             .padding(.horizontal)
@@ -91,7 +93,7 @@ struct ShowDetailView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    Task { await fetchShow() }
+                    Task { await fullRefresh() }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -105,12 +107,26 @@ struct ShowDetailView: View {
         .refreshable {
             await fetchShow()
         }
+        .refreshable {
+            await fullRefresh()
+        }
         .task(id: selectedSeason) {
             await loadEpisodes(for: selectedSeason)
         }
         .task(id: episodes) {
             await scrollToLatestEpisode()
         }
+    }
+    
+    private func fullRefresh() async {
+        // Reset all state to force complete refresh
+        refreshTrigger = UUID()
+        seasons = []
+        episodes = []
+        selectedSeason = nil
+        
+        // Reload everything
+        await fetchShow()
     }
     
     private func fetchShow() async {
