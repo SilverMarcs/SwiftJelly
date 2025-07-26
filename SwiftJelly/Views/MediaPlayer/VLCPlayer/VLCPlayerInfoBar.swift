@@ -13,7 +13,6 @@ struct VLCPlayerInfoBar: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.name ?? "Unknown")
                     .font(.title.bold())
-                    .foregroundStyle(.white)
             }
             
             Spacer()

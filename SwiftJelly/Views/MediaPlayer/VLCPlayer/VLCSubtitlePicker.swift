@@ -30,7 +30,6 @@ struct VLCSubtitlePicker: View {
         } label: {
             Label("Subtitles", systemImage: "captions.bubble")
                 .imageScale(.large)
-                .foregroundStyle(.white)
         }
         .labelStyle(.iconOnly)
         .menuIndicator(.hidden)

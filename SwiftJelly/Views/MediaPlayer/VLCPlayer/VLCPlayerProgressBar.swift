@@ -13,14 +13,12 @@ struct VLCPlayerProgressBar: View {
             HStack {
                 Text(timeString(from: playbackState.currentSeconds))
                     .font(.caption)
-                    .foregroundStyle(.white)
                     .monospacedDigit()
                 
                 Spacer()
                 
                 Text(timeString(from: playbackState.totalDuration))
                     .font(.caption)
-                    .foregroundStyle(.white)
                     .monospacedDigit()
             }
             
@@ -33,7 +31,7 @@ struct VLCPlayerProgressBar: View {
                         dragProgress = playbackState.currentProgress
                     } else {
                         let newSeconds = Int(dragProgress * Double(playbackState.totalDuration))
-                        proxy.setTime(.seconds(newSeconds))
+                        proxy.setSeconds(.seconds(newSeconds))
                         isDragging = false
                     }
                 }
