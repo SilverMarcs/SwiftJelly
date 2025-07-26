@@ -19,22 +19,22 @@ struct MediaGrid: View {
     
     var body: some View {
         ScrollView {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(items) { item in
+                    MediaNavigationLink(item: item)
+                }
+            }
+            .scenePadding(.horizontal)            
+        }
+        .overlay {
             if isLoading {
                 UniversalProgressView()
-            } else if items.isEmpty {
+            } else if  items.isEmpty {
                 ContentUnavailableView {
                     Label("No Media Found", systemImage: "play.square.stack.fill")
                 } description: {
                     Text("Try a different query for your search")
                 }
-                .fullScreenFrame()
-            } else {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(items) { item in
-                        MediaNavigationLink(item: item)
-                    }
-                }
-                .scenePadding(.horizontal)
             }
         }
     }

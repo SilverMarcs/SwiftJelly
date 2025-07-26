@@ -17,19 +17,20 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
+                VStack(spacing: 24) {
+                    ContinueWatchingView(items: continueWatchingItems)
+                        .environment(\.refresh, refreshContinueWatching)
+                    
+                    RecentlyAddedView(items: latestMovies, header: "Movies")
+                    
+                    RecentlyAddedView(items: latestShows, header: "Shows")
+                        .scenePadding(.bottom)
+                }
+                .contentMargins(.horizontal, 15)
+            }
+            .overlay {
                 if isLoading {
                     UniversalProgressView()
-                } else {
-                    VStack(spacing: 24) {
-                        ContinueWatchingView(items: continueWatchingItems)
-                            .environment(\.refresh, refreshContinueWatching)
-                        
-                        RecentlyAddedView(items: latestMovies, header: "Movies")
-                        
-                        RecentlyAddedView(items: latestShows, header: "Shows")
-                            .scenePadding(.bottom)
-                    }
-                    .contentMargins(.horizontal, 15)
                 }
             }
             .navigationTitle("Home")

@@ -19,23 +19,22 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(libraries, id: \.id) { library in
+                        NavigationLink {
+                            LibraryItemsView(library: library)
+                        } label: {
+                            LandscapeImageView(item: library)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .scenePadding(.horizontal)
+            }
+            .overlay {
                 if isLoading {
                     UniversalProgressView()
-                }
-
-                if !libraries.isEmpty && !isLoading {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(libraries, id: \.id) { library in
-                            NavigationLink {
-                                LibraryItemsView(library: library)
-                            } label: {
-                                LandscapeImageView(item: library)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .scenePadding(.horizontal)
                 }
             }
             .navigationTitle("Libraries")

@@ -73,7 +73,10 @@ struct ShowDetailView: View {
                 }
                 .scenePadding(.bottom)
                 
-            } else if isLoading {
+            }
+        }
+        .overlay {
+            if isLoading {
                 UniversalProgressView()
             }
         }
