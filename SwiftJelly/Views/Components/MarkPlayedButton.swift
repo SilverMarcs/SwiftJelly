@@ -12,12 +12,15 @@ struct MarkPlayedButton: View {
             }
         } label: {
             Image(systemName: "checkmark")
-                .font(.title2)
                 .foregroundStyle((item.userData?.isPlayed == true) ? .accent : .secondary)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
+        #if os(macOS)
         .controlSize(.extraLarge)
+        #else
+        .controlSize(.large)
+        #endif
     }
     
     private func togglePlayedStatus() async {

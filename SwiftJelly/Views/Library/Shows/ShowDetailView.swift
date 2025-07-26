@@ -45,7 +45,13 @@ struct ShowDetailView: View {
                                 }
                             }
                             .labelsHidden()
+                            #if os(macOS)
                             .pickerStyle(.segmented)
+                            #else
+                            .pickerStyle(.menu)
+                            .menuStyle(.button)
+                            .buttonStyle(.glass)
+                            #endif
                         }
                     }
                     .scenePadding(.horizontal)

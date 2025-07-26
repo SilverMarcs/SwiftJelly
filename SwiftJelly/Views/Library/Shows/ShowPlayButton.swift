@@ -40,11 +40,10 @@ struct ShowPlayButton: View {
                 PlayMediaButton(item: episode) {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")
-                            .imageScale(.large)
+                        
                         if let season = episode.parentIndexNumber, let ep = episode.indexNumber {
                             Text("S\(season)E\(ep)")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
                         }
                         if let progress = episode.playbackProgress, progress > 0, progress < 1 {
                             Gauge(value: progress) {
@@ -56,20 +55,22 @@ struct ShowPlayButton: View {
                             } maximumValueLabel: {
                                 EmptyView()
                             }
+                            .tint(.white)
                             .gaugeStyle(.accessoryLinearCapacity)
                             .controlSize(.mini)
                             .frame(width: 40)
                         }
+                        
                         if let remaining = episode.timeRemainingString {
                             Text(remaining)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+                                .font(.caption)
                         }
                     }
                 }
+                .tint(Color(.accent).secondary)
                 .buttonBorderShape(.capsule)
                 .controlSize(.extraLarge)
-                .buttonStyle(.glass)
+                .buttonStyle(.glassProminent)
                 
                 MarkPlayedButton(item: episode)
             }

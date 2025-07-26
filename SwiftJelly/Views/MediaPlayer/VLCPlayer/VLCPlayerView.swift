@@ -13,7 +13,6 @@ struct VLCPlayerView: View {
     @State private var playbackState = PlaybackStateManager()
     @State private var sessionManager: PlaybackSessionManager
     @State private var subtitleManager: SubtitleManager
-    @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
     
@@ -42,14 +41,12 @@ struct VLCPlayerView: View {
             .proxy(proxy)
             .onStateUpdated { state, info in
                 handleStateChange(state)
-                playbackInfo = info
                 subtitleManager.updateFromPlaybackInfo(info)
             }
             .onSecondsUpdated { duration, info in
                 let seconds = Int(duration.components.seconds)
                 let totalDuration = info.length / 1000
                 playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                playbackInfo = info
                 subtitleManager.updateFromPlaybackInfo(info)
                 
                 updateSystemMediaPlaybackState()
