@@ -15,7 +15,7 @@ struct VLCPlayerOverlays: ViewModifier {
     func body(content: Content) -> some View {
         content
             #if !os(macOS)
-            .ignoresSafeArea(edges: isAspectFillMode ? .horizontal : [])
+            .ignoresSafeArea(edges: isAspectFillMode ? [.horizontal, .vertical] : [.vertical])
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
