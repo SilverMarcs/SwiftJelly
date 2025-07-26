@@ -13,7 +13,6 @@ struct VLCPlayerView: View {
     @State private var playbackState = PlaybackStateManager()
     @State private var sessionManager: PlaybackSessionManager
     @State private var subtitleManager: SubtitleManager
-    @State private var controlsVisible: Bool = false
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
@@ -79,14 +78,6 @@ struct VLCPlayerView: View {
                 }
             }
             #endif
-            .simultaneousGesture(
-                TapGesture(count: 1)
-                    .onEnded {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            controlsVisible.toggle()
-                        }
-                    }
-            )
             .ignoresSafeArea(edges: .vertical)
             .background(.black, ignoresSafeAreaEdges: .all)
             .onDisappear {
@@ -97,9 +88,7 @@ struct VLCPlayerView: View {
                 playbackState: playbackState,
                 proxy: proxy
             )
-            .mediaPlayerOverlays(
-                controlsVisible: $controlsVisible,
-                item: item,
+            .mediaPlayerOverlays(                item: item,
                 proxy: proxy,
                 playbackState: playbackState,
                 playbackInfo: playbackInfo,
