@@ -24,9 +24,9 @@ struct HomeView: View {
                         ContinueWatchingView(items: continueWatchingItems)
                             .environment(\.refresh, refreshContinueWatching)
                         
-                        LatestMediaView(items: latestMovies, header: "Movies")
+                        RecentlyAddedView(items: latestMovies, header: "Movies")
                         
-                        LatestMediaView(items: latestShows, header: "Shows")
+                        RecentlyAddedView(items: latestShows, header: "Shows")
                             .scenePadding(.bottom)
                     }
                     .contentMargins(.horizontal, 15)
@@ -59,12 +59,12 @@ struct HomeView: View {
     private func loadAll() async {
         isLoading = true
         async let continueWatching = JFAPI.loadContinueWatchingSmart()
-        async let allItems = JFAPI.loadRecentlyAddedItems(limit: 10)
+        async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 20)
         do {
             continueWatchingItems = try await continueWatching
             let items = try await allItems
-            latestMovies = Array(items.filter { $0.type == .movie }.prefix(5))
-            latestShows = Array(items.filter { $0.type == .series }.prefix(5))
+            latestMovies = Array(items.filter { $0.type == .movie }.prefix(8))
+            latestShows = Array(items.filter { $0.type == .series }.prefix(8))
         } catch {
             print(error.localizedDescription)
         }

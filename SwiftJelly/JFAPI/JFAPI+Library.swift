@@ -76,11 +76,12 @@ extension JFAPI {
     ///   - library: The library to get latest items from
     ///   - limit: Maximum number of items to return (default: 12)
     /// - Returns: Array of BaseItemDto representing latest items in the library
-    static func loadLatestMediaInLibrary(_ library: BaseItemDto, limit: Int = 12) async throws -> [BaseItemDto] {
+//    static func loadLatestMediaInLibrary(_ library: BaseItemDto, limit: Int = 12) async throws -> [BaseItemDto] {
+    static func loadLatestMediaInLibrary(limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetLatestMediaParameters()
         parameters.userID = context.userID
-        parameters.parentID = library.id
+//        parameters.parentID = library.id
         parameters.fields = .MinimumFields
         parameters.enableUserData = true
         parameters.limit = limit

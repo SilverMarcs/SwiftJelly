@@ -21,7 +21,7 @@ struct PeopleScrollView: View {
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 16) {
-                        ForEach(people) { person in
+                        ForEach(people, id: \.self) { person in
                             PersonView(person: person)
                         }
                     }
