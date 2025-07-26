@@ -1,6 +1,7 @@
 import SwiftUI
 import JellyfinAPI
 import VLCUI
+import MediaPlayer
 
 struct VLCPlayerView: View {
     let item: BaseItemDto
@@ -11,6 +12,7 @@ struct VLCPlayerView: View {
     @State private var controlsVisible: Bool = false
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var hasLoadedEmbeddedSubs = false
+    @State private var hasSetupSystemMediaControls = false
     
     let playbackURL: URL?
     let startTimeSeconds: Int
@@ -47,6 +49,9 @@ struct VLCPlayerView: View {
                 playbackInfo = info
                 subtitleManager.updateFromPlaybackInfo(info)
                 
+                // Update system media controls with current position
+                updateSystemMediaPlaybackState()
+                
                 if !hasLoadedEmbeddedSubs {
                     subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
                     hasLoadedEmbeddedSubs = true
@@ -54,6 +59,7 @@ struct VLCPlayerView: View {
             }
             .onAppear {
                 subtitleManager.setVLCProxy(proxy)
+                setupSystemMediaControls()
             }
             .tint(.white)
             .accentColor(.white)
@@ -112,6 +118,9 @@ struct VLCPlayerView: View {
         let wasPlaying = playbackState.isPlaying
         playbackState.updatePlayingState(state == .playing)
         
+        // Update system media controls
+        updateSystemMediaPlaybackState()
+        
         // Send start report when playback begins
         if !sessionManager.hasSentStart && state == .playing {
             sessionManager.startPlayback(at: playbackState.currentSeconds)
@@ -132,9 +141,88 @@ struct VLCPlayerView: View {
         }
     }
     
+    private func setupSystemMediaControls() {
+        guard !hasSetupSystemMediaControls else { return }
+        hasSetupSystemMediaControls = true
+        
+        SystemMediaController.shared.setHandlers(
+            playPause: {
+                if playbackState.isPlaying {
+                    proxy.pause()
+                } else {
+                    proxy.play()
+                }
+            },
+            seek: { seconds in
+                if seconds > 0 {
+                    proxy.jumpForward(Int(seconds))
+                } else {
+                    proxy.jumpBackward(Int(abs(seconds)))
+                }
+            },
+            changePlaybackPosition: { position in
+                proxy.setSeconds(.seconds(position))
+            }
+        )
+        
+        // Set initial media info
+        updateSystemMediaInfo()
+    }
+    
+    private func updateSystemMediaInfo() {
+        let title = item.name ?? "Unknown Title"
+        let artist = item.seriesName ?? item.albumArtist ?? "Unknown Artist"
+        let albumTitle = item.album ?? item.seriesName
+        let duration = Double(item.runTimeTicks ?? 0) / 10_000_000 // Convert from ticks to seconds
+        
+        Task {
+            var artwork: MPMediaItemArtwork? = nil
+            
+            // Try to load artwork if available
+            if let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
+                artwork = await loadArtwork(from: imageURL)
+            }
+            
+            await MainActor.run {
+                SystemMediaController.shared.updateNowPlayingInfo(
+                    title: title,
+                    artist: artist,
+                    albumTitle: albumTitle,
+                    artwork: artwork,
+                    duration: duration,
+                    currentTime: Double(playbackState.currentSeconds),
+                    playbackRate: playbackState.isPlaying ? 1.0 : 0.0
+                )
+            }
+        }
+    }
+    
+    private func loadArtwork(from url: URL) async -> MPMediaItemArtwork? {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            #if os(macOS)
+            guard let image = NSImage(data: data) else { return nil }
+            #else
+            guard let image = UIImage(data: data) else { return nil }
+            #endif
+            return SystemMediaController.shared.createArtwork(from: image)
+        } catch {
+            print("Failed to load artwork: \(error)")
+            return nil
+        }
+    }
+    
+    private func updateSystemMediaPlaybackState() {
+        SystemMediaController.shared.updatePlaybackState(
+            isPlaying: playbackState.isPlaying,
+            currentTime: Double(playbackState.currentSeconds)
+        )
+    }
+    
     func cleanup() {
         proxy.stop()
         sessionManager.stopPlayback(at: playbackState.currentSeconds)
+        SystemMediaController.shared.clearNowPlayingInfo()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }
         }
