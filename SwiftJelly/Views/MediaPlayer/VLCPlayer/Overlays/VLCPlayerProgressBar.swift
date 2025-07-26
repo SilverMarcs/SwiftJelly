@@ -40,9 +40,9 @@ struct VLCPlayerProgressBar: View {
             .onAppear {
                 dragProgress = playbackState.currentProgress
             }
-            .onChange(of: playbackState.currentProgress) { newValue in
+            .onChange(of: playbackState.currentProgress) {
                 if !isDragging {
-                    dragProgress = newValue
+                    dragProgress = playbackState.currentProgress
                 }
             }
         }
