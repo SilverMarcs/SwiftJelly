@@ -171,29 +171,31 @@ struct VLCPlayerView: View {
     
     private func updateSystemMediaInfo() {
         let title = item.name ?? "Unknown Title"
-        let artist = item.seriesName ?? item.albumArtist ?? "Unknown Artist"
-        let albumTitle = item.album ?? item.seriesName
+        let artist = item.seriesName ?? item.albumArtist ?? ""
+        var albumTitle: String? = nil
+        if let season = item.parentIndexNumber, let episode = item.indexNumber {
+            albumTitle = "S\(season)E\(episode)"
+        }
         let duration = Double(item.runTimeTicks ?? 0) / 10_000_000 // Convert from ticks to seconds
         
         Task {
             var artwork: MPMediaItemArtwork? = nil
             
             // Try to load artwork if available
+            // TODO: get this from cache servie
             if let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
                 artwork = await loadArtwork(from: imageURL)
             }
             
-            await MainActor.run {
-                SystemMediaController.shared.updateNowPlayingInfo(
-                    title: title,
-                    artist: artist,
-                    albumTitle: albumTitle,
-                    artwork: artwork,
-                    duration: duration,
-                    currentTime: Double(playbackState.currentSeconds),
-                    playbackRate: playbackState.isPlaying ? 1.0 : 0.0
-                )
-            }
+            SystemMediaController.shared.updateNowPlayingInfo(
+                title: title,
+                artist: artist,
+                albumTitle: albumTitle,
+                artwork: artwork,
+                duration: duration,
+                currentTime: Double(playbackState.currentSeconds),
+                playbackRate: playbackState.isPlaying ? 1.0 : 0.0
+            )
         }
     }
     
