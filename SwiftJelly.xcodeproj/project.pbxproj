@@ -44,7 +44,8 @@
 			platformFiltersByRelativePath = {
 				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift = (macos, );
-				Views/MediaPlayer/VLCPlayer/Overlays/VLCPlayerTopOverlay.swift = (ios, xros, );
+				Views/MediaPlayer/VLCPlayer/Overlays/VLCMobileControls.swift = (ios, xros, );
+				Views/MediaPlayer/VLCPlayer/Overlays/VLCTopOverlay.swift = (ios, xros, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
 		};

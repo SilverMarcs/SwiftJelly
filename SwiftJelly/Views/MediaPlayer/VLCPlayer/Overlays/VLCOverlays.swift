@@ -21,6 +21,13 @@ struct VLCPlayerOverlays: ViewModifier {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
                 }
             }
+            .overlay(alignment: .center) {
+                VLCMobileControls(
+                    playbackState: playbackState,
+                    proxy: proxy,
+                    controlsVisible: $controlsVisible
+                )
+            }
             #endif
             .simultaneousGesture(
                 TapGesture(count: 1)
@@ -41,7 +48,9 @@ struct VLCPlayerOverlays: ViewModifier {
             .overlay(alignment: .bottom) {
                 if controlsVisible {
                     VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
+                    #if os(macOS)
                         .padding()
+                    #endif
                 }
             }
     }

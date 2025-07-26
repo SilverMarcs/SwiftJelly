@@ -18,6 +18,7 @@ struct VLCControlsOverlay: View {
     
     var body: some View {
         HStack(spacing: 15) {
+            #if os(macOS)
             // Control buttons
             Button {
                 proxy.jumpBackward(10)
@@ -44,6 +45,7 @@ struct VLCControlsOverlay: View {
                 Image(systemName: "goforward.10")
                     .font(.title2)
             }
+            #endif
             
             // Time and slider
             Text(timeString(from: playbackState.currentSeconds))
