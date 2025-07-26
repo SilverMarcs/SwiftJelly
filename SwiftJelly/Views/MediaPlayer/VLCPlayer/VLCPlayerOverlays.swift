@@ -10,8 +10,7 @@ struct VLCPlayerOverlays: ViewModifier {
     let playbackState: PlaybackStateManager
     let playbackInfo: VLCVideoPlayer.PlaybackInformation?
     let subtitleManager: SubtitleManager
-    @Binding var isAspectFillMode: Bool
-    let onToggleAspectFill: () -> Void
+    @State private var isAspectFillMode = false
     
     func body(content: Content) -> some View {
         content
@@ -50,11 +49,17 @@ struct VLCPlayerOverlays: ViewModifier {
                 }
             }
 #if !os(macOS)
+            .ignoresSafeArea(edges: isAspectFillMode ? .horizontal : [])
             .overlay(alignment: .top) {
                 if controlsVisible {
                     HStack {
                         Button {
-                            onToggleAspectFill()
+                            isAspectFillMode.toggle()
+                            if isAspectFillMode {
+                                proxy.aspectFill(1.0)
+                            } else {
+                                proxy.aspectFill(0.0)
+                            }
                         } label: {
                             Image(systemName: isAspectFillMode ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
                         }
@@ -67,11 +72,11 @@ struct VLCPlayerOverlays: ViewModifier {
                             dismiss()
                         } label: {
                             Image(systemName: "xmark")
+                                .padding(2)
                         }
                         .buttonStyle(.glass)
                         .buttonBorderShape(.circle)
                     }
-//                    .padding()
                 }
             }
 #endif
@@ -86,8 +91,6 @@ extension View {
         playbackState: PlaybackStateManager,
         playbackInfo: VLCVideoPlayer.PlaybackInformation?,
         subtitleManager: SubtitleManager,
-        isAspectFillMode: Binding<Bool>,
-        onToggleAspectFill: @escaping () -> Void
     ) -> some View {
         self.modifier(VLCPlayerOverlays(
             controlsVisible: controlsVisible,
@@ -96,8 +99,6 @@ extension View {
             playbackState: playbackState,
             playbackInfo: playbackInfo,
             subtitleManager: subtitleManager,
-            isAspectFillMode: isAspectFillMode,
-            onToggleAspectFill: onToggleAspectFill
         ))
     }
 }

@@ -17,7 +17,6 @@ struct VLCPlayerView: View {
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
-    @State private var isAspectFillMode = false
     
     let playbackURL: URL?
     let startTimeSeconds: Int
@@ -72,7 +71,7 @@ struct VLCPlayerView: View {
             }
             .navigationTitle(item.name ?? "Media Player")
             #if os(macOS)
-//            .aspectRatio(16/9, contentMode: .fit)
+            .aspectRatio(16/9, contentMode: .fit)
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .onTapGesture(count: 2) {
                 if let window = NSApplication.shared.keyWindow {
@@ -89,7 +88,7 @@ struct VLCPlayerView: View {
                     }
             )
             .ignoresSafeArea(edges: .vertical)
-            .background(.black)
+            .background(.black, ignoresSafeAreaEdges: .all)
             .onDisappear {
                 cleanup()
             }
@@ -105,17 +104,6 @@ struct VLCPlayerView: View {
                 playbackState: playbackState,
                 playbackInfo: playbackInfo,
                 subtitleManager: subtitleManager,
-                isAspectFillMode: $isAspectFillMode,
-                onToggleAspectFill: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isAspectFillMode.toggle()
-                        if isAspectFillMode {
-                            proxy.aspectFill(1.0)
-                        } else {
-                            proxy.aspectFill(0.0)
-                        }
-                    }
-                }
             )
         }
     }
