@@ -5,7 +5,6 @@ import VLCUI
 struct VLCPlayerOverlays: ViewModifier {
     @Environment(\.dismiss) var dismiss
 
-    let item: BaseItemDto
     let proxy: VLCVideoPlayer.Proxy
     let playbackState: PlaybackStateManager
     let subtitleManager: SubtitleManager
@@ -33,10 +32,9 @@ struct VLCPlayerOverlays: ViewModifier {
             )
             .overlay {
                 if controlsVisible {
-                    Color.black.opacity(0.5)
+                    Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.2), value: controlsVisible)
                         .allowsHitTesting(false)
                 }
             }
@@ -52,7 +50,6 @@ struct VLCPlayerOverlays: ViewModifier {
                 if controlsVisible {
                     VStack {
                         VLCPlayerInfoBar(
-                            item: item,
                             proxy: proxy,
                             subtitleManager: subtitleManager
                         )
@@ -69,13 +66,11 @@ struct VLCPlayerOverlays: ViewModifier {
 
 extension View {
     func mediaPlayerOverlays(
-        item: BaseItemDto,
         proxy: VLCVideoPlayer.Proxy,
         playbackState: PlaybackStateManager,
         subtitleManager: SubtitleManager,
     ) -> some View {
         self.modifier(VLCPlayerOverlays(
-            item: item,
             proxy: proxy,
             playbackState: playbackState,
             subtitleManager: subtitleManager,

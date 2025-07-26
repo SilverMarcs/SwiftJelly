@@ -14,10 +14,10 @@ extension JFAPI {
     /// - Parameter item: The BaseItemDto to get subtitle streams for
     /// - Returns: Array of MediaStream subtitle tracks with deliveryURL
     static func getExternalSubtitleStreams(for item: BaseItemDto) async throws -> [MediaStream] {
-        guard let itemId = item.id else { return [] }
-        
-        let context = try getAPIContext()
-        
+//        guard let itemId = item.id else { return [] }
+//        
+//        let context = try getAPIContext()
+//        
 //        let playbackInfoRequest = PlaybackInfoDto(
 //            deviceProfile: .vlcProfile,
 //            userID: context.user.id,

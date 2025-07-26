@@ -88,7 +88,6 @@ struct VLCPlayerView: View {
                 proxy: proxy
             )
             .mediaPlayerOverlays(
-                item: item,
                 proxy: proxy,
                 playbackState: playbackState,
                 subtitleManager: subtitleManager,
