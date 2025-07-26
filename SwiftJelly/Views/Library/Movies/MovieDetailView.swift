@@ -29,7 +29,6 @@ struct MovieDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if let overview = movie.overview {
                             Text(overview)
-                                .font(.body)
                                 .foregroundStyle(.secondary)
                         }
                         if let year = movie.productionYear {

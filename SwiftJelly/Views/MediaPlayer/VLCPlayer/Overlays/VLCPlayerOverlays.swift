@@ -18,7 +18,7 @@ struct VLCPlayerOverlays: ViewModifier {
             .ignoresSafeArea(edges: isAspectFillMode ? .horizontal : [])
             .overlay(alignment: .top) {
                 if controlsVisible {
-                    VLCPlayerTopOverlay(proxy: proxy)
+                    VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
                 }
             }
             #endif

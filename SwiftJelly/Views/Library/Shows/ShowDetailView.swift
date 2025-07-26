@@ -34,7 +34,6 @@ struct ShowDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if let overview = show.overview {
                             Text(overview)
-                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                     
@@ -48,7 +47,9 @@ struct ShowDetailView: View {
                             #if os(macOS)
                             .pickerStyle(.segmented)
                             #else
-                            .pickerStyle(.wheel)
+                            .pickerStyle(.menu)
+                            .menuStyle(.button)
+                            .buttonStyle(.glass)
                             #endif
                         }
                     }

@@ -14,7 +14,7 @@ struct VLCPlayerTopOverlay: View {
     @Environment(\.dismiss) var dismiss
     let proxy: VLCVideoPlayer.Proxy
     
-    @State private var isAspectFillMode = false
+    @Binding var isAspectFillMode: Bool
     
     var body: some View {
         HStack {
@@ -28,7 +28,7 @@ struct VLCPlayerTopOverlay: View {
             } label: {
                 Image(systemName: isAspectFillMode ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.bordered)
             .buttonBorderShape(.circle)
             
             Spacer()
@@ -39,7 +39,7 @@ struct VLCPlayerTopOverlay: View {
                 Image(systemName: "xmark")
                     .padding(2)
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.bordered)
             .buttonBorderShape(.circle)
         }
         .padding()

@@ -27,8 +27,8 @@ struct PersonView: View {
                         }
                 }
             }
-            .aspectRatio(contentMode: .fill)
             .frame(width: 80, height: 80)
+            .scaledToFill() // not working
             .clipShape(Circle())
             .overlay(
                 Circle()
@@ -53,6 +53,5 @@ struct PersonView: View {
                 }
             }
         }
-        .frame(width: 90)
     }
 }
