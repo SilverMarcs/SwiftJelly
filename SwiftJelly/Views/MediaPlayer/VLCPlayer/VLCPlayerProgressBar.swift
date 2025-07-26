@@ -14,21 +14,20 @@ struct VLCPlayerProgressBar: View {
                 Text(timeString(from: playbackState.currentSeconds))
                     .font(.caption)
                     .monospacedDigit()
-                
+
                 Spacer()
-                
+
                 Text(timeString(from: playbackState.totalDuration))
                     .font(.caption)
                     .monospacedDigit()
             }
-            
+
             Slider(
-                value: isDragging ? $dragProgress : .constant(playbackState.currentProgress),
+                value: $dragProgress,
                 in: 0...1,
                 onEditingChanged: { editing in
                     if editing {
                         isDragging = true
-                        dragProgress = playbackState.currentProgress
                     } else {
                         let newSeconds = Int(dragProgress * Double(playbackState.totalDuration))
                         proxy.setSeconds(.seconds(newSeconds))
@@ -38,6 +37,14 @@ struct VLCPlayerProgressBar: View {
             )
             .tint(.white)
             .accentColor(.white)
+            .onAppear {
+                dragProgress = playbackState.currentProgress
+            }
+            .onChange(of: playbackState.currentProgress) { newValue in
+                if !isDragging {
+                    dragProgress = newValue
+                }
+            }
         }
     }
     

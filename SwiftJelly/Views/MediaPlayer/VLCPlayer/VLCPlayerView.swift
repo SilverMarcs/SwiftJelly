@@ -69,16 +69,8 @@ struct VLCPlayerView: View {
             }
             .navigationTitle(item.name ?? "Media Player")
             #if os(macOS)
+//            .aspectRatio(16/9, contentMode: .fit)
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-            .aspectRatio(16/9, contentMode: .fit)
-            .task {
-                if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == "Media Player" }) {
-                    mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
-                    await MainActor.run {
-                        mediaPlayerWindow.title = item.derivedNavigationTitle
-                    }
-                }
-            }
             .onTapGesture(count: 2) {
                 if let window = NSApplication.shared.keyWindow {
                     window.toggleFullScreen(nil)
