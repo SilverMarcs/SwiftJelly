@@ -52,7 +52,6 @@ struct VLCPlayerView: View {
                 playbackInfo = info
                 subtitleManager.updateFromPlaybackInfo(info)
                 
-                // Update system media controls with current position
                 updateSystemMediaPlaybackState()
                 
                 if !hasLoadedEmbeddedSubs {
@@ -70,7 +69,8 @@ struct VLCPlayerView: View {
             }
             .navigationTitle(item.name ?? "Media Player")
             #if os(macOS)
-            .aspectRatio(16/9, contentMode: .fit)
+            .gesture(WindowDragGesture())
+            .aspectRatio(16/9, contentMode: .fill)
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .onTapGesture(count: 2) {
                 if let window = NSApplication.shared.keyWindow {
@@ -78,7 +78,6 @@ struct VLCPlayerView: View {
                 }
             }
             #endif
-            .ignoresSafeArea(edges: .vertical)
             .background(.black, ignoresSafeAreaEdges: .all)
             .onDisappear {
                 cleanup()
