@@ -8,7 +8,6 @@ struct VLCPlayerOverlays: ViewModifier {
     let item: BaseItemDto
     let proxy: VLCVideoPlayer.Proxy
     let playbackState: PlaybackStateManager
-    let playbackInfo: VLCVideoPlayer.PlaybackInformation?
     let subtitleManager: SubtitleManager
     
     @State private var controlsVisible: Bool = false
@@ -47,7 +46,6 @@ struct VLCPlayerOverlays: ViewModifier {
                         VLCPlayerInfoBar(
                             item: item,
                             proxy: proxy,
-                            playbackInfo: playbackInfo,
                             subtitleManager: subtitleManager
                         )
                         VLCPlayerProgressBar(
@@ -98,14 +96,12 @@ extension View {
         item: BaseItemDto,
         proxy: VLCVideoPlayer.Proxy,
         playbackState: PlaybackStateManager,
-        playbackInfo: VLCVideoPlayer.PlaybackInformation?,
         subtitleManager: SubtitleManager,
     ) -> some View {
         self.modifier(VLCPlayerOverlays(
             item: item,
             proxy: proxy,
             playbackState: playbackState,
-            playbackInfo: playbackInfo,
             subtitleManager: subtitleManager,
         ))
     }

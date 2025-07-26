@@ -5,7 +5,6 @@ import VLCUI
 struct VLCPlayerInfoBar: View {
     let item: BaseItemDto
     let proxy: VLCVideoPlayer.Proxy
-    let playbackInfo: VLCVideoPlayer.PlaybackInformation?
     let subtitleManager: SubtitleManager
     
     var body: some View {

@@ -88,10 +88,10 @@ struct VLCPlayerView: View {
                 playbackState: playbackState,
                 proxy: proxy
             )
-            .mediaPlayerOverlays(                item: item,
+            .mediaPlayerOverlays(
+                item: item,
                 proxy: proxy,
                 playbackState: playbackState,
-                playbackInfo: playbackInfo,
                 subtitleManager: subtitleManager,
             )
         }
