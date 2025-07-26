@@ -25,7 +25,7 @@ struct ShowDetailView: View {
                     }
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
-                        ShowPlayButton(show: show, episodes: episodes)
+                        ShowPlayButton(show: show, seasons: seasons)
                             .animation(.default, value: show)
                             .environment(\.refresh, fetchShow)
                             .padding(16)
@@ -48,9 +48,7 @@ struct ShowDetailView: View {
                             #if os(macOS)
                             .pickerStyle(.segmented)
                             #else
-                            .pickerStyle(.menu)
-                            .menuStyle(.button)
-                            .buttonStyle(.glass)
+                            .pickerStyle(.wheel)
                             #endif
                         }
                     }
@@ -110,15 +108,7 @@ struct ShowDetailView: View {
             await loadEpisodes(for: selectedSeason)
         }
         .task(id: episodes) {
-            if let latest = episodes.filter({
-                let ticks = $0.userData?.playbackPositionTicks ?? 0
-                return ticks > 0
-            }).sorted(by: { ($0.userData?.lastPlayedDate ?? .distantPast) > ($1.userData?.lastPlayedDate ?? .distantPast) }).first,
-               let id = latest.id {
-                withAnimation {
-                    episodeScrollPosition.scrollTo(id: id, anchor: .trailing)
-                }
-            }
+            await scrollToLatestEpisode()
         }
     }
     
@@ -137,19 +127,17 @@ struct ShowDetailView: View {
     
     private func loadSeasons() async {
         guard let show else { seasons = []; return }
-        guard seasons.isEmpty else { return } // Don't reload if already loaded
+        guard seasons.isEmpty else { return }
         isLoading = true
         defer { isLoading = false }
         do {
             let loadedSeasons = try await JFAPI.loadSeasons(for: show)
-            self.seasons = loadedSeasons
-            if let recent = loadedSeasons.first(where: {
-                ($0.userData?.isPlayed == true) || (($0.userData?.playCount ?? 0) > 0)
-            }) {
-                self.selectedSeason = recent
-            } else {
-                self.selectedSeason = loadedSeasons.first
-            }
+            self.seasons = loadedSeasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+            
+            // Find the latest season to continue watching
+            let latestSeason = findLatestSeasonToContinue()
+            self.selectedSeason = latestSeason ?? self.seasons.first
+            
             if let selected = self.selectedSeason {
                 await loadEpisodes(for: selected)
             }
@@ -158,12 +146,82 @@ struct ShowDetailView: View {
         }
     }
     
+    private func findLatestSeasonToContinue() -> BaseItemDto? {
+        let sortedSeasons = seasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+        
+        // Find the latest season with any watched content
+        var latestWatchedSeason: BaseItemDto?
+        
+        for season in sortedSeasons.reversed() {
+            // Check if season has any watched episodes or in-progress episodes
+            if (season.userData?.playCount ?? 0) > 0 || 
+               (season.userData?.playbackPositionTicks ?? 0) > 0 ||
+               season.userData?.isPlayed == true {
+                latestWatchedSeason = season
+                break
+            }
+        }
+        
+        // If we found a watched season, check if it's fully completed
+        if let watchedSeason = latestWatchedSeason {
+            // If the season is fully watched, try to find the next season
+            if watchedSeason.userData?.isPlayed == true {
+                if let currentIndex = sortedSeasons.firstIndex(where: { $0.id == watchedSeason.id }),
+                   currentIndex + 1 < sortedSeasons.count {
+                    return sortedSeasons[currentIndex + 1]
+                }
+            }
+            return watchedSeason
+        }
+        
+        // If no watched content found, return first season
+        return sortedSeasons.first
+    }
+    
     private func loadEpisodes(for season: BaseItemDto?) async {
         guard let show, let season else { episodes = []; return }
         do {
-            self.episodes = try await JFAPI.loadEpisodes(for: show, season: season)
+            let loadedEpisodes = try await JFAPI.loadEpisodes(for: show, season: season)
+            self.episodes = loadedEpisodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
         } catch {
             self.episodes = []
+        }
+    }
+    
+    private func scrollToLatestEpisode() async {
+        guard !episodes.isEmpty else { return }
+        
+        let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+        
+        // Find episode to scroll to (in-progress or next unwatched)
+        var targetEpisode: BaseItemDto?
+        
+        // First, look for in-progress episode
+        targetEpisode = sortedEpisodes.first { episode in
+            let hasProgress = (episode.userData?.playbackPositionTicks ?? 0) > 0
+            let isFullyWatched = episode.userData?.isPlayed == true || 
+                               (episode.playbackProgress ?? 0) >= 0.95
+            return hasProgress && !isFullyWatched
+        }
+        
+        // If no in-progress episode, find first unwatched
+        if targetEpisode == nil {
+            targetEpisode = sortedEpisodes.first { episode in
+                let isWatched = episode.userData?.isPlayed == true || 
+                               (episode.playbackProgress ?? 0) >= 0.95
+                return !isWatched
+            }
+        }
+        
+        // If all episodes are watched, scroll to last episode
+        if targetEpisode == nil {
+            targetEpisode = sortedEpisodes.last
+        }
+        
+        if let episode = targetEpisode, let episodeId = episode.id {
+            withAnimation {
+                episodeScrollPosition.scrollTo(id: episodeId, anchor: .center)
+            }
         }
     }
 }

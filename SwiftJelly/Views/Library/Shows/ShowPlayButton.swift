@@ -3,36 +3,10 @@ import JellyfinAPI
 
 struct ShowPlayButton: View {
     let show: BaseItemDto
-    let episodes: [BaseItemDto]
-
-    private var nextEpisode: BaseItemDto? {
-        // Sort episodes by episode number for proper order
-        let sortedEpisodes = episodes.sorted { (a, b) in
-            (a.indexNumber ?? 0) < (b.indexNumber ?? 0)
-        }
-        
-        // Find episode with in-progress playback (not fully watched)
-        if let inProgressEpisode = sortedEpisodes.first(where: { episode in
-            let hasProgress = (episode.userData?.playbackPositionTicks ?? 0) > 0
-            let isFullyWatched = episode.userData?.isPlayed == true || 
-                               (episode.playbackProgress ?? 0) >= 0.95
-            return hasProgress && !isFullyWatched
-        }) {
-            return inProgressEpisode
-        }
-        
-        // Find first unwatched episode
-        if let firstUnwatched = sortedEpisodes.first(where: { episode in
-            let isWatched = episode.userData?.isPlayed == true || 
-                           (episode.playbackProgress ?? 0) >= 0.95
-            return !isWatched
-        }) {
-            return firstUnwatched
-        }
-        
-        // If all episodes are watched, return the last episode
-        return sortedEpisodes.last
-    }
+    let seasons: [BaseItemDto]
+    
+    @State private var nextEpisode: BaseItemDto?
+    @State private var isLoading = false
 
     var body: some View {
         if let episode = nextEpisode {
@@ -45,7 +19,8 @@ struct ShowPlayButton: View {
                             Text("S\(season)E\(ep)")
                                 .font(.caption)
                         }
-                        if let progress = episode.playbackProgress, progress > 0, progress < 1 {
+                        
+                        if let progress = episode.playbackProgress, progress > 0, progress < 0.95 {
                             Gauge(value: progress) {
                                 EmptyView()
                             } currentValueLabel: {
@@ -72,7 +47,62 @@ struct ShowPlayButton: View {
                 .controlSize(.extraLarge)
                 .buttonStyle(.glassProminent)
                 
-                MarkPlayedButton(item: episode)
+                if let episode = nextEpisode {
+                    MarkPlayedButton(item: episode)
+                }
+            }
+        } else {
+            ProgressView()
+                .task(id: seasons) {
+                    await findNextEpisode()
+                }
+        }
+    }
+    
+    private func findNextEpisode() async {
+        guard !seasons.isEmpty else { return }
+        
+        let sortedSeasons = seasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+        
+        for season in sortedSeasons {
+            do {
+                let episodes = try await JFAPI.loadEpisodes(for: show, season: season)
+                let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+                
+                // Look for in-progress episode first
+                if let inProgressEpisode = sortedEpisodes.first(where: { episode in
+                    let hasProgress = (episode.userData?.playbackPositionTicks ?? 0) > 0
+                    let isFullyWatched = episode.userData?.isPlayed == true || 
+                                       (episode.playbackProgress ?? 0) >= 0.95
+                    return hasProgress && !isFullyWatched
+                }) {
+                    nextEpisode = inProgressEpisode
+                    return
+                }
+                
+                // Look for first unwatched episode
+                if let firstUnwatched = sortedEpisodes.first(where: { episode in
+                    let isWatched = episode.userData?.isPlayed == true || 
+                                   (episode.playbackProgress ?? 0) >= 0.95
+                    return !isWatched
+                }) {
+                    nextEpisode = firstUnwatched
+                    return
+                }
+                
+                // If all episodes in this season are watched, continue to next season
+            } catch {
+                continue
+            }
+        }
+        
+        // If we get here, all episodes are watched - set to last episode of last season
+        if let lastSeason = sortedSeasons.last {
+            do {
+                let episodes = try await JFAPI.loadEpisodes(for: show, season: lastSeason)
+                nextEpisode = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }.last
+            } catch {
+                nextEpisode = nil
             }
         }
     }
