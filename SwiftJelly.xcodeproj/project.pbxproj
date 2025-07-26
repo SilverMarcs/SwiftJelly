@@ -42,6 +42,8 @@
 		084962382E1FBBA700CA183B /* Exceptions for "SwiftJelly" folder in "SwiftJelly" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			platformFiltersByRelativePath = {
+				AppDelegate.swift = (ios, xros, );
+				Utilities/OrientationManager.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift = (macos, );
 				Views/MediaPlayer/VLCPlayer/Overlays/VLCMobileControls.swift = (ios, xros, );

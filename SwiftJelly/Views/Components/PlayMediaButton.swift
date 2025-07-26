@@ -26,7 +26,7 @@ struct PlayMediaButton<Label: View>: View {
         }
         #if !os(macOS)
         .fullScreenCover(isPresented: $showPlayer) {
-            VLCPlayerView(item: item)
+            UniversalMediaPlayer(item: item)
                 .environment(\.refresh, refresh)
         }
         #endif
