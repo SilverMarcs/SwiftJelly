@@ -73,6 +73,24 @@ class PlaybackReporter {
         }
     }
     
+    /// Reports playback progress (periodic updates)
+    func reportProgress(positionSeconds: Int, isPaused: Bool) {
+        guard hasSentStart else { return }
+        
+        Task {
+            do {
+                try await JFAPI.reportPlaybackProgress(
+                    for: item,
+                    positionTicks: positionSeconds.toPositionTicks,
+                    isPaused: isPaused,
+                    playSessionID: playSessionID
+                )
+            } catch {
+                print("Failed to send progress report: \(error)")
+            }
+        }
+    }
+    
     /// Reports playback stop
     func reportStop(positionSeconds: Int) {
         guard hasSentStart else { return }

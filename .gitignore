@@ -27,3 +27,5 @@ VLCUIPackageCode
 JellyFinApiPackageCode
 IgnoreFolder
 .DS_Store
+SwiftUI
+VLCVideoPlayer

@@ -18,7 +18,7 @@ struct SwiftJellyApp: App {
         #if os(macOS)
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
             if let item = item {
-                AVMediaPlayerView(item: item)
+                VLCPlayerView(item: item)
             } else {
                 Text("Unable to open player window.")
             }
