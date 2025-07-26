@@ -16,6 +16,7 @@ struct MovieDetailView: View {
                             PortraitImageView(item: movie)
                         } else {
                             LandscapeImageView(item: movie)
+                                .frame(maxHeight: 500)
                         }
                     }
                     .backgroundExtensionEffect()

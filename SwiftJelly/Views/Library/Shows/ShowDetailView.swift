@@ -22,6 +22,7 @@ struct ShowDetailView: View {
                             PortraitImageView(item: show)
                         } else {
                             LandscapeImageView(item: show)
+                                .frame(maxHeight: 500)
                         }
                     }
                     .backgroundExtensionEffect()
@@ -62,7 +63,7 @@ struct ShowDetailView: View {
                             HStack(spacing: 15) {
                                 ForEach(episodes) { episode in
                                     PlayableCard(item: episode, showNavigation: false)
-                                        .id("episode-\(episode.id ?? "")-\(refreshTrigger)")
+                                        .id(episode.id)
                                         .environment(\.refresh, fullRefresh)
                                 }
                             }
@@ -114,18 +115,13 @@ struct ShowDetailView: View {
             await loadEpisodes(for: selectedSeason)
         }
         .task(id: episodes) {
-            await scrollToLatestEpisode()
+            scrollToLatestEpisode()
         }
     }
     
     private func fullRefresh() async {
-        // Reset all state to force complete refresh
         refreshTrigger = UUID()
-        seasons = []
-        episodes = []
-        selectedSeason = nil
         
-        // Reload everything
         await fetchShow()
     }
     
@@ -144,7 +140,6 @@ struct ShowDetailView: View {
     
     private func loadSeasons() async {
         guard let show else { seasons = []; return }
-        guard seasons.isEmpty else { return }
         isLoading = true
         defer { isLoading = false }
         do {
@@ -205,7 +200,7 @@ struct ShowDetailView: View {
         }
     }
     
-    private func scrollToLatestEpisode() async {
+    private func scrollToLatestEpisode() {
         guard !episodes.isEmpty else { return }
         
         let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
@@ -237,7 +232,7 @@ struct ShowDetailView: View {
         
         if let episode = targetEpisode, let episodeId = episode.id {
             withAnimation {
-                episodeScrollPosition.scrollTo(id: episodeId, anchor: .center)
+                episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing)
             }
         }
     }

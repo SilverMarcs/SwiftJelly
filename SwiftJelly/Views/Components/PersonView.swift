@@ -27,7 +27,7 @@ struct PersonView: View {
                         }
                 }
             }
-            .frame(width: 80, height: 80)
+            .frame(width: 60, height: 60)
             .scaledToFill() // not working
             .clipShape(Circle())
             .overlay(
