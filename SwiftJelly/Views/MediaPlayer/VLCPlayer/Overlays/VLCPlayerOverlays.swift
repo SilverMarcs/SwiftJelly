@@ -38,27 +38,10 @@ struct VLCPlayerOverlays: ViewModifier {
                         .allowsHitTesting(false)
                 }
             }
-            .overlay(alignment: .center) {
-                if controlsVisible {
-                    VLCPlayerControls(
-                        playbackState: playbackState,
-                        proxy: proxy
-                    )
-                }
-            }
             .overlay(alignment: .bottom) {
                 if controlsVisible {
-                    VStack {
-                        VLCPlayerInfoBar(
-                            proxy: proxy,
-                            subtitleManager: subtitleManager
-                        )
-                        VLCPlayerProgressBar(
-                            playbackState: playbackState,
-                            proxy: proxy
-                        )
-                    }
-                    .padding()
+                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
+                        .padding()
                 }
             }
     }

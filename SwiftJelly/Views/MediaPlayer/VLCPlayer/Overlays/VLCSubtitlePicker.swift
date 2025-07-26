@@ -33,8 +33,9 @@ struct VLCSubtitlePicker: View {
         }
         .labelStyle(.iconOnly)
         .menuIndicator(.hidden)
-        .menuStyle(.button)
-        .buttonStyle(.glass)
-        .controlSize(.large)
+        .buttonStyle(.plain)
+//        .menuStyle(.button)
+//        .buttonStyle(.glass)
+//        .controlSize(.large)
     }
 }
