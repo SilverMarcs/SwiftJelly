@@ -3,6 +3,10 @@ import JellyfinAPI
 import VLCUI
 import MediaPlayer
 
+#if !os(macOS)
+import UIKit
+#endif
+
 struct VLCPlayerView: View {
     let item: BaseItemDto
     @State private var proxy: VLCVideoPlayer.Proxy = .init()
@@ -13,6 +17,7 @@ struct VLCPlayerView: View {
     @State private var playbackInfo: VLCVideoPlayer.PlaybackInformation? = nil
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
+    @State private var isAspectFillMode = false
     
     let playbackURL: URL?
     let startTimeSeconds: Int
@@ -61,8 +66,6 @@ struct VLCPlayerView: View {
                 subtitleManager.setVLCProxy(proxy)
                 setupSystemMediaControls()
             }
-            .tint(.white)
-            .accentColor(.white)
             .preferredColorScheme(.dark)
             .task {
                 await subtitleManager.loadExternalSubtitles()
@@ -102,6 +105,17 @@ struct VLCPlayerView: View {
                 playbackState: playbackState,
                 playbackInfo: playbackInfo,
                 subtitleManager: subtitleManager,
+                isAspectFillMode: $isAspectFillMode,
+                onToggleAspectFill: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isAspectFillMode.toggle()
+                        if isAspectFillMode {
+                            proxy.aspectFill(1.0)
+                        } else {
+                            proxy.aspectFill(0.0)
+                        }
+                    }
+                }
             )
         }
     }

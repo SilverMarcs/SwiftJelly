@@ -10,6 +10,8 @@ struct VLCPlayerOverlays: ViewModifier {
     let playbackState: PlaybackStateManager
     let playbackInfo: VLCVideoPlayer.PlaybackInformation?
     let subtitleManager: SubtitleManager
+    @Binding var isAspectFillMode: Bool
+    let onToggleAspectFill: () -> Void
     
     func body(content: Content) -> some View {
         content
@@ -48,14 +50,28 @@ struct VLCPlayerOverlays: ViewModifier {
                 }
             }
 #if !os(macOS)
-            .overlay(alignment: .topTrailing) {
+            .overlay(alignment: .top) {
                 if controlsVisible {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
+                    HStack {
+                        Button {
+                            onToggleAspectFill()
+                        } label: {
+                            Image(systemName: isAspectFillMode ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.circle)
+                        
+                        Spacer()
+                        
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.circle)
                     }
-                    .padding()
+//                    .padding()
                 }
             }
 #endif
@@ -70,6 +86,8 @@ extension View {
         playbackState: PlaybackStateManager,
         playbackInfo: VLCVideoPlayer.PlaybackInformation?,
         subtitleManager: SubtitleManager,
+        isAspectFillMode: Binding<Bool>,
+        onToggleAspectFill: @escaping () -> Void
     ) -> some View {
         self.modifier(VLCPlayerOverlays(
             controlsVisible: controlsVisible,
@@ -78,6 +96,8 @@ extension View {
             playbackState: playbackState,
             playbackInfo: playbackInfo,
             subtitleManager: subtitleManager,
+            isAspectFillMode: isAspectFillMode,
+            onToggleAspectFill: onToggleAspectFill
         ))
     }
 }
