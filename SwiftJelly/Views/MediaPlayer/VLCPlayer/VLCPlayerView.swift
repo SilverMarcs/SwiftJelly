@@ -48,9 +48,7 @@ struct VLCPlayerView: View {
                 let totalDuration = info.length / 1000
                 playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
                 subtitleManager.updateFromPlaybackInfo(info)
-                
                 updateSystemMediaPlaybackState()
-                
                 if !hasLoadedEmbeddedSubs {
                     subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
                     hasLoadedEmbeddedSubs = true
@@ -59,6 +57,9 @@ struct VLCPlayerView: View {
             .onAppear {
                 subtitleManager.setVLCProxy(proxy)
                 setupSystemMediaControls()
+#if os(iOS)
+                OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
+#endif
             }
             .preferredColorScheme(.dark)
             .task {
@@ -78,6 +79,9 @@ struct VLCPlayerView: View {
             .background(.black, ignoresSafeAreaEdges: .all)
             .onDisappear {
                 cleanup()
+            #if os(iOS)
+                OrientationManager.shared.lockOrientation(.all)
+            #endif
             }
             .preferredColorScheme(.dark)
             .mediaPlayerKeyboardShortcuts(

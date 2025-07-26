@@ -21,7 +21,7 @@ struct VLCMobileControls: View {
                 } label: {
                     Image(systemName: "gobackward.10")
                         .font(.system(size: 25))
-//                        .padding(5)
+                        .padding(5)
                 }
             }
             
@@ -34,7 +34,7 @@ struct VLCMobileControls: View {
             } label: {
                 Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 45))
-//                    .padding(10)
+                    .padding(10)
             }
             .opacity(controlsVisible ? 1 : 0.01)
             .contentShape(Rectangle()) // Always has a tappable area
@@ -46,7 +46,7 @@ struct VLCMobileControls: View {
                 } label: {
                     Image(systemName: "goforward.10")
                         .font(.system(size: 25))
-//                        .padding(5)
+                        .padding(5)
                 }
             }
         }
