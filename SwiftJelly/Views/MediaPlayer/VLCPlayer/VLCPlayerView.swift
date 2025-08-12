@@ -35,7 +35,6 @@ struct VLCPlayerView: View {
                     autoPlay: true,
                     startSeconds: .seconds(Int64(startTimeSeconds)),
                     subtitleSize: .absolute(24),
-                    playbackChildren: subtitleManager.getPlaybackChildren()
                 )
             )
             .proxy(proxy)
@@ -62,9 +61,6 @@ struct VLCPlayerView: View {
 #endif
             }
             .preferredColorScheme(.dark)
-            .task {
-                await subtitleManager.loadExternalSubtitles()
-            }
             .navigationTitle(item.name ?? "Media Player")
             #if os(macOS)
             .gesture(WindowDragGesture())

@@ -39,7 +39,7 @@ struct VLCPlayerOverlays: ViewModifier {
             )
             .overlay {
                 if controlsVisible {
-                    Color.black.opacity(0.3)
+                    Color.black.opacity(0.2)
                         .ignoresSafeArea()
                         .transition(.opacity)
                         .allowsHitTesting(false)

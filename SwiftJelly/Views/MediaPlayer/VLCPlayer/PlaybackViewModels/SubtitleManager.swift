@@ -4,12 +4,10 @@ import VLCUI
 
 @Observable class SubtitleManager {
     @ObservationIgnored private let item: BaseItemDto
-    var isLoading: Bool = false
     var availableSubtitles: [MediaTrack] = []
     var selectedSubtitleIndex: Int = -1
     
     private var vlcProxy: VLCVideoPlayer.Proxy?
-    private var externalSubtitleChildren: [VLCVideoPlayer.PlaybackChild] = []
     
     init(item: BaseItemDto) {
         self.item = item
@@ -17,10 +15,6 @@ import VLCUI
     
     func setVLCProxy(_ proxy: VLCVideoPlayer.Proxy) {
         self.vlcProxy = proxy
-    }
-    
-    func getPlaybackChildren() -> [VLCVideoPlayer.PlaybackChild] {
-        return externalSubtitleChildren
     }
     
     func updateFromPlaybackInfo(_ info: VLCVideoPlayer.PlaybackInformation) {
@@ -31,18 +25,6 @@ import VLCUI
     
     func loadSubtitlesFromVLC(tracks: [MediaTrack]) {
         availableSubtitles = tracks
-    }
-    
-    func loadExternalSubtitles() async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        do {
-            externalSubtitleChildren = try await JFAPI.createExternalSubtitlePlaybackChildren(for: item)
-            print("Loaded \(externalSubtitleChildren.count) external subtitle streams")
-        } catch {
-            print("Failed to load external subtitles: \(error)")
-        }
     }
     
     func selectSubtitle(at index: Int) {
