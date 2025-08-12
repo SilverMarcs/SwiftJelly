@@ -39,8 +39,6 @@ struct VLCPlayerTopOverlay: View {
             }
         }
         .buttonBorderShape(.circle)
-        .tint(.white)
-        .buttonStyle(.bordered)
-//        .buttonStyle(.glass)
+        .buttonStyle(.glass)
     }
 }

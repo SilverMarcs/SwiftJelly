@@ -83,7 +83,7 @@ struct VLCControlsOverlay: View {
                 VLCSubtitlePicker(subtitleManager: subtitleManager)
             }
         }
-        .buttonStyle(.plain)
+//        .buttonStyle(.plain)
         #if os(macOS)
         .frame(maxWidth: 500)
         #endif
