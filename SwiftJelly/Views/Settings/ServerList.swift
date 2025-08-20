@@ -10,6 +10,7 @@ import SwiftUI
 struct ServerList: View {
     private var dataManager = DataManager.shared
     @State private var showAddSheet = false
+    @Namespace private var transition
     
     var body: some View {
         List {
@@ -45,9 +46,12 @@ struct ServerList: View {
                     Image(systemName: "plus")
                 }
             }
+            .matchedTransitionSource(id: "add-server-button", in: transition)
         }
         .sheet(isPresented: $showAddSheet) {
             AddServerView()
+                .navigationTransition(.zoom(sourceID: "add-server-button", in: transition))
+                .presentationDetents([.medium])
         }
     }
 }

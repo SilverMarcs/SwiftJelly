@@ -8,18 +8,22 @@
 import SwiftUI
 
 struct SettingsToolbar: ToolbarContent {
-    @State private var showSettings: Bool = false
+    @State var isPresented: Bool = false
+    @Namespace private var transition
     
     var body: some ToolbarContent {
-        ToolbarItem(placement: .primaryAction) {
+        ToolbarItem {
             Button {
-                showSettings.toggle()
+                isPresented = true
             } label: {
                 Label("Settings", systemImage: "gear")
             }
-            .sheet(isPresented: $showSettings) {
+            .sheet(isPresented: $isPresented) {
                 SettingsView()
+                    .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
+                    .presentationDetents([.medium])
             }
         }
+        .matchedTransitionSource(id: "settings-button", in: transition)
     }
 }
