@@ -78,10 +78,8 @@ struct VLCControlsOverlay: View {
                 .font(.caption)
                 .monospacedDigit()
             
-            // Subtitle picker
-            if !subtitleManager.availableSubtitles.isEmpty {
-                VLCSubtitlePicker(subtitleManager: subtitleManager)
-            }
+            // Subtitle picker - always show for debugging
+            VLCSubtitlePicker(subtitleManager: subtitleManager)
         }
         .buttonStyle(.plain)
         #if os(macOS)
