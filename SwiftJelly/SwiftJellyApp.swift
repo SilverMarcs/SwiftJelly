@@ -20,9 +20,9 @@ struct SwiftJellyApp: App {
         }
         
         #if os(macOS)
-        WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
-            if let item = item {
-                UniversalMediaPlayer(item: item)
+        WindowGroup("Media Player", id: "media-player", for: MediaItem.self) { $mediaItem in
+            if let mediaItem = mediaItem {
+                UniversalMediaPlayer(mediaItem: mediaItem)
             } else {
                 Text("Unable to open player window.")
             }

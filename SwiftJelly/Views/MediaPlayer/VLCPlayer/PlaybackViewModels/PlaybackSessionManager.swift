@@ -12,8 +12,6 @@ import JellyfinAPI
         self.playbackReporter = PlaybackReporter(item: item)
     }
     
-
-    
     func startPlayback(at seconds: Int) {
         guard !hasSentStart else { return }
         playbackReporter.reportStart(positionSeconds: seconds)
@@ -34,6 +32,4 @@ import JellyfinAPI
         guard hasSentStart else { return }
         playbackReporter.reportStop(positionSeconds: seconds)
     }
-    
-    // No periodic progress reporting. Only report on start, pause, resume, stop.
 }

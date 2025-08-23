@@ -19,6 +19,10 @@ struct ContentView: View {
             }
             
             #if os(macOS)
+            Tab("Local Media", systemImage: "folder") {
+                LocalMediaView()
+            }
+            
             Tab("Settings", systemImage: "gear") {
                 SettingsView()
             }

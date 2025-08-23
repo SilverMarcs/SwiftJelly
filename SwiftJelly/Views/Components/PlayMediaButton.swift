@@ -17,7 +17,7 @@ struct PlayMediaButton<Label: View>: View {
             RefreshHandlerContainer.shared.refresh = refresh
             #if os(macOS)
             dismissWindow(id: "media-player") // ensure we close any open players first
-            openWindow(id: "media-player", value: item)
+            openWindow(id: "media-player", value: MediaItem.jellyfin(item))
             #else
             showPlayer = true
             #endif

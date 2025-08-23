@@ -20,10 +20,10 @@ struct SettingsToolbar: ToolbarContent {
             }
             .sheet(isPresented: $isPresented) {
                 SettingsView()
-                    .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
+//                    .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
                     .presentationDetents([.medium])
             }
         }
-        .matchedTransitionSource(id: "settings-button", in: transition)
+//        .matchedTransitionSource(id: "settings-button", in: transition)
     }
 }

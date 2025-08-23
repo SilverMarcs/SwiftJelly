@@ -8,10 +8,11 @@ import UIKit
 #endif
 
 struct VLCPlayerView: View {
-    let item: BaseItemDto
-    @State private var proxy: VLCVideoPlayer.Proxy = .init()
+    let mediaItem: MediaItem
+    
+    @State private var proxy: VLCVideoPlayer.Proxy
     @State private var playbackState = PlaybackStateManager()
-    @State private var sessionManager: PlaybackSessionManager
+    @State private var sessionManager: PlaybackSessionManager?
     @State private var subtitleManager: SubtitleManager
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
@@ -19,12 +20,23 @@ struct VLCPlayerView: View {
     let playbackURL: URL?
     let startTimeSeconds: Int
     
-    init(item: BaseItemDto) {
-        self.item = item
-        self.playbackURL = try? JFAPI.getPlaybackURL(for: item)
-        self.startTimeSeconds = JFAPI.getStartTimeSeconds(for: item)
-        self._sessionManager = State(initialValue: PlaybackSessionManager(item: item))
-        self._subtitleManager = State(initialValue: SubtitleManager(item: item))
+    init(mediaItem: MediaItem) {
+        self.mediaItem = mediaItem
+        self.playbackURL = mediaItem.url
+        self.startTimeSeconds = mediaItem.startTimeSeconds
+        
+        let vlcProxy = VLCVideoPlayer.Proxy()
+        self._proxy = State(initialValue: vlcProxy)
+        
+        // Initialize subtitle manager with the proxy
+        self._subtitleManager = State(initialValue: SubtitleManager(vlcProxy: vlcProxy))
+        
+        // Only create session manager for Jellyfin items
+        if let jellyfinItem = mediaItem.jellyfinItem {
+            self._sessionManager = State(initialValue: PlaybackSessionManager(item: jellyfinItem))
+        } else {
+            self._sessionManager = State(initialValue: nil)
+        }
     }
     
     var body: some View {
@@ -54,14 +66,13 @@ struct VLCPlayerView: View {
                 }
             }
             .onAppear {
-                subtitleManager.setVLCProxy(proxy)
                 setupSystemMediaControls()
-#if os(iOS)
+                #if os(iOS)
                 OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
-#endif
+                #endif
             }
             .preferredColorScheme(.dark)
-            .navigationTitle(item.name ?? "Media Player")
+            .navigationTitle(mediaItem.name ?? "Media Player")
             #if os(macOS)
             .gesture(WindowDragGesture())
             .aspectRatio(16/9, contentMode: .fill)
@@ -75,9 +86,9 @@ struct VLCPlayerView: View {
             .background(.black, ignoresSafeAreaEdges: .all)
             .onDisappear {
                 cleanup()
-            #if os(iOS)
+                #if os(iOS)
                 OrientationManager.shared.lockOrientation(.all)
-            #endif
+                #endif
             }
             .preferredColorScheme(.dark)
             .mediaPlayerKeyboardShortcuts(
@@ -98,6 +109,9 @@ struct VLCPlayerView: View {
         
         // Update system media controls
         updateSystemMediaPlaybackState()
+        
+        // Only handle Jellyfin session management for Jellyfin items
+        guard let sessionManager = sessionManager else { return }
         
         // Send start report when playback begins
         if !sessionManager.hasSentStart && state == .playing {
@@ -148,23 +162,34 @@ struct VLCPlayerView: View {
     }
     
     private func updateSystemMediaInfo() {
-        let title = item.name ?? "Unknown Title"
-        let artist = item.seriesName ?? item.albumArtist ?? ""
+        let title = mediaItem.name ?? "Unknown Title"
+        var artist = ""
         var albumTitle: String? = nil
-        if let season = item.parentIndexNumber, let episode = item.indexNumber {
-            albumTitle = "S\(season)E\(episode)"
+        var duration: Double = 0
+        
+        // Get metadata based on media type
+        switch mediaItem {
+        case .jellyfin(let item):
+            artist = item.seriesName ?? item.albumArtist ?? ""
+            if let season = item.parentIndexNumber, let episode = item.indexNumber {
+                albumTitle = "S\(season)E\(episode)"
+            }
+            duration = Double(item.runTimeTicks ?? 0) / 10_000_000
+        case .local(let file):
+            artist = "Local Media"
+            duration = file.duration ?? 0
         }
-        let duration = Double(item.runTimeTicks ?? 0) / 10_000_000 // Convert from ticks to seconds
         
         Task {
             var artwork: MPMediaItemArtwork? = nil
             
-            // Try to load artwork if available
-            // TODO: get this from cache servie
-            if let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
+            // Try to load artwork if available (only for Jellyfin items)
+            if case .jellyfin(let item) = mediaItem,
+               let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
                 artwork = await loadArtwork(from: imageURL)
             }
             
+            // TODO: we are passing too much no need so much
             SystemMediaController.shared.updateNowPlayingInfo(
                 title: title,
                 artist: artist,
@@ -201,7 +226,7 @@ struct VLCPlayerView: View {
     
     func cleanup() {
         proxy.stop()
-        sessionManager.stopPlayback(at: playbackState.currentSeconds)
+        sessionManager?.stopPlayback(at: playbackState.currentSeconds)
         SystemMediaController.shared.clearNowPlayingInfo()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }
