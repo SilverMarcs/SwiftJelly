@@ -33,11 +33,15 @@ struct LocalMediaRow: View {
                         .lineLimit(1)
                     
                     HStack {
-                        if let duration = file.duration {
-                            Text(formatDuration(duration))
+                        if let durationSeconds = file.durationSeconds {
+                            Text(durationSeconds.timeString())
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        
+                        Text("•")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         
                         if file.savedPosition > 0 {
                             if file.isCompleted {
@@ -45,18 +49,11 @@ struct LocalMediaRow: View {
                                     .font(.caption)
                                     .foregroundStyle(.green)
                             } else {
-                                Text("Resume at \(formatDuration(TimeInterval(file.savedPosition)))")
+                                Text("Resume at \(file.savedPosition.timeString())")
                                     .font(.caption)
                                     .foregroundStyle(.accent)
                             }
                         }
-                    }
-                    
-                    // Progress bar
-                    if let progress = file.progress, progress > 0.05 {
-                        ProgressView(value: progress)
-                            .progressViewStyle(LinearProgressViewStyle(tint: file.isCompleted ? .green : .blue))
-                            .scaleEffect(y: 0.5)
                     }
                 }
                 
@@ -80,19 +77,6 @@ struct LocalMediaRow: View {
             Button("Remove from Recent", systemImage: "trash", role: .destructive) {
                 LocalMediaManager.shared.removeRecentFile(file)
             }
-        }
-    }
-    
-    // TODO: search for formatDuration
-    private func formatDuration(_ seconds: TimeInterval) -> String {
-        let hours = Int(seconds) / 3600
-        let minutes = Int(seconds) % 3600 / 60
-        let secs = Int(seconds) % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, secs)
-        } else {
-            return String(format: "%d:%02d", minutes, secs)
         }
     }
 }

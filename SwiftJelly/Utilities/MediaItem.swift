@@ -28,7 +28,8 @@ enum MediaItem: Codable, Hashable {
             guard let ticks = item.runTimeTicks else { return nil }
             return Double(ticks) / 10_000_000
         case .local(let file):
-            return file.duration
+            guard let durationSeconds = file.durationSeconds else { return nil }
+            return TimeInterval(durationSeconds)
         }
     }
     
@@ -77,18 +78,18 @@ enum MediaItem: Codable, Hashable {
 struct LocalMediaFile: Codable, Hashable {
     let url: URL
     let name: String
-    let duration: TimeInterval?
+    let durationSeconds: Int?
     
     init(url: URL) {
         self.url = url
         self.name = url.deletingPathExtension().lastPathComponent
-        self.duration = nil
+        self.durationSeconds = nil
     }
     
-    init(url: URL, name: String, duration: TimeInterval? = nil) {
+    init(url: URL, name: String, durationSeconds: Int? = nil) {
         self.url = url
         self.name = name
-        self.duration = duration
+        self.durationSeconds = durationSeconds
     }
     
     /// Get the saved playback position for this file
@@ -105,7 +106,7 @@ struct LocalMediaFile: Codable, Hashable {
     
     /// Get progress percentage based on saved position and duration
     var progress: Double? {
-        guard let duration = duration, duration > 0 else { return nil }
-        return Double(savedPosition) / duration
+        guard let durationSeconds = durationSeconds, durationSeconds > 0 else { return nil }
+        return Double(savedPosition) / Double(durationSeconds)
     }
 }

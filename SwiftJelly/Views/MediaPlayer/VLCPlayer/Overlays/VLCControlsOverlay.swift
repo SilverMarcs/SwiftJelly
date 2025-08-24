@@ -48,7 +48,7 @@ struct VLCControlsOverlay: View {
             #endif
             
             // Time and slider
-            Text(timeString(from: playbackState.currentSeconds))
+            Text(playbackState.currentSeconds.timeString())
                 .font(.caption)
                 .monospacedDigit()
 
@@ -74,7 +74,7 @@ struct VLCControlsOverlay: View {
                 }
             }
 
-            Text(timeString(from: playbackState.totalDuration))
+            Text(playbackState.totalDuration.timeString())
                 .font(.caption)
                 .monospacedDigit()
             
@@ -87,17 +87,5 @@ struct VLCControlsOverlay: View {
         #endif
         .padding(12)
         .glassEffect()
-    }
-    
-    private func timeString(from seconds: Int) -> String {
-        let hours = seconds / 3600
-        let minutes = (seconds % 3600) / 60
-        let seconds = seconds % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
     }
 }

@@ -18,11 +18,11 @@ struct ContentView: View {
                 LibraryView()
             }
             
-            #if os(macOS)
-            Tab("Local Media", systemImage: "folder") {
+            Tab("Local", systemImage: "folder") {
                 LocalMediaView()
             }
             
+            #if os(macOS)
             Tab("Settings", systemImage: "gear") {
                 SettingsView()
             }

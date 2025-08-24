@@ -13,7 +13,7 @@ struct ServerList: View {
     @Namespace private var transition
     
     var body: some View {
-        List {
+        Form {
             ForEach(dataManager.servers) { server in
                 Button {
                     dataManager.selectServer(server)
@@ -28,15 +28,16 @@ struct ServerList: View {
                     .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
-            }
-            .onDelete { indexSet in
-                for index in indexSet {
-                    let server = dataManager.servers[index]
-                    dataManager.deleteServer(server)
+                .contextMenu {
+                    Button(role: .destructive) {
+                        dataManager.deleteServer(server)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
                 }
             }
         }
-        .scrollDisabled(true)
+        .formStyle(.grouped)
         .navigationTitle("Servers")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

@@ -59,18 +59,15 @@ class LocalPlaybackReporter: PlaybackReporterProtocol {
         guard hasSentStart else { return }
         
         // If we're near the end (within last 5% of duration), mark as completed
-        if let duration = file.duration {
-            let progressPercent = Double(positionSeconds) / duration
+        if let durationSeconds = file.durationSeconds {
+            let progressPercent = Double(positionSeconds) / Double(durationSeconds)
             if progressPercent >= 0.95 {
                 markAsCompleted()
-                print("Completed local playback for: \(file.name)")
             } else {
                 savePlaybackPosition(positionSeconds)
-                print("Stopped local playback for: \(file.name) at \(positionSeconds)s")
             }
         } else {
             savePlaybackPosition(positionSeconds)
-            print("Stopped local playback for: \(file.name) at \(positionSeconds)s")
         }
     }
     

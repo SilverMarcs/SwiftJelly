@@ -109,6 +109,16 @@ struct VLCPlayerView: View {
             hasLoadedEmbeddedSubs = true
         }
         
+        // Update local media file duration if not already set
+        if case .local(let file) = mediaItem, file.durationSeconds == nil, totalDuration > 0 {
+            let updatedFile = LocalMediaFile(
+                url: file.url,
+                name: file.name,
+                durationSeconds: totalDuration
+            )
+            LocalMediaManager.shared.addRecentFile(updatedFile)
+        }
+        
         // Send periodic progress updates
         // playbackReporter?.reportProgress(
         //     positionSeconds: playbackState.currentSeconds,

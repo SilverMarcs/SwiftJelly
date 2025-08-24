@@ -176,7 +176,7 @@ public class SystemMediaController {
             }
         case .local(let file):
             artist = "Local Media"
-            duration = file.duration ?? 0
+            duration = Double(file.durationSeconds ?? 0)
         }
 
         var artwork: MPMediaItemArtwork? = nil

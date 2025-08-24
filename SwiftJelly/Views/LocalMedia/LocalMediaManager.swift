@@ -43,7 +43,7 @@ class LocalMediaManager {
     
     /// Get enhanced metadata for a local file
     func getEnhancedMetadata(for file: LocalMediaFile) async -> LocalMediaFile {
-        guard file.duration == nil else { return file }
+        guard file.durationSeconds == nil else { return file }
         
         do {
             let asset = AVURLAsset(url: file.url)
@@ -53,7 +53,7 @@ class LocalMediaManager {
             return LocalMediaFile(
                 url: file.url,
                 name: file.name,
-                duration: durationSeconds.isFinite ? durationSeconds : nil
+                durationSeconds: durationSeconds.isFinite ? Int(durationSeconds) : nil
             )
         } catch {
             print("Failed to load metadata for \(file.name): \(error)")

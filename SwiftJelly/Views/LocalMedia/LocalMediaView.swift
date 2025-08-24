@@ -7,16 +7,17 @@
 
 import SwiftUI
 
-struct LocalMediaView: View {    
+struct LocalMediaView: View {
     @State private var localMediaManager = LocalMediaManager.shared
     
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 ForEach(localMediaManager.recentFiles, id: \.url) { file in
                     LocalMediaRow(file: file)
                 }
             }
+            .formStyle(.grouped)
             .overlay {
                 if localMediaManager.recentFiles.isEmpty {
                     ContentUnavailableView(
