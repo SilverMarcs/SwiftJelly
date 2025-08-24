@@ -8,23 +8,16 @@
 import SwiftUI
 
 struct LocalMediaView: View {
-    @State private var localMediaManager = LocalMediaManager.shared
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
+    
+    @State private var localMediaManager = LocalMediaManager.shared
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
                 // File picker button
-                LocalMediaFilePicker { file in
-                    Task {
-                        let enhancedFile = await localMediaManager.getEnhancedMetadata(for: file)
-                        localMediaManager.addRecentFile(enhancedFile)
-                        let mediaItem = MediaItem.local(enhancedFile)
-                        #if os(macOS)
-                        openWindow(id: "media-player", value: mediaItem)
-                        #endif
-                    }
-                }
+                LocalMediaFilePicker()
                 
                 // Recent files list
                 if !localMediaManager.recentFiles.isEmpty {
@@ -37,6 +30,7 @@ struct LocalMediaView: View {
                             LocalMediaRow(file: file) {
                                 let mediaItem = MediaItem.local(file)
                                 #if os(macOS)
+                                dismissWindow(id: "media-player")
                                 openWindow(id: "media-player", value: mediaItem)
                                 #endif
                             }

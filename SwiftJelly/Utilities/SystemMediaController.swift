@@ -154,6 +154,62 @@ public class SystemMediaController {
         
         nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
     }
+
+    // Convenience async helper to build and update now playing info from a MediaItem
+    func updateNowPlayingInfo(
+        for mediaItem: MediaItem,
+        playbackState: PlaybackStateManager
+    ) async {
+        let title = mediaItem.name ?? "Unknown Title"
+        var artist: String? = nil
+        var albumTitle: String? = nil
+        var duration: Double = 0
+
+        switch mediaItem {
+        case .jellyfin(let item):
+            artist = item.seriesName ?? item.albumArtist
+            if let season = item.parentIndexNumber, let episode = item.indexNumber {
+                albumTitle = "S\(season)E\(episode)"
+            }
+            if let runTimeTicks = item.runTimeTicks {
+                duration = Double(runTimeTicks) / 10_000_000
+            }
+        case .local(let file):
+            artist = "Local Media"
+            duration = file.duration ?? 0
+        }
+
+        var artwork: MPMediaItemArtwork? = nil
+
+        // Attempt to load artwork for Jellyfin items if an image URL provider exists
+        if case .jellyfin(let item) = mediaItem,
+           let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: imageURL)
+                #if os(macOS)
+                if let image = NSImage(data: data) {
+                    artwork = createArtwork(from: image)
+                }
+                #else
+                if let image = UIImage(data: data) {
+                    artwork = createArtwork(from: image)
+                }
+                #endif
+            } catch {
+                print("Failed to load artwork: \(error)")
+            }
+        }
+
+        updateNowPlayingInfo(
+            title: title,
+            artist: artist,
+            albumTitle: albumTitle,
+            artwork: artwork,
+            duration: duration,
+            currentTime: Double(playbackState.currentSeconds),
+            playbackRate: playbackState.isPlaying ? 1.0 : 0.0
+        )
+    }
     
     public func updatePlaybackState(isPlaying: Bool, currentTime: Double) {
         var currentInfo = nowPlayingInfoCenter.nowPlayingInfo ?? [:]

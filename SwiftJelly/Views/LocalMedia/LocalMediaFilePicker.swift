@@ -10,7 +10,9 @@ import UniformTypeIdentifiers
 
 struct LocalMediaFilePicker: View {
     @State private var isPickerPresented = false
-    let onFileSelected: (LocalMediaFile) -> Void
+    @State private var localMediaManager = LocalMediaManager.shared
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
     
     var body: some View {
         Button("Open Local Media") {
@@ -32,7 +34,16 @@ struct LocalMediaFilePicker: View {
             case .success(let urls):
                 if let url = urls.first {
                     let localFile = LocalMediaFile(url: url)
-                    onFileSelected(localFile)
+
+                    Task {
+                        let enhancedFile = await localMediaManager.getEnhancedMetadata(for: localFile)
+                        localMediaManager.addRecentFile(enhancedFile)
+                        let mediaItem = MediaItem.local(enhancedFile)
+                        #if os(macOS)
+                        dismissWindow(id: "media-player")
+                        openWindow(id: "media-player", value: mediaItem)
+                        #endif
+                    }
                 }
             case .failure(let error):
                 print("Error selecting file: \(error)")

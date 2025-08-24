@@ -14,6 +14,7 @@ struct VLCPlayerView: View {
     @State private var playbackState = PlaybackStateManager()
     @State private var sessionManager: PlaybackSessionManager?
     @State private var subtitleManager: SubtitleManager
+    
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
     
@@ -54,14 +55,7 @@ struct VLCPlayerView: View {
                 handleStateChange(state)
             }
             .onSecondsUpdated { duration, info in
-                let seconds = Int(duration.components.seconds)
-                let totalDuration = info.length / 1000
-                playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                updateSystemMediaPlaybackState()
-                if !hasLoadedEmbeddedSubs {
-                    subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
-                    hasLoadedEmbeddedSubs = true
-                }
+                handleTicks(duration: duration, info: info)
             }
             .onAppear {
                 setupSystemMediaControls()
@@ -69,8 +63,16 @@ struct VLCPlayerView: View {
                 OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
                 #endif
             }
+            .onDisappear {
+                cleanup()
+                #if os(iOS)
+                OrientationManager.shared.lockOrientation(.all)
+                #endif
+            }
             .preferredColorScheme(.dark)
             .navigationTitle(mediaItem.name ?? "Media Player")
+            .background(.black, ignoresSafeAreaEdges: .all)
+            .preferredColorScheme(.dark)
             #if os(macOS)
             .gesture(WindowDragGesture())
             .aspectRatio(16/9, contentMode: .fill)
@@ -81,14 +83,6 @@ struct VLCPlayerView: View {
                 }
             }
             #endif
-            .background(.black, ignoresSafeAreaEdges: .all)
-            .onDisappear {
-                cleanup()
-                #if os(iOS)
-                OrientationManager.shared.lockOrientation(.all)
-                #endif
-            }
-            .preferredColorScheme(.dark)
             .mediaPlayerKeyboardShortcuts(
                 playbackState: playbackState,
                 proxy: proxy
@@ -101,12 +95,29 @@ struct VLCPlayerView: View {
         }
     }
     
+    private func handleTicks(duration: Duration, info: VLCVideoPlayer.PlaybackInformation) {
+        let seconds = Int(duration.components.seconds)
+        let totalDuration = info.length / 1000
+        playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
+        SystemMediaController.shared.updatePlaybackState(
+            isPlaying: playbackState.isPlaying,
+            currentTime: Double(playbackState.currentSeconds)
+        )
+        if !hasLoadedEmbeddedSubs {
+            subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
+            hasLoadedEmbeddedSubs = true
+        }
+    }
+    
     private func handleStateChange(_ state: VLCVideoPlayer.State) {
         let wasPlaying = playbackState.isPlaying
         playbackState.updatePlayingState(state == .playing)
         
         // Update system media controls
-        updateSystemMediaPlaybackState()
+        SystemMediaController.shared.updatePlaybackState(
+            isPlaying: playbackState.isPlaying,
+            currentTime: Double(playbackState.currentSeconds)
+        )
         
         // Only handle Jellyfin session management for Jellyfin items
         guard let sessionManager = sessionManager else { return }
@@ -155,73 +166,12 @@ struct VLCPlayerView: View {
             }
         )
         
-        // Set initial media info
-        updateSystemMediaInfo()
-    }
-    
-    private func updateSystemMediaInfo() {
-        let title = mediaItem.name ?? "Unknown Title"
-        var artist = ""
-        var albumTitle: String? = nil
-        var duration: Double = 0
-        
-        // Get metadata based on media type
-        switch mediaItem {
-        case .jellyfin(let item):
-            artist = item.seriesName ?? item.albumArtist ?? ""
-            if let season = item.parentIndexNumber, let episode = item.indexNumber {
-                albumTitle = "S\(season)E\(episode)"
-            }
-            duration = Double(item.runTimeTicks ?? 0) / 10_000_000
-        case .local(let file):
-            artist = "Local Media"
-            duration = file.duration ?? 0
-        }
-        
+        // Set initial media info via SystemMediaController
         Task {
-            var artwork: MPMediaItemArtwork? = nil
-            
-            // Try to load artwork if available (only for Jellyfin items)
-            if case .jellyfin(let item) = mediaItem,
-               let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
-                artwork = await loadArtwork(from: imageURL)
-            }
-            
-            // TODO: we are passing too much no need so much
-            SystemMediaController.shared.updateNowPlayingInfo(
-                title: title,
-                artist: artist,
-                albumTitle: albumTitle,
-                artwork: artwork,
-                duration: duration,
-                currentTime: Double(playbackState.currentSeconds),
-                playbackRate: playbackState.isPlaying ? 1.0 : 0.0
-            )
+            await SystemMediaController.shared.updateNowPlayingInfo(for: mediaItem, playbackState: playbackState)
         }
     }
-    
-    private func loadArtwork(from url: URL) async -> MPMediaItemArtwork? {
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            #if os(macOS)
-            guard let image = NSImage(data: data) else { return nil }
-            #else
-            guard let image = UIImage(data: data) else { return nil }
-            #endif
-            return SystemMediaController.shared.createArtwork(from: image)
-        } catch {
-            print("Failed to load artwork: \(error)")
-            return nil
-        }
-    }
-    
-    private func updateSystemMediaPlaybackState() {
-        SystemMediaController.shared.updatePlaybackState(
-            isPlaying: playbackState.isPlaying,
-            currentTime: Double(playbackState.currentSeconds)
-        )
-    }
-    
+
     func cleanup() {
         proxy.stop()
         sessionManager?.stopPlayback(at: playbackState.currentSeconds)
