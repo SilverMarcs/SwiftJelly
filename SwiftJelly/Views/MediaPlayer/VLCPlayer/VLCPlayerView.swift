@@ -52,13 +52,11 @@ struct VLCPlayerView: View {
             .proxy(proxy)
             .onStateUpdated { state, info in
                 handleStateChange(state)
-                subtitleManager.updateFromPlaybackInfo(info)
             }
             .onSecondsUpdated { duration, info in
                 let seconds = Int(duration.components.seconds)
                 let totalDuration = info.length / 1000
                 playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-                subtitleManager.updateFromPlaybackInfo(info)
                 updateSystemMediaPlaybackState()
                 if !hasLoadedEmbeddedSubs {
                     subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)

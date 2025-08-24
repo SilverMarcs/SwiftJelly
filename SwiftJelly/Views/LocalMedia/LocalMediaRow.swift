@@ -52,6 +52,7 @@ struct LocalMediaRow: View {
         }
     }
     
+    // TODO: search for formatDuration
     private func formatDuration(_ seconds: TimeInterval) -> String {
         let hours = Int(seconds) / 3600
         let minutes = Int(seconds) % 3600 / 60

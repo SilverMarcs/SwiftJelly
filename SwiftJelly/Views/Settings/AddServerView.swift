@@ -39,7 +39,7 @@ struct AddServerView: View {
                             Image(systemName: "checkmark")
                         }
                     }
-                    .disabled(serverName.isEmpty || serverURL.isEmpty || username.isEmpty || password.isEmpty || isAuthenticating)
+                    .disabled(serverName.isEmpty || serverURL.isEmpty || username.isEmpty || isAuthenticating)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

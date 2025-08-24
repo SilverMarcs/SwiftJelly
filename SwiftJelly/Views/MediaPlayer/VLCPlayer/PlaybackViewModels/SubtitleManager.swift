@@ -12,12 +12,6 @@ import VLCUI
         self.vlcProxy = vlcProxy
     }
     
-    func updateFromPlaybackInfo(_ info: VLCVideoPlayer.PlaybackInformation) {
-        // Update current subtitle selection based on VLC state
-        let currentTrack = info.currentSubtitleTrack
-        selectedSubtitleIndex = currentTrack.index
-    }
-    
     func loadSubtitlesFromVLC(tracks: [MediaTrack]) {
         availableSubtitles = tracks
     }
