@@ -3,17 +3,17 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerView: View {
-    @Environment(\.refresh) var refresh
-    let item: BaseItemDto
+    let mediaItem: MediaItem
     
     @State var stateManager: AVPlayerStateManager
+    @Environment(LocalMediaManager.self) var localMediaManager
     
     let startTimeSeconds: Int
     
-    init(item: BaseItemDto) {
-        self.item = item
-        self.startTimeSeconds = JFAPI.getStartTimeSeconds(for: item)
-        self._stateManager = State(initialValue: AVPlayerStateManager(item: item))
+    init(mediaItem: MediaItem) {
+        self.mediaItem = mediaItem
+        self.startTimeSeconds = mediaItem.startTimeSeconds
+        self._stateManager = State(initialValue: AVPlayerStateManager(mediaItem: mediaItem))
     }
 
     var body: some View {
@@ -27,12 +27,15 @@ struct AVMediaPlayerView: View {
                 if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == "Media Player" }) {
                     mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
                     await MainActor.run {
-                        mediaPlayerWindow.title = item.derivedNavigationTitle
+                        mediaPlayerWindow.title = mediaItem.name ?? "Media Player"
                     }
                 }
             }
             .onDisappear {
                 cleanup()
+            }
+            .onAppear {
+                RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
             }
         #else
         AVPlayerIos(startTimeSeconds: startTimeSeconds, stateManager: stateManager)
@@ -40,11 +43,14 @@ struct AVMediaPlayerView: View {
             .onDisappear {
                 cleanup()
             }
+            .onAppear {
+                RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
+            }
         #endif
     }
     
     func cleanup() {
-        stateManager.stop()
+        stateManager.close()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }
         }

@@ -6,13 +6,23 @@ import Combine
 @Observable class AVPlayerStateManager {
     var player: AVPlayer?
     
-    @ObservationIgnored private let reporter: JellyfinPlaybackReporter
+    @ObservationIgnored private let reporter: PlaybackReporterProtocol
+    @ObservationIgnored private let mediaItem: MediaItem
     @ObservationIgnored private var cancellables = Set<AnyCancellable>()
     @ObservationIgnored private var lastReportedTimeControlStatus: AVPlayer.TimeControlStatus?
-
-    init(item: BaseItemDto) {
-        self.reporter = JellyfinPlaybackReporter(item: item)
-        if let playbackURL = try? JFAPI.getPlaybackURL(for: item) {
+    
+    init(mediaItem: MediaItem) {
+        self.mediaItem = mediaItem
+        
+        // Initialize appropriate playback reporter based on media type
+        switch mediaItem {
+        case .jellyfin(let item):
+            self.reporter = JellyfinPlaybackReporter(item: item)
+        case .local(let file):
+            self.reporter = LocalPlaybackReporter(file: file)
+        }
+        
+        if let playbackURL = mediaItem.url {
             self.player = AVPlayer(url: playbackURL)
             setupPlayerObservation()
         }
@@ -57,10 +67,14 @@ import Combine
         }
     }
     
-    func stop() {
+    func close() {
+        // Report stop if not already stopped
+        if player != nil {
+            reporter.reportStop(positionSeconds: currentPosition)
+        }
         player?.pause()
-        reporter.reportStop(positionSeconds: currentPosition)
         player = nil
+        cancellables.removeAll()
     }
     
     private var currentPosition: Int {
