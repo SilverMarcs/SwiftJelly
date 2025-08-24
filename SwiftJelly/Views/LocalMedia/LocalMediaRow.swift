@@ -16,6 +16,8 @@ struct LocalMediaRow: View {
     
     var body: some View {
         Button {
+            RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
+            
             let mediaItem = MediaItem.local(file)
             #if os(macOS)
             dismissWindow(id: "media-player")

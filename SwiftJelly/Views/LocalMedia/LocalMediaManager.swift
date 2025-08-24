@@ -106,7 +106,7 @@ class LocalMediaManager {
     
     // MARK: - Persistence
     
-    private func loadRecentFiles() {
+    func loadRecentFiles() {
         guard let data = UserDefaults.standard.data(forKey: "recentMediaFiles"),
               let files = try? JSONDecoder().decode([LocalMediaFile].self, from: data) else {
             return
