@@ -8,6 +8,7 @@ import UIKit
 #endif
 
 struct VLCPlayerView: View {
+    @Environment(LocalMediaManager.self) var localMediaManager
     let mediaItem: MediaItem
     
     @State private var proxy: VLCVideoPlayer.Proxy
@@ -116,7 +117,7 @@ struct VLCPlayerView: View {
                 name: file.name,
                 durationSeconds: totalDuration
             )
-            LocalMediaManager.shared.addRecentFile(updatedFile)
+            localMediaManager.updateRecentFile(updatedFile)
         }
         
         // Send periodic progress updates
@@ -186,7 +187,7 @@ struct VLCPlayerView: View {
         }
     }
 
-    func cleanup() {
+    private func cleanup() {
         proxy.stop()
         playbackReporter.reportStop(positionSeconds: playbackState.currentSeconds)
         SystemMediaController.shared.clearNowPlayingInfo()

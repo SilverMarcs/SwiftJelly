@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LocalMediaView: View {
-    @State private var localMediaManager = LocalMediaManager.shared
+    @Environment(LocalMediaManager.self) var localMediaManager
     
     var body: some View {
         NavigationStack {

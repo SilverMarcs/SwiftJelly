@@ -10,6 +10,7 @@ import SwiftUI
 struct LocalMediaRow: View {
     let file: LocalMediaFile
     
+    @Environment(LocalMediaManager.self) var localMediaManager
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
@@ -63,19 +64,18 @@ struct LocalMediaRow: View {
                     .foregroundStyle(.tertiary)
                     .font(.caption)
             }
-            .padding(.vertical, 4)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .contextMenu {
             if file.savedPosition > 0 {
                 Button("Clear Progress", systemImage: "arrow.counterclockwise") {
-                    LocalMediaManager.shared.clearPlaybackData(for: file)
+                    localMediaManager.clearPlaybackData(for: file)
                 }
             }
             
             Button("Remove from Recent", systemImage: "trash", role: .destructive) {
-                LocalMediaManager.shared.removeRecentFile(file)
+                localMediaManager.removeRecentFile(file)
             }
         }
     }

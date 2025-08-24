@@ -10,12 +10,10 @@ import AVFoundation
 
 @Observable
 class LocalMediaManager {
-    static let shared = LocalMediaManager()
-    
     private(set) var recentFiles: [LocalMediaFile] = []
     private let maxRecentFiles = 10
     
-    private init() {
+    init() {
         loadRecentFiles()
     }
     
@@ -32,6 +30,18 @@ class LocalMediaManager {
             recentFiles = Array(recentFiles.prefix(maxRecentFiles))
         }
         
+        saveRecentFiles()
+    }
+
+    /// Replace or add a recent file and persist changes
+    func updateRecentFile(_ file: LocalMediaFile) {
+        recentFiles.removeAll { $0.url == file.url }
+        recentFiles.insert(file, at: 0)
+
+        if recentFiles.count > maxRecentFiles {
+            recentFiles = Array(recentFiles.prefix(maxRecentFiles))
+        }
+
         saveRecentFiles()
     }
     
@@ -98,22 +108,21 @@ class LocalMediaManager {
     
     private func loadRecentFiles() {
         guard let data = UserDefaults.standard.data(forKey: "recentMediaFiles"),
-              let urls = try? JSONDecoder().decode([URL].self, from: data) else {
+              let files = try? JSONDecoder().decode([LocalMediaFile].self, from: data) else {
             return
         }
-        
-        recentFiles = urls.compactMap { url in
+
+        recentFiles = files.compactMap { file in
             // Check if file still exists
-            guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
+            guard file.url.isFileURL, FileManager.default.fileExists(atPath: file.url.path) else {
                 return nil
             }
-            return LocalMediaFile(url: url)
+            return file
         }
     }
     
     private func saveRecentFiles() {
-        let urls = recentFiles.map { $0.url }
-        if let data = try? JSONEncoder().encode(urls) {
+        if let data = try? JSONEncoder().encode(recentFiles) {
             UserDefaults.standard.set(data, forKey: "recentMediaFiles")
         }
     }

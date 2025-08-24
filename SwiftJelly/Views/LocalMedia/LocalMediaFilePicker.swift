@@ -10,7 +10,8 @@ import UniformTypeIdentifiers
 
 struct LocalMediaFilePicker: View {
     @State private var isPickerPresented = false
-    @State private var localMediaManager = LocalMediaManager.shared
+    
+    @Environment(LocalMediaManager.self) var localMediaManager
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
