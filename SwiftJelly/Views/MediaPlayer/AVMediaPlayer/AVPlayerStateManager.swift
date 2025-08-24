@@ -4,7 +4,7 @@ import JellyfinAPI
 import Combine
 
 @Observable class AVPlayerStateManager {
-    var player: AVPlayer?
+    var player: AVPlayer
     
     @ObservationIgnored private let reporter: PlaybackReporterProtocol
     @ObservationIgnored private let mediaItem: MediaItem
@@ -22,17 +22,13 @@ import Combine
             self.reporter = LocalPlaybackReporter(file: file)
         }
         
-        if let playbackURL = mediaItem.url {
-            self.player = AVPlayer(url: playbackURL)
-            setupPlayerObservation()
-        }
+        self.player = AVPlayer(url: mediaItem.url)
+        setupPlayerObservation()
     }
 
     private func setupPlayerObservation() {
         // Clear existing observations
         cancellables.removeAll()
-        
-        guard let player = player else { return }
         
         // Observe timeControlStatus for play/pause state changes
         player.publisher(for: \.timeControlStatus)
@@ -69,16 +65,13 @@ import Combine
     
     func close() {
         // Report stop if not already stopped
-        if player != nil {
-            reporter.reportStop(positionSeconds: currentPosition)
-        }
-        player?.pause()
-        player = nil
+        reporter.reportStop(positionSeconds: currentPosition)
+        player.pause()
         cancellables.removeAll()
     }
     
     private var currentPosition: Int {
-        guard let player = player, let time = player.currentItem?.currentTime(), time.isValid else { return 0 }
+        guard let time = player.currentItem?.currentTime(), time.isValid else { return 0 }
         return Int(time.seconds)
     }
     

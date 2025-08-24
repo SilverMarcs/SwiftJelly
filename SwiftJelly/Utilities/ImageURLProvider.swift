@@ -8,7 +8,7 @@
 import Foundation
 import JellyfinAPI
 
-struct ImageURLProvider {
+enum ImageURLProvider {
     /// Generates the primary image URL for a BaseItemDto with fallback logic
     /// - Parameters:
     ///   - item: The BaseItemDto to get image for

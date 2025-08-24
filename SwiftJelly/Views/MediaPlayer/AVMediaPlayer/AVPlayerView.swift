@@ -24,6 +24,14 @@ struct AVMediaPlayerView: View {
             .aspectRatio(16/9, contentMode: .fit)
             .gesture(WindowDragGesture())
             .navigationTitle(mediaItem.name ?? "Media Player")
+//            .task {
+//                if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == mediaItem.name ?? "Media Player" }) {
+//                    mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
+//                    await MainActor.run {
+//                        mediaPlayerWindow.title = mediaItem.name ?? "Media Player"
+//                    }
+//                }
+//            }
             .onDisappear {
                 cleanup()
             }

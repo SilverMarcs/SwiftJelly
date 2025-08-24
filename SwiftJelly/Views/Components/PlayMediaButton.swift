@@ -32,10 +32,3 @@ struct PlayMediaButton<Label: View>: View {
         #endif
     }
 }
-
-final class RefreshHandlerContainer {
-    static let shared = RefreshHandlerContainer()
-    private init() {}
-    
-    var refresh: (() async -> Void)?
-}
