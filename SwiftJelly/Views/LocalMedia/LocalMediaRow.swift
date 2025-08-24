@@ -9,14 +9,22 @@ import SwiftUI
 
 struct LocalMediaRow: View {
     let file: LocalMediaFile
-    let onTap: () -> Void
+    
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
     
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            let mediaItem = MediaItem.local(file)
+            #if os(macOS)
+            dismissWindow(id: "media-player")
+            openWindow(id: "media-player", value: mediaItem)
+            #endif
+        } label: {
             HStack {
                 Image(systemName: "play.rectangle.fill")
-                    .foregroundStyle(.blue)
-                    .font(.title2)
+                    .foregroundStyle(.accent)
+                    .font(.title)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(file.name)
@@ -24,16 +32,32 @@ struct LocalMediaRow: View {
                         .foregroundStyle(.primary)
                         .lineLimit(1)
                     
-                    if let duration = file.duration {
-                        Text(formatDuration(duration))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    HStack {
+                        if let duration = file.duration {
+                            Text(formatDuration(duration))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        if file.savedPosition > 0 {
+                            if file.isCompleted {
+                                Text("Watched")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            } else {
+                                Text("Resume at \(formatDuration(TimeInterval(file.savedPosition)))")
+                                    .font(.caption)
+                                    .foregroundStyle(.accent)
+                            }
+                        }
                     }
                     
-                    Text(file.url.lastPathComponent)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
+                    // Progress bar
+                    if let progress = file.progress, progress > 0.05 {
+                        ProgressView(value: progress)
+                            .progressViewStyle(LinearProgressViewStyle(tint: file.isCompleted ? .green : .blue))
+                            .scaleEffect(y: 0.5)
+                    }
                 }
                 
                 Spacer()
@@ -43,9 +67,16 @@ struct LocalMediaRow: View {
                     .font(.caption)
             }
             .padding(.vertical, 4)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .contextMenu {
+            if file.savedPosition > 0 {
+                Button("Clear Progress", systemImage: "arrow.counterclockwise") {
+                    LocalMediaManager.shared.clearPlaybackData(for: file)
+                }
+            }
+            
             Button("Remove from Recent", systemImage: "trash", role: .destructive) {
                 LocalMediaManager.shared.removeRecentFile(file)
             }

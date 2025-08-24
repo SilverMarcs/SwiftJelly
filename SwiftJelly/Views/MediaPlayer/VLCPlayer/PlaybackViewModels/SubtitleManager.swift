@@ -13,7 +13,7 @@ import VLCUI
     }
     
     func loadSubtitlesFromVLC(tracks: [MediaTrack]) {
-        availableSubtitles = tracks
+        availableSubtitles = tracks.filter { !$0.title.lowercased().contains("forced") }
     }
     
     func selectSubtitle(at index: Int) {

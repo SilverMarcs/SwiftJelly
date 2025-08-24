@@ -6,12 +6,12 @@ import Combine
 @Observable class AVPlayerStateManager {
     var player: AVPlayer?
     
-    @ObservationIgnored private let reporter: PlaybackReporter
+    @ObservationIgnored private let reporter: JellyfinPlaybackReporter
     @ObservationIgnored private var cancellables = Set<AnyCancellable>()
     @ObservationIgnored private var lastReportedTimeControlStatus: AVPlayer.TimeControlStatus?
 
     init(item: BaseItemDto) {
-        self.reporter = PlaybackReporter(item: item)
+        self.reporter = JellyfinPlaybackReporter(item: item)
         if let playbackURL = try? JFAPI.getPlaybackURL(for: item) {
             self.player = AVPlayer(url: playbackURL)
             setupPlayerObservation()

@@ -12,7 +12,7 @@ struct VLCPlayerView: View {
     
     @State private var proxy: VLCVideoPlayer.Proxy
     @State private var playbackState = PlaybackStateManager()
-    @State private var sessionManager: PlaybackSessionManager?
+    @State private var playbackReporter: PlaybackReporterProtocol
     @State private var subtitleManager: SubtitleManager
     
     @State private var hasLoadedEmbeddedSubs = false
@@ -32,11 +32,12 @@ struct VLCPlayerView: View {
         // Initialize subtitle manager with the proxy
         self._subtitleManager = State(initialValue: SubtitleManager(vlcProxy: vlcProxy))
         
-        // Only create session manager for Jellyfin items
-        if let jellyfinItem = mediaItem.jellyfinItem {
-            self._sessionManager = State(initialValue: PlaybackSessionManager(item: jellyfinItem))
-        } else {
-            self._sessionManager = State(initialValue: nil)
+        // Initialize appropriate playback reporter based on media type
+        switch mediaItem {
+        case .jellyfin(let item):
+            self._playbackReporter = State(initialValue: JellyfinPlaybackReporter(item: item))
+        case .local(let file):
+            self._playbackReporter = State(initialValue: LocalPlaybackReporter(file: file))
         }
     }
     
@@ -107,6 +108,12 @@ struct VLCPlayerView: View {
             subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
             hasLoadedEmbeddedSubs = true
         }
+        
+        // Send periodic progress updates
+        // playbackReporter?.reportProgress(
+        //     positionSeconds: playbackState.currentSeconds,
+        //     isPaused: !playbackState.isPlaying
+        // )
     }
     
     private func handleStateChange(_ state: VLCVideoPlayer.State) {
@@ -119,26 +126,23 @@ struct VLCPlayerView: View {
             currentTime: Double(playbackState.currentSeconds)
         )
         
-        // Only handle Jellyfin session management for Jellyfin items
-        guard let sessionManager = sessionManager else { return }
-        
         // Send start report when playback begins
-        if !sessionManager.hasSentStart && state == .playing {
-            sessionManager.startPlayback(at: playbackState.currentSeconds)
+        if !playbackReporter.hasStarted && state == .playing {
+            playbackReporter.reportStart(positionSeconds: playbackState.currentSeconds)
         }
         
         // Handle pause/resume
-        if sessionManager.hasSentStart {
+        if playbackReporter.hasStarted {
             if wasPlaying && state == .paused {
-                sessionManager.pausePlayback(at: playbackState.currentSeconds)
+                playbackReporter.reportPause(positionSeconds: playbackState.currentSeconds)
             } else if !wasPlaying && state == .playing {
-                sessionManager.resumePlayback(at: playbackState.currentSeconds)
+                playbackReporter.reportResume(positionSeconds: playbackState.currentSeconds)
             }
         }
         
         // Handle stop/end
         if state == .stopped || state == .ended {
-            sessionManager.stopPlayback(at: playbackState.currentSeconds)
+            playbackReporter.reportStop(positionSeconds: playbackState.currentSeconds)
         }
     }
     
@@ -174,7 +178,7 @@ struct VLCPlayerView: View {
 
     func cleanup() {
         proxy.stop()
-        sessionManager?.stopPlayback(at: playbackState.currentSeconds)
+        playbackReporter.reportStop(positionSeconds: playbackState.currentSeconds)
         SystemMediaController.shared.clearNowPlayingInfo()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }

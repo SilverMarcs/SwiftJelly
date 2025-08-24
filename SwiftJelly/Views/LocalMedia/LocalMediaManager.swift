@@ -73,6 +73,27 @@ class LocalMediaManager {
         return supportedExtensions.contains(fileExtension)
     }
     
+    /// Clear playback data for a specific file
+    func clearPlaybackData(for file: LocalMediaFile) {
+        let positionKey = "localMedia_position_\(file.url.absoluteString.hash)"
+        let completedKey = "localMedia_completed_\(file.url.absoluteString.hash)"
+        
+        UserDefaults.standard.removeObject(forKey: positionKey)
+        UserDefaults.standard.removeObject(forKey: completedKey)
+    }
+    
+    /// Clear all local media playback data
+    func clearAllPlaybackData() {
+        for file in recentFiles {
+            clearPlaybackData(for: file)
+        }
+    }
+    
+    /// Get recently played files (files with saved progress)
+    func getRecentlyPlayedFiles() -> [LocalMediaFile] {
+        return recentFiles.filter { $0.savedPosition > 0 }
+    }
+    
     // MARK: - Persistence
     
     private func loadRecentFiles() {

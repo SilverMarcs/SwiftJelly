@@ -1,0 +1,122 @@
+//
+//  LocalPlaybackReporter.swift
+//  SwiftJelly
+//
+//  Created by Zabir Raihan on 24/08/2025.
+//
+
+import Foundation
+
+/// Handles playback position persistence for local media files
+class LocalPlaybackReporter: PlaybackReporterProtocol {
+    private let file: LocalMediaFile
+    private let userDefaults = UserDefaults.standard
+    private var hasSentStart: Bool = false
+    
+    var hasStarted: Bool {
+        hasSentStart
+    }
+    
+    init(file: LocalMediaFile) {
+        self.file = file
+    }
+    
+    /// Reports the start of playback and loads any existing position
+    func reportStart(positionSeconds: Int) {
+        guard !hasSentStart else { return }
+        hasSentStart = true
+        
+        // Store that playback has started for this file
+        savePlaybackPosition(positionSeconds)
+    }
+    
+    /// Reports playback pause and saves position
+    func reportPause(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        
+        savePlaybackPosition(positionSeconds)
+    }
+    
+    /// Reports playback resume and saves position
+    func reportResume(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        
+        savePlaybackPosition(positionSeconds)
+    }
+    
+    /// Reports playback progress and periodically saves position
+    func reportProgress(positionSeconds: Int, isPaused: Bool) {
+        guard hasSentStart else { return }
+        
+        // Save position every 10 seconds to avoid excessive writes
+        if positionSeconds % 10 == 0 {
+            savePlaybackPosition(positionSeconds)
+        }
+    }
+    
+    /// Reports playback stop and saves final position
+    func reportStop(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        
+        // If we're near the end (within last 5% of duration), mark as completed
+        if let duration = file.duration {
+            let progressPercent = Double(positionSeconds) / duration
+            if progressPercent >= 0.95 {
+                markAsCompleted()
+                print("Completed local playback for: \(file.name)")
+            } else {
+                savePlaybackPosition(positionSeconds)
+                print("Stopped local playback for: \(file.name) at \(positionSeconds)s")
+            }
+        } else {
+            savePlaybackPosition(positionSeconds)
+            print("Stopped local playback for: \(file.name) at \(positionSeconds)s")
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func savePlaybackPosition(_ seconds: Int) {
+        let key = playbackPositionKey
+        userDefaults.set(seconds, forKey: key)
+    }
+    
+    private func markAsCompleted() {
+        let positionKey = playbackPositionKey
+        let completedKey = playbackCompletedKey
+        
+        // Remove position (start from beginning next time)
+        userDefaults.removeObject(forKey: positionKey)
+        
+        // Mark as completed
+        userDefaults.set(true, forKey: completedKey)
+    }
+    
+    private var playbackPositionKey: String {
+        "localMedia_position_\(file.url.absoluteString.hash)"
+    }
+    
+    private var playbackCompletedKey: String {
+        "localMedia_completed_\(file.url.absoluteString.hash)"
+    }
+    
+    // MARK: - Public Helpers
+    
+    /// Get the saved playback position for this file
+    func getSavedPosition() -> Int {
+        let key = playbackPositionKey
+        return userDefaults.integer(forKey: key)
+    }
+    
+    /// Check if this file has been marked as completed
+    func isCompleted() -> Bool {
+        let key = playbackCompletedKey
+        return userDefaults.bool(forKey: key)
+    }
+    
+    /// Clear playback data for this file
+    func clearPlaybackData() {
+        userDefaults.removeObject(forKey: playbackPositionKey)
+        userDefaults.removeObject(forKey: playbackCompletedKey)
+    }
+}

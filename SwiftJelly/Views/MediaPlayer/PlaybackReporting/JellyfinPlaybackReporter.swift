@@ -1,18 +1,22 @@
 //
-//  PlaybackReporter.swift
+//  JellyfinPlaybackReporter.swift
 //  SwiftJelly
 //
-//  Created by Zabir Raihan on 10/07/2025.
+//  Created by Zabir Raihan on 24/08/2025.
 //
 
 import Foundation
 import JellyfinAPI
 
 /// Handles playback session reporting to Jellyfin server
-class PlaybackReporter {
+class JellyfinPlaybackReporter: PlaybackReporterProtocol {
     let playSessionID: String
     private let item: BaseItemDto
     private var hasSentStart: Bool = false
+    
+    var hasStarted: Bool {
+        hasSentStart
+    }
     
     init(item: BaseItemDto) {
         self.item = item
@@ -106,9 +110,5 @@ class PlaybackReporter {
                 print("Failed to send stop report: \(error)")
             }
         }
-    }
-    
-    var hasStarted: Bool {
-        hasSentStart
     }
 }

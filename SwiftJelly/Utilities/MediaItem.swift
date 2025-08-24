@@ -45,8 +45,8 @@ enum MediaItem: Codable, Hashable {
         switch self {
         case .jellyfin(let item):
             return JFAPI.getStartTimeSeconds(for: item)
-        case .local:
-            return 0 // Local files start from beginning
+        case .local(let file):
+            return file.savedPosition // Resume from saved position
         }
     }
     
@@ -82,12 +82,30 @@ struct LocalMediaFile: Codable, Hashable {
     init(url: URL) {
         self.url = url
         self.name = url.deletingPathExtension().lastPathComponent
-        self.duration = nil // TODO: Could be populated using AVAsset if needed
+        self.duration = nil
     }
     
     init(url: URL, name: String, duration: TimeInterval? = nil) {
         self.url = url
         self.name = name
         self.duration = duration
+    }
+    
+    /// Get the saved playback position for this file
+    var savedPosition: Int {
+        let key = "localMedia_position_\(url.absoluteString.hash)"
+        return UserDefaults.standard.integer(forKey: key)
+    }
+    
+    /// Check if this file has been marked as completed
+    var isCompleted: Bool {
+        let key = "localMedia_completed_\(url.absoluteString.hash)"
+        return UserDefaults.standard.bool(forKey: key)
+    }
+    
+    /// Get progress percentage based on saved position and duration
+    var progress: Double? {
+        guard let duration = duration, duration > 0 else { return nil }
+        return Double(savedPosition) / duration
     }
 }

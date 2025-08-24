@@ -15,11 +15,10 @@ struct LocalMediaFilePicker: View {
     @Environment(\.dismissWindow) private var dismissWindow
     
     var body: some View {
-        Button("Open Local Media") {
+        Button("Open", role: .confirm) {
             isPickerPresented = true
         }
         .buttonStyle(.borderedProminent)
-        .controlSize(.large)
         .fileImporter(
             isPresented: $isPickerPresented,
             allowedContentTypes: [
