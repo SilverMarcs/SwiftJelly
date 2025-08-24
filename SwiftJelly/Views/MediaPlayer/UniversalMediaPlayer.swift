@@ -21,16 +21,9 @@ struct UniversalMediaPlayer: View {
     }
 
     var body: some View {
-        switch mediaItem {
-        case .jellyfin(let item):
-            if AVPlayerSupportChecker.isSupported(item: item) {
-                AVMediaPlayerView(item: item)
-            } else {
-                VLCPlayerView(mediaItem: mediaItem)
-            }
-        case .local:
-            // Always use VLC for local files for broader format support
-            // TODO: dont do this, still try for avplayer
+        if AVPlayerSupportChecker.isSupported(item: mediaItem) {
+            AVMediaPlayerView(item: mediaItem)
+        } else {
             VLCPlayerView(mediaItem: mediaItem)
         }
     }
