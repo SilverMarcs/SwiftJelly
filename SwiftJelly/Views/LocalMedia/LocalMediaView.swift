@@ -15,7 +15,6 @@ struct LocalMediaView: View {
             Form {
                 ForEach(localMediaManager.recentFiles, id: \.url) { file in
                     LocalMediaRow(file: file)
-//                        .environment(\.refresh, localMediaManager.loadRecentFiles)
                 }
             }
             .formStyle(.grouped)
@@ -33,6 +32,7 @@ struct LocalMediaView: View {
         .toolbar {
             LocalMediaFilePicker()
         }
+        .environment(\.refresh, localMediaManager.loadRecentFiles)
     }
 }
 

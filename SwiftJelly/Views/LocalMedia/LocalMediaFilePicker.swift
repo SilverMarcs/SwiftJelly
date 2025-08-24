@@ -12,6 +12,7 @@ struct LocalMediaFilePicker: View {
     @State private var isPickerPresented = false
     
     @Environment(LocalMediaManager.self) var localMediaManager
+    @Environment(\.refresh) private var refresh
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
@@ -39,7 +40,7 @@ struct LocalMediaFilePicker: View {
                         let enhancedFile = await localMediaManager.getEnhancedMetadata(for: localFile)
                         localMediaManager.addRecentFile(enhancedFile)
                         let mediaItem = MediaItem.local(enhancedFile)
-                        RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
+                        RefreshHandlerContainer.shared.refresh = refresh
                         #if os(macOS)
                         dismissWindow(id: "media-player")
                         openWindow(id: "media-player", value: mediaItem)

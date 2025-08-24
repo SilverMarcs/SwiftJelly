@@ -23,28 +23,15 @@ struct AVMediaPlayerView: View {
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .aspectRatio(16/9, contentMode: .fit)
             .gesture(WindowDragGesture())
-            .task {
-                if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == "Media Player" }) {
-                    mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
-                    await MainActor.run {
-                        mediaPlayerWindow.title = mediaItem.name ?? "Media Player"
-                    }
-                }
-            }
+            .navigationTitle(mediaItem.name ?? "Media Player")
             .onDisappear {
                 cleanup()
-            }
-            .onAppear {
-                RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
             }
         #else
         AVPlayerIos(startTimeSeconds: startTimeSeconds, stateManager: stateManager)
             .ignoresSafeArea()
             .onDisappear {
                 cleanup()
-            }
-            .onAppear {
-                RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
             }
         #endif
     }

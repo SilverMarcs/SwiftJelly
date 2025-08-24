@@ -11,12 +11,13 @@ struct LocalMediaRow: View {
     let file: LocalMediaFile
     
     @Environment(LocalMediaManager.self) var localMediaManager
+    @Environment(\.refresh) private var refresh
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
     var body: some View {
         Button {
-            RefreshHandlerContainer.shared.refresh = localMediaManager.loadRecentFiles
+            RefreshHandlerContainer.shared.refresh = refresh
             
             let mediaItem = MediaItem.local(file)
             #if os(macOS)
