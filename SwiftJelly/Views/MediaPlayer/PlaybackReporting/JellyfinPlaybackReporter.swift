@@ -97,7 +97,7 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
     
     /// Reports playback stop
     func reportStop(positionSeconds: Int) {
-//        guard hasSentStart else { return }
+        guard hasSentStart else { return }
         
         Task {
             do {

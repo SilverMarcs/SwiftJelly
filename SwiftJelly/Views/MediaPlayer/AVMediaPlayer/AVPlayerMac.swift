@@ -10,7 +10,6 @@ import AVKit
 
 struct AVPlayerMac: NSViewRepresentable {
     let startTimeSeconds: Int
-//    let stateManager: AVPlayerStateManager
     let player: AVPlayer
     
     func makeNSView(context: Context) -> AVPlayerView {

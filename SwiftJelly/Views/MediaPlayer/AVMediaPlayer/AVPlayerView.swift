@@ -4,13 +4,21 @@ import JellyfinAPI
 
 struct AVMediaPlayerView: View {
     let mediaItem: MediaItem
-    let player: AVPlayer
+    @State var player: AVPlayer
     let startTimeSeconds: Int
+    let reporter: PlaybackReporterProtocol
     
     init(mediaItem: MediaItem) {
         self.mediaItem = mediaItem
         self.startTimeSeconds = mediaItem.startTimeSeconds
-        self.player = AVPlayer(url: mediaItem.url)
+        self._player = State(initialValue: AVPlayer(url: mediaItem.url))
+        
+        switch mediaItem {
+        case .jellyfin(let item):
+            self.reporter = JellyfinPlaybackReporter(item: item)
+        case .local(let file):
+            self.reporter = LocalPlaybackReporter(file: file)
+        }
     }
 
     var body: some View {
@@ -21,6 +29,9 @@ struct AVMediaPlayerView: View {
             .aspectRatio(16/9, contentMode: .fit)
             .gesture(WindowDragGesture())
             .navigationTitle(mediaItem.name ?? "Media Player")
+            .onAppear {
+                reporter.reportStart(positionSeconds: startTimeSeconds)
+            }
             .onDisappear {
                 cleanup()
             }
@@ -35,6 +46,9 @@ struct AVMediaPlayerView: View {
         #else
         AVPlayerIos(startTimeSeconds: startTimeSeconds, player: player)
             .ignoresSafeArea()
+            .onAppear {
+                reporter.reportStart(positionSeconds: startTimeSeconds)
+            }
             .onDisappear {
                 cleanup()
             }
@@ -42,20 +56,13 @@ struct AVMediaPlayerView: View {
     }
     
     func cleanup() {
-        let reporter: PlaybackReporterProtocol
-        
-        switch mediaItem {
-        case .jellyfin(let item):
-            reporter = JellyfinPlaybackReporter(item: item)
-        case .local(let file):
-            reporter = LocalPlaybackReporter(file: file)
-        }
-        
-        guard let time = player.currentItem?.currentTime(), time.isValid else { return }
-        
-        print("time", time)
+        guard let time = player.currentItem?.currentTime() else { return }
 
-        reporter.reportStop(positionSeconds: Int(time.seconds))
+        let seconds = Int(time.seconds)
+        
+        reporter.reportPause(positionSeconds: seconds)
+        reporter.reportProgress(positionSeconds: seconds, isPaused: true)
+        reporter.reportStop(positionSeconds: seconds)
         player.pause()
         
         if let handler = RefreshHandlerContainer.shared.refresh {
