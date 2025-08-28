@@ -27,10 +27,17 @@ struct LocalMediaView: View {
                     )
                 }
             }
-        }
-        .navigationTitle("Recent Files")
-        .toolbar {
-            LocalMediaFilePicker()
+            .navigationTitle("Recent Files")
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar {
+    //            Button {
+    //                localMediaManager.clearAllRecents()
+    //            } label: {
+    //                Label("Clear", systemImage: "trash")
+    //            }
+                
+                LocalMediaFilePicker()
+            }
         }
         .environment(\.refresh, localMediaManager.loadRecentFiles)
     }

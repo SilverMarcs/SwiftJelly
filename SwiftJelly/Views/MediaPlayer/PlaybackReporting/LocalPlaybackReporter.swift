@@ -11,11 +11,7 @@ import Foundation
 class LocalPlaybackReporter: PlaybackReporterProtocol {
     private let file: LocalMediaFile
     private let userDefaults = UserDefaults.standard
-    private var hasSentStart: Bool = false
-    
-    var hasStarted: Bool {
-        hasSentStart
-    }
+    var hasStarted: Bool = false
     
     init(file: LocalMediaFile) {
         self.file = file
@@ -23,31 +19,21 @@ class LocalPlaybackReporter: PlaybackReporterProtocol {
     
     /// Reports the start of playback and loads any existing position
     func reportStart(positionSeconds: Int) {
-        guard !hasSentStart else { return }
-        hasSentStart = true
-        
-        // Store that playback has started for this file
         savePlaybackPosition(positionSeconds)
     }
     
     /// Reports playback pause and saves position
     func reportPause(positionSeconds: Int) {
-        guard hasSentStart else { return }
-        
         savePlaybackPosition(positionSeconds)
     }
     
     /// Reports playback resume and saves position
     func reportResume(positionSeconds: Int) {
-        guard hasSentStart else { return }
-        
         savePlaybackPosition(positionSeconds)
     }
     
     /// Reports playback progress and periodically saves position
     func reportProgress(positionSeconds: Int, isPaused: Bool) {
-        guard hasSentStart else { return }
-        
         // Save position every 10 seconds to avoid excessive writes
         if positionSeconds % 10 == 0 {
             savePlaybackPosition(positionSeconds)
@@ -56,8 +42,6 @@ class LocalPlaybackReporter: PlaybackReporterProtocol {
     
     /// Reports playback stop and saves final position
     func reportStop(positionSeconds: Int) {
-        guard hasSentStart else { return }
-        
         // If we're near the end (within last 5% of duration), mark as completed
         if let durationSeconds = file.durationSeconds {
             let progressPercent = Double(positionSeconds) / Double(durationSeconds)

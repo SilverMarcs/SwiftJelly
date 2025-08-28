@@ -20,7 +20,6 @@ struct LocalMediaFilePicker: View {
         Button("Open", role: .confirm) {
             isPickerPresented = true
         }
-        .buttonStyle(.borderedProminent)
         .fileImporter(
             isPresented: $isPickerPresented,
             allowedContentTypes: [

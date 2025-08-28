@@ -10,11 +10,12 @@ import AVKit
 
 struct AVPlayerMac: NSViewRepresentable {
     let startTimeSeconds: Int
-    let stateManager: AVPlayerStateManager
+//    let stateManager: AVPlayerStateManager
+    let player: AVPlayer
     
     func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
-        view.player = stateManager.player
+        view.player = player
         view.controlsStyle = .floating
         view.showsFullScreenToggleButton = true
         

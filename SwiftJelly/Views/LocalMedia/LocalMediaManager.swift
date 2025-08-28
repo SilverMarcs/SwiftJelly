@@ -71,18 +71,6 @@ class LocalMediaManager {
         }
     }
     
-    /// Check if URL is a supported media file
-    static func isSupportedMediaFile(_ url: URL) -> Bool {
-        let supportedExtensions = [
-            "mp4", "mov", "m4v", "avi", "mkv", "wmv", "flv", "webm",
-            "mp3", "aac", "wav", "flac", "ogg", "m4a", "wma",
-            "ts", "mts", "m2ts", "vob", "3gp", "f4v"
-        ]
-        
-        let fileExtension = url.pathExtension.lowercased()
-        return supportedExtensions.contains(fileExtension)
-    }
-    
     /// Clear playback data for a specific file
     func clearPlaybackData(for file: LocalMediaFile) {
         let positionKey = "localMedia_position_\(file.url.absoluteString.hash)"
@@ -97,11 +85,6 @@ class LocalMediaManager {
         for file in recentFiles {
             clearPlaybackData(for: file)
         }
-    }
-    
-    /// Get recently played files (files with saved progress)
-    func getRecentlyPlayedFiles() -> [LocalMediaFile] {
-        return recentFiles.filter { $0.savedPosition > 0 }
     }
     
     // MARK: - Persistence

@@ -13,7 +13,6 @@ struct VLCPlayerView: View {
     
     @State private var proxy: VLCVideoPlayer.Proxy
     @State private var playbackState = PlaybackStateManager()
-    @State private var playbackReporter: PlaybackReporterProtocol
     @State private var subtitleManager: SubtitleManager
     
     @State private var hasLoadedEmbeddedSubs = false
@@ -32,14 +31,6 @@ struct VLCPlayerView: View {
         
         // Initialize subtitle manager with the proxy
         self._subtitleManager = State(initialValue: SubtitleManager(vlcProxy: vlcProxy))
-        
-        // Initialize appropriate playback reporter based on media type
-        switch mediaItem {
-        case .jellyfin(let item):
-            self._playbackReporter = State(initialValue: JellyfinPlaybackReporter(item: item))
-        case .local(let file):
-            self._playbackReporter = State(initialValue: LocalPlaybackReporter(file: file))
-        }
     }
     
     var body: some View {
@@ -136,25 +127,6 @@ struct VLCPlayerView: View {
             isPlaying: playbackState.isPlaying,
             currentTime: Double(playbackState.currentSeconds)
         )
-        
-        // Send start report when playback begins
-        if !playbackReporter.hasStarted && state == .playing {
-            playbackReporter.reportStart(positionSeconds: playbackState.currentSeconds)
-        }
-        
-        // Handle pause/resume
-        if playbackReporter.hasStarted {
-            if wasPlaying && state == .paused {
-                playbackReporter.reportPause(positionSeconds: playbackState.currentSeconds)
-            } else if !wasPlaying && state == .playing {
-                playbackReporter.reportResume(positionSeconds: playbackState.currentSeconds)
-            }
-        }
-        
-        // Handle stop/end
-        if state == .stopped || state == .ended {
-            playbackReporter.reportStop(positionSeconds: playbackState.currentSeconds)
-        }
     }
     
     private func setupSystemMediaControls() {
@@ -189,7 +161,18 @@ struct VLCPlayerView: View {
 
     private func cleanup() {
         proxy.stop()
-        playbackReporter.reportStop(positionSeconds: playbackState.currentSeconds)
+        
+        let reporter: PlaybackReporterProtocol
+        
+        switch mediaItem {
+        case .jellyfin(let item):
+            reporter = JellyfinPlaybackReporter(item: item)
+        case .local(let file):
+            reporter = LocalPlaybackReporter(file: file)
+        }
+        
+        reporter.reportStop(positionSeconds: playbackState.currentSeconds)
+        
         SystemMediaController.shared.clearNowPlayingInfo()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }
