@@ -71,13 +71,13 @@ struct VLCPlayerView: View {
                 OrientationManager.shared.lockOrientation(.all)
                 #endif
             }
-            .preferredColorScheme(.dark)
             .navigationTitle(mediaItem.name ?? "Media Player")
             .background(.black, ignoresSafeAreaEdges: .all)
             .preferredColorScheme(.dark)
             #if os(macOS)
             .gesture(WindowDragGesture())
             .aspectRatio(16/9, contentMode: .fill)
+            .ignoresSafeArea()
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .onTapGesture(count: 2) {
                 if let window = NSApplication.shared.keyWindow {
