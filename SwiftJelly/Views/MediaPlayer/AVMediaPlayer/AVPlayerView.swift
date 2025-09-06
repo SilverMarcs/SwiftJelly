@@ -46,6 +46,10 @@ struct AVMediaPlayerView: View {
             .ignoresSafeArea()
             .onDisappear {
                 cleanup()
+                OrientationManager.shared.lockOrientation(.all)
+            }
+            .onAppear {
+                OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
             }
         #endif
     }
@@ -61,66 +65,10 @@ struct AVMediaPlayerView: View {
         player.pause()
         
         Task {
-            try? await Task.sleep(nanoseconds: 100_000_000) // 1 second delay
+            try? await Task.sleep(nanoseconds: 100_000_000)
             if let handler = RefreshHandlerContainer.shared.refresh {
                 await handler()
             }
         }
     }
 }
-
-
-
-//import SwiftUI
-//import AVKit
-//import JellyfinAPI
-//
-//struct AVMediaPlayerView: View {
-//    let mediaItem: MediaItem
-//    
-//    @State var stateManager: AVPlayerStateManager
-//    @Environment(LocalMediaManager.self) var localMediaManager
-//    
-//    let startTimeSeconds: Int
-//    
-//    init(mediaItem: MediaItem) {
-//        self.mediaItem = mediaItem
-//        self.startTimeSeconds = mediaItem.startTimeSeconds
-//        self._stateManager = State(initialValue: AVPlayerStateManager(mediaItem: mediaItem))
-//    }
-//
-//    var body: some View {
-//        #if os(macOS)
-//        AVPlayerMac(startTimeSeconds: startTimeSeconds, stateManager: stateManager)
-//            .ignoresSafeArea()
-//            .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-//            .aspectRatio(16/9, contentMode: .fit)
-//            .gesture(WindowDragGesture())
-//            .navigationTitle(mediaItem.name ?? "Media Player")
-////            .task {
-////                if let mediaPlayerWindow = NSApplication.shared.windows.first(where: { $0.title == mediaItem.name ?? "Media Player" }) {
-////                    mediaPlayerWindow.standardWindowButton(.zoomButton)?.isEnabled = false
-////                    await MainActor.run {
-////                        mediaPlayerWindow.title = mediaItem.name ?? "Media Player"
-////                    }
-////                }
-////            }
-//            .onDisappear {
-//                cleanup()
-//            }
-//        #else
-//        AVPlayerIos(startTimeSeconds: startTimeSeconds, stateManager: stateManager)
-//            .ignoresSafeArea()
-//            .onDisappear {
-//                cleanup()
-//            }
-//        #endif
-//    }
-//    
-//    func cleanup() {
-//        stateManager.close()
-//        if let handler = RefreshHandlerContainer.shared.refresh {
-//            Task { await handler() }
-//        }
-//    }
-//}

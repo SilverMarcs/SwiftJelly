@@ -17,12 +17,12 @@ struct SwiftJellyApp: App {
     @State private var localMediaManager = LocalMediaManager()
     
     var body: some Scene {
-        WindowGroup {
+        #if os(macOS)
+        Window("SwiftJelly", id: "swiftjelly") {
             ContentView()
                 .environment(localMediaManager)
         }
         
-        #if os(macOS)
         WindowGroup("Media Player", id: "media-player", for: MediaItem.self) { $mediaItem in
             if let mediaItem = mediaItem {
                 UniversalMediaPlayer(mediaItem: mediaItem)
@@ -38,6 +38,15 @@ struct SwiftJellyApp: App {
 //        Settings {
 //            SettingsView()
 //        }
+        #else
+        WindowGroup {
+            ContentView()
+                .environment(localMediaManager)
+        }
         #endif
     }
+    
+//    init() {
+//        NSWindow.allowsAutomaticWindowTabbing = false
+//    }
 }

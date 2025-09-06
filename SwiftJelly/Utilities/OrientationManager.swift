@@ -1,7 +1,7 @@
 import SwiftUI
 
 // TODO: see if need to be observable or not
-@Observable class OrientationManager {
+class OrientationManager {
     static let shared = OrientationManager()
     var lockedOrientation: UIInterfaceOrientationMask = .all
     

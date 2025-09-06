@@ -10,6 +10,10 @@ import SwiftUI
 struct ContentView: View {
     @SceneStorage("selectedTab") private var selectedTab: TabSelection = .home
     
+    @Environment(LocalMediaManager.self) var localMediaManager
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab(TabSelection.home.title,
@@ -45,6 +49,14 @@ struct ContentView: View {
         .tabViewStyle(.sidebarAdaptable)
         #if !os(macOS)
         .tabBarMinimizeBehavior(.onScrollDown)
+        #else
+        .onOpenURL { url in
+            if url.isFileURL {
+                let mediaItem = MediaItem.local(LocalMediaFile(url: url))
+                dismissWindow(id: "media-player")
+                openWindow(id: "media-player", value: mediaItem)
+            }
+        }
         #endif
     }
 }

@@ -15,6 +15,12 @@ struct LocalMediaRow: View {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
+    // Calculate progress as a value between 0 and 1
+    private var progress: Double {
+        guard let duration = file.durationSeconds, duration > 0 else { return 0 }
+        return min(Double(file.savedPosition) / Double(duration), 1.0)
+    }
+    
     var body: some View {
         Button {
             RefreshHandlerContainer.shared.refresh = refresh
@@ -25,47 +31,65 @@ struct LocalMediaRow: View {
             openWindow(id: "media-player", value: mediaItem)
             #endif
         } label: {
-            HStack {
-                Image(systemName: "play.rectangle.fill")
-                    .foregroundStyle(.accent)
-                    .font(.title)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(file.name)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
+            VStack(spacing: 8) {
+                HStack {
+                    Image(systemName: "play.rectangle.fill")
+                        .foregroundStyle(.accent)
+                        .font(.title)
                     
-                    HStack {
-                        if let durationSeconds = file.durationSeconds {
-                            Text(durationSeconds.timeString())
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(file.name)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        
+                        HStack {
+                            if let durationSeconds = file.durationSeconds {
+                                Text(durationSeconds.timeString())
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            Text("•")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                        }
-                        
-                        Text("•")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        
-                        if file.savedPosition > 0 {
-                            if file.isCompleted {
-                                Text("Watched")
-                                    .font(.caption)
-                                    .foregroundStyle(.green)
-                            } else {
-                                Text("Resume at \(file.savedPosition.timeString())")
-                                    .font(.caption)
-                                    .foregroundStyle(.accent)
+                            
+                            if file.savedPosition > 0 {
+                                if file.isCompleted {
+                                    Text("Watched")
+                                        .font(.caption)
+                                        .foregroundStyle(.green)
+                                } else {
+                                    Text("Resume at \(file.savedPosition.timeString())")
+                                        .font(.caption)
+                                        .foregroundStyle(.accent)
+                                }
                             }
                         }
                     }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.tertiary)
+                        .font(.caption)
                 }
                 
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.tertiary)
-                    .font(.caption)
+                // Progress gauge - only show if there's saved progress
+                if file.savedPosition > 0 {
+                    Gauge(value: progress) {
+                        EmptyView()
+                    } currentValueLabel: {
+                        EmptyView()
+                    } minimumValueLabel: {
+                        EmptyView()
+                    } maximumValueLabel: {
+                        EmptyView()
+                    }
+                    .controlSize(.mini)
+                    .gaugeStyle(.accessoryLinearCapacity)
+                    .tint(file.isCompleted ? .green : .accent)
+                }
             }
             .contentShape(.rect)
         }
