@@ -37,14 +37,6 @@ struct VLCPlayerOverlays: ViewModifier {
                         }
                     }
             )
-            .overlay {
-                if controlsVisible {
-                    Color.black.opacity(0.2)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
-                        .allowsHitTesting(false)
-                }
-            }
             .overlay(alignment: .bottom) {
                 if controlsVisible {
                     VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)

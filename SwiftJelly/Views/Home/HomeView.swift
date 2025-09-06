@@ -24,8 +24,8 @@ struct HomeView: View {
                     RecentlyAddedView(items: latestMovies, header: "Movies")
                     
                     RecentlyAddedView(items: latestShows, header: "Shows")
-                        .scenePadding(.bottom)
                 }
+                .scenePadding(.bottom)
                 .contentMargins(.horizontal, 15)
             }
             .overlay {

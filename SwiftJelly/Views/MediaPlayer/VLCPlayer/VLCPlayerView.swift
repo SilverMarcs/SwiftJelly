@@ -20,6 +20,7 @@ struct VLCPlayerView: View {
     
     let playbackURL: URL?
     let startTimeSeconds: Int
+    let reporter: PlaybackReporterProtocol
     
     init(mediaItem: MediaItem) {
         self.mediaItem = mediaItem
@@ -31,6 +32,14 @@ struct VLCPlayerView: View {
         
         // Initialize subtitle manager with the proxy
         self._subtitleManager = State(initialValue: SubtitleManager(vlcProxy: vlcProxy))
+        
+        switch mediaItem {
+        case .jellyfin(let item):
+            self.reporter = JellyfinPlaybackReporter(item: item)
+        case .local(let file):
+            self.reporter = LocalPlaybackReporter(file: file)
+        }
+        reporter.reportStart(positionSeconds: startTimeSeconds)
     }
     
     var body: some View {
@@ -96,6 +105,7 @@ struct VLCPlayerView: View {
             isPlaying: playbackState.isPlaying,
             currentTime: Double(playbackState.currentSeconds)
         )
+        
         if !hasLoadedEmbeddedSubs {
             subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
             hasLoadedEmbeddedSubs = true
@@ -110,16 +120,9 @@ struct VLCPlayerView: View {
             )
             localMediaManager.updateRecentFile(updatedFile)
         }
-        
-        // Send periodic progress updates
-        // playbackReporter?.reportProgress(
-        //     positionSeconds: playbackState.currentSeconds,
-        //     isPaused: !playbackState.isPlaying
-        // )
     }
     
     private func handleStateChange(_ state: VLCVideoPlayer.State) {
-        let wasPlaying = playbackState.isPlaying
         playbackState.updatePlayingState(state == .playing)
         
         // Update system media controls
@@ -162,20 +165,11 @@ struct VLCPlayerView: View {
     private func cleanup() {
         proxy.stop()
         
-        let reporter: PlaybackReporterProtocol
-        
-        switch mediaItem {
-        case .jellyfin(let item):
-            reporter = JellyfinPlaybackReporter(item: item)
-        case .local(let file):
-            reporter = LocalPlaybackReporter(file: file)
-        }
-        
         reporter.reportStop(positionSeconds: playbackState.currentSeconds)
-        
-        SystemMediaController.shared.clearNowPlayingInfo()
         if let handler = RefreshHandlerContainer.shared.refresh {
             Task { await handler() }
         }
+        
+        SystemMediaController.shared.clearNowPlayingInfo()
     }
 }

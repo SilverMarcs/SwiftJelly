@@ -19,6 +19,7 @@ struct AVMediaPlayerView: View {
         case .local(let file):
             self.reporter = LocalPlaybackReporter(file: file)
         }
+        reporter.reportStart(positionSeconds: startTimeSeconds)
     }
 
     var body: some View {
@@ -29,9 +30,6 @@ struct AVMediaPlayerView: View {
             .aspectRatio(16/9, contentMode: .fit)
             .gesture(WindowDragGesture())
             .navigationTitle(mediaItem.name ?? "Media Player")
-            .onAppear {
-                reporter.reportStart(positionSeconds: startTimeSeconds)
-            }
             .onDisappear {
                 cleanup()
             }
@@ -46,9 +44,6 @@ struct AVMediaPlayerView: View {
         #else
         AVPlayerIos(startTimeSeconds: startTimeSeconds, player: player)
             .ignoresSafeArea()
-            .onAppear {
-                reporter.reportStart(positionSeconds: startTimeSeconds)
-            }
             .onDisappear {
                 cleanup()
             }

@@ -24,7 +24,8 @@ struct MediaGrid: View {
                     MediaNavigationLink(item: item)
                 }
             }
-            .scenePadding(.horizontal)            
+            .scenePadding(.horizontal)
+            .scenePadding(.bottom)
         }
         .overlay {
             if isLoading {
