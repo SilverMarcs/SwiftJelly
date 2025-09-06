@@ -60,8 +60,11 @@ struct AVMediaPlayerView: View {
         reporter.reportStop(positionSeconds: seconds)
         player.pause()
         
-        if let handler = RefreshHandlerContainer.shared.refresh {
-            Task { await handler() }
+        Task {
+            try? await Task.sleep(nanoseconds: 100_000_000) // 1 second delay
+            if let handler = RefreshHandlerContainer.shared.refresh {
+                await handler()
+            }
         }
     }
 }

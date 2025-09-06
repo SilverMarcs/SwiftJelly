@@ -166,8 +166,13 @@ struct VLCPlayerView: View {
         proxy.stop()
         
         reporter.reportStop(positionSeconds: playbackState.currentSeconds)
-        if let handler = RefreshHandlerContainer.shared.refresh {
-            Task { await handler() }
+        
+        // Add a small delay to allow server to process the stop report before refreshing
+        Task {
+            try? await Task.sleep(nanoseconds: 100_000_000) // 1 second delay
+            if let handler = RefreshHandlerContainer.shared.refresh {
+                await handler()
+            }
         }
         
         SystemMediaController.shared.clearNowPlayingInfo()
