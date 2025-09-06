@@ -52,9 +52,19 @@ struct ContentView: View {
         #else
         .onOpenURL { url in
             if url.isFileURL {
-                let mediaItem = MediaItem.local(LocalMediaFile(url: url))
-                dismissWindow(id: "media-player")
-                openWindow(id: "media-player", value: mediaItem)
+                Task {
+                    let canAccess = url.startAccessingSecurityScopedResource()
+                    if canAccess {
+                        let enhancedFile = await localMediaManager.getEnhancedMetadata(for: LocalMediaFile(url: url))
+                        localMediaManager.addRecentFile(enhancedFile)
+                        
+                        let mediaItem = MediaItem.local(enhancedFile)
+                        dismissWindow(id: "media-player")
+                        openWindow(id: "media-player", value: mediaItem)
+                    } else {
+                        print("Failed to access security-scoped resource")
+                    }
+                }
             }
         }
         #endif

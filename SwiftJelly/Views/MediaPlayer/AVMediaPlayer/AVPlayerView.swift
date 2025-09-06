@@ -64,6 +64,13 @@ struct AVMediaPlayerView: View {
         reporter.reportStop(positionSeconds: seconds)
         player.pause()
         
+        // Stop accessing security-scoped resource for local files
+        #if os(macOS)
+        if case .local(let file) = mediaItem {
+            file.stopAccessingSecurityScopedResource()
+        }
+        #endif
+        
         Task {
             try? await Task.sleep(nanoseconds: 100_000_000)
             if let handler = RefreshHandlerContainer.shared.refresh {

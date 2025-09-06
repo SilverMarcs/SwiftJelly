@@ -31,6 +31,7 @@ class LocalMediaManager {
         }
         
         saveRecentFiles()
+        saveFileDuration(file)
     }
 
     /// Replace or add a recent file and persist changes
@@ -43,6 +44,7 @@ class LocalMediaManager {
         }
 
         saveRecentFiles()
+        saveFileDuration(file)
     }
     
     /// Remove a file from recent files list
@@ -71,19 +73,11 @@ class LocalMediaManager {
         }
     }
     
-    /// Clear playback data for a specific file
-    func clearPlaybackData(for file: LocalMediaFile) {
-        let positionKey = "localMedia_position_\(file.url.absoluteString.hash)"
-        let completedKey = "localMedia_completed_\(file.url.absoluteString.hash)"
-        
-        UserDefaults.standard.removeObject(forKey: positionKey)
-        UserDefaults.standard.removeObject(forKey: completedKey)
-    }
-    
-    /// Clear all local media playback data
-    func clearAllPlaybackData() {
-        for file in recentFiles {
-            clearPlaybackData(for: file)
+    /// Save the duration for a specific file
+    private func saveFileDuration(_ file: LocalMediaFile) {
+        if let duration = file.durationSeconds {
+            let durationKey = "localMedia_duration_\(file.url.absoluteString.hash)"
+            UserDefaults.standard.set(duration, forKey: durationKey)
         }
     }
     
@@ -91,22 +85,40 @@ class LocalMediaManager {
     
     func loadRecentFiles() {
         guard let data = UserDefaults.standard.data(forKey: "recentMediaFiles"),
-              let files = try? JSONDecoder().decode([LocalMediaFile].self, from: data) else {
+              let bookmarkDatas = try? JSONDecoder().decode([Data].self, from: data) else {
             return
         }
 
-        recentFiles = files.compactMap { file in
-            // Check if file still exists
-            guard file.url.isFileURL, FileManager.default.fileExists(atPath: file.url.path) else {
-                return nil
-            }
-            return file
+        recentFiles = bookmarkDatas.compactMap { bookmarkData in
+            #if os(macOS)
+            return LocalMediaFile(bookmarkData: bookmarkData)
+            #else
+            // For non-macOS platforms, we can't use bookmarks, so this won't work
+            // This is a fallback that won't work after restart
+            return nil
+            #endif
         }
     }
     
     private func saveRecentFiles() {
+        #if os(macOS)
+        let bookmarkDatas = recentFiles.compactMap { file -> Data? in
+            do {
+                return try file.url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+            } catch {
+                print("Failed to create bookmark for saving: \(error)")
+                return nil
+            }
+        }
+        
+        if let data = try? JSONEncoder().encode(bookmarkDatas) {
+            UserDefaults.standard.set(data, forKey: "recentMediaFiles")
+        }
+        #else
+        // For non-macOS, save URLs directly (won't work after restart due to security)
         if let data = try? JSONEncoder().encode(recentFiles) {
             UserDefaults.standard.set(data, forKey: "recentMediaFiles")
         }
+        #endif
     }
 }

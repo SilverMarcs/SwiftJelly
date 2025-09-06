@@ -167,6 +167,13 @@ struct VLCPlayerView: View {
         
         reporter.reportStop(positionSeconds: playbackState.currentSeconds)
         
+        // Stop accessing security-scoped resource for local files
+        #if os(macOS)
+        if case .local(let file) = mediaItem {
+            file.stopAccessingSecurityScopedResource()
+        }
+        #endif
+        
         // Add a small delay to allow server to process the stop report before refreshing
         Task {
             try? await Task.sleep(nanoseconds: 100_000_000) // 1 second delay

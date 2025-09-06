@@ -42,11 +42,11 @@ struct LocalMediaRow: View {
                                     .foregroundStyle(.secondary)
                             }
                             
-                            Text("•")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            
                             if file.savedPosition > 0 {
+                                Text("•")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                
                                 if file.isCompleted {
                                     Text("Watched")
                                         .font(.caption)
@@ -87,12 +87,6 @@ struct LocalMediaRow: View {
         }
         .buttonStyle(.plain)
         .contextMenu {
-            if file.savedPosition > 0 {
-                Button("Clear Progress", systemImage: "arrow.counterclockwise") {
-                    localMediaManager.clearPlaybackData(for: file)
-                }
-            }
-            
             Button("Remove from Recent", systemImage: "trash", role: .destructive) {
                 localMediaManager.removeRecentFile(file)
             }
