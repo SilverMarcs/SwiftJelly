@@ -22,15 +22,7 @@ struct LocalMediaRow: View {
     }
     
     var body: some View {
-        Button {
-            RefreshHandlerContainer.shared.refresh = refresh
-            
-            let mediaItem = MediaItem.local(file)
-            #if os(macOS)
-            dismissWindow(id: "media-player")
-            openWindow(id: "media-player", value: mediaItem)
-            #endif
-        } label: {
+        PlayMediaButton(item: file) {
             VStack(spacing: 8) {
                 HStack {
                     Image(systemName: "play.rectangle.fill")

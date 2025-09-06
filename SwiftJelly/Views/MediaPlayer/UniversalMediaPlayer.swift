@@ -11,11 +11,6 @@ import JellyfinAPI
 struct UniversalMediaPlayer: View {
     let mediaItem: MediaItem
     
-    // Convenience initializer for Jellyfin items (backward compatibility)
-    init(item: BaseItemDto) {
-        self.mediaItem = .jellyfin(item)
-    }
-    
     init(mediaItem: MediaItem) {
         self.mediaItem = mediaItem
     }
