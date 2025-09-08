@@ -1,7 +1,7 @@
 # SwiftJelly
 
 Jellyfin Media Server client with SwiftUI & Liquid Glass.
-Uses several new SwiftUI APIs introduced in WWDC25/
+Uses several new SwiftUI APIs introduced in WWDC25.
 
 ## Features
 - Watch your movies and shows stored on a Jellyfin Server
