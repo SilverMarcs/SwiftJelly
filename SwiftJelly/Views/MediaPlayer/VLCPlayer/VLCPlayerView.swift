@@ -84,6 +84,15 @@ struct VLCPlayerView: View {
                     window.toggleFullScreen(nil)
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .keyboard) {
+                    Button("Toggle FullScreen") {
+                        guard let window = NSApplication.shared.keyWindow else { return }
+                       window.toggleFullScreen(nil)
+                    }
+                    .keyboardShortcut("F")
+                }
+            }
             #endif
             .mediaPlayerKeyboardShortcuts(
                 playbackState: playbackState,
