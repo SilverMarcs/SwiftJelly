@@ -7,6 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
+import CachedAsyncImage
 
 @main
 struct SwiftJellyApp: App {
@@ -46,7 +47,11 @@ struct SwiftJellyApp: App {
         #endif
     }
     
-//    init() {
-//        NSWindow.allowsAutomaticWindowTabbing = false
-//    }
+    init() {
+         CachedAsyncImageConfiguration.configure(
+             memoryCountLimit: 150,        // Max 150 images in memory
+             memoryCostLimitMB: 100,       // Max 100 MB memory usage
+             diskCacheLimitMB: 500         // Max 500 MB disk cache
+         )
+    }
 }
