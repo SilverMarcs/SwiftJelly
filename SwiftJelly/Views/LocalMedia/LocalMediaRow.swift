@@ -92,4 +92,22 @@ struct LocalMediaRow: View {
             }
         }
     }
+
+    private var subtitleText: String {
+        var components: [String] = []
+        
+        if let durationSeconds = file.durationSeconds {
+            components.append(durationSeconds.timeString())
+        }
+        
+        if file.savedPosition > 0 {
+            if file.isCompleted {
+                components.append("Watched")
+            } else {
+                components.append("Resume at \(file.savedPosition.timeString())")
+            }
+        }
+        
+        return components.joined(separator: " • ")
+    }
 }

@@ -18,6 +18,8 @@ struct MediaNavigationLink: View {
                 MovieDetailView(id: item.id ?? "")
             case .series:
                 ShowDetailView(id: item.id ?? "")
+            case .boxSet:
+                LibraryItemsView(library: item)
             default:
                 Text("Unsupported item type")
             }

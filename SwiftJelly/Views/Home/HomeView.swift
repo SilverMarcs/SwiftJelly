@@ -64,8 +64,8 @@ struct HomeView: View {
         do {
             continueWatchingItems = try await continueWatching
             let items = try await allItems
-            latestMovies = Array(items.filter { $0.type == .movie }.prefix(8))
-            latestShows = Array(items.filter { $0.type == .series }.prefix(8))
+            latestMovies = Array(items.filter { $0.type == .movie })
+            latestShows = Array(items.filter { $0.type == .series })
         } catch {
             print(error.localizedDescription)
         }
