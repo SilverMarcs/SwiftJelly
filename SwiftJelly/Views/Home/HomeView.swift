@@ -60,7 +60,7 @@ struct HomeView: View {
     private func loadAll() async {
         isLoading = true
         async let continueWatching = JFAPI.loadContinueWatchingSmart()
-        async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 20)
+        async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 30)
         do {
             continueWatchingItems = try await continueWatching
             let items = try await allItems

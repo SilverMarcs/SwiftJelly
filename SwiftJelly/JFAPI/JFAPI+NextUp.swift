@@ -13,7 +13,7 @@ extension JFAPI {
     /// Loads items for the Continue Watching section: for each show, if there is an in-progress episode, show that; otherwise, show the next up episode. Movies are always included. Deduplicates by show.
     static func loadContinueWatchingSmart() async throws -> [BaseItemDto] {
         async let resumeItemsRaw = loadResumeItems()
-        async let nextUpItemsRaw = loadNextUpItems(limit: 40)
+        async let nextUpItemsRaw = loadNextUpItems(limit: 10)
         let resumeItems = try await resumeItemsRaw
         let nextUpItems = try await nextUpItemsRaw
 
@@ -80,7 +80,7 @@ extension JFAPI {
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.includeItemTypes = [.movie, .episode]
-        parameters.limit = 100 // fetch more to allow grouping, then limit to 20 after grouping
+        parameters.limit = 50 // fetch more to allow grouping, then limit to 20 after grouping
         let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
         // Group episodes by seriesID, pick most recent per show; include all movies

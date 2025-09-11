@@ -16,10 +16,10 @@ struct UniversalMediaPlayer: View {
     }
 
     var body: some View {
-        if AVPlayerSupportChecker.isSupported(item: mediaItem) {
-            AVMediaPlayerView(mediaItem: mediaItem)
-        } else {
+//        if AVPlayerSupportChecker.isSupported(item: mediaItem) {
+//            AVMediaPlayerView(mediaItem: mediaItem)
+//        } else {
             VLCPlayerView(mediaItem: mediaItem)
-        }
+//        }
     }
 }
