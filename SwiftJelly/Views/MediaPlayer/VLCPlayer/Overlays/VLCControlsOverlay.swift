@@ -85,7 +85,8 @@ struct VLCControlsOverlay: View {
         #if os(macOS)
         .frame(maxWidth: 500)
         #endif
-        .padding(12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 9)
         .glassEffect()
     }
 }

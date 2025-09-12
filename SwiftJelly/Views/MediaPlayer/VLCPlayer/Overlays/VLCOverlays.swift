@@ -20,6 +20,7 @@ struct VLCPlayerOverlays: ViewModifier {
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
+                        .padding(.top, -10)
                         .simultaneousGesture(
                             TapGesture()
                                 .onEnded {
@@ -62,6 +63,8 @@ struct VLCPlayerOverlays: ViewModifier {
                         )
                     #if os(macOS)
                         .padding()
+                    #else
+                        .padding(.bottom, -10)
                     #endif
                 }
             }
@@ -77,7 +80,7 @@ struct VLCPlayerOverlays: ViewModifier {
     
     private func startHideTimer() {
         hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { _ in
+        hideTimer = Timer.scheduledTimer(withTimeInterval: 3.5, repeats: false) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
                 controlsVisible = false
             }

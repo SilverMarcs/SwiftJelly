@@ -27,6 +27,9 @@ struct VLCPlayerTopOverlay: View {
                 }
             } label: {
                 Image(systemName: isAspectFillMode ? "rectangle.arrowtriangle.2.inward" : "rectangle.arrowtriangle.2.outward")
+                    .contentTransition(.symbolEffect(.replace))
+                    .font(.title2)
+//                    .imageScale(.large)
             }
             
             Spacer()
@@ -35,9 +38,12 @@ struct VLCPlayerTopOverlay: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .padding(2)
+                    .padding(3)
+                    .font(.title2)
+//                    .imageScale(.large)
             }
         }
+//        .controlSize(.large)
         .buttonBorderShape(.circle)
         .buttonStyle(.glass)
     }
