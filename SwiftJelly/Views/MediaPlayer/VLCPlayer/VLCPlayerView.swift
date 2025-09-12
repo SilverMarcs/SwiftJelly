@@ -60,6 +60,8 @@ struct VLCPlayerView: View {
                 handleTicks(duration: duration, info: info)
             }
             .onAppear {
+                // Load server subtitles before VLC starts
+                subtitleManager.loadServerSubtitles(from: mediaItem)
                 setupSystemMediaControls()
                 #if os(iOS)
                 OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
@@ -115,6 +117,7 @@ struct VLCPlayerView: View {
             currentTime: Double(playbackState.currentSeconds)
         )
         
+        // Load embedded subtitles from VLC if not already loaded
         if !hasLoadedEmbeddedSubs {
             subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
             hasLoadedEmbeddedSubs = true
