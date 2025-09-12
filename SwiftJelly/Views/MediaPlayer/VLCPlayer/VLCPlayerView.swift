@@ -13,7 +13,6 @@ struct VLCPlayerView: View {
     
     @State private var proxy: VLCVideoPlayer.Proxy
     @State private var playbackState = PlaybackStateManager()
-    @State private var subtitleManager: SubtitleManager
     
     @State private var hasLoadedEmbeddedSubs = false
     @State private var hasSetupSystemMediaControls = false
@@ -22,6 +21,8 @@ struct VLCPlayerView: View {
     let startTimeSeconds: Int
     let reporter: PlaybackReporterProtocol
     
+    @State private var subtitleManager: SubtitleManager
+
     init(mediaItem: MediaItem) {
         self.mediaItem = mediaItem
         self.playbackURL = mediaItem.url
@@ -60,8 +61,7 @@ struct VLCPlayerView: View {
                 handleTicks(duration: duration, info: info)
             }
             .onAppear {
-                // Load server subtitles before VLC starts
-                subtitleManager.loadServerSubtitles(from: mediaItem)
+                subtitleManager.primeServerStreams(from: mediaItem) // load metadata only; don’t add yet
                 setupSystemMediaControls()
                 #if os(iOS)
                 OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
@@ -116,12 +116,8 @@ struct VLCPlayerView: View {
             isPlaying: playbackState.isPlaying,
             currentTime: Double(playbackState.currentSeconds)
         )
-        
-        // Load embedded subtitles from VLC if not already loaded
-        if !hasLoadedEmbeddedSubs {
-            subtitleManager.loadSubtitlesFromVLC(tracks: info.subtitleTracks)
-            hasLoadedEmbeddedSubs = true
-        }
+
+        subtitleManager.onVLCTracksUpdated(info.subtitleTracks)
         
         // Update local media file duration if not already set
         if case .local(let file) = mediaItem, file.durationSeconds == nil, totalDuration > 0 {

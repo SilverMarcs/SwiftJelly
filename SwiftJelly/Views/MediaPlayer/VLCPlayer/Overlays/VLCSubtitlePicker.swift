@@ -3,25 +3,21 @@ import VLCUI
 
 struct VLCSubtitlePicker: View {
     var subtitleManager: SubtitleManager
-    
     var body: some View {
         Menu {
-            ForEach(subtitleManager.availableSubtitles, id: \.index) { subtitle in
+            ForEach(subtitleManager.options) { opt in
                 Button {
-                    subtitleManager.selectSubtitle(at: subtitle.index)
+                    subtitleManager.selectSubtitle(withId: opt.id)
                 } label: {
-                    if subtitleManager.selectedSubtitleIndex == subtitle.index {
-                        Label(subtitle.title, systemImage: "checkmark")
-                            .labelStyle(.titleAndIcon)
+                    if subtitleManager.selectedId == opt.id {
+                        Label(opt.title, systemImage: "checkmark").labelStyle(.titleAndIcon)
                     } else {
-                        Label(subtitle.title, systemImage: "captions.bubble")
-                            .labelStyle(.titleOnly)
+                        Label(opt.title, systemImage: "captions.bubble").labelStyle(.titleOnly)
                     }
                 }
             }
         } label: {
-            Label("Subtitles", systemImage: "captions.bubble")
-                .imageScale(.large)
+            Label("Subtitles", systemImage: "captions.bubble").imageScale(.large)
         }
         .labelStyle(.iconOnly)
         .menuIndicator(.hidden)
