@@ -11,17 +11,14 @@ struct VLCPlayerView: View {
     @Environment(LocalMediaManager.self) var localMediaManager
     let mediaItem: MediaItem
     
-    @State private var proxy: VLCVideoPlayer.Proxy
+    private var proxy: VLCVideoPlayer.Proxy
     @State private var playbackState = PlaybackStateManager()
-    
-    @State private var hasLoadedEmbeddedSubs = false
+    @State private var subtitleManager: SubtitleManager
     @State private var hasSetupSystemMediaControls = false
     
     let playbackURL: URL?
     let startTimeSeconds: Int
     let reporter: PlaybackReporterProtocol
-    
-    @State private var subtitleManager: SubtitleManager
 
     init(mediaItem: MediaItem) {
         self.mediaItem = mediaItem
@@ -29,9 +26,8 @@ struct VLCPlayerView: View {
         self.startTimeSeconds = mediaItem.startTimeSeconds
         
         let vlcProxy = VLCVideoPlayer.Proxy()
-        self._proxy = State(initialValue: vlcProxy)
+        self.proxy = vlcProxy
         
-        // Initialize subtitle manager with the proxy
         self._subtitleManager = State(initialValue: SubtitleManager(vlcProxy: vlcProxy))
         
         switch mediaItem {
