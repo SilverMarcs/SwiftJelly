@@ -114,8 +114,10 @@ struct VLCPlayerView: View {
         )
 
         subtitleManager.onVLCTracksUpdated(info.subtitleTracks)
-        
-        // Update local media file duration if not already set
+
+        // Periodic progress (throttled internally to ~10s by JellyfinPlaybackReporter)
+        reporter.reportProgress(positionSeconds: seconds, isPaused: !playbackState.isPlaying)
+
         if case .local(let file) = mediaItem, file.durationSeconds == nil, totalDuration > 0 {
             let updatedFile = LocalMediaFile(
                 url: file.url,
@@ -125,15 +127,24 @@ struct VLCPlayerView: View {
             localMediaManager.updateRecentFile(updatedFile)
         }
     }
-    
+
     private func handleStateChange(_ state: VLCVideoPlayer.State) {
-        playbackState.updatePlayingState(state == .playing)
+        let wasPlaying = playbackState.isPlaying
+        let nowPlaying = (state == .playing)
+        playbackState.updatePlayingState(nowPlaying)
         
         // Update system media controls
         SystemMediaController.shared.updatePlaybackState(
             isPlaying: playbackState.isPlaying,
             currentTime: Double(playbackState.currentSeconds)
         )
+        
+        // Report pause/resume to Jellyfin
+        if nowPlaying && !wasPlaying {
+            reporter.reportResume(positionSeconds: playbackState.currentSeconds)
+        } else if !nowPlaying && wasPlaying {
+            reporter.reportPause(positionSeconds: playbackState.currentSeconds)
+        }
     }
     
     private func setupSystemMediaControls() {
