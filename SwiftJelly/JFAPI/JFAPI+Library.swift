@@ -69,4 +69,22 @@ extension JFAPI {
         let request = Paths.getLatestMedia(parameters: parameters)
         return try await send(request)
     }
+    
+    /// Loads media items that a person appeared in
+    /// - Parameter person: The person to load media for
+    /// - Returns: Array of BaseItemDto representing media the person appeared in
+    static func loadPersonMedia(for person: BaseItemPerson) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetItemsByUserIDParameters()
+        parameters.isRecursive = true
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        parameters.sortBy = [ItemSortBy.sortName.rawValue]
+        parameters.sortOrder = [SortOrder.ascending]
+        parameters.includeItemTypes = [.movie, .series]
+        parameters.personIDs = [person.id].compactMap { $0 }
+        
+        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
+        return try await send(request).items ?? []
+    }
 }

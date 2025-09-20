@@ -13,6 +13,15 @@ struct PersonView: View {
     let person: BaseItemPerson
     
     var body: some View {
+        NavigationLink {
+            PersonMediaView(person: person)
+        } label: {
+            personContent
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var personContent: some View {
         VStack(alignment: .center, spacing: 10) {
             Group {
                 if let url = ImageURLProvider.personImageURL(for: person) {
