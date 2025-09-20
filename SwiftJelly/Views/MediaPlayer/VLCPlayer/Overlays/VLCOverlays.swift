@@ -9,88 +9,31 @@ struct VLCPlayerOverlays: ViewModifier {
     let playbackState: PlaybackStateManager
     let subtitleManager: SubtitleManager
     
-    @State private var controlsVisible: Bool = false
     @State private var isAspectFillMode = false
-    @State private var hideTimer: Timer?
     
     func body(content: Content) -> some View {
         content
             #if !os(macOS)
             .ignoresSafeArea(edges: isAspectFillMode ? [.horizontal, .vertical] : [.vertical])
             .overlay(alignment: .top) {
-                if controlsVisible {
-                    VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
-                        .padding(.top, -10)
-                        .simultaneousGesture(
-                            TapGesture()
-                                .onEnded {
-                                    resetHideTimer()
-                                }
-                        )
-                }
+                VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
+                    .padding(.top, -10)
             }
             .overlay(alignment: .center) {
                 VLCMobileControls(
                     playbackState: playbackState,
-                    proxy: proxy,
-                    controlsVisible: $controlsVisible
-                )
-                .simultaneousGesture(
-                    TapGesture()
-                        .onEnded {
-                            resetHideTimer()
-                        }
+                    proxy: proxy
                 )
             }
             #endif
-            .simultaneousGesture(
-                TapGesture(count: 1)
-                    .onEnded {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            controlsVisible.toggle()
-                        }
-                        resetHideTimer()
-                    }
-            )
             .overlay(alignment: .bottom) {
-                if controlsVisible {
-                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
-                        .simultaneousGesture(
-                            TapGesture()
-                                .onEnded {
-                                    resetHideTimer()
-                                }
-                        )
-                    #if os(macOS)
-                        .padding()
-                    #else
-                        .padding(.bottom, -10)
-                    #endif
-                }
+                VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
+                #if os(macOS)
+                    .padding()
+                #else
+                    .padding(.bottom, -10)
+                #endif
             }
-            .onChange(of: controlsVisible) { oldValue, newValue in
-                if newValue {
-                    startHideTimer()
-                } else {
-                    hideTimer?.invalidate()
-                    hideTimer = nil
-                }
-            }
-    }
-    
-    private func startHideTimer() {
-        hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 3.5, repeats: false) { _ in
-            withAnimation(.easeInOut(duration: 0.2)) {
-                controlsVisible = false
-            }
-        }
-    }
-    
-    private func resetHideTimer() {
-        if controlsVisible {
-            startHideTimer()
-        }
     }
 }
 

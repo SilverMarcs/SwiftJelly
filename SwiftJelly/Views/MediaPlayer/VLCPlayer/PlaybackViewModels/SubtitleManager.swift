@@ -72,9 +72,13 @@ struct SubtitleOption: Identifiable, Equatable {
                 SubtitleOption(id: t.index, title: t.title)
             }
 
-            // Optionally, auto-select default by name or language
-            if selectedId == nil, let defaultTrack = options.first(where: { $0.title.lowercased().contains("default") }) {
-                selectSubtitle(withId: defaultTrack.id)
+            // Auto-select previously selected or default track
+            if selectedId == nil {
+                if let defaultTrack = options.first(where: { $0.title.lowercased().contains("default") }) {
+                    selectSubtitle(withId: defaultTrack.id)
+                } else if options.count > 1 { // first actual track (skip None)
+                    selectSubtitle(withId: options[1].id)
+                }
             }
         }
     }
