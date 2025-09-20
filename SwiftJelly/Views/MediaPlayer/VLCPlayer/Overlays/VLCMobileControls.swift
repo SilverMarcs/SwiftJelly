@@ -11,15 +11,18 @@ import VLCUI
 struct VLCMobileControls: View {
     let playbackState: PlaybackStateManager
     let proxy: VLCVideoPlayer.Proxy
+    let controlsVisible: Bool
     
     var body: some View {
         HStack(spacing: 30) {
-            Button {
-                proxy.jumpBackward(10)
-            } label: {
-                Image(systemName: "gobackward.10")
-                    .font(.system(size: 27))
-                    .padding(7)
+            if controlsVisible {
+                Button {
+                    proxy.jumpBackward(.seconds(10))
+                } label: {
+                    Image(systemName: "gobackward.10")
+                        .font(.system(size: 27))
+                        .padding(7)
+                }
             }
             
             Button {
@@ -34,13 +37,18 @@ struct VLCMobileControls: View {
                     .font(.system(size: 49))
                     .padding(14)
             }
+            .opacity(controlsVisible ? 1 : 0.001)
+            .contentShape(Rectangle())
+            .allowsHitTesting(true)
             
-            Button {
-                proxy.jumpForward(10)
-            } label: {
-                Image(systemName: "goforward.10")
-                    .font(.system(size: 27))
-                    .padding(7)
+            if controlsVisible {
+                Button {
+                    proxy.jumpForward(.seconds(10))
+                } label: {
+                    Image(systemName: "goforward.10")
+                        .font(.system(size: 27))
+                        .padding(7)
+                }
             }
         }
         .buttonStyle(.glass)

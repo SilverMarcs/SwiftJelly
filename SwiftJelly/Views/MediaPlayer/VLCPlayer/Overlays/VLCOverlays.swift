@@ -9,6 +9,7 @@ struct VLCPlayerOverlays: ViewModifier {
     let playbackState: PlaybackStateManager
     let subtitleManager: SubtitleManager
     
+    @State private var controlsVisible: Bool = true
     @State private var isAspectFillMode = false
     
     func body(content: Content) -> some View {
@@ -16,23 +17,38 @@ struct VLCPlayerOverlays: ViewModifier {
             #if !os(macOS)
             .ignoresSafeArea(edges: isAspectFillMode ? [.horizontal, .vertical] : [.vertical])
             .overlay(alignment: .top) {
-                VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
-                    .padding(.top, -10)
+                if controlsVisible {
+                    VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
+                        .padding(.top, -10)
+                }
             }
             .overlay(alignment: .center) {
-                VLCMobileControls(
-                    playbackState: playbackState,
-                    proxy: proxy
-                )
+                if controlsVisible {
+                    VLCMobileControls(
+                        playbackState: playbackState,
+                        proxy: proxy,
+                        controlsVisible: controlsVisible
+                    )
+                }
             }
             #endif
+            .simultaneousGesture(
+                TapGesture(count: 1)
+                    .onEnded {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            controlsVisible.toggle()
+                        }
+                    }
+            )
             .overlay(alignment: .bottom) {
-                VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
-                #if os(macOS)
-                    .padding()
-                #else
-                    .padding(.bottom, -10)
-                #endif
+                if controlsVisible {
+                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
+                    #if os(macOS)
+                        .padding()
+                    #else
+                        .padding(.bottom, -10)
+                    #endif
+                }
             }
     }
 }
