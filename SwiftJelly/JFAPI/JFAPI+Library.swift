@@ -53,35 +53,15 @@ extension JFAPI {
         return try await send(request).items ?? []
     }
     
-    /// Loads recently added items
-    /// - Parameter limit: Maximum number of items to return (default: 20)
-    /// - Returns: Array of BaseItemDto representing recently added items
-    static func loadRecentlyAddedItems(limit: Int = 20) async throws -> [BaseItemDto] {
-        let context = try getAPIContext()
-        var parameters = Paths.GetItemsByUserIDParameters()
-        parameters.enableUserData = true
-        parameters.fields = .MinimumFields
-        parameters.includeItemTypes = [.movie, .series]
-        parameters.isRecursive = true
-        parameters.limit = limit
-        parameters.sortBy = [ItemSortBy.dateCreated.rawValue]
-        parameters.sortOrder = [.descending]
-        
-        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
-        return try await send(request).items ?? []
-    }
-    
     /// Loads latest media for a specific library
     /// - Parameters:
     ///   - library: The library to get latest items from
     ///   - limit: Maximum number of items to return (default: 12)
     /// - Returns: Array of BaseItemDto representing latest items in the library
-//    static func loadLatestMediaInLibrary(_ library: BaseItemDto, limit: Int = 12) async throws -> [BaseItemDto] {
     static func loadLatestMediaInLibrary(limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetLatestMediaParameters()
         parameters.userID = context.userID
-//        parameters.parentID = library.id
         parameters.fields = .MinimumFields
         parameters.enableUserData = true
         parameters.limit = limit

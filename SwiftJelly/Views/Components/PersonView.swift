@@ -27,29 +27,28 @@ struct PersonView: View {
                         }
                 }
             }
-            .frame(width: 60, height: 60)
-            .scaledToFill() // not working
-            .clipShape(Circle())
-            .overlay(
-                Circle()
-                    .stroke(.secondary, lineWidth: 1)
-            )
+            .aspectRatio(3/4, contentMode: .fill) 
+            .clipShape(.rect(cornerRadius: 6))
+            .overlay {
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(.background.quinary, lineWidth: 1)
+            }
             
-            VStack(spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 if let name = person.name {
                     Text(name)
                         .font(.caption)
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
-                        .lineLimit(2)
+                        .lineLimit(1)
                 }
                 
                 if let role = person.role, !role.isEmpty {
-                    Text("as \(role)")
+                    Text(role)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
-                        .lineLimit(2)
+                        .lineLimit(1)
                 }
             }
         }

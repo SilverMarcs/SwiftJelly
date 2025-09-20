@@ -8,4 +8,17 @@ extension JFAPI {
         let request = Paths.getItem(itemID: id, userID: context.userID)
         return try await send(request)
     }
+    
+    /// Loads similar/recommended items for a given item
+    static func loadSimilarItems(for item: BaseItemDto, limit: Int = 20) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetSimilarItemsParameters()
+        parameters.fields = .MinimumFields
+        parameters.limit = limit
+        parameters.userID = context.userID
+        
+        let request = Paths.getSimilarItems(itemID: item.id ?? "", parameters: parameters)
+        let response = try await send(request)
+        return response.items ?? []
+    }
 }

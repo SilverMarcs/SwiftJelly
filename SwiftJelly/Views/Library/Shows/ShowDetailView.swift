@@ -9,6 +9,7 @@ struct ShowDetailView: View {
     @State private var seasons: [BaseItemDto] = []
     @State private var selectedSeason: BaseItemDto?
     @State private var episodes: [BaseItemDto] = []
+    @State private var recommendedItems: [BaseItemDto] = []
     @State private var isLoading = false
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     @State private var refreshTrigger = UUID()
@@ -78,9 +79,16 @@ struct ShowDetailView: View {
                         PeopleScrollView(people: people)
                             .contentMargins(.horizontal, 10)
                     }
+                    
+                    if !recommendedItems.isEmpty {
+                        HorizontalMediaScrollView(
+                            title: "Recommended",
+                            items: recommendedItems,
+                        )
+                        .contentMargins(.horizontal, 10)
+                    }
                 }
                 .scenePadding(.bottom)
-                
             }
         }
         .overlay {
@@ -131,10 +139,14 @@ struct ShowDetailView: View {
         do {
             show = try await JFAPI.loadItem(by: id)
             await loadSeasons()
+            if let show = show {
+                recommendedItems = try await JFAPI.loadSimilarItems(for: show)
+            }
         } catch {
             show = nil
             seasons = []
             episodes = []
+            recommendedItems = []
         }
     }
     

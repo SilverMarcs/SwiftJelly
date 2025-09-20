@@ -5,6 +5,7 @@ struct MovieDetailView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let id: String
     @State private var movie: BaseItemDto?
+    @State private var recommendedItems: [BaseItemDto] = []
     @State private var isLoading = false
     
     var body: some View {
@@ -49,6 +50,14 @@ struct MovieDetailView: View {
                         PeopleScrollView(people: people)
                             .contentMargins(.horizontal, 10)
                     }
+                    
+                    if !recommendedItems.isEmpty {
+                        HorizontalMediaScrollView(
+                            title: "Recommended",
+                            items: recommendedItems,
+                        )
+                        .contentMargins(.horizontal, 10)
+                    }
                 }
                 .scenePadding(.bottom)
             }
@@ -85,9 +94,13 @@ struct MovieDetailView: View {
         defer { isLoading = false }
         do {
             movie = try await JFAPI.loadItem(by: id)
+            if let movie = movie {
+                recommendedItems = try await JFAPI.loadSimilarItems(for: movie)
+            }
         } catch {
             // handle error
             movie = nil
+            recommendedItems = []
         }
     }
     

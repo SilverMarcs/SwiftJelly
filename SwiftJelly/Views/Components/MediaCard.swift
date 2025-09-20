@@ -37,5 +37,6 @@ struct MediaCard: View {
                 .truncationMode(.middle)
                 .multilineTextAlignment(.leading)
         }
+        .contentShape(.rect)
     }
 }
