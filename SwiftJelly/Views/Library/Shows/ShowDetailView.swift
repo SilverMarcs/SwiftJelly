@@ -40,6 +40,13 @@ struct ShowDetailView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {
+                        if let firstTagline = show.taglines?.first {
+                            Text(firstTagline)
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .multilineTextAlignment(.leading)
+                        }
+                        
                         if let overview = show.overview {
                             Text(overview)
                                 .foregroundStyle(.secondary)
