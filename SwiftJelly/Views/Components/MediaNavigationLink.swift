@@ -19,7 +19,7 @@ struct MediaNavigationLink: View {
             case .series:
                 ShowDetailView(id: item.id ?? "")
             case .boxSet:
-                LibraryItemsView(library: item)
+                FilteredMediaView(filter: .library(item))
             default:
                 Text("Unsupported item type")
             }

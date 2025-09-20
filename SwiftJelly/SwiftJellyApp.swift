@@ -49,9 +49,9 @@ struct SwiftJellyApp: App {
     
     init() {
          CachedAsyncImageConfiguration.configure(
-             memoryCountLimit: 150,        // Max 150 images in memory
+             memoryCountLimit: 100,        // Max 100 images in memory
              memoryCostLimitMB: 100,       // Max 100 MB memory usage
-             diskCacheLimitMB: 500         // Max 500 MB disk cache
+             diskCacheLimitMB: 400         // Max 500 MB disk cache
          )
     }
 }

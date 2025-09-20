@@ -11,7 +11,7 @@ struct MovieDetailView: View {
     var body: some View {
         ScrollView {
             if let movie {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     Group {
                         if horizontalSizeClass == .compact {
                             PortraitImageView(item: movie)
@@ -22,25 +22,27 @@ struct MovieDetailView: View {
                     }
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
-                        MoviePlayButton(item: movie)
-                            .animation(.default, value: movie)
-                            .environment(\.refresh, fetchMovie)
-                            .padding(16)
+                        VStack(alignment: .leading, spacing: 8) {
+                            AttributesView(item: movie)
+                                .padding(.leading, 2)
+                            
+                            MoviePlayButton(item: movie)
+                                .animation(.default, value: movie)
+                                .environment(\.refresh, fetchMovie)
+                        }
+                        .padding(16)
                     }
                 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        if let firstTagline = movie.taglines?.first {
+                            Text(firstTagline)
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .multilineTextAlignment(.leading)
+                        }
+                        
                         if let overview = movie.overview {
                             Text(overview)
-                                .foregroundStyle(.secondary)
-                        }
-                        if let year = movie.productionYear {
-                            Text("Year: \(String(year))")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        if let duration = movie.runTimeTicks {
-                            Text("Duration: \(duration / 10_000_000 / 60) min")
-                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -48,18 +50,21 @@ struct MovieDetailView: View {
                     
                     if let people = movie.people {
                         PeopleScrollView(people: people)
-                            .contentMargins(.horizontal, 10)
                     }
+                    
+//                    if let studios = movie.studios, !studios.isEmpty {
+//                        StudiosScrollView(studios: studios)
+//                    }
                     
                     if !recommendedItems.isEmpty {
                         HorizontalMediaScrollView(
                             title: "Recommended",
                             items: recommendedItems,
                         )
-                        .contentMargins(.horizontal, 10)
                     }
                 }
                 .scenePadding(.bottom)
+                .contentMargins(.horizontal, 18)
             }
         }
         .overlay {

@@ -87,4 +87,40 @@ extension JFAPI {
         let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
         return try await send(request).items ?? []
     }
+    
+    /// Loads media items filtered by genre
+    /// - Parameter genre: The genre to filter by
+    /// - Returns: Array of BaseItemDto representing media with the specified genre
+    static func loadMediaByGenre(_ genre: String) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetItemsByUserIDParameters()
+        parameters.isRecursive = true
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        parameters.sortBy = [ItemSortBy.sortName.rawValue]
+        parameters.sortOrder = [SortOrder.ascending]
+        parameters.includeItemTypes = [.movie, .series]
+        parameters.genres = [genre]
+        
+        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
+        return try await send(request).items ?? []
+    }
+    
+    /// Loads media items filtered by studio
+    /// - Parameter studio: The studio to filter by
+    /// - Returns: Array of BaseItemDto representing media from the specified studio
+    static func loadMediaByStudio(_ studio: NameGuidPair) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetItemsByUserIDParameters()
+        parameters.isRecursive = true
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        parameters.sortBy = [ItemSortBy.sortName.rawValue]
+        parameters.sortOrder = [SortOrder.ascending]
+        parameters.includeItemTypes = [.movie, .series]
+        parameters.studioIDs = [studio.id].compactMap { $0 }
+        
+        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
+        return try await send(request).items ?? []
+    }
 }

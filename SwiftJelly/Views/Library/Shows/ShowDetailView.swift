@@ -17,7 +17,7 @@ struct ShowDetailView: View {
     var body: some View {
         ScrollView {
             if let show {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 20) {
                     Group {
                         if horizontalSizeClass == .compact {
                             PortraitImageView(item: show)
@@ -28,11 +28,15 @@ struct ShowDetailView: View {
                     }
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
-                        ShowPlayButton(show: show, seasons: seasons)
-                            .animation(.default, value: show)
-                            .environment(\.refresh, fullRefresh)
-                            .id("show-play-\(refreshTrigger)") // Force recreation when refresh trigger changes
-                            .padding(16)
+                        VStack(alignment: .leading, spacing: 8) {
+                            AttributesView(item: show)
+                            
+                            ShowPlayButton(show: show, seasons: seasons)
+                                .animation(.default, value: show)
+                                .environment(\.refresh, fullRefresh)
+                                .id("show-play-\(refreshTrigger)") // Force recreation when refresh trigger changes
+                        }
+                        .padding(16)
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {
@@ -68,8 +72,6 @@ struct ShowDetailView: View {
                                         .environment(\.refresh, fullRefresh)
                                 }
                             }
-                            .padding(.horizontal)
-                            .padding(.bottom)
                             .scrollTargetLayout()
                         }
                         .scrollPosition($episodeScrollPosition)
@@ -77,18 +79,69 @@ struct ShowDetailView: View {
                     
                     if let people = show.people {
                         PeopleScrollView(people: people)
-                            .contentMargins(.horizontal, 10)
                     }
                     
+//                    if let genres = show.genres, !genres.isEmpty {
+//                        VStack(alignment: .leading, spacing: 10) {
+//                            Text("Genres")
+//                                .font(.title2)
+//                                .fontWeight(.semibold)
+//                                .padding(.horizontal, 16)
+//                            
+//                            ScrollView(.horizontal, showsIndicators: false) {
+//                                HStack(spacing: 12) {
+//                                    ForEach(genres, id: \.self) { genre in
+//                                        NavigationLink(destination: FilteredMediaView(filter: .genre(genre))) {
+//                                            Text(genre)
+//                                                .font(.caption)
+//                                                .fontWeight(.semibold)
+//                                                .foregroundStyle(.primary)
+//                                                .padding(.horizontal, 12)
+//                                                .padding(.vertical, 8)
+//                                                .background(.fill.secondary, in: Capsule())
+//                                        }
+//                                    }
+//                                }
+//                                .padding(.horizontal, 16)
+//                            }
+//                        }
+//                    }
+//                    
+//                    if let studios = show.studios, !studios.isEmpty {
+//                        VStack(alignment: .leading, spacing: 10) {
+//                            Text("Studios")
+//                                .font(.title2)
+//                                .fontWeight(.semibold)
+//                                .padding(.horizontal, 16)
+//                            
+//                            ScrollView(.horizontal, showsIndicators: false) {
+//                                HStack(spacing: 12) {
+//                                    ForEach(studios, id: \.self) { studio in
+//                                        NavigationLink(destination: FilteredMediaView(filter: .studio(studio))) {
+//                                            Text(studio.name ?? "Unknown")
+//                                                .font(.caption)
+//                                                .fontWeight(.semibold)
+//                                                .foregroundStyle(.primary)
+//                                                .padding(.horizontal, 12)
+//                                                .padding(.vertical, 8)
+//                                                .background(.fill.secondary, in: Capsule())
+//                                        }
+//                                    }
+//                                }
+//                                .padding(.horizontal, 16)
+//                            }
+//                        }
+//                    }
+//                    
                     if !recommendedItems.isEmpty {
                         HorizontalMediaScrollView(
                             title: "Recommended",
                             items: recommendedItems,
                         )
-                        .contentMargins(.horizontal, 10)
                     }
                 }
                 .scenePadding(.bottom)
+                .contentMargins(.horizontal, 18)
             }
         }
         .overlay {

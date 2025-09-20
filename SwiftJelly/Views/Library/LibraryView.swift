@@ -22,7 +22,7 @@ struct LibraryView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(libraries, id: \.id) { library in
                         NavigationLink {
-                            LibraryItemsView(library: library)
+                            FilteredMediaView(filter: .library(library))
                         } label: {
                             LandscapeImageView(item: library)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
