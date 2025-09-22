@@ -4,6 +4,13 @@ import JellyfinAPI
 struct MediaGrid: View {
     let items: [BaseItemDto]
     let isLoading: Bool
+    let onLoadMore: (() -> Void)?
+    
+    init(items: [BaseItemDto], isLoading: Bool, onLoadMore: (() -> Void)? = nil) {
+        self.items = items
+        self.isLoading = isLoading
+        self.onLoadMore = onLoadMore
+    }
     
     private static var defaultSize: CGFloat {
         #if os(macOS)
@@ -22,6 +29,11 @@ struct MediaGrid: View {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(items) { item in
                     MediaNavigationLink(item: item)
+                        .onAppear {
+                            if item == items.last, let onLoadMore {
+                                onLoadMore()
+                            }
+                        }
                 }
             }
             .scenePadding(.horizontal)
