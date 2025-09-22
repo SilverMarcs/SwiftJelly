@@ -22,11 +22,13 @@ struct MediaCard: View {
                 }
                 .overlay(alignment: .topTrailing) {
                     if item.userData?.isPlayed ?? false {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.headline)
-                            .foregroundStyle(.white, .accent)
-                            .padding(.top, 6)
-                            .padding(.horizontal, 8)
+                        Button {} label: {
+                            Image(systemName: "checkmark")
+                        }
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.circle)
+                        .padding(6)
+                        .allowsHitTesting(false)
                     }
                 }
             
