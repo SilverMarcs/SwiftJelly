@@ -13,6 +13,9 @@ class LocalPlaybackReporter: PlaybackReporterProtocol {
     private let userDefaults = UserDefaults.standard
     var hasStarted: Bool = false
     
+    private var lastSaved: Int? = nil
+    private let saveEverySeconds = 10
+    
     init(file: LocalMediaFile) {
         self.file = file
     }
@@ -34,9 +37,12 @@ class LocalPlaybackReporter: PlaybackReporterProtocol {
     
     /// Reports playback progress and periodically saves position
     func reportProgress(positionSeconds: Int, isPaused: Bool) {
-        // Save position every 10 seconds to avoid excessive writes
-        if positionSeconds % 10 == 0 {
+        if let lastSaved, positionSeconds - lastSaved >= saveEverySeconds {
             savePlaybackPosition(positionSeconds)
+            self.lastSaved = positionSeconds
+        } else if lastSaved == nil {
+            savePlaybackPosition(positionSeconds)
+            self.lastSaved = positionSeconds
         }
     }
     
