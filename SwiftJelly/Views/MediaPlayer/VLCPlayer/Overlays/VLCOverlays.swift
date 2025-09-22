@@ -8,7 +8,6 @@ struct VLCPlayerOverlays: ViewModifier {
     let proxy: VLCVideoPlayer.Proxy
     let playbackState: PlaybackStateManager
     let subtitleManager: SubtitleManager
-    let uiState: PlaybackUIState
     
     @State private var controlsVisible: Bool = true
     @State private var isAspectFillMode = false
@@ -16,7 +15,8 @@ struct VLCPlayerOverlays: ViewModifier {
     func body(content: Content) -> some View {
         content
             #if !os(macOS)
-            .ignoresSafeArea(edges: isAspectFillMode ? [.horizontal, .vertical] : [.vertical])
+//            .ignoresSafeArea(edges: isAspectFillMode ? [.horizontal, .vertical] : [.vertical])
+            .ignoresSafeArea(edges: .vertical)
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
@@ -29,7 +29,6 @@ struct VLCPlayerOverlays: ViewModifier {
                         playbackState: playbackState,
                         proxy: proxy,
                         controlsVisible: controlsVisible,
-                        uiState: uiState
                     )
                 }
             }
@@ -44,7 +43,7 @@ struct VLCPlayerOverlays: ViewModifier {
             )
             .overlay(alignment: .bottom) {
                 if controlsVisible {
-                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager, uiState: uiState)
+                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
                     #if os(macOS)
                         .padding()
                     #else
@@ -60,13 +59,11 @@ extension View {
         proxy: VLCVideoPlayer.Proxy,
         playbackState: PlaybackStateManager,
         subtitleManager: SubtitleManager,
-        uiState: PlaybackUIState,
     ) -> some View {
         self.modifier(VLCPlayerOverlays(
             proxy: proxy,
             playbackState: playbackState,
             subtitleManager: subtitleManager,
-            uiState: uiState,
         ))
     }
 }

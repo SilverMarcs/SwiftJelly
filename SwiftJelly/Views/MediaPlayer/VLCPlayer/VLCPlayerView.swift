@@ -12,10 +12,8 @@ struct VLCPlayerView: View {
     let mediaItem: MediaItem
     
     private var proxy: VLCVideoPlayer.Proxy
-    @State private var playbackState = PlaybackStateManager()
-    @State private var subtitleManager: SubtitleManager
-    @State private var hasSetupSystemMediaControls = false
-    private var uiState = PlaybackUIState()
+    private var playbackState = PlaybackStateManager()
+    private var subtitleManager: SubtitleManager
     
     let playbackURL: URL?
     let startTimeSeconds: Int
@@ -29,7 +27,7 @@ struct VLCPlayerView: View {
         let vlcProxy = VLCVideoPlayer.Proxy()
         self.proxy = vlcProxy
         
-        self._subtitleManager = State(initialValue: SubtitleManager(vlcProxy: vlcProxy))
+        subtitleManager = SubtitleManager(vlcProxy: vlcProxy)
         
         switch mediaItem {
         case .jellyfin(let item):
@@ -95,14 +93,12 @@ struct VLCPlayerView: View {
             #endif
             .mediaPlayerKeyboardShortcuts(
                 playbackState: playbackState,
-                proxy: proxy,
-                uiState: uiState
+                proxy: proxy
             )
             .mediaPlayerOverlays(
                 proxy: proxy,
                 playbackState: playbackState,
                 subtitleManager: subtitleManager,
-                uiState: uiState
             )
         }
     }
@@ -111,10 +107,6 @@ struct VLCPlayerView: View {
         let seconds = Int(duration.components.seconds)
         let totalDuration = info.length / 1000
         playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-//        SystemMediaController.shared.updatePlaybackState(
-//            isPlaying: playbackState.isPlaying,
-//            currentTime: Double(playbackState.currentSeconds)
-//        )
 
         subtitleManager.onVLCTracksUpdated(info.subtitleTracks)
 
@@ -130,58 +122,7 @@ struct VLCPlayerView: View {
             localMediaManager.updateRecentFile(updatedFile)
         }
     }
-
-    /*
-    private func handleStateChange(_ state: VLCVideoPlayer.State) {
-        let wasPlaying = playbackState.isPlaying
-        let nowPlaying = (state == .playing)
-        playbackState.updatePlayingState(nowPlaying)
-        
-        // Update system media controls
-        SystemMediaController.shared.updatePlaybackState(
-            isPlaying: playbackState.isPlaying,
-            currentTime: Double(playbackState.currentSeconds)
-        )
-        
-        // Report pause/resume to Jellyfin
-        if nowPlaying && !wasPlaying {
-            reporter.reportResume(positionSeconds: playbackState.currentSeconds)
-        } else if !nowPlaying && wasPlaying {
-            reporter.reportPause(positionSeconds: playbackState.currentSeconds)
-        }
-    }
-    */
     
-    private func setupSystemMediaControls() {
-        guard !hasSetupSystemMediaControls else { return }
-        hasSetupSystemMediaControls = true
-        
-        SystemMediaController.shared.setHandlers(
-            playPause: {
-                if playbackState.isPlaying {
-                    proxy.pause()
-                } else {
-                    proxy.play()
-                }
-            },
-            seek: { seconds in
-                if seconds > 0 {
-                    proxy.jumpForward(Int(seconds))
-                } else {
-                    proxy.jumpBackward(Int(abs(seconds)))
-                }
-            },
-            changePlaybackPosition: { position in
-                proxy.setSeconds(.seconds(position))
-            }
-        )
-        
-        // Set initial media info via SystemMediaController
-        Task {
-            await SystemMediaController.shared.updateNowPlayingInfo(for: mediaItem, playbackState: playbackState)
-        }
-    }
-
     private func cleanup() {
         proxy.stop()
         
@@ -201,7 +142,5 @@ struct VLCPlayerView: View {
                 await handler()
             }
         }
-        
-//        SystemMediaController.shared.clearNowPlayingInfo()
     }
 }

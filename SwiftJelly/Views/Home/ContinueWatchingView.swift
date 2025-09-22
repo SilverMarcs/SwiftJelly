@@ -14,7 +14,7 @@ struct ContinueWatchingView: View {
     var body: some View {
         if !items.isEmpty {
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 16) {
+                HStack {
                     ForEach(items, id: \.id) { item in
                         PlayableCard(item: item)
                     }
