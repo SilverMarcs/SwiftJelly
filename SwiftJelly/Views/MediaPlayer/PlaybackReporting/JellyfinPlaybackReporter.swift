@@ -26,6 +26,18 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
         self.item = item
         self.playSessionID = JFAPI.generatePlaySessionID()
     }
+    
+    func reportPause(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        // Send immediately on pause
+        sendProgress(positionSeconds: positionSeconds, isPaused: true, force: true)
+    }
+    
+    func reportResume(positionSeconds: Int) {
+        guard hasSentStart else { return }
+        // Send immediately on resume
+        sendProgress(positionSeconds: positionSeconds, isPaused: false, force: true)
+    }
 
     func reportStart(positionSeconds: Int) {
         guard !hasSentStart else { return }
@@ -48,15 +60,11 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
     func reportProgress(positionSeconds: Int, isPaused: Bool) {
         guard hasSentStart else {
             reportStart(positionSeconds: positionSeconds)
+            return
         }
 
         // Always update lastTickSeconds at the end
         defer { self.lastTickSeconds = positionSeconds }
-
-        // Skip periodic sends while paused (you already send on pause/resume)
-        if isPaused {
-            return
-        }
 
         let lastTick = lastTickSeconds
         let lastSent = lastReportedSeconds

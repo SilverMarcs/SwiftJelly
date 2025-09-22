@@ -8,92 +8,94 @@ struct SubtitleOption: Identifiable, Equatable {
     let title: String
 }
 
+// SubtitleManager.swift
 @Observable final class SubtitleManager {
     private let vlcProxy: VLCVideoPlayer.Proxy
-    
+
     // UI state
     var options: [SubtitleOption] = []
     var selectedId: Int? = nil
-    
+
+    // One-time
+    private(set) var initialized = false
+
     // Policy state
     private var decidedSource = false
     private var usingEmbedded = false
     private var usingServer = false
     private var requestedServerOnce = false
-    
-    // Keep Jellyfin streams around to build PlaybackChildren if needed
+
+    // Jellyfin
     private var jellyfinStreams: [MediaStream] = []
     private var currentMediaItem: MediaItem?
-    
+
     init(vlcProxy: VLCVideoPlayer.Proxy) {
         self.vlcProxy = vlcProxy
     }
-    
+
     func primeServerStreams(from mediaItem: MediaItem) {
         currentMediaItem = mediaItem
         guard case .jellyfin(let item) = mediaItem,
               let mediaStreams = item.mediaSources?.first?.mediaStreams else { return }
-        
-        // Keep only textual subs; ignore bitmap/PGS/teletext etc.
         jellyfinStreams = mediaStreams.filter { s in
             (s.type == .subtitle || s.isTextSubtitleStream == true)
         }
     }
-    
-    // Called on every onSecondsUpdated with info.subtitleTracks
-    func onVLCTracksUpdated(_ tracks: [MediaTrack]) {
-        // Filter to usable text tracks; guard against “Track 1/2” placeholders where type/codec isn’t text
+
+    // Call this exactly once, when VLC first exposes tracks
+    func initializeIfNeeded(with tracks: [MediaTrack]) {
+        guard !initialized else { return }
+
+        // Filter usable text tracks (adjust predicate as needed)
         let textTracks = tracks.filter { t in
-            // Prefer: t.isText or t.codec in ["subrip", "webvtt", "ssa", "ass"]
-            // Fallback: filter out “forced” by name if that’s policy
             !t.title.lowercased().contains("forced")
         }
-        
-        // Decide once which source we use
+
+        // Decide source once
         if !decidedSource {
             if !textTracks.isEmpty {
                 usingEmbedded = true
-                decidedSource = true
             } else {
                 usingEmbedded = false
-                decidedSource = true
-                // Ask to add server subs if available; only once
                 if !requestedServerOnce {
                     requestedServerOnce = true
                     addServerSubtitlesIfNeeded()
+                    // After adding server subs, VLC will surface them as tracks;
+                    // If you truly never get another update, you can also prebuild options
+                    // from jellyfinStreams, but typically one more frame has updated tracks.
                 }
+                usingServer = true
             }
+            decidedSource = true
         }
-        
-        // If we decided to use embedded, show embedded-only list
-        // If we decided to use server, we still rebuild from VLC’s tracks after adding playback children
-        if (usingEmbedded && !textTracks.isEmpty) || usingServer {
-            options = textTracks.map { t in
-                SubtitleOption(id: t.index, title: t.title)
-            }
 
-            // Auto-select previously selected or default track
-            if selectedId == nil {
-                if let defaultTrack = options.first(where: { $0.title.lowercased().contains("default") }) {
-                    selectSubtitle(withId: defaultTrack.id)
-                } else if options.count > 1 { // first actual track (skip None)
-                    selectSubtitle(withId: options[1].id)
-                }
+        // Build options from what VLC shows now (embedded or server—if they’re already visible)
+        let visibleTextTracks = textTracks
+        options = visibleTextTracks.map { t in
+            SubtitleOption(id: t.index, title: t.title)
+        }
+
+        // Auto-select once
+        if selectedId == nil, !options.isEmpty {
+            if let defaultTrack = options.first(where: { $0.title.lowercased().contains("default") }) {
+                selectSubtitle(withId: defaultTrack.id)
+            } else if options.count > 1 { // skip "None"
+                selectSubtitle(withId: options[1].id)
             }
         }
+
+        initialized = true
     }
-    
+
     private func addServerSubtitlesIfNeeded() {
         guard !jellyfinStreams.isEmpty else { return }
-        usingServer = true
-        
         for s in jellyfinStreams {
             if let child = createPlaybackChild(from: s) {
                 vlcProxy.addPlaybackChild(child)
             }
         }
     }
-    
+
     private func createPlaybackChild(from stream: MediaStream) -> VLCVideoPlayer.PlaybackChild? {
         guard let api = try? JFAPI.getAPIContext() else { return nil }
         if let deliveryURL = stream.deliveryURL {
@@ -110,14 +112,13 @@ struct SubtitleOption: Identifiable, Equatable {
                 return nil
             }),
             let index = stream.index else { return nil }
-            
             let format = "vtt"
             let path = "/Videos/\(itemId)/\(sourceId)/Subtitles/\(index)/Stream.\(format)"
             guard let url = URL(string: path, relativeTo: api.server.url) else { return nil }
             return .init(url: url, type: .subtitle, enforce: false)
         }
     }
-    
+
     func selectSubtitle(withId id: Int?) {
         selectedId = id
         vlcProxy.setSubtitleTrack(.absolute(id ?? -1))

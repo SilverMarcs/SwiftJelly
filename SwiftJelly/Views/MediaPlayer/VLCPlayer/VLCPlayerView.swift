@@ -108,11 +108,13 @@ struct VLCPlayerView: View {
         let seconds = Int(duration.components.seconds)
         let totalDuration = info.length / 1000
         playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-
-        subtitleManager.onVLCTracksUpdated(info.subtitleTracks)
-
+        
         // Periodic progress (throttled internally to ~10s by JellyfinPlaybackReporter)
         reporter.reportProgress(positionSeconds: seconds, isPaused: !playbackState.isPlaying)
+        
+        if !subtitleManager.initialized, !info.subtitleTracks.isEmpty {
+            subtitleManager.initializeIfNeeded(with: info.subtitleTracks)
+        }
 
         if case .local(let file) = mediaItem, file.durationSeconds == nil, totalDuration > 0 {
             let updatedFile = LocalMediaFile(
@@ -129,7 +131,6 @@ struct VLCPlayerView: View {
         
         reporter.reportStop(positionSeconds: playbackState.currentSeconds)
         
-        // Stop accessing security-scoped resource for local files
         #if os(macOS)
         if case .local(let file) = mediaItem {
             file.stopAccessingSecurityScopedResource()
