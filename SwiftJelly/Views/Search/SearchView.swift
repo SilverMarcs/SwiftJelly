@@ -6,6 +6,7 @@ struct SearchView: View {
     @State private var searchScope: SearchScope = .all
     @State private var results: [BaseItemDto] = []
     @State private var isLoading = false
+    @FocusState private var isFocused
     
     var body: some View {
         NavigationStack {
@@ -14,6 +15,10 @@ struct SearchView: View {
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
                 .searchable(text: $query, placement: .toolbarPrincipal)
+                .searchFocused($isFocused)
+                .task {
+                    isFocused = true
+                }
                 .searchScopes($searchScope) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)

@@ -16,12 +16,16 @@ struct SwiftJellyApp: App {
     #endif
     
     @State private var localMediaManager = LocalMediaManager()
+    @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
         #if os(macOS)
         Window("SwiftJelly", id: "swiftjelly") {
-            ContentView()
+            ContentView(selectedTab: $selectedTab)
                 .environment(localMediaManager)
+        }
+        .commands {
+            AppCommands(selectedTab: $selectedTab)
         }
         
         WindowGroup("Media Player", id: "media-player", for: MediaItem.self) { $mediaItem in
@@ -36,9 +40,6 @@ struct SwiftJellyApp: App {
         .restorationBehavior(.disabled)
         .windowResizability(.contentSize)
         
-//        Settings {
-//            SettingsView()
-//        }
         #else
         WindowGroup {
             ContentView()

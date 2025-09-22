@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @SceneStorage("selectedTab") private var selectedTab: TabSelection = .home
+//    @SceneStorage("selectedTab") private var selectedTab: TabSelection = .home
+    @Binding var selectedTab: TabSelection
     
     @Environment(LocalMediaManager.self) var localMediaManager
     @Environment(\.openWindow) private var openWindow
