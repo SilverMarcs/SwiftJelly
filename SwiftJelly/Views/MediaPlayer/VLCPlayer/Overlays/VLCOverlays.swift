@@ -8,6 +8,7 @@ struct VLCPlayerOverlays: ViewModifier {
     let proxy: VLCVideoPlayer.Proxy
     let playbackState: PlaybackStateManager
     let subtitleManager: SubtitleManager
+    let uiState: PlaybackUIState
     
     @State private var controlsVisible: Bool = true
     @State private var isAspectFillMode = false
@@ -27,7 +28,8 @@ struct VLCPlayerOverlays: ViewModifier {
                     VLCMobileControls(
                         playbackState: playbackState,
                         proxy: proxy,
-                        controlsVisible: controlsVisible
+                        controlsVisible: controlsVisible,
+                        uiState: uiState
                     )
                 }
             }
@@ -42,7 +44,7 @@ struct VLCPlayerOverlays: ViewModifier {
             )
             .overlay(alignment: .bottom) {
                 if controlsVisible {
-                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager)
+                    VLCControlsOverlay(playbackState: playbackState, proxy: proxy, subtitleManager: subtitleManager, uiState: uiState)
                     #if os(macOS)
                         .padding()
                     #else
@@ -58,11 +60,13 @@ extension View {
         proxy: VLCVideoPlayer.Proxy,
         playbackState: PlaybackStateManager,
         subtitleManager: SubtitleManager,
+        uiState: PlaybackUIState,
     ) -> some View {
         self.modifier(VLCPlayerOverlays(
             proxy: proxy,
             playbackState: playbackState,
             subtitleManager: subtitleManager,
+            uiState: uiState,
         ))
     }
 }

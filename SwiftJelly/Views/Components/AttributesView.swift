@@ -13,6 +13,12 @@ struct AttributesView: View {
     
     var body: some View {
         HStack(spacing: 10) {
+            if let genre = item.genres?.first {
+                AttributeBadge(
+                    text: genre,
+                )
+            }
+            
             // Community Rating (stars)
             if let communityRating = item.communityRating {
                 AttributeBadge(

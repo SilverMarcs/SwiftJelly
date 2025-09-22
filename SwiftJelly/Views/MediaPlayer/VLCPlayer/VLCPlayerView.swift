@@ -15,6 +15,7 @@ struct VLCPlayerView: View {
     @State private var playbackState = PlaybackStateManager()
     @State private var subtitleManager: SubtitleManager
     @State private var hasSetupSystemMediaControls = false
+    private var uiState = PlaybackUIState()
     
     let playbackURL: URL?
     let startTimeSeconds: Int
@@ -50,15 +51,15 @@ struct VLCPlayerView: View {
                 )
             )
             .proxy(proxy)
-            .onStateUpdated { state, info in
-                handleStateChange(state)
-            }
+//            .onStateUpdated { state, info in
+//                handleStateChange(state)
+//            }
             .onSecondsUpdated { duration, info in
                 handleTicks(duration: duration, info: info)
             }
             .onAppear {
                 subtitleManager.primeServerStreams(from: mediaItem) // load metadata only; don’t add yet
-                setupSystemMediaControls()
+//                setupSystemMediaControls()
                 #if os(iOS)
                 OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
                 #endif
@@ -94,12 +95,14 @@ struct VLCPlayerView: View {
             #endif
             .mediaPlayerKeyboardShortcuts(
                 playbackState: playbackState,
-                proxy: proxy
+                proxy: proxy,
+                uiState: uiState
             )
             .mediaPlayerOverlays(
                 proxy: proxy,
                 playbackState: playbackState,
                 subtitleManager: subtitleManager,
+                uiState: uiState
             )
         }
     }
@@ -108,10 +111,10 @@ struct VLCPlayerView: View {
         let seconds = Int(duration.components.seconds)
         let totalDuration = info.length / 1000
         playbackState.updatePosition(seconds: seconds, totalDuration: totalDuration)
-        SystemMediaController.shared.updatePlaybackState(
-            isPlaying: playbackState.isPlaying,
-            currentTime: Double(playbackState.currentSeconds)
-        )
+//        SystemMediaController.shared.updatePlaybackState(
+//            isPlaying: playbackState.isPlaying,
+//            currentTime: Double(playbackState.currentSeconds)
+//        )
 
         subtitleManager.onVLCTracksUpdated(info.subtitleTracks)
 
@@ -128,6 +131,7 @@ struct VLCPlayerView: View {
         }
     }
 
+    /*
     private func handleStateChange(_ state: VLCVideoPlayer.State) {
         let wasPlaying = playbackState.isPlaying
         let nowPlaying = (state == .playing)
@@ -146,6 +150,7 @@ struct VLCPlayerView: View {
             reporter.reportPause(positionSeconds: playbackState.currentSeconds)
         }
     }
+    */
     
     private func setupSystemMediaControls() {
         guard !hasSetupSystemMediaControls else { return }
@@ -197,6 +202,6 @@ struct VLCPlayerView: View {
             }
         }
         
-        SystemMediaController.shared.clearNowPlayingInfo()
+//        SystemMediaController.shared.clearNowPlayingInfo()
     }
 }

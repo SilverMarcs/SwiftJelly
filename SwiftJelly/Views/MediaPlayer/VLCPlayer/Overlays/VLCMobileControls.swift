@@ -12,6 +12,7 @@ struct VLCMobileControls: View {
     let playbackState: PlaybackStateManager
     let proxy: VLCVideoPlayer.Proxy
     let controlsVisible: Bool
+    let uiState: PlaybackUIState
     
     var body: some View {
         HStack(spacing: 30) {
@@ -26,13 +27,14 @@ struct VLCMobileControls: View {
             }
             
             Button {
-                if playbackState.isPlaying {
-                    proxy.pause()
-                } else {
+                uiState.isPlaying.toggle()
+                if uiState.isPlaying {
                     proxy.play()
+                } else {
+                    proxy.pause()
                 }
             } label: {
-                Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
+                Image(systemName: uiState.isPlaying ? "pause.fill" : "play.fill")
                     .contentTransition(.symbolEffect(.replace))
                     .font(.system(size: 49))
                     .padding(14)

@@ -4,14 +4,16 @@ import VLCUI
 struct VLCPlayerKeyboardShortcuts: ViewModifier {
     let playbackState: PlaybackStateManager
     let proxy: VLCVideoPlayer.Proxy
+    let uiState: PlaybackUIState
     
     func body(content: Content) -> some View {
         content
             .onKeyPress(.space) {
-                if playbackState.isPlaying {
-                    proxy.pause()
-                } else {
+                uiState.isPlaying.toggle()
+                if uiState.isPlaying {
                     proxy.play()
+                } else {
+                    proxy.pause()
                 }
                 return .handled
             }
@@ -37,11 +39,13 @@ struct VLCPlayerKeyboardShortcuts: ViewModifier {
 extension View {
     func mediaPlayerKeyboardShortcuts(
         playbackState: PlaybackStateManager,
-        proxy: VLCVideoPlayer.Proxy
+        proxy: VLCVideoPlayer.Proxy,
+        uiState: PlaybackUIState
     ) -> some View {
         self.modifier(VLCPlayerKeyboardShortcuts(
             playbackState: playbackState,
-            proxy: proxy
+            proxy: proxy,
+            uiState: uiState
         ))
     }
 }

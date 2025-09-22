@@ -12,6 +12,7 @@ struct VLCControlsOverlay: View {
     let playbackState: PlaybackStateManager
     let proxy: VLCVideoPlayer.Proxy
     let subtitleManager: SubtitleManager
+    let uiState: PlaybackUIState
     
     @State private var isDragging = false
     @State private var dragProgress: Double = 0
@@ -21,26 +22,27 @@ struct VLCControlsOverlay: View {
             #if os(macOS)
             // Control buttons
             Button {
-                proxy.jumpBackward(10)
+                proxy.jumpBackward(.seconds(10))
             } label: {
                 Image(systemName: "gobackward.10")
                     .font(.title2)
             }
             
             Button {
-                if playbackState.isPlaying {
-                    proxy.pause()
-                } else {
+                uiState.isPlaying.toggle()
+                if uiState.isPlaying {
                     proxy.play()
+                } else {
+                    proxy.pause()
                 }
             } label: {
-                Image(systemName: playbackState.isPlaying ? "pause.fill" : "play.fill")
+                Image(systemName: uiState.isPlaying ? "pause.fill" : "play.fill")
                     .font(.title)
                     .frame(width: 25, height: 25) 
             }
             
             Button {
-                proxy.jumpForward(10)
+                proxy.jumpForward(.seconds(10))
             } label: {
                 Image(systemName: "goforward.10")
                     .font(.title2)
