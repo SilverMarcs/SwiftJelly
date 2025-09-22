@@ -53,11 +53,12 @@ struct VLCPlayerView: View {
 //                handleStateChange(state)
 //            }
             .onSecondsUpdated { duration, info in
+                // TODO: make task
                 handleTicks(duration: duration, info: info)
             }
             .onAppear {
                 subtitleManager.primeServerStreams(from: mediaItem) // load metadata only; don’t add yet
-//                setupSystemMediaControls()
+                playbackState.isPlaying = true
                 #if os(iOS)
                 OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
                 #endif
