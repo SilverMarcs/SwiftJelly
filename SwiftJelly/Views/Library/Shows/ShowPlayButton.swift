@@ -2,74 +2,46 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowPlayButton: View {
-    let show: BaseItemDto
-    
-    @State private var nextEpisode: BaseItemDto? = nil
-    @State private var isLoading = true
+    var vm: ShowDetailViewModel
     
     var body: some View {
         HStack {
             animatedButton
-            MarkPlayedButton(item: nextEpisode ?? BaseItemDto())
-            FavoriteButton(item: nextEpisode ?? BaseItemDto())
-        }
-        .task {
-            await refreshNextEpisode()
+            MarkPlayedButton(item: vm.nextEpisode ?? BaseItemDto())
+            FavoriteButton(item: vm.nextEpisode ?? BaseItemDto())
         }
     }
     
     private var animatedButton: some View {
-        PlayMediaButton(item: nextEpisode ?? BaseItemDto()) {
+        PlayMediaButton(item: vm.nextEpisode ?? BaseItemDto()) {
             ZStack {
-                // Loading content
-                HStack(spacing: 8) {
-                    ProgressView().controlSize(.mini)
-                    Text("Loading…").font(.caption)
-                }
-                .opacity(isLoading || nextEpisode == nil ? 1 : 0)
-                
-                // Play content
-                Group {
-                    if let nextEpisode {
-                        HStack(spacing: 8) {
-                            Image(systemName: "play.fill")
-                            if let s = nextEpisode.parentIndexNumber, let e = nextEpisode.indexNumber {
-                                Text("S\(s)E\(e)").font(.caption)
-                            }
-                            if let progress = nextEpisode.playbackProgress, progress > 0, progress < 0.95 {
-                                Gauge(value: progress) { EmptyView() } currentValueLabel: { EmptyView() } minimumValueLabel: { EmptyView() } maximumValueLabel: { EmptyView() }
-                                    .tint(.white)
-                                    .gaugeStyle(.accessoryLinearCapacity)
-                                    .controlSize(.mini)
-                                    .frame(width: 40)
-                            }
-                            if let remaining = nextEpisode.timeRemainingString {
-                                Text(remaining).font(.caption)
-                            }
+                if vm.nextEpisode == nil {
+                    HStack(spacing: 8) { ProgressView().controlSize(.mini); Text("Loading…").font(.caption) }
+                        .transition(.opacity)
+                    
+                } else if let nextEpisode = vm.nextEpisode {
+                    HStack(spacing: 8) {
+                        Image(systemName: "play.fill")
+                        if let s = nextEpisode.parentIndexNumber, let e = nextEpisode.indexNumber { Text("S\(s)E\(e)").font(.caption) }
+                        if let progress = nextEpisode.playbackProgress, progress > 0, progress < 0.95 {
+                            Gauge(value: progress) { EmptyView() } currentValueLabel: { EmptyView() } minimumValueLabel: { EmptyView() } maximumValueLabel: { EmptyView() }
+                                .tint(.white)
+                                .gaugeStyle(.accessoryLinearCapacity)
+                                .controlSize(.mini)
+                                .frame(width: 40)
                         }
+                        if let remaining = nextEpisode.timeRemainingString { Text(remaining).font(.caption) }
                     }
+                    .transition(.opacity)
                 }
-                .opacity(isLoading || nextEpisode == nil ? 0 : 1)
             }
-            .animation(.easeInOut(duration: 0.2), value: isLoading)
-            .animation(.easeInOut(duration: 0.2), value: nextEpisode?.id)
+            .animation(.easeInOut(duration: 0.2), value: vm.nextEpisode?.id)
         }
         .tint(Color(.accent).secondary)
         .buttonBorderShape(.capsule)
         .controlSize(.extraLarge)
         .buttonStyle(.glassProminent)
+        .environment(\.refresh, vm.refreshAll)
     }
 }
 
-// MARK: - Loading / Selection
-
-private extension ShowPlayButton {
-    func refreshNextEpisode() async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        nextEpisode = nil
-        let episode = await JFAPI.loadNextEpisode(for: show)
-        nextEpisode = episode
-    }
-}

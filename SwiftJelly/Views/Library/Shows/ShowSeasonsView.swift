@@ -2,22 +2,14 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowSeasonsView: View {
-    @Environment(\.refresh) var refresh
-    
-    let show: BaseItemDto
-    
-    @State private var seasons: [BaseItemDto] = []
-    @State private var selectedSeason: BaseItemDto?
-    @State private var episodes: [BaseItemDto] = []
+    @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
-    
-    @State private var isLoading = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if !seasons.isEmpty {
-                Picker("Season", selection: $selectedSeason) {
-                    ForEach(seasons) { season in
+            if !vm.seasons.isEmpty {
+                Picker("Season", selection: $vm.selectedSeason) {
+                    ForEach(vm.seasons) { season in
                         Text(season.name ?? "Season").tag(season as BaseItemDto?)
                     }
                 }
@@ -30,110 +22,46 @@ struct ShowSeasonsView: View {
                 .menuStyle(.button)
                 .buttonStyle(.glass)
                 #endif
+                .task(id: vm.selectedSeason) { await vm.updateEpisodesForSelectedSeason() }
             }
-
-            if !episodes.isEmpty {
+            
+            if !vm.episodes.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        ForEach(episodes) { episode in
+                        ForEach(vm.episodes) { episode in
                             PlayableCard(item: episode, showNavigation: false)
                                 .id(episode.id)
-                                .environment(\.refresh, refreshEpisodes)
+                                .environment(\.refresh, vm.refreshEpisodesOnly)
                         }
                     }
                     .scrollTargetLayout()
                 }
                 .scrollPosition($episodeScrollPosition)
+                .onChange(of: vm.episodes) { _, _ in scrollToLatestEpisode() }
             }
         }
-        .overlay {
-            if isLoading {
-                UniversalProgressView()
-            }
-        }
-                .task {
-            await loadSeasons()
-        }
-        .task(id: selectedSeason) {
-            await loadEpisodes(for: selectedSeason)
-        }
-        .task(id: episodes) {
-            scrollToLatestEpisode()
-        }
-    }
-    
-    private func refreshEpisodes() async {
-        async let a: Void = refresh()
-        async let b: Void = loadEpisodes(for: selectedSeason)
-        _ = await (a, b) // wait for both to finish
-    }
-    
-    private func loadSeasons() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            let loadedSeasons = try await JFAPI.loadSeasons(for: show)
-            self.seasons = loadedSeasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-            
-            // Find the season of the next episode
-            let nextEpisode = await JFAPI.loadNextEpisode(for: show)
-            self.selectedSeason = seasons.first { $0.id == nextEpisode?.seasonID } ?? self.seasons.first
-            
-            if let selected = self.selectedSeason {
-                await loadEpisodes(for: selected)
-            }
-        } catch {
-            self.seasons = []
-        }
-    }
-    
-    private func loadEpisodes(for season: BaseItemDto?) async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        guard let season else { episodes = []; return }
-        do {
-            let loadedEpisodes = try await JFAPI.loadEpisodes(for: show, season: season)
-            self.episodes = loadedEpisodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-        } catch {
-            self.episodes = []
-        }
+        .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
     }
     
     private func scrollToLatestEpisode() {
+        let episodes = vm.episodes
         guard !episodes.isEmpty else { return }
-        
         let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-        
-        // Find episode to scroll to (in-progress or next unwatched)
-        var targetEpisode: BaseItemDto?
-        
-        // First, look for in-progress episode
-        targetEpisode = sortedEpisodes.first { episode in
-            let hasProgress = (episode.userData?.playbackPositionTicks ?? 0) > 0
-            let isFullyWatched = episode.userData?.isPlayed == true || 
-                               (episode.playbackProgress ?? 0) >= 0.95
+        var targetEpisode: BaseItemDto? = sortedEpisodes.first { ep in
+            let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
+            let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
             return hasProgress && !isFullyWatched
         }
-        
-        // If no in-progress episode, find first unwatched
         if targetEpisode == nil {
-            targetEpisode = sortedEpisodes.first { episode in
-                let isWatched = episode.userData?.isPlayed == true || 
-                               (episode.playbackProgress ?? 0) >= 0.95
+            targetEpisode = sortedEpisodes.first { ep in
+                let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return !isWatched
             }
         }
-        
-        // If all episodes are watched, scroll to last episode
-        if targetEpisode == nil {
-            targetEpisode = sortedEpisodes.last
-        }
-        
+        if targetEpisode == nil { targetEpisode = sortedEpisodes.last }
         if let episode = targetEpisode, let episodeId = episode.id {
-            withAnimation {
-                episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing)
-            }
+            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing) }
         }
     }
 }
+
