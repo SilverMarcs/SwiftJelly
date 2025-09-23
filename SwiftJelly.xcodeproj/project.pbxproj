@@ -45,6 +45,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift,
+				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift,
+				Views/MediaPlayer/AVMediaPlayer/AVPlayerStateManager.swift,
+				Views/MediaPlayer/AVMediaPlayer/AVPlayerView.swift,
 			);
 			platformFiltersByRelativePath = {
 				AppDelegate.swift = (ios, xros, );
@@ -53,8 +57,6 @@
 				Views/LocalMedia/LocalMediaManager.swift = (macos, );
 				Views/LocalMedia/LocalMediaRow.swift = (macos, );
 				Views/LocalMedia/LocalMediaView.swift = (macos, );
-				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift = (ios, xros, );
-				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift = (macos, );
 				Views/MediaPlayer/VLCPlayer/Overlays/VLCMobileControls.swift = (ios, xros, );
 				Views/MediaPlayer/VLCPlayer/Overlays/VLCTopOverlay.swift = (ios, xros, );
 			};
