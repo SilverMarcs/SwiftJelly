@@ -31,7 +31,6 @@ struct ShowSeasonsView: View {
                         ForEach(vm.episodes) { episode in
                             PlayableCard(item: episode, showNavigation: false)
                                 .id(episode.id)
-                                .environment(\.refresh, vm.refreshEpisodesOnly)
                         }
                     }
                     .scrollTargetLayout()

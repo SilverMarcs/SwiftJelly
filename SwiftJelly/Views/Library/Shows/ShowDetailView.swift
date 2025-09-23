@@ -40,6 +40,7 @@ struct ShowDetailView: View {
         .overlay { if vm.isLoading { UniversalProgressView() } }
         .task { await vm.loadInitial() }
         .refreshable { await vm.refreshAll() }
+        .environment(\.refresh, vm.refreshEpisodes)
         .ignoresSafeArea(edges: .top)
         .navigationTitle(vm.show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)
@@ -50,6 +51,7 @@ struct ShowDetailView: View {
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
+                .keyboardShortcut("r")
             }
         }
     }

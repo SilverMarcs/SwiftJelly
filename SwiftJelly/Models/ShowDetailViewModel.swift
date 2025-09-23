@@ -40,18 +40,21 @@ import Combine
         await computeNextEpisode()
     }
     
-    func refreshEpisodesOnly() async {
-        guard let selectedSeason else { return }
+    func refreshEpisodes() async {
         isLoadingEpisodes = true
         defer { isLoadingEpisodes = false }
         do {
-            let eps = try await JFAPI.loadEpisodes(for: show, season: selectedSeason)
-            let sortedEps = eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-            allEpisodes[selectedSeason.id ?? ""] = sortedEps
-            episodes = sortedEps
-        } catch { 
-            episodes = []
-            allEpisodes[selectedSeason.id ?? ""] = []
+            let allEps = try await JFAPI.loadAllEpisodes(for: show)
+            let grouped = Dictionary(grouping: allEps) { $0.seasonID ?? "" }
+            for (seasonID, eps) in grouped where !seasonID.isEmpty {
+                allEpisodes[seasonID] = eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+            }
+            // Update current episodes
+            if let selectedSeason, let sid = selectedSeason.id {
+                episodes = allEpisodes[sid] ?? []
+            }
+        } catch {
+            // Keep existing data on error
         }
         await computeNextEpisode()
     }
@@ -65,33 +68,14 @@ import Combine
     func updateEpisodesForSelectedSeason() async {
         guard let selectedSeason else { episodes = []; return }
         let sid = selectedSeason.id ?? ""
-        if allEpisodes[sid] == nil {
-            isLoadingEpisodes = true
-            defer { isLoadingEpisodes = false }
-            do {
-                let eps = try await JFAPI.loadEpisodes(for: show, season: selectedSeason)
-                let sortedEps = eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-                allEpisodes[sid] = sortedEps
-                episodes = sortedEps
-            } catch {
-                allEpisodes[sid] = []
-                episodes = []
-            }
-        } else {
-            episodes = allEpisodes[sid] ?? []
-        }
+        episodes = allEpisodes[sid] ?? []
     }
     
     func markEpisodePlayed(_ episode: BaseItemDto) async {
         do {
             try await JFAPI.toggleItemPlayedStatus(item: episode)
-            await refreshEpisodesOnly()
+            await refreshEpisodes()
         } catch { print("Toggle played failed: \(error)") }
-    }
-    
-    func refreshAfterPlayback() async {
-        // After playback finishes we only need fresh userData for episodes + nextEpisode
-        await refreshEpisodesOnly()
     }
     
     // MARK: - Internal loading helpers
@@ -105,22 +89,34 @@ import Combine
     
     private func reloadSeasonsAndEpisodes() async {
         do {
-            let loaded = try await JFAPI.loadSeasons(for: show)
-            let sorted = loaded.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-            seasons = sorted
+            let allEps = try await JFAPI.loadAllEpisodes(for: show)
             
-            // Load episodes only for the first season initially
+            // Group episodes by seasonID
+            let grouped = Dictionary(grouping: allEps) { $0.seasonID ?? "" }
+            
+            var inferredSeasons: [BaseItemDto] = []
             allEpisodes = [:]
-            if let firstSeason = sorted.first {
-                let eps = try? await JFAPI.loadEpisodes(for: show, season: firstSeason)
-                let sortedEps = eps?.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) } ?? []
-                allEpisodes[firstSeason.id ?? ""] = sortedEps
+            
+            for (seasonID, eps) in grouped where !seasonID.isEmpty {
+                if let firstEp = eps.first {
+                    // Create season from episode data
+                    var season = BaseItemDto()
+                    season.id = seasonID
+                    season.name = firstEp.seasonName
+                    season.indexNumber = firstEp.parentIndexNumber
+                    season.type = .season
+                    season.seriesID = show.id
+                    season.seriesName = show.name
+                    // Add other fields if needed, but for now, id, name, indexNumber suffice
+                    
+                    inferredSeasons.append(season)
+                    
+                    // Sort and store episodes
+                    allEpisodes[seasonID] = eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+                }
             }
             
-            if selectedSeason == nil || !sorted.contains(where: { $0.id == selectedSeason?.id }) {
-                selectedSeason = sorted.first
-            }
-            await updateEpisodesForSelectedSeason()
+            seasons = inferredSeasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
         } catch {
             seasons = []
             episodes = []

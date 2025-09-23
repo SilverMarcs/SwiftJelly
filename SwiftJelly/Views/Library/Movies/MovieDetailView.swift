@@ -44,6 +44,7 @@ struct MovieDetailView: View {
                 UniversalProgressView()
             }
         }
+        .refreshable { await fetchMovie() }
         .ignoresSafeArea(edges: .top)
         .navigationTitle(movie.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
@@ -54,10 +55,8 @@ struct MovieDetailView: View {
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
+                .keyboardShortcut("r")
             }
-        }
-        .refreshable {
-            await fetchMovie()
         }
     }
     
