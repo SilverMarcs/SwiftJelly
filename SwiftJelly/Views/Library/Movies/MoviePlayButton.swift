@@ -49,6 +49,8 @@ struct MoviePlayButton: View {
             .buttonStyle(.glassProminent)
             
             MarkPlayedButton(item: item)
+            
+            FavoriteButton(item: item)
         }
     }
 }

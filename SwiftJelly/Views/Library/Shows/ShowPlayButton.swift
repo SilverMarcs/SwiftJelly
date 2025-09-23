@@ -49,6 +49,8 @@ struct ShowPlayButton: View {
                 
                 if let episode = nextEpisode {
                     MarkPlayedButton(item: episode)
+                    
+                    FavoriteButton(item: episode)
                 }
             }
         } else {

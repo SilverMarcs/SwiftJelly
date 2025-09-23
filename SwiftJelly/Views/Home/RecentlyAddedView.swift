@@ -8,7 +8,7 @@ struct RecentlyAddedView: View {
     var body: some View {
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Recently Added \(header)")
+                Text("\(header)")
                     .font(.title2)
                     .bold()
                     .scenePadding(.leading)

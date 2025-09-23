@@ -1,19 +1,18 @@
 import SwiftUI
 import JellyfinAPI
 
-struct MarkPlayedButton: View {
+struct FavoriteButton: View {
     let item: BaseItemDto
     @Environment(\.refresh) private var refresh
     
     var body: some View {
         Button {
             Task {
-                await togglePlayedStatus()
+                await toggleFavoriteStatus()
             }
         } label: {
-            Image(systemName: "checkmark")
-                .foregroundStyle((item.userData?.isPlayed == true) ? .accent : .secondary)
-                .fontWeight(.semibold)
+            Image(systemName: (item.userData?.isFavorite == true) ? "star.fill" : "star")
+                .foregroundStyle((item.userData?.isFavorite == true) ? .orange : .secondary)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
@@ -24,12 +23,12 @@ struct MarkPlayedButton: View {
         #endif
     }
     
-    private func togglePlayedStatus() async {
+    private func toggleFavoriteStatus() async {
         do {
-            try await JFAPI.toggleItemPlayedStatus(item: item)
+            try await JFAPI.toggleItemFavoriteStatus(item: item)
             await refresh()
         } catch {
-            print("Error toggling played status: \(error)")
+            print("Error toggling favorite status: \(error)")
         }
     }
 }
