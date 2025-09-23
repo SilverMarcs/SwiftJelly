@@ -2,61 +2,62 @@ import SwiftUI
 import JellyfinAPI
 
 struct MovieDetailView: View {
-    let id: String
-    @State private var movie: BaseItemDto?
+    @State private var currentItem: BaseItemDto
     @State private var isLoading = false
+    
+    init(item: BaseItemDto) {
+        self._currentItem = State(initialValue: item)
+    }
     
     var body: some View {
         ScrollView {
-            if let movie {
-                VStack(alignment: .leading, spacing: 20) {
-                    Group {
-                        LandscapeImageView(item: movie)
-                            .frame(maxHeight: 500)
-                    }
-                    .backgroundExtensionEffect()
-                    .overlay(alignment: .bottomLeading) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            LogoView(item: movie)
+            VStack(alignment: .leading, spacing: 20) {
+                Group {
+                    LandscapeImageView(item: currentItem)
+                        .frame(maxHeight: 500)
+                }
+                .backgroundExtensionEffect()
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        LogoView(item: currentItem)
 
-                            AttributesView(item: movie)
-                                .padding(.leading, 2)
-                            
-                            MoviePlayButton(item: movie)
-                                .animation(.default, value: movie)
-                                .environment(\.refresh, fetchMovie)
-                        }
-                        .padding(16)
-                    }
-                
-                    VStack(alignment: .leading, spacing: 5) {
-                        if let firstTagline = movie.taglines?.first {
-                            Text(firstTagline)
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .multilineTextAlignment(.leading)
-                        }
+                        AttributesView(item: currentItem)
+                            .padding(.leading, 2)
                         
-                        if let overview = movie.overview {
-                            Text(overview)
-                                .foregroundStyle(.secondary)
-                        }
+                        MoviePlayButton(item: currentItem)
+                            .animation(.default, value: currentItem)
+                            .environment(\.refresh, fetchMovie)
                     }
-                    .scenePadding(.horizontal)
-                    
-                    if let people = movie.people {
-                        PeopleScrollView(people: people)
+                    .padding(16)
+                }
+            
+                VStack(alignment: .leading, spacing: 5) {
+                    if let firstTagline = currentItem.taglines?.first {
+                        Text(firstTagline)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .multilineTextAlignment(.leading)
                     }
                     
-//                    if let studios = movie.studios, !studios.isEmpty {
+                    if let overview = currentItem.overview {
+                        Text(overview)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .scenePadding(.horizontal)
+                
+                if let people = currentItem.people {
+                    PeopleScrollView(people: people)
+                }
+                
+//                    if let studios = currentItem.studios, !studios.isEmpty {
 //                        StudiosScrollView(studios: studios)
 //                    }
-                    
-                    SimilarItemsView(item: movie)
-                }
-                .scenePadding(.bottom)
-                .contentMargins(.horizontal, 18)
+                
+                SimilarItemsView(item: currentItem)
             }
+            .scenePadding(.bottom)
+            .contentMargins(.horizontal, 18)
         }
         .overlay {
             if isLoading {
@@ -64,7 +65,7 @@ struct MovieDetailView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .navigationTitle(movie?.name ?? "Movie")
+        .navigationTitle(currentItem.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -73,11 +74,6 @@ struct MovieDetailView: View {
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
-            }
-        }
-        .task {
-            if movie == nil {
-                await fetchMovie()
             }
         }
         .refreshable {
@@ -89,10 +85,9 @@ struct MovieDetailView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            movie = try await JFAPI.loadItem(by: id)
+            currentItem = try await JFAPI.loadItem(by: currentItem.id ?? "")
         } catch {
-            // handle error
-            movie = nil
+            print(error.localizedDescription)
         }
     }
     

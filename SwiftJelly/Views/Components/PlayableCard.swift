@@ -47,7 +47,7 @@ struct PlayableCard: View {
                     NavigationLink {
                         switch item.type {
                         case .movie:
-                            MovieDetailView(id: item.id ?? "")
+                            MovieDetailView(item: item)
                         case .episode, .series:
                             ShowDetailView(id: item.seriesID ?? "")
                         default:

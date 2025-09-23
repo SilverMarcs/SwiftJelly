@@ -15,7 +15,7 @@ struct MediaNavigationLink: View {
         NavigationLink {
             switch item.type {
             case .movie:
-                MovieDetailView(id: item.id ?? "")
+                MovieDetailView(item: item)
             case .series:
                 ShowDetailView(id: item.id ?? "")
             case .boxSet:

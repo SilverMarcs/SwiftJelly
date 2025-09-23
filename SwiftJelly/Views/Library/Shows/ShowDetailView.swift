@@ -114,9 +114,6 @@ struct ShowDetailView: View {
             }
         }
         .refreshable {
-            await fetchShow()
-        }
-        .refreshable {
             await fullRefresh()
         }
         .task(id: selectedSeason) {
