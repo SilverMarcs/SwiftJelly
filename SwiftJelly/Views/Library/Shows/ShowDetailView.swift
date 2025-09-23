@@ -38,9 +38,10 @@ struct ShowDetailView: View {
             .contentMargins(.horizontal, 18)
         }
         .overlay { if vm.isLoading { UniversalProgressView() } }
-        .task { await vm.loadInitial() }
+        .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
+        .task { await vm.reloadSeasonsAndEpisodes() }
         .refreshable { await vm.refreshAll() }
-        .environment(\.refresh, vm.refreshEpisodes)
+        .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
         .ignoresSafeArea(edges: .top)
         .navigationTitle(vm.show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)

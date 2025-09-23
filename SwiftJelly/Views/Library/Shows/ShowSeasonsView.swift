@@ -22,7 +22,9 @@ struct ShowSeasonsView: View {
                 .menuStyle(.button)
                 .buttonStyle(.glass)
                 #endif
-                .task(id: vm.selectedSeason) { await vm.updateEpisodesForSelectedSeason() }
+                .task(id: vm.selectedSeason) { 
+                    await vm.updateEpisodesForSelectedSeason() 
+                }
             }
             
             if !vm.episodes.isEmpty {
@@ -39,7 +41,7 @@ struct ShowSeasonsView: View {
                 .onChange(of: vm.episodes) { _, _ in scrollToLatestEpisode() }
             }
         }
-        .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
+//        .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
     }
     
     private func scrollToLatestEpisode() {

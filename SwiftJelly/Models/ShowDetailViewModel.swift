@@ -24,12 +24,7 @@ import Combine
         self.show = show
     }
     
-    // MARK: - Public API
-    func loadInitial() async {
-        await self.reloadSeasonsAndEpisodes()
-        await computeNextEpisode()
-    }
-    
+    // refreshes everything: show metadata, seasons, episodes, next episode
     func refreshAll() async {
         isLoading = true
         defer { isLoading = false }
@@ -37,32 +32,6 @@ import Combine
             group.addTask { await self.reloadShow() }
             group.addTask { await self.reloadSeasonsAndEpisodes() }
         }
-        await computeNextEpisode()
-    }
-    
-    func refreshEpisodes() async {
-        isLoadingEpisodes = true
-        defer { isLoadingEpisodes = false }
-        do {
-            let allEps = try await JFAPI.loadAllEpisodes(for: show)
-            let grouped = Dictionary(grouping: allEps) { $0.seasonID ?? "" }
-            for (seasonID, eps) in grouped where !seasonID.isEmpty {
-                allEpisodes[seasonID] = eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-            }
-            // Update current episodes
-            if let selectedSeason, let sid = selectedSeason.id {
-                episodes = allEpisodes[sid] ?? []
-            }
-        } catch {
-            // Keep existing data on error
-        }
-        await computeNextEpisode()
-    }
-    
-    func selectSeason(_ season: BaseItemDto) async {
-        guard selectedSeason?.id != season.id else { return }
-        selectedSeason = season
-        await updateEpisodesForSelectedSeason()
     }
     
     func updateEpisodesForSelectedSeason() async {
@@ -74,20 +43,27 @@ import Combine
     func markEpisodePlayed(_ episode: BaseItemDto) async {
         do {
             try await JFAPI.toggleItemPlayedStatus(item: episode)
-            await refreshEpisodes()
-        } catch { print("Toggle played failed: \(error)") }
+            await reloadSeasonsAndEpisodes()
+        } catch { 
+            print("Toggle played failed: \(error)") 
+        }
     }
     
-    // MARK: - Internal loading helpers
+    // loads show metadata like genre studios etc
     private func reloadShow() async {
         do {
             let itemId = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !itemId.isEmpty else { return }
             show = try await JFAPI.loadItem(by: itemId)
-        } catch { print("Reload show failed: \(error)") }
+        } catch { 
+            print("Reload show failed: \(error)") 
+        }
     }
     
-    private func reloadSeasonsAndEpisodes() async {
+    // loads all seasons and episodes, inferring seasons if needed
+    func reloadSeasonsAndEpisodes() async {
+        isLoadingEpisodes = true
+        defer { isLoadingEpisodes = false }
         do {
             let allEps = try await JFAPI.loadAllEpisodes(for: show)
             
@@ -122,21 +98,19 @@ import Combine
             episodes = []
             allEpisodes = [:]
         }
+        
+        await computeNextEpisode()
+        await updateEpisodesForSelectedSeason()
     }
     
     private func computeNextEpisode() async {
         let sortedSeasons = seasons // already sorted in reloadSeasonsAndEpisodes
         for season in sortedSeasons {
             let sid = season.id ?? ""
-            var sortedEpisodes = allEpisodes[sid]
-            if sortedEpisodes == nil {
-                let eps = try? await JFAPI.loadEpisodes(for: show, season: season)
-                sortedEpisodes = eps?.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) } ?? []
-                allEpisodes[sid] = sortedEpisodes
-            }
+            let sortedEpisodes = allEpisodes[sid] ?? []
             
             // Prefer in-progress but not finished
-            if let inProgress = sortedEpisodes!.first(where: { ep in
+            if let inProgress = sortedEpisodes.first(where: { ep in
                 let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
                 let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return hasProgress && !isFullyWatched
@@ -146,7 +120,7 @@ import Combine
             }
             
             // First fully-unwatched
-            if let firstUnwatched = sortedEpisodes!.first(where: { ep in
+            if let firstUnwatched = sortedEpisodes.first(where: { ep in
                 let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return !isWatched
             }) {
@@ -160,13 +134,8 @@ import Combine
         // All watched: choose last episode of last season
         if nextEpisode == nil, let lastSeason = sortedSeasons.last {
             let sid = lastSeason.id ?? ""
-            var sortedEpisodes = allEpisodes[sid]
-            if sortedEpisodes == nil {
-                let eps = try? await JFAPI.loadEpisodes(for: show, season: lastSeason)
-                sortedEpisodes = eps?.sorted(by: { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }) ?? []
-                allEpisodes[sid] = sortedEpisodes
-            }
-            nextEpisode = sortedEpisodes!.last
+            let sortedEpisodes = allEpisodes[sid] ?? []
+            nextEpisode = sortedEpisodes.last
         }
         
         // Try to auto-select the season of next episode if different
