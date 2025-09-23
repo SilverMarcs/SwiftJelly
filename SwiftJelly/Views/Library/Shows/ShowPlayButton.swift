@@ -10,55 +10,7 @@ struct ShowPlayButton: View {
     
     var body: some View {
         HStack {
-            if isLoading {
-                // Loading placeholder while fetching
-                loadingButton
-            } else if let nextEpisode {
-                // Real playback UI when we have an episode
-                PlayMediaButton(item: nextEpisode) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "play.fill")
-                        
-                        if let season = nextEpisode.parentIndexNumber,
-                           let ep = nextEpisode.indexNumber {
-                            Text("S\(season)E\(ep)")
-                                .font(.caption)
-                        }
-                        
-                        if let progress = nextEpisode.playbackProgress,
-                           progress > 0, progress < 0.95 {
-                            Gauge(value: progress) {
-                                EmptyView()
-                            } currentValueLabel: {
-                                EmptyView()
-                            } minimumValueLabel: {
-                                EmptyView()
-                            } maximumValueLabel: {
-                                EmptyView()
-                            }
-                            .tint(.white)
-                            .gaugeStyle(.accessoryLinearCapacity)
-                            .controlSize(.mini)
-                            .frame(width: 40)
-                        }
-                        
-                        if let remaining = nextEpisode.timeRemainingString {
-                            Text(remaining)
-                                .font(.caption)
-                        }
-                    }
-                }
-                .tint(Color(.accent).secondary)
-                .buttonBorderShape(.capsule)
-                .controlSize(.extraLarge)
-                .buttonStyle(.glassProminent)
-                // Consider re-enabling with a flag after first load to avoid initial flicker:
-                // .animation(.default, value: nextEpisode)
-                
-            } else {
-                // Requested change: when there is "no episode", show the same loading UI
-                loadingButton
-            }
+            animatedButton
             MarkPlayedButton(item: nextEpisode ?? BaseItemDto())
             FavoriteButton(item: nextEpisode ?? BaseItemDto())
         }
@@ -66,6 +18,48 @@ struct ShowPlayButton: View {
         .task(id: seasons.map { $0.id ?? "" }.joined(separator: "|")) {
             await refreshNextEpisode()
         }
+    }
+    
+    private var animatedButton: some View {
+        Button(action: {}) {
+            ZStack {
+                // Loading content
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.mini)
+                    Text("Loading…").font(.caption)
+                }
+                .opacity(isLoading || nextEpisode == nil ? 1 : 0)
+
+                // Play content
+                Group {
+                    if let nextEpisode {
+                        HStack(spacing: 8) {
+                            Image(systemName: "play.fill")
+                            if let s = nextEpisode.parentIndexNumber, let e = nextEpisode.indexNumber {
+                                Text("S\(s)E\(e)").font(.caption)
+                            }
+                            if let progress = nextEpisode.playbackProgress, progress > 0, progress < 0.95 {
+                                Gauge(value: progress) { EmptyView() } currentValueLabel: { EmptyView() } minimumValueLabel: { EmptyView() } maximumValueLabel: { EmptyView() }
+                                    .tint(.white)
+                                    .gaugeStyle(.accessoryLinearCapacity)
+                                    .controlSize(.mini)
+                                    .frame(width: 40)
+                            }
+                            if let remaining = nextEpisode.timeRemainingString {
+                                Text(remaining).font(.caption)
+                            }
+                        }
+                    }
+                }
+                .opacity(isLoading || nextEpisode == nil ? 0 : 1)
+            }
+            .animation(.easeInOut(duration: 0.2), value: isLoading)
+            .animation(.easeInOut(duration: 0.2), value: nextEpisode?.id)
+        }
+        .tint(Color(.accent).secondary)
+        .buttonBorderShape(.capsule)
+        .controlSize(.extraLarge)
+        .buttonStyle(.glassProminent)
     }
     
     // MARK: - Subviews
