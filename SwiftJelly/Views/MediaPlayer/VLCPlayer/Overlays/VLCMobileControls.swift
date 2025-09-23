@@ -38,7 +38,7 @@ struct VLCMobileControls: View {
                     .font(.system(size: 49))
                     .padding(14)
             }
-            .opacity(controlsVisible ? 1 : 0.001)
+            .opacity(controlsVisible ? 1 : 0.01)
             .contentShape(Rectangle())
             .allowsHitTesting(true)
             

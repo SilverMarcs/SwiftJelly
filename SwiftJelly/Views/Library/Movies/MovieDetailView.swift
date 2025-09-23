@@ -2,6 +2,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct MovieDetailView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var movie: BaseItemDto
     @State private var isLoading = false
     
@@ -12,8 +13,14 @@ struct MovieDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                LandscapeImageView(item: movie)
-                    .frame(maxHeight: 450)
+                Group {
+                    if horizontalSizeClass == .compact {
+                        PortraitImageView(item: movie)
+                    } else {
+                        LandscapeImageView(item: movie)
+                            .frame(maxHeight: 450)
+                    }
+                }
                 .backgroundExtensionEffect()
                 .overlay(alignment: .bottomLeading) {
                     VStack(alignment: .leading, spacing: 8) {

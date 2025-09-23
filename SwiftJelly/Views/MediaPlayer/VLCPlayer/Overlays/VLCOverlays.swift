@@ -15,12 +15,11 @@ struct VLCPlayerOverlays: ViewModifier {
     func body(content: Content) -> some View {
         content
             #if !os(macOS)
-//            .ignoresSafeArea(edges: isAspectFillMode ? [.horizontal, .vertical] : [.vertical])
-            .ignoresSafeArea(edges: .vertical)
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
                         .padding(.top, -10)
+                        .tint(.white)
                 }
             }
             .overlay(alignment: .center) {
@@ -30,6 +29,7 @@ struct VLCPlayerOverlays: ViewModifier {
                         proxy: proxy,
                         controlsVisible: controlsVisible,
                     )
+                    .tint(.white)
                 }
             }
             #endif
@@ -47,7 +47,7 @@ struct VLCPlayerOverlays: ViewModifier {
                     #if os(macOS)
                         .padding()
                     #else
-                        .padding(.bottom, -10)
+                        .padding(.bottom, -15)
                     #endif
                 }
             }

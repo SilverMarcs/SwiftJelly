@@ -23,16 +23,16 @@ struct MediaCard: View {
                 }
                 .overlay(alignment: .topTrailing) {
                     HStack(spacing: 4) {
-                        if item.userData?.isFavorite == true {
-                            Button {} label: {
-                                Image(systemName: "star.fill")
-                                    .imageScale(.small)
-                            }
-                            .tint(.orange)
-                            .buttonStyle(.glassProminent)
-                            .buttonBorderShape(.circle)
-                            .allowsHitTesting(false)
-                        }
+//                        if item.userData?.isFavorite == true {
+//                            Button {} label: {
+//                                Image(systemName: "star.fill")
+//                                    .imageScale(.small)
+//                            }
+//                            .tint(.orange)
+//                            .buttonStyle(.glassProminent)
+//                            .buttonBorderShape(.circle)
+//                            .allowsHitTesting(false)
+//                        }
                         
                         if item.userData?.isPlayed ?? false {
                             Button {} label: {

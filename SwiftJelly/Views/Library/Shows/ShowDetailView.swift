@@ -2,6 +2,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowDetailView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private var vm: ShowDetailViewModel
     
     init(item: BaseItemDto) {
@@ -11,18 +12,25 @@ struct ShowDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                LandscapeImageView(item: vm.show)
-                    .frame(maxHeight: 450)
-                    .backgroundExtensionEffect()
-                    .overlay(alignment: .bottomLeading) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            AttributesView(item: vm.show)
-                                .padding(.leading, 1)
-                            
-                            ShowPlayButton(vm: vm)
-                        }
-                        .padding(16)
+                Group {
+                    if horizontalSizeClass == .compact {
+                        PortraitImageView(item: vm.show)
+                    } else {
+                        LandscapeImageView(item: vm.show)
+                            .frame(maxHeight: 450)
                     }
+                }
+                .frame(maxHeight: 450)
+                .backgroundExtensionEffect()
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        AttributesView(item: vm.show)
+                            .padding(.leading, 1)
+                        
+                        ShowPlayButton(vm: vm)
+                    }
+                    .padding(16)
+                }
                 
                 OverviewView(item: vm.show)
                 
