@@ -2,7 +2,6 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowDetailView: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let id: String
     
     @State private var show: BaseItemDto?
@@ -19,20 +18,18 @@ struct ShowDetailView: View {
             if let show {
                 VStack(alignment: .leading, spacing: 20) {
                     Group {
-                        if horizontalSizeClass == .compact {
-                            PortraitImageView(item: show)
-                        } else {
-                            LandscapeImageView(item: show)
-                                .frame(maxHeight: 500)
-                        }
+                        LandscapeImageView(item: show)
+                            .frame(maxHeight: 500)
                     }
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 8) {
+                            LogoView(item: show)
+
                             AttributesView(item: show)
                             
                             ShowPlayButton(show: show, seasons: seasons)
-                                .animation(.default, value: show)
+//                                .animation(.default, value: show)
                                 .environment(\.refresh, fullRefresh)
                                 .id("show-play-\(refreshTrigger)") // Force recreation when refresh trigger changes
                         }
@@ -88,58 +85,8 @@ struct ShowDetailView: View {
                         PeopleScrollView(people: people)
                     }
                     
-//                    if let genres = show.genres, !genres.isEmpty {
-//                        VStack(alignment: .leading, spacing: 10) {
-//                            Text("Genres")
-//                                .font(.title2)
-//                                .fontWeight(.semibold)
-//                                .padding(.horizontal, 16)
-//                            
-//                            ScrollView(.horizontal, showsIndicators: false) {
-//                                HStack(spacing: 12) {
-//                                    ForEach(genres, id: \.self) { genre in
-//                                        NavigationLink(destination: FilteredMediaView(filter: .genre(genre))) {
-//                                            Text(genre)
-//                                                .font(.caption)
-//                                                .fontWeight(.semibold)
-//                                                .foregroundStyle(.primary)
-//                                                .padding(.horizontal, 12)
-//                                                .padding(.vertical, 8)
-//                                                .background(.fill.secondary, in: Capsule())
-//                                        }
-//                                    }
-//                                }
-//                                .padding(.horizontal, 16)
-//                            }
-//                        }
-//                    }
-//                    
-//                    if let studios = show.studios, !studios.isEmpty {
-//                        VStack(alignment: .leading, spacing: 10) {
-//                            Text("Studios")
-//                                .font(.title2)
-//                                .fontWeight(.semibold)
-//                                .padding(.horizontal, 16)
-//                            
-//                            ScrollView(.horizontal, showsIndicators: false) {
-//                                HStack(spacing: 12) {
-//                                    ForEach(studios, id: \.self) { studio in
-//                                        NavigationLink(destination: FilteredMediaView(filter: .studio(studio))) {
-//                                            Text(studio.name ?? "Unknown")
-//                                                .font(.caption)
-//                                                .fontWeight(.semibold)
-//                                                .foregroundStyle(.primary)
-//                                                .padding(.horizontal, 12)
-//                                                .padding(.vertical, 8)
-//                                                .background(.fill.secondary, in: Capsule())
-//                                        }
-//                                    }
-//                                }
-//                                .padding(.horizontal, 16)
-//                            }
-//                        }
-//                    }
-//                    
+                    // TODO: show filteredmeidaview links for genres and studios
+            
                     if !recommendedItems.isEmpty {
                         HorizontalMediaScrollView(
                             title: "Recommended",

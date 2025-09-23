@@ -2,7 +2,6 @@ import SwiftUI
 import JellyfinAPI
 
 struct MovieDetailView: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let id: String
     @State private var movie: BaseItemDto?
     @State private var recommendedItems: [BaseItemDto] = []
@@ -13,16 +12,14 @@ struct MovieDetailView: View {
             if let movie {
                 VStack(alignment: .leading, spacing: 20) {
                     Group {
-                        if horizontalSizeClass == .compact {
-                            PortraitImageView(item: movie)
-                        } else {
-                            LandscapeImageView(item: movie)
-                                .frame(maxHeight: 500)
-                        }
+                        LandscapeImageView(item: movie)
+                            .frame(maxHeight: 500)
                     }
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 8) {
+                            LogoView(item: movie)
+
                             AttributesView(item: movie)
                                 .padding(.leading, 2)
                             

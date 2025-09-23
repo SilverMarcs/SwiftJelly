@@ -5,22 +5,28 @@ struct ShowPlayButton: View {
     let show: BaseItemDto
     let seasons: [BaseItemDto]
     
-    @State private var nextEpisode: BaseItemDto?
-    @State private var isLoading = false
-
+    @State private var nextEpisode: BaseItemDto? = nil
+    @State private var isLoading = true
+    
     var body: some View {
-        if let episode = nextEpisode {
-            HStack {
-                PlayMediaButton(item: episode) {
+        HStack {
+            if isLoading {
+                // Loading placeholder while fetching
+                loadingButton
+            } else if let nextEpisode {
+                // Real playback UI when we have an episode
+                PlayMediaButton(item: nextEpisode) {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")
                         
-                        if let season = episode.parentIndexNumber, let ep = episode.indexNumber {
+                        if let season = nextEpisode.parentIndexNumber,
+                           let ep = nextEpisode.indexNumber {
                             Text("S\(season)E\(ep)")
                                 .font(.caption)
                         }
                         
-                        if let progress = episode.playbackProgress, progress > 0, progress < 0.95 {
+                        if let progress = nextEpisode.playbackProgress,
+                           progress > 0, progress < 0.95 {
                             Gauge(value: progress) {
                                 EmptyView()
                             } currentValueLabel: {
@@ -36,7 +42,7 @@ struct ShowPlayButton: View {
                             .frame(width: 40)
                         }
                         
-                        if let remaining = episode.timeRemainingString {
+                        if let remaining = nextEpisode.timeRemainingString {
                             Text(remaining)
                                 .font(.caption)
                         }
@@ -46,67 +52,105 @@ struct ShowPlayButton: View {
                 .buttonBorderShape(.capsule)
                 .controlSize(.extraLarge)
                 .buttonStyle(.glassProminent)
+                // Consider re-enabling with a flag after first load to avoid initial flicker:
+                // .animation(.default, value: nextEpisode)
                 
-                if let episode = nextEpisode {
-                    MarkPlayedButton(item: episode)
-                    
-                    FavoriteButton(item: episode)
-                }
+            } else {
+                // Requested change: when there is "no episode", show the same loading UI
+                loadingButton
             }
-        } else {
-            ProgressView()
-                .task(id: seasons) {
-                    nextEpisode = nil // Reset state
-                    await findNextEpisode()
-                }
+            MarkPlayedButton(item: nextEpisode ?? BaseItemDto())
+            FavoriteButton(item: nextEpisode ?? BaseItemDto())
+        }
+        // Trigger load when seasons identity changes
+        .task(id: seasons.map { $0.id ?? "" }.joined(separator: "|")) {
+            await refreshNextEpisode()
         }
     }
     
-    private func findNextEpisode() async {
-        guard !seasons.isEmpty else { return }
+    // MARK: - Subviews
+    
+    private var loadingButton: some View {
+        Button(action: {}) {
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.mini)
+                Text("Loading…")
+                    .font(.caption)
+            }
+
+        }
+        .tint(Color(.accent).secondary)
+        .buttonBorderShape(.capsule)
+        .controlSize(.extraLarge)
+        .buttonStyle(.glassProminent)
+    }
+}
+
+// MARK: - Loading / Selection
+
+private extension ShowPlayButton {
+    func refreshNextEpisode() async {
+        await MainActor.run {
+            isLoading = true
+            nextEpisode = nil
+        }
+        
+        let episode = await loadNextEpisode(for: show, seasons: seasons)
+        
+        await MainActor.run {
+            nextEpisode = episode
+            isLoading = false
+        }
+    }
+    
+    func loadNextEpisode(for show: BaseItemDto, seasons: [BaseItemDto]) async -> BaseItemDto? {
+        guard !seasons.isEmpty else { return nil }
         
         let sortedSeasons = seasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
         
+        // Try per season in order
         for season in sortedSeasons {
             do {
                 let episodes = try await JFAPI.loadEpisodes(for: show, season: season)
                 let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
                 
-                // Look for in-progress episode first
-                if let inProgressEpisode = sortedEpisodes.first(where: { episode in
-                    let hasProgress = (episode.userData?.playbackPositionTicks ?? 0) > 0
-                    let isFullyWatched = episode.userData?.isPlayed == true || 
-                                       (episode.playbackProgress ?? 0) >= 0.95
+                // Prefer in-progress but not finished
+                if let inProgress = sortedEpisodes.first(where: { ep in
+                    let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
+                    let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                     return hasProgress && !isFullyWatched
                 }) {
-                    nextEpisode = inProgressEpisode
-                    return
+                    return inProgress
                 }
                 
-                // Look for first unwatched episode
-                if let firstUnwatched = sortedEpisodes.first(where: { episode in
-                    let isWatched = episode.userData?.isPlayed == true || 
-                                   (episode.playbackProgress ?? 0) >= 0.95
+                // First fully-unwatched
+                if let firstUnwatched = sortedEpisodes.first(where: { ep in
+                    let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                     return !isWatched
                 }) {
-                    nextEpisode = firstUnwatched
-                    return
+                    return firstUnwatched
                 }
                 
-                // If all episodes in this season are watched, continue to next season
+                // else: this season finished, continue
             } catch {
+                // Failed to load this season; try next
                 continue
             }
         }
         
-        // If we get here, all episodes are watched - set to last episode of last season
+        // All watched: choose last episode of last season
         if let lastSeason = sortedSeasons.last {
             do {
                 let episodes = try await JFAPI.loadEpisodes(for: show, season: lastSeason)
-                nextEpisode = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }.last
+                if let last = episodes.sorted(by: { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }).last {
+                    return last
+                }
             } catch {
-                nextEpisode = nil
+                // If this also fails, return nil
             }
         }
+        
+        return nil
     }
 }

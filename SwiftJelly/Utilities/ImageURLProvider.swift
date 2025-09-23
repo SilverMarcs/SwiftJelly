@@ -94,11 +94,14 @@ enum ImageURLProvider {
         imageURL(for: item, maxWidth: maxWidth, preferredType: .primary)
     }
     /// Generates a landscape image URL specifically for continue watching cards
-    static func landscapeImageURL(for item: BaseItemDto, maxWidth: CGFloat = 600) -> URL? {
-        imageURL(for: item, maxWidth: maxWidth, preferredType: .thumb)
+    static func landscapeImageURL(for item: BaseItemDto, maxWidth: CGFloat = 1920) -> URL? {
+        imageURL(for: item, maxWidth: maxWidth, preferredType: .backdrop)
     }
     
-    /// Generates image URL for a BaseItemPerson
+    /// Generates a logo image URL for items
+    static func logoImageURL(for item: BaseItemDto, maxHeight: CGFloat = 100) -> URL? {
+        imageURL(for: item, preferredType: .logo)
+    }
     /// - Parameters:
     ///   - person: The BaseItemPerson to get image for
     ///   - maxWidth: Maximum width for the image (default: 300)
