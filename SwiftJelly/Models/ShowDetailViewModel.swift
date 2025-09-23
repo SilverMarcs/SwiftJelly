@@ -20,8 +20,14 @@ import Combine
      var isLoading: Bool = false
      var isLoadingEpisodes: Bool = false
     
-    init(show: BaseItemDto) {
-        self.show = show
+    init(item: BaseItemDto) {
+        self.show = item
+    }
+    
+    func ensureSeriesLoaded() async {
+        if show.type == .episode {
+            await reloadShow()
+        }
     }
     
     // refreshes everything: show metadata, seasons, episodes, next episode
@@ -50,7 +56,7 @@ import Combine
     }
     
     // loads show metadata like genre studios etc
-    private func reloadShow() async {
+    func reloadShow() async {
         do {
             let itemId = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !itemId.isEmpty else { return }

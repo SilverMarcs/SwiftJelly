@@ -5,7 +5,7 @@ struct ShowDetailView: View {
     private var vm: ShowDetailViewModel
     
     init(item: BaseItemDto) {
-        vm = ShowDetailViewModel(show: item)
+        vm = ShowDetailViewModel(item: item)
     }
     
     var body: some View {
@@ -39,7 +39,7 @@ struct ShowDetailView: View {
         }
         .overlay { if vm.isLoading { UniversalProgressView() } }
         .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
-        .task { await vm.reloadSeasonsAndEpisodes() }
+        .task { await vm.ensureSeriesLoaded(); await vm.reloadSeasonsAndEpisodes() }
         .refreshable { await vm.refreshAll() }
         .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
         .ignoresSafeArea(edges: .top)
