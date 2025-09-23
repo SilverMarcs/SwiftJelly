@@ -21,8 +21,14 @@ enum ImageURLProvider {
         guard let id = item.id else { return nil }
 
         // Episodes always use primary
-        let imageType = (item.type == .episode) ? .primary : type
-        return url(forItemID: id, imageType: imageType)
+        let imageType = (item.type == .episode || item.collectionType != nil) ? .primary : type
+        
+        // Check if the item has the required image tag
+        if let tag = item.imageTags?[imageType.rawValue], !tag.isEmpty {
+            return url(forItemID: id, imageType: imageType)
+        }
+        
+        return nil
     }
 
     /// - Parameters:
