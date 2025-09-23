@@ -54,5 +54,6 @@ struct VLCMobileControls: View {
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
+        .tint(.white)
     }
 }

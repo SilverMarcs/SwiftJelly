@@ -18,7 +18,7 @@ struct VLCPlayerOverlays: ViewModifier {
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
-                        .padding(.top, -10)
+                        .padding(.top, 5)
                         .tint(.white)
                 }
             }
@@ -47,7 +47,7 @@ struct VLCPlayerOverlays: ViewModifier {
                     #if os(macOS)
                         .padding()
                     #else
-                        .padding(.bottom, -15)
+                        .padding(.bottom, -6)
                     #endif
                 }
             }

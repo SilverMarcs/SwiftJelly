@@ -40,7 +40,6 @@ struct PlayMediaButton<Label: View>: View {
         #if !os(macOS)
         .fullScreenCover(isPresented: $showPlayer) {
             UniversalMediaPlayer(mediaItem: item)
-                .environment(\.refresh, refresh)
         }
         #endif
     }

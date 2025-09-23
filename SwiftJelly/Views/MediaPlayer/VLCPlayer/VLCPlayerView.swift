@@ -29,7 +29,7 @@ struct VLCPlayerView: View {
         let vlcProxy = VLCVideoPlayer.Proxy()
         self.proxy = vlcProxy
         
-        subtitleManager = SubtitleManager(vlcProxy: vlcProxy)
+        self.subtitleManager = SubtitleManager(vlcProxy: vlcProxy)
         
         switch mediaItem {
         case .jellyfin(let item):
@@ -146,6 +146,7 @@ struct VLCPlayerView: View {
             try? await Task.sleep(nanoseconds: 100_000_000) // 1 second delay
             if let handler = RefreshHandlerContainer.shared.refresh {
                 await handler()
+                RefreshHandlerContainer.shared.refresh = nil
             }
         }
     }
