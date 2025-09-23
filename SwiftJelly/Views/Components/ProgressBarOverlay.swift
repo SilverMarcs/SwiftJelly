@@ -35,6 +35,7 @@ struct ProgressBarOverlay: View {
 private struct ProgressIcon: View {
     let isPlayed: Bool
     var body: some View {
+        // TODO: use glass button here
         if isPlayed {
             Image(systemName: "checkmark.circle.fill")
                 .font(.subheadline)

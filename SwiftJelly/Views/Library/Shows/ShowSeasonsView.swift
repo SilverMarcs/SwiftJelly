@@ -2,6 +2,8 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowSeasonsView: View {
+    @Environment(\.refresh) var refresh
+    
     let show: BaseItemDto
     
     @State private var seasons: [BaseItemDto] = []
@@ -36,6 +38,7 @@ struct ShowSeasonsView: View {
                         ForEach(episodes) { episode in
                             PlayableCard(item: episode, showNavigation: false)
                                 .id(episode.id)
+                                .environment(\.refresh, refreshEpisodes)
                         }
                     }
                     .scrollTargetLayout()
@@ -57,6 +60,12 @@ struct ShowSeasonsView: View {
         .task(id: episodes) {
             scrollToLatestEpisode()
         }
+    }
+    
+    private func refreshEpisodes() async {
+        async let a: Void = refresh()
+        async let b: Void = loadEpisodes(for: selectedSeason)
+        _ = await (a, b) // wait for both to finish
     }
     
     private func loadSeasons() async {
