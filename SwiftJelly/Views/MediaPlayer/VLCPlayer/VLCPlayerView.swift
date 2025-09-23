@@ -47,7 +47,7 @@ struct VLCPlayerView: View {
                     url: url,
                     autoPlay: true,
                     startSeconds: .seconds(Int64(startTimeSeconds)),
-                    subtitleSize: .absolute(24),
+                    subtitleSize: .absolute(subSize),
                 )
             )
             .proxy(proxy)
@@ -148,5 +148,13 @@ struct VLCPlayerView: View {
                 await handler()
             }
         }
+    }
+    
+    var subSize: Int {
+        #if os(macOS)
+        24
+        #else
+        19
+        #endif
     }
 }
