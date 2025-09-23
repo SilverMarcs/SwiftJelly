@@ -10,7 +10,7 @@ import JellyfinAPI
 import Get
 
 /// Service class that handles common Jellyfin API operations
-struct JFAPI {
+enum JFAPI {
     static let dataManager: DataManager = .shared
 
     /// Returns a configured JellyfinClient for the current server, or throws if not available

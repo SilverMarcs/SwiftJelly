@@ -1,7 +1,7 @@
 import Foundation
 import JellyfinAPI
 
-struct AVPlayerSupportChecker {
+enum AVPlayerSupportChecker {
     static let supportedExtensions: Set<String> = [
         "mp4", "mov", "m4v", "mp3", "aac", "wav", "aiff", "hevc", "avi"
     ]
