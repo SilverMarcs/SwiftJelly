@@ -49,6 +49,10 @@
 			platformFiltersByRelativePath = {
 				AppDelegate.swift = (ios, xros, );
 				Utilities/OrientationManager.swift = (ios, xros, );
+				Views/LocalMedia/LocalMediaFilePicker.swift = (macos, );
+				Views/LocalMedia/LocalMediaManager.swift = (macos, );
+				Views/LocalMedia/LocalMediaRow.swift = (macos, );
+				Views/LocalMedia/LocalMediaView.swift = (macos, );
 				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift = (macos, );
 				Views/MediaPlayer/VLCPlayer/Overlays/VLCMobileControls.swift = (ios, xros, );

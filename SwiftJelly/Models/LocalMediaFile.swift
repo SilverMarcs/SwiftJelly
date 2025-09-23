@@ -12,10 +12,10 @@ struct LocalMediaFile: Codable, Hashable {
     let name: String
     let durationSeconds: Int?
     
-    #if os(macOS)
     // Store bookmark data for macOS security-scoped access
     private let bookmarkData: Data?
     
+    #if os(macOS)
     init(url: URL) {
         self.url = url
         self.name = url.deletingPathExtension().lastPathComponent
@@ -43,7 +43,8 @@ struct LocalMediaFile: Codable, Hashable {
             self.bookmarkData = nil
         }
     }
-    
+
+//    #if os(macOS)
     /// Create from bookmark data (for loading from persistence)
     init?(bookmarkData: Data) {
         do {
@@ -69,19 +70,6 @@ struct LocalMediaFile: Codable, Hashable {
             return nil
         }
     }
-    
-    #else
-    init(url: URL) {
-        self.url = url
-        self.name = url.deletingPathExtension().lastPathComponent
-        self.durationSeconds = nil
-    }
-    
-    init(url: URL, name: String, durationSeconds: Int? = nil) {
-        self.url = url
-        self.name = name
-        self.durationSeconds = durationSeconds
-    }
     #endif
     
     /// Get the saved playback position for this file
@@ -102,10 +90,8 @@ struct LocalMediaFile: Codable, Hashable {
         return Double(savedPosition) / Double(durationSeconds)
     }
     
-    #if os(macOS)
     /// Stop accessing the security-scoped resource when done
     func stopAccessingSecurityScopedResource() {
         url.stopAccessingSecurityScopedResource()
     }
-    #endif
 }

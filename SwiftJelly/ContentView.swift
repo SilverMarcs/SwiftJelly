@@ -10,8 +10,9 @@ import SwiftUI
 struct ContentView: View {
 //    @SceneStorage("selectedTab") private var selectedTab: TabSelection = .home
     @Binding var selectedTab: TabSelection
-    
+    #if os(macOS)
     @Environment(LocalMediaManager.self) var localMediaManager
+    #endif
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
@@ -29,13 +30,13 @@ struct ContentView: View {
                 LibraryView()
             }
             
+            #if os(macOS)
             Tab(TabSelection.local.title,
                 systemImage: TabSelection.local.systemImage,
                 value: TabSelection.local) {
                 LocalMediaView()
             }
-            
-            #if os(macOS)
+
             Tab(TabSelection.settings.title,
                 systemImage: TabSelection.settings.systemImage,
                 value: TabSelection.settings) {

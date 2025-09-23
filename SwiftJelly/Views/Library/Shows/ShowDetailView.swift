@@ -8,7 +8,6 @@ struct ShowDetailView: View {
     @State private var seasons: [BaseItemDto] = []
     @State private var selectedSeason: BaseItemDto?
     @State private var episodes: [BaseItemDto] = []
-    @State private var recommendedItems: [BaseItemDto] = []
     @State private var isLoading = false
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     @State private var refreshTrigger = UUID()
@@ -29,7 +28,6 @@ struct ShowDetailView: View {
                             AttributesView(item: show)
                             
                             ShowPlayButton(show: show, seasons: seasons)
-//                                .animation(.default, value: show)
                                 .environment(\.refresh, fullRefresh)
                                 .id("show-play-\(refreshTrigger)") // Force recreation when refresh trigger changes
                         }
@@ -87,12 +85,7 @@ struct ShowDetailView: View {
                     
                     // TODO: show filteredmeidaview links for genres and studios
             
-                    if !recommendedItems.isEmpty {
-                        HorizontalMediaScrollView(
-                            title: "Recommended",
-                            items: recommendedItems,
-                        )
-                    }
+                    SimilarItemsView(item: show)
                 }
                 .scenePadding(.bottom)
                 .contentMargins(.horizontal, 18)
@@ -146,14 +139,10 @@ struct ShowDetailView: View {
         do {
             show = try await JFAPI.loadItem(by: id)
             await loadSeasons()
-            if let show = show {
-                recommendedItems = try await JFAPI.loadSimilarItems(for: show)
-            }
         } catch {
             show = nil
             seasons = []
             episodes = []
-            recommendedItems = []
         }
     }
     

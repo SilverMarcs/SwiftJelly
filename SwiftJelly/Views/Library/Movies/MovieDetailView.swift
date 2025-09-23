@@ -4,7 +4,6 @@ import JellyfinAPI
 struct MovieDetailView: View {
     let id: String
     @State private var movie: BaseItemDto?
-    @State private var recommendedItems: [BaseItemDto] = []
     @State private var isLoading = false
     
     var body: some View {
@@ -53,12 +52,7 @@ struct MovieDetailView: View {
 //                        StudiosScrollView(studios: studios)
 //                    }
                     
-                    if !recommendedItems.isEmpty {
-                        HorizontalMediaScrollView(
-                            title: "Recommended",
-                            items: recommendedItems,
-                        )
-                    }
+                    SimilarItemsView(item: movie)
                 }
                 .scenePadding(.bottom)
                 .contentMargins(.horizontal, 18)
@@ -96,13 +90,9 @@ struct MovieDetailView: View {
         defer { isLoading = false }
         do {
             movie = try await JFAPI.loadItem(by: id)
-            if let movie = movie {
-                recommendedItems = try await JFAPI.loadSimilarItems(for: movie)
-            }
         } catch {
             // handle error
             movie = nil
-            recommendedItems = []
         }
     }
     

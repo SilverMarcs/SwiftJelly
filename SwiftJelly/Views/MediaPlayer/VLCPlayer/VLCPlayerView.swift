@@ -8,7 +8,9 @@ import UIKit
 #endif
 
 struct VLCPlayerView: View {
+    #if os(macOS)
     @Environment(LocalMediaManager.self) var localMediaManager
+    #endif
     let mediaItem: MediaItem
     
     private var proxy: VLCVideoPlayer.Proxy
@@ -116,6 +118,7 @@ struct VLCPlayerView: View {
             subtitleManager.initializeIfNeeded(with: info.subtitleTracks)
         }
 
+        #if os(macOS)
         if case .local(let file) = mediaItem, file.durationSeconds == nil, totalDuration > 0 {
             let updatedFile = LocalMediaFile(
                 url: file.url,
@@ -124,6 +127,7 @@ struct VLCPlayerView: View {
             )
             localMediaManager.updateRecentFile(updatedFile)
         }
+        #endif
     }
     
     private func cleanup() {

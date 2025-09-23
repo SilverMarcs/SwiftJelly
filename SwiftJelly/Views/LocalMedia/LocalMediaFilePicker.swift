@@ -40,10 +40,8 @@ struct LocalMediaFilePicker: View {
                         localMediaManager.addRecentFile(enhancedFile)
                         let mediaItem = MediaItem.local(enhancedFile)
                         RefreshHandlerContainer.shared.refresh = refresh
-                        #if os(macOS)
                         dismissWindow(id: "media-player")
                         openWindow(id: "media-player", value: mediaItem)
-                        #endif
                     }
                 }
             case .failure(let error):

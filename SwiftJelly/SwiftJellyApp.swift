@@ -13,9 +13,10 @@ import CachedAsyncImage
 struct SwiftJellyApp: App {
     #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #else
+    @State private var localMediaManager = LocalMediaManager()
     #endif
     
-    @State private var localMediaManager = LocalMediaManager()
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
@@ -42,15 +43,13 @@ struct SwiftJellyApp: App {
         
         #else
         WindowGroup {
-            ContentView()
-                .environment(localMediaManager)
+            ContentView(selectedTab: $selectedTab)
         }
         #endif
     }
     
     init() {
          CachedAsyncImageConfiguration.configure(
-             memoryCountLimit: 100,        // Max 100 images in memory
              memoryCostLimitMB: 100,       // Max 100 MB memory usage
              diskCacheLimitMB: 400         // Max 500 MB disk cache
          )

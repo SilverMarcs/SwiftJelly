@@ -90,18 +90,11 @@ class LocalMediaManager {
         }
 
         recentFiles = bookmarkDatas.compactMap { bookmarkData in
-            #if os(macOS)
             return LocalMediaFile(bookmarkData: bookmarkData)
-            #else
-            // For non-macOS platforms, we can't use bookmarks, so this won't work
-            // This is a fallback that won't work after restart
-            return nil
-            #endif
         }
     }
     
     private func saveRecentFiles() {
-        #if os(macOS)
         let bookmarkDatas = recentFiles.compactMap { file -> Data? in
             do {
                 return try file.url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
@@ -114,11 +107,5 @@ class LocalMediaManager {
         if let data = try? JSONEncoder().encode(bookmarkDatas) {
             UserDefaults.standard.set(data, forKey: "recentMediaFiles")
         }
-        #else
-        // For non-macOS, save URLs directly (won't work after restart due to security)
-        if let data = try? JSONEncoder().encode(recentFiles) {
-            UserDefaults.standard.set(data, forKey: "recentMediaFiles")
-        }
-        #endif
     }
 }
