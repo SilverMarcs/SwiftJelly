@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		080195482E7F2CC9000A83C3 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 080195472E7F2CC9000A83C3 /* VLCUI */; };
 		082A202D2E82178600F1626F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 082A202C2E82178600F1626F /* JellyfinAPI */; };
+		082A20362E822DE800F1626F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 082A20352E822DE800F1626F /* JellyfinAPI */; };
 		08408A7A2E3360A400C43C1B /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08408A782E3360A400C43C1B /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); };
 		08408A7B2E3360A400C43C1B /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 08408A782E3360A400C43C1B /* MobileVLCKit.xcframework */; platformFilters = (ios, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		08408A7C2E3360A400C43C1B /* VLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08408A792E3360A400C43C1B /* VLCKit.xcframework */; platformFilters = (macos, ); };
@@ -75,6 +76,7 @@
 			files = (
 				080195482E7F2CC9000A83C3 /* VLCUI in Frameworks */,
 				085D1FC92E7EE7BA00435795 /* VLCUI in Frameworks */,
+				082A20362E822DE800F1626F /* JellyfinAPI in Frameworks */,
 				08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */,
 				08D5DCC82E28A0D90027D139 /* CachedAsyncImage in Frameworks */,
 				08408A7C2E3360A400C43C1B /* VLCKit.xcframework in Frameworks */,
@@ -138,6 +140,7 @@
 				085D1FC82E7EE7BA00435795 /* VLCUI */,
 				080195472E7F2CC9000A83C3 /* VLCUI */,
 				082A202C2E82178600F1626F /* JellyfinAPI */,
+				082A20352E822DE800F1626F /* JellyfinAPI */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -170,7 +173,7 @@
 			packageReferences = (
 				08D5DCC62E28A0D90027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
 				080195462E7F2CC9000A83C3 /* XCRemoteSwiftPackageReference "VLCUI" */,
-				082A202B2E82178600F1626F /* XCLocalSwiftPackageReference "../Frameworks/jellyfin-sdk-swift" */,
+				082A20342E822DE800F1626F /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -456,17 +459,18 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		082A202B2E82178600F1626F /* XCLocalSwiftPackageReference "../Frameworks/jellyfin-sdk-swift" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../Frameworks/jellyfin-sdk-swift";
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		080195462E7F2CC9000A83C3 /* XCRemoteSwiftPackageReference "VLCUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SilverMarcs/VLCUI";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		082A20342E822DE800F1626F /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SilverMarcs/jellyfin-sdk-swift";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -490,6 +494,11 @@
 		};
 		082A202C2E82178600F1626F /* JellyfinAPI */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = JellyfinAPI;
+		};
+		082A20352E822DE800F1626F /* JellyfinAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 082A20342E822DE800F1626F /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
 			productName = JellyfinAPI;
 		};
 		08493C5B2E292DBC007F0D75 /* JellyfinAPI */ = {
