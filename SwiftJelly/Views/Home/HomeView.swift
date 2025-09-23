@@ -10,7 +10,6 @@ import JellyfinAPI
 
 struct HomeView: View {
     @State private var continueWatchingItems: [BaseItemDto] = []
-    @State private var favoriteItems: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
     @State private var isLoading = false
@@ -21,8 +20,6 @@ struct HomeView: View {
                 VStack(spacing: 24) {
                     ContinueWatchingView(items: continueWatchingItems)
                         .environment(\.refresh, refreshContinueWatching)
-                    
-                    RecentlyAddedView(items: favoriteItems, header: "Favorites")
                     
                     RecentlyAddedView(items: latestMovies, header: "Recently Added Movies")
                     
@@ -39,7 +36,7 @@ struct HomeView: View {
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
             .task {
-                if continueWatchingItems.isEmpty && favoriteItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
+                if continueWatchingItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
                     await loadAll()
                 }
             }
@@ -55,6 +52,7 @@ struct HomeView: View {
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
+                .keyboardShortcut("r")
                 #endif
             }
         }
@@ -63,11 +61,9 @@ struct HomeView: View {
     private func loadAll() async {
         isLoading = true
         async let continueWatching = JFAPI.loadContinueWatchingSmart()
-        async let favorites = JFAPI.loadFavoriteItems(limit: 15)
         async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 15)
         do {
             continueWatchingItems = try await continueWatching
-            favoriteItems = try await favorites
             let items = try await allItems
             latestMovies = Array(items.filter { $0.type == .movie })
             latestShows = Array(items.filter { $0.type == .series })

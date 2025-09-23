@@ -24,6 +24,12 @@ struct ContentView: View {
                 HomeView()
             }
             
+            Tab(TabSelection.favorites.title,
+                systemImage: TabSelection.favorites.systemImage,
+                value: TabSelection.favorites) {
+                FavoritesView()
+            }
+            
             Tab(TabSelection.libraries.title,
                 systemImage: TabSelection.libraries.systemImage,
                 value: TabSelection.libraries) {

@@ -10,6 +10,7 @@ import Foundation
 // Enum for tab cases
 enum TabSelection: String, CaseIterable {
     case home = "home"
+    case favorites = "favourites"
     case libraries = "libraries"
     case local = "local"
     case settings = "settings"
@@ -18,6 +19,7 @@ enum TabSelection: String, CaseIterable {
     var title: String {
         switch self {
         case .home: return "Home"
+        case .favorites: return "Favorites"
         case .libraries: return "Libraries"
         case .local: return "Local"
         case .settings: return "Settings"
@@ -28,6 +30,7 @@ enum TabSelection: String, CaseIterable {
     var systemImage: String {
         switch self {
         case .home: return "house"
+        case .favorites: return "star"
         case .libraries: return "film"
         case .local: return "folder"
         case .settings: return "gear"
@@ -38,8 +41,9 @@ enum TabSelection: String, CaseIterable {
     var shortcutKey: String? {
         switch self {
         case .home: return "1"
-        case .libraries: return "2"
-        case .local: return "3"
+        case .favorites: return "2"
+        case .libraries: return "3"
+        case .local: return "4"
         case .settings: return ","
         case .search: return "f"
         }
