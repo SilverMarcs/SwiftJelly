@@ -3,7 +3,6 @@ import JellyfinAPI
 
 struct ShowPlayButton: View {
     let show: BaseItemDto
-    let seasons: [BaseItemDto]
     
     @State private var nextEpisode: BaseItemDto? = nil
     @State private var isLoading = true
@@ -14,14 +13,13 @@ struct ShowPlayButton: View {
             MarkPlayedButton(item: nextEpisode ?? BaseItemDto())
             FavoriteButton(item: nextEpisode ?? BaseItemDto())
         }
-        // Trigger load when seasons identity changes
-        .task(id: seasons.map { $0.id ?? "" }.joined(separator: "|")) {
+        .task {
             await refreshNextEpisode()
         }
     }
     
     private var animatedButton: some View {
-        Button(action: {}) {
+        PlayMediaButton(item: nextEpisode ?? BaseItemDto()) {
             ZStack {
                 // Loading content
                 HStack(spacing: 8) {
@@ -29,7 +27,7 @@ struct ShowPlayButton: View {
                     Text("Loading…").font(.caption)
                 }
                 .opacity(isLoading || nextEpisode == nil ? 1 : 0)
-
+                
                 // Play content
                 Group {
                     if let nextEpisode {
@@ -61,90 +59,17 @@ struct ShowPlayButton: View {
         .controlSize(.extraLarge)
         .buttonStyle(.glassProminent)
     }
-    
-    // MARK: - Subviews
-    
-    private var loadingButton: some View {
-        Button(action: {}) {
-            HStack(spacing: 8) {
-                ProgressView()
-                    .controlSize(.mini)
-                Text("Loading…")
-                    .font(.caption)
-            }
-
-        }
-        .tint(Color(.accent).secondary)
-        .buttonBorderShape(.capsule)
-        .controlSize(.extraLarge)
-        .buttonStyle(.glassProminent)
-    }
 }
 
 // MARK: - Loading / Selection
 
 private extension ShowPlayButton {
     func refreshNextEpisode() async {
-        await MainActor.run {
-            isLoading = true
-            nextEpisode = nil
-        }
+        isLoading = true
+        defer { isLoading = false }
         
-        let episode = await loadNextEpisode(for: show, seasons: seasons)
-        
-        await MainActor.run {
-            nextEpisode = episode
-            isLoading = false
-        }
-    }
-    
-    func loadNextEpisode(for show: BaseItemDto, seasons: [BaseItemDto]) async -> BaseItemDto? {
-        guard !seasons.isEmpty else { return nil }
-        
-        let sortedSeasons = seasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-        
-        // Try per season in order
-        for season in sortedSeasons {
-            do {
-                let episodes = try await JFAPI.loadEpisodes(for: show, season: season)
-                let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-                
-                // Prefer in-progress but not finished
-                if let inProgress = sortedEpisodes.first(where: { ep in
-                    let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
-                    let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
-                    return hasProgress && !isFullyWatched
-                }) {
-                    return inProgress
-                }
-                
-                // First fully-unwatched
-                if let firstUnwatched = sortedEpisodes.first(where: { ep in
-                    let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
-                    return !isWatched
-                }) {
-                    return firstUnwatched
-                }
-                
-                // else: this season finished, continue
-            } catch {
-                // Failed to load this season; try next
-                continue
-            }
-        }
-        
-        // All watched: choose last episode of last season
-        if let lastSeason = sortedSeasons.last {
-            do {
-                let episodes = try await JFAPI.loadEpisodes(for: show, season: lastSeason)
-                if let last = episodes.sorted(by: { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }).last {
-                    return last
-                }
-            } catch {
-                // If this also fails, return nil
-            }
-        }
-        
-        return nil
+        nextEpisode = nil
+        let episode = await JFAPI.loadNextEpisode(for: show)
+        nextEpisode = episode
     }
 }

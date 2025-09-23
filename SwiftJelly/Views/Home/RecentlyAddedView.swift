@@ -21,7 +21,7 @@ struct RecentlyAddedView: View {
                                 case .movie:
                                     MovieDetailView(item: item)
                                 case .series:
-                                    ShowDetailView(id: item.id ?? "")
+                                    ShowDetailView(item: item)
                                 default:
                                     Text("Unsupported item type")
                                 }

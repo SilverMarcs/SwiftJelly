@@ -49,7 +49,7 @@ struct PlayableCard: View {
                         case .movie:
                             MovieDetailView(item: item)
                         case .episode, .series:
-                            ShowDetailView(id: item.seriesID ?? "")
+                            ShowDetailView(item: item)
                         default:
                             Text("Unsupported item type")
                         }

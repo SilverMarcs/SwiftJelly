@@ -17,7 +17,7 @@ struct MediaNavigationLink: View {
             case .movie:
                 MovieDetailView(item: item)
             case .series:
-                ShowDetailView(id: item.id ?? "")
+                ShowDetailView(item: item)
             case .boxSet:
                 FilteredMediaView(filter: .library(item))
             default:

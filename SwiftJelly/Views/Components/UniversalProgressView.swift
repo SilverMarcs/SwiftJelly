@@ -16,3 +16,19 @@ struct UniversalProgressView: View {
     }
 }
 
+//struct UniversalProgressView: View {
+//    var body: some View {
+//        ZStack {
+//            // Semi-transparent dark background
+//            Rectangle()
+//                .fill(.background)
+//                .frame(maxWidth: .infinity, maxHeight: .infinity)
+//            
+//            // Progress indicator
+//            ProgressView()
+//                .controlSize(.large)        }
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .listRowSeparator(.hidden)
+//    }
+//}
+//

@@ -50,5 +50,4 @@ struct SimilarItemsView: View {
             print(error.localizedDescription)
         }
     }
-    
 }

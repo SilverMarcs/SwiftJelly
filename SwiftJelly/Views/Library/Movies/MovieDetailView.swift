@@ -12,10 +12,8 @@ struct MovieDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Group {
-                    LandscapeImageView(item: currentItem)
-                        .frame(maxHeight: 500)
-                }
+                LandscapeImageView(item: currentItem)
+                    .frame(maxHeight: 450)
                 .backgroundExtensionEffect()
                 .overlay(alignment: .bottomLeading) {
                     VStack(alignment: .leading, spacing: 8) {
@@ -31,28 +29,13 @@ struct MovieDetailView: View {
                     .padding(16)
                 }
             
-                VStack(alignment: .leading, spacing: 5) {
-                    if let firstTagline = currentItem.taglines?.first {
-                        Text(firstTagline)
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .multilineTextAlignment(.leading)
-                    }
-                    
-                    if let overview = currentItem.overview {
-                        Text(overview)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .scenePadding(.horizontal)
+                OverviewView(item: currentItem)
                 
                 if let people = currentItem.people {
                     PeopleScrollView(people: people)
                 }
                 
-//                    if let studios = currentItem.studios, !studios.isEmpty {
-//                        StudiosScrollView(studios: studios)
-//                    }
+                // TODO: show filteredmeidaview links for genres and studios
                 
                 SimilarItemsView(item: currentItem)
             }
