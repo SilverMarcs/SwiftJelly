@@ -67,8 +67,8 @@ struct AttributeBadge: View {
             }
         }
         .font(.subheadline)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .glassEffect()
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .glassEffect(in: .rect(cornerRadius: 6))
     }
 }

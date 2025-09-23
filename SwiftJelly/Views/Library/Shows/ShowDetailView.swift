@@ -19,10 +19,8 @@ struct ShowDetailView: View {
                     .backgroundExtensionEffect()
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 8) {
-                            LogoView(item: currentShow)
-
                             AttributesView(item: currentShow)
-                                .padding(.leading, 2)
+                                .padding(.leading, 1)
                             
                             ShowPlayButton(show: currentShow)
                                 .environment(\.refresh, fetchShow)

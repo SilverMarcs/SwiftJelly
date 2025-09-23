@@ -183,7 +183,7 @@ public class SystemMediaController {
 
         // Attempt to load artwork for Jellyfin items if an image URL provider exists
         if case .jellyfin(let item) = mediaItem,
-           let imageURL = ImageURLProvider.landscapeImageURL(for: item) {
+           let imageURL = ImageURLProvider.imageURL(for: item, type: .thumb) {
             do {
                 let (data, _) = try await URLSession.shared.data(from: imageURL)
                 #if os(macOS)

@@ -12,13 +12,11 @@ enum ImageURLProvider {
     /// Generates the primary image URL for a BaseItemDto with fallback logic
     /// - Parameters:
     ///   - item: The BaseItemDto to get image for
-    ///   - maxWidth: Maximum width for the image (default: 600)
-    ///   - preferredType: Preferred image type (default: .primary)
+    ///   - type: Preferred image type (default: .primary)
     /// - Returns: URL for the image or nil if not available
     static func imageURL(
         for item: BaseItemDto,
-        maxWidth: CGFloat = 600,
-        preferredType: ImageType = .primary
+        type: ImageType = .primary
     ) -> URL? {
         guard let id = item.id else { return nil }
         let client: JellyfinClient
@@ -31,10 +29,7 @@ enum ImageURLProvider {
         if item.type == .episode, let seriesId = item.seriesID {
             // Try thumb image from series first
             if let thumbTag = getImageTag(for: .thumb, from: item) {
-                let parameters = Paths.GetItemImageParameters(
-                    maxWidth: Int(maxWidth),
-                    tag: thumbTag
-                )
+                let parameters = Paths.GetItemImageParameters(tag: thumbTag)
                 let request = Paths.getItemImage(
                     itemID: seriesId,
                     imageType: ImageType.thumb.rawValue,
@@ -44,10 +39,7 @@ enum ImageURLProvider {
             }
             // Try backdrop image from series
             if let backdropTag = item.backdropImageTags?.first {
-                let parameters = Paths.GetItemImageParameters(
-                    maxWidth: Int(maxWidth),
-                    tag: backdropTag
-                )
+                let parameters = Paths.GetItemImageParameters(tag: backdropTag)
                 let request = Paths.getItemImage(
                     itemID: seriesId,
                     imageType: ImageType.backdrop.rawValue,
@@ -57,14 +49,11 @@ enum ImageURLProvider {
             }
         }
         // Try preferred type first
-        if let preferredTag = getImageTag(for: preferredType, from: item) {
-            let parameters = Paths.GetItemImageParameters(
-                maxWidth: Int(maxWidth),
-                tag: preferredTag
-            )
+        if let preferredTag = getImageTag(for: type, from: item) {
+            let parameters = Paths.GetItemImageParameters(tag: preferredTag)
             let request = Paths.getItemImage(
                 itemID: id,
-                imageType: preferredType.rawValue,
+                imageType: type.rawValue,
                 parameters: parameters
             )
             return client.fullURL(with: request)
@@ -72,12 +61,9 @@ enum ImageURLProvider {
         // Fallback order: thumb -> backdrop -> primary
         let fallbackTypes: [ImageType] = [.thumb, .backdrop, .primary]
         for imageType in fallbackTypes {
-            if imageType == preferredType { continue }
+            if imageType == type { continue }
             if let tag = getImageTag(for: imageType, from: item) {
-                let parameters = Paths.GetItemImageParameters(
-                    maxWidth: Int(maxWidth),
-                    tag: tag
-                )
+                let parameters = Paths.GetItemImageParameters(tag: tag)
                 let request = Paths.getItemImage(
                     itemID: id,
                     imageType: imageType.rawValue,
@@ -89,26 +75,11 @@ enum ImageURLProvider {
         return nil
     }
     
-    /// Generates a portrait image URL specifically for library items
-    static func portraitImageURL(for item: BaseItemDto, maxWidth: CGFloat = 300) -> URL? {
-        imageURL(for: item, maxWidth: maxWidth, preferredType: .primary)
-    }
-    /// Generates a landscape image URL specifically for continue watching cards
-    static func landscapeImageURL(for item: BaseItemDto, maxWidth: CGFloat = 1920) -> URL? {
-        imageURL(for: item, maxWidth: maxWidth, preferredType: .backdrop)
-    }
-    
-    /// Generates a logo image URL for items
-    static func logoImageURL(for item: BaseItemDto, maxHeight: CGFloat = 100) -> URL? {
-        imageURL(for: item, preferredType: .logo)
-    }
     /// - Parameters:
     ///   - person: The BaseItemPerson to get image for
-    ///   - maxWidth: Maximum width for the image (default: 300)
     /// - Returns: URL for the person's image or nil if not available
     static func personImageURL(
-        for person: BaseItemPerson,
-        maxWidth: CGFloat = 300
+        for person: BaseItemPerson
     ) -> URL? {
         guard let id = person.id, let primaryImageTag = person.primaryImageTag else { return nil }
         
@@ -119,10 +90,7 @@ enum ImageURLProvider {
             return nil
         }
         
-        let parameters = Paths.GetItemImageParameters(
-            maxWidth: Int(maxWidth),
-            tag: primaryImageTag
-        )
+        let parameters = Paths.GetItemImageParameters(tag: primaryImageTag)
         
         let request = Paths.getItemImage(
             itemID: id,

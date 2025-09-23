@@ -17,10 +17,8 @@ struct MovieDetailView: View {
                 .backgroundExtensionEffect()
                 .overlay(alignment: .bottomLeading) {
                     VStack(alignment: .leading, spacing: 8) {
-                        LogoView(item: currentItem)
-
                         AttributesView(item: currentItem)
-                            .padding(.leading, 2)
+                            .padding(.leading, 1)
                         
                         MoviePlayButton(item: currentItem)
                             .animation(.default, value: currentItem)
