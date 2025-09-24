@@ -25,7 +25,7 @@ struct PersonView: View {
         VStack(alignment: .center, spacing: 10) {
             Group {
                 if let url = ImageURLProvider.personImageURL(for: person) {
-                    CachedAsyncImage(url: url, targetSize: CGSize(width: 100, height: 100))
+                    CachedAsyncImage(url: url, targetSize: 200)
                 } else {
                     Rectangle()
                         .foregroundStyle(.quaternary)

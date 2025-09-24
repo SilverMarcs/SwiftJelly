@@ -16,7 +16,7 @@ struct ShowDetailView: View {
                     if horizontalSizeClass == .compact {
                         PortraitImageView(item: vm.show)
                     } else {
-                        LandscapeImageView(item: vm.show)
+                        LandscapeImageView(item: vm.show, size: 700)
                             .frame(maxHeight: 450)
                     }
                 }
@@ -47,7 +47,8 @@ struct ShowDetailView: View {
         }
         .overlay { if vm.isLoading { UniversalProgressView() } }
         .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
-        .task { await vm.ensureSeriesLoaded(); await vm.reloadSeasonsAndEpisodes() }
+//        .task { await vm.ensureSeriesLoaded(); await vm.reloadSeasonsAndEpisodes() }
+        .task { await vm.reloadSeasonsAndEpisodes() }
         .refreshable { await vm.refreshAll() }
         .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
         .ignoresSafeArea(edges: .top)

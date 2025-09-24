@@ -12,7 +12,6 @@ struct PlayableCard: View {
     @Environment(\.refresh) var refresh
     
     let item: BaseItemDto
-    var showNavigation: Bool = true
     @State private var showPlayer = false
 
     var body: some View {
@@ -42,17 +41,10 @@ struct PlayableCard: View {
         }
         .buttonStyle(.plain)
         .contextMenu {
-            if showNavigation {
+            if item.type == .movie {
                 Section {
                     NavigationLink {
-                        switch item.type {
-                        case .movie:
-                            MovieDetailView(item: item)
-                        case .episode, .series:
-                            ShowDetailView(item: item)
-                        default:
-                            Text("Unsupported item type")
-                        }
+                        MovieDetailView(item: item)
                     } label: {
                         PlayableItemTypeLabel(item: item)
                     }

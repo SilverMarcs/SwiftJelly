@@ -17,7 +17,7 @@ struct MovieDetailView: View {
                     if horizontalSizeClass == .compact {
                         PortraitImageView(item: movie)
                     } else {
-                        LandscapeImageView(item: movie)
+                        LandscapeImageView(item: movie, size: 700)
                             .frame(maxHeight: 450)
                     }
                 }
