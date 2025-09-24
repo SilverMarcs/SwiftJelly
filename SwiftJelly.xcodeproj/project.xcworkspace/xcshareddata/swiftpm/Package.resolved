@@ -1,15 +1,6 @@
 {
-  "originHash" : "b2940ea786aa730baa658fd1a95878a95ae2a2b9497f11a7aee2b5fc9c93113e",
+  "originHash" : "e6589588db2c7e7deea29e4c46525f9a299b0917775813898bd15bfc72297333",
   "pins" : [
-    {
-      "identity" : "cachedasyncimage",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SilverMarcs/CachedAsyncImage",
-      "state" : {
-        "branch" : "main",
-        "revision" : "4b42cf1457041e65f67d777f9042da3e7ae80a44"
-      }
-    },
     {
       "identity" : "get",
       "kind" : "remoteSourceControl",
@@ -26,6 +17,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "54ed5a768363b9cff65eced96af435306c1f7339"
+      }
+    },
+    {
+      "identity" : "swiftmediaviewer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SilverMarcs/SwiftMediaViewer",
+      "state" : {
+        "branch" : "main",
+        "revision" : "f84f03d0aacb8fab0cef181565c7489f1f7c4c60"
       }
     },
     {

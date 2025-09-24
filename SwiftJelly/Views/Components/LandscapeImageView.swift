@@ -7,7 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 struct LandscapeImageView: View {
     let item: BaseItemDto

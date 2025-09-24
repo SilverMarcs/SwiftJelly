@@ -7,7 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 @main
 struct SwiftJellyApp: App {

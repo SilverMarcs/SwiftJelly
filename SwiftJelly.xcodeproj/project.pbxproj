@@ -16,7 +16,7 @@
 		08408A7D2E3360A400C43C1B /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 08408A792E3360A400C43C1B /* VLCKit.xcframework */; platformFilters = (macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08493C5B2E292DBC007F0D75 /* JellyfinAPI */; };
 		085D1FC92E7EE7BA00435795 /* VLCUI in Frameworks */ = {isa = PBXBuildFile; productRef = 085D1FC82E7EE7BA00435795 /* VLCUI */; };
-		08D5DCC82E28A0D90027D139 /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = 08D5DCC72E28A0D90027D139 /* CachedAsyncImage */; };
+		08BB38732E84994800BDF671 /* SwiftMediaViewer in Frameworks */ = {isa = PBXBuildFile; productRef = 08BB38722E84994800BDF671 /* SwiftMediaViewer */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -84,10 +84,10 @@
 				085D1FC92E7EE7BA00435795 /* VLCUI in Frameworks */,
 				082A20362E822DE800F1626F /* JellyfinAPI in Frameworks */,
 				08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */,
-				08D5DCC82E28A0D90027D139 /* CachedAsyncImage in Frameworks */,
 				08408A7C2E3360A400C43C1B /* VLCKit.xcframework in Frameworks */,
 				08408A7A2E3360A400C43C1B /* MobileVLCKit.xcframework in Frameworks */,
 				082A202D2E82178600F1626F /* JellyfinAPI in Frameworks */,
+				08BB38732E84994800BDF671 /* SwiftMediaViewer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,12 +141,12 @@
 			);
 			name = SwiftJelly;
 			packageProductDependencies = (
-				08D5DCC72E28A0D90027D139 /* CachedAsyncImage */,
 				08493C5B2E292DBC007F0D75 /* JellyfinAPI */,
 				085D1FC82E7EE7BA00435795 /* VLCUI */,
 				080195472E7F2CC9000A83C3 /* VLCUI */,
 				082A202C2E82178600F1626F /* JellyfinAPI */,
 				082A20352E822DE800F1626F /* JellyfinAPI */,
+				08BB38722E84994800BDF671 /* SwiftMediaViewer */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -177,9 +177,9 @@
 			mainGroup = 083128A02E0EE1F70096527C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				08D5DCC62E28A0D90027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */,
 				080195462E7F2CC9000A83C3 /* XCRemoteSwiftPackageReference "VLCUI" */,
 				082A20342E822DE800F1626F /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
+				08BB38712E84994800BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -482,9 +482,9 @@
 				kind = branch;
 			};
 		};
-		08D5DCC62E28A0D90027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */ = {
+		08BB38712E84994800BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SilverMarcs/CachedAsyncImage";
+			repositoryURL = "https://github.com/SilverMarcs/SwiftMediaViewer";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -515,10 +515,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = VLCUI;
 		};
-		08D5DCC72E28A0D90027D139 /* CachedAsyncImage */ = {
+		08BB38722E84994800BDF671 /* SwiftMediaViewer */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 08D5DCC62E28A0D90027D139 /* XCRemoteSwiftPackageReference "CachedAsyncImage" */;
-			productName = CachedAsyncImage;
+			package = 08BB38712E84994800BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */;
+			productName = SwiftMediaViewer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

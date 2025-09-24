@@ -7,7 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 struct PersonView: View {
     let person: BaseItemPerson

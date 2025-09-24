@@ -1,6 +1,6 @@
 import SwiftUI
 import JellyfinAPI
-import CachedAsyncImage
+import SwiftMediaViewer
 
 struct PortraitImageView: View {
     let item: BaseItemDto
