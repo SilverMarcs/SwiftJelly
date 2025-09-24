@@ -13,7 +13,7 @@ struct VLCPlayerView: View {
     #endif
     let mediaItem: MediaItem
     
-    private var proxy: VLCVideoPlayer.Proxy
+    @State private var proxy: VLCVideoPlayer.Proxy
     private var playbackState = PlaybackStateManager()
     private var subtitleManager: SubtitleManager
     
@@ -27,7 +27,7 @@ struct VLCPlayerView: View {
         self.startTimeSeconds = mediaItem.startTimeSeconds
         
         let vlcProxy = VLCVideoPlayer.Proxy()
-        self.proxy = vlcProxy
+        self._proxy = State(initialValue: vlcProxy)
         
         self.subtitleManager = SubtitleManager(vlcProxy: vlcProxy)
         

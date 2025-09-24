@@ -11,10 +11,20 @@ struct VLCPlayerOverlays: ViewModifier {
     
     @State private var controlsVisible: Bool = true
     @State private var isAspectFillMode = false
+    #if os(iOS)
+    @State private var suppressSingleTapToggleUntil: Date? = nil
+    #endif
     
     func body(content: Content) -> some View {
         content
             #if !os(macOS)
+            .overlay(alignment: .center) {
+                // Gesture layer lives underneath visual controls; it's always active
+                VLCGestureLayer(proxy: proxy) {
+                    // If a double-tap happened, suppress single-tap toggle briefly
+                    suppressSingleTapToggleUntil = Date().addingTimeInterval(1)
+                }
+            }
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
@@ -36,9 +46,11 @@ struct VLCPlayerOverlays: ViewModifier {
             .simultaneousGesture(
                 TapGesture(count: 1)
                     .onEnded {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            controlsVisible.toggle()
-                        }
+                        #if os(iOS)
+                        // Ignore if we just handled a double-tap
+                        if let until = suppressSingleTapToggleUntil, Date() < until { return }
+                        #endif
+                        withAnimation(.easeInOut(duration: 0.2)) { controlsVisible.toggle() }
                     }
             )
             .overlay(alignment: .bottom) {
