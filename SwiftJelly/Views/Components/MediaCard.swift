@@ -21,30 +21,18 @@ struct MediaCard: View {
                     RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(.background.quinary, lineWidth: 1)
                 }
-                .overlay(alignment: .topTrailing) {
-                    HStack(spacing: 4) {
-//                        if item.userData?.isFavorite == true {
-//                            Button {} label: {
-//                                Image(systemName: "star.fill")
-//                                    .imageScale(.small)
-//                            }
-//                            .tint(.orange)
-//                            .buttonStyle(.glassProminent)
-//                            .buttonBorderShape(.circle)
-//                            .allowsHitTesting(false)
-//                        }
-                        
-                        if item.userData?.isPlayed ?? false {
-                            Button {} label: {
-                                Image(systemName: "checkmark")
-                                    .fontWeight(.semibold)
-                            }
-                            .buttonStyle(.glassProminent)
-                            .buttonBorderShape(.circle)
-                            .allowsHitTesting(false)
+                .overlay(alignment: .topTrailing) {                        
+                    if item.userData?.isPlayed ?? false {
+                        Button {} label: {
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
                         }
+                        .buttonStyle(.glassProminent)
+                        .controlSize(.small)
+                        .buttonBorderShape(.circle)
+                        .allowsHitTesting(false)
+                        .padding(6)
                     }
-                    .padding(6)
                 }
             
             Text(item.name ?? "Unknown")

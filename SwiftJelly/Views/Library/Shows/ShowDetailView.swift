@@ -16,12 +16,15 @@ struct ShowDetailView: View {
                     if horizontalSizeClass == .compact {
                         PortraitImageView(item: vm.show)
                     } else {
-                        LandscapeImageView(item: vm.show, size: 700)
+                        LandscapeImageView(item: vm.show)
                             .frame(maxHeight: 450)
                     }
                 }
-                .frame(maxHeight: 450)
+                #if os(macOS)
                 .backgroundExtensionEffect()
+                #else
+                .stretchy()
+                #endif
                 .overlay(alignment: .bottomLeading) {
                     VStack(alignment: .leading, spacing: 8) {
                         AttributesView(item: vm.show)

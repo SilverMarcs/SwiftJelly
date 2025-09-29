@@ -17,11 +17,15 @@ struct MovieDetailView: View {
                     if horizontalSizeClass == .compact {
                         PortraitImageView(item: movie)
                     } else {
-                        LandscapeImageView(item: movie, size: 700)
+                        LandscapeImageView(item: movie)
                             .frame(maxHeight: 450)
                     }
                 }
+                #if os(macOS)
                 .backgroundExtensionEffect()
+                #else
+                .stretchy()
+                #endif
                 .overlay(alignment: .bottomLeading) {
                     VStack(alignment: .leading, spacing: 8) {
                         AttributesView(item: movie)
@@ -51,7 +55,7 @@ struct MovieDetailView: View {
                 UniversalProgressView()
             }
         }
-        .refreshable { await fetchMovie() }
+//        .refreshable { await fetchMovie() }
         .ignoresSafeArea(edges: .top)
         .navigationTitle(movie.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
