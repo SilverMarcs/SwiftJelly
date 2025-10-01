@@ -60,6 +60,7 @@ struct HomeView: View {
 
     private func loadAll() async {
         isLoading = true
+        defer { isLoading = false }
         async let continueWatching = JFAPI.loadContinueWatchingSmart()
         async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 15)
         do {
@@ -70,7 +71,6 @@ struct HomeView: View {
         } catch {
             print(error.localizedDescription)
         }
-        isLoading = false
     }
 
     private func refreshContinueWatching() async {

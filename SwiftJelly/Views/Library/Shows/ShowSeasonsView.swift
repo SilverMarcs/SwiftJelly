@@ -15,13 +15,9 @@ struct ShowSeasonsView: View {
                 }
                 .scenePadding(.horizontal)
                 .labelsHidden()
-                #if os(macOS)
-                .pickerStyle(.segmented)
-                #else
                 .pickerStyle(.menu)
                 .menuStyle(.button)
                 .buttonStyle(.glass)
-                #endif
                 .task(id: vm.selectedSeason) { 
                     await vm.updateEpisodesForSelectedSeason()
                     scrollToLatestEpisode()

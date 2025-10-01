@@ -11,6 +11,9 @@ struct UniversalProgressView: View {
     var body: some View {
         ProgressView()
             .controlSize(.large)
+            .padding()
+//            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .listRowSeparator(.hidden)
     }

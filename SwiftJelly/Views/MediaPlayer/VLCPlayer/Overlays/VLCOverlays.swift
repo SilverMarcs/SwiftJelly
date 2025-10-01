@@ -17,6 +17,7 @@ struct VLCPlayerOverlays: ViewModifier {
     
     func body(content: Content) -> some View {
         content
+            .ignoresSafeArea()
             #if !os(macOS)
             .overlay(alignment: .center) {
                 // Gesture layer lives underneath visual controls; it's always active
@@ -28,19 +29,16 @@ struct VLCPlayerOverlays: ViewModifier {
             .overlay(alignment: .top) {
                 if controlsVisible {
                     VLCPlayerTopOverlay(proxy: proxy, isAspectFillMode: $isAspectFillMode)
-                        .padding(.top, 5)
                         .tint(.white)
                 }
             }
             .overlay(alignment: .center) {
-                if controlsVisible {
-                    VLCMobileControls(
-                        playbackState: playbackState,
-                        proxy: proxy,
-                        controlsVisible: controlsVisible,
-                    )
-                    .tint(.white)
-                }
+                VLCMobileControls(
+                    playbackState: playbackState,
+                    proxy: proxy,
+                    controlsVisible: controlsVisible,
+                )
+                .tint(.white)
             }
             #endif
             .simultaneousGesture(
