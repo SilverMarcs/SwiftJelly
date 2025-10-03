@@ -11,7 +11,7 @@ struct ShowDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            LazyVStack(alignment: .leading, spacing: 20) {
                 Group {
                     if horizontalSizeClass == .compact {
                         PortraitImageView(item: vm.show)
