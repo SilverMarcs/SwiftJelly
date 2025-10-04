@@ -28,4 +28,10 @@ extension BaseItemDto {
         formatter.unitsStyle = .abbreviated
         return formatter.string(from: TimeInterval(seconds))
     }
+    
+    /// Returns the start time in seconds for playback based on saved position
+    var startTimeSeconds: Int {
+        guard let ticks = userData?.playbackPositionTicks else { return 0 }
+        return Int(ticks / 10_000_000)
+    }
 }

@@ -7,22 +7,13 @@
 //    var player: AVPlayer
 //    
 //    @ObservationIgnored private let reporter: PlaybackReporterProtocol
-//    @ObservationIgnored private let mediaItem: MediaItem
 //    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
 //    @ObservationIgnored private var lastReportedTimeControlStatus: AVPlayer.TimeControlStatus?
 //    
-//    init(mediaItem: MediaItem) {
-//        self.mediaItem = mediaItem
-//        
-//        // Initialize appropriate playback reporter based on media type
-//        switch mediaItem {
-//        case .jellyfin(let item):
-//            self.reporter = JellyfinPlaybackReporter(item: item)
-//        case .local(let file):
-//            self.reporter = LocalPlaybackReporter(file: file)
-//        }
-//        
-//        self.player = AVPlayer(url: mediaItem.url)
+//    init() {
+//        // Placeholder init since class is commented
+//        self.reporter = LocalPlaybackReporter(file: URL(fileURLWithPath: ""))
+//        self.player = AVPlayer()
 //        setupPlayerObservation()
 //    }
 //

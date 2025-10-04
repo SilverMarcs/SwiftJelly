@@ -13,8 +13,6 @@ import SwiftMediaViewer
 struct SwiftJellyApp: App {
     #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    #else
-    @State private var localMediaManager = LocalMediaManager()
     #endif
     
     @State var selectedTab: TabSelection = .home
@@ -23,24 +21,22 @@ struct SwiftJellyApp: App {
         #if os(macOS)
         Window("SwiftJelly", id: "swiftjelly") {
             ContentView(selectedTab: $selectedTab)
-                .environment(localMediaManager)
         }
         .commands {
             AppCommands(selectedTab: $selectedTab)
         }
         
-        WindowGroup("Media Player", id: "media-player", for: MediaItem.self) { $mediaItem in
-            if let mediaItem = mediaItem {
-                UniversalMediaPlayer(mediaItem: mediaItem)
-                    .environment(localMediaManager)
+        WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
+            if let item = item {
+                AVMediaPlayerView(item: item)
             } else {
                 Text("Unable to open player window.")
-                    .environment(localMediaManager)
             }
         }
         .restorationBehavior(.disabled)
         .windowResizability(.contentSize)
-        
+        .defaultSize(width: 1024, height: 576)
+
         #else
         WindowGroup {
             ContentView(selectedTab: $selectedTab)

@@ -4,7 +4,7 @@ import JellyfinAPI
 struct PlayMediaButton<Label: View>: View {
     @Environment(\.refresh) var refresh
     
-    let item: MediaItem
+    let item: BaseItemDto
     let label: Label
     #if os(macOS)
     @Environment(\.openWindow) private var openWindow
@@ -13,12 +13,7 @@ struct PlayMediaButton<Label: View>: View {
     @State private var showPlayer = false
     
     init(item: BaseItemDto, @ViewBuilder label: () -> Label) {
-        self.item = MediaItem.jellyfin(item)
-        self.label = label()
-    }
-    
-    init(item: LocalMediaFile, @ViewBuilder label: () -> Label) {
-        self.item = MediaItem.local(item)
+        self.item = item
         self.label = label()
     }
 
@@ -39,7 +34,7 @@ struct PlayMediaButton<Label: View>: View {
         }
         #if !os(macOS)
         .fullScreenCover(isPresented: $showPlayer) {
-            UniversalMediaPlayer(mediaItem: item)
+            AVMediaPlayerView(item: item)
         }
         #endif
     }

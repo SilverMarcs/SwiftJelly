@@ -3,25 +3,16 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerView: View {
-    let mediaItem: MediaItem
+    let item: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true
     
-    let startTimeSeconds: Int
     let reporter: PlaybackReporterProtocol
     
-    init(mediaItem: MediaItem) {
-        self.mediaItem = mediaItem
-        self.startTimeSeconds = mediaItem.startTimeSeconds
-        
-        switch mediaItem {
-        case .jellyfin(let item):
-            self.reporter = JellyfinPlaybackReporter(item: item)
-        case .local(let file):
-            self.reporter = LocalPlaybackReporter(file: file)
-        }
-        
-        reporter.reportStart(positionSeconds: startTimeSeconds)
+    init(item: BaseItemDto) {
+        self.item = item
+        self.reporter = JellyfinPlaybackReporter(item: item)
+        reporter.reportStart(positionSeconds: item.startTimeSeconds)
     }
 
     var body: some View {
@@ -40,20 +31,20 @@ struct AVMediaPlayerView: View {
     @ViewBuilder
     private func playerView(player: AVPlayer) -> some View {
         #if os(macOS)
-        AVPlayerMac(startTimeSeconds: startTimeSeconds, player: player)
+        AVPlayerMac(player: player)
             .ignoresSafeArea()
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .aspectRatio(16/9, contentMode: .fit)
             .gesture(WindowDragGesture())
-            .navigationTitle(mediaItem.name ?? "Media Player")
+            .navigationTitle(item.name ?? "Media Player")
             .onDisappear {
                 cleanup()
             }
         #else
-        AVPlayerIos(startTimeSeconds: startTimeSeconds, player: player)
+        AVPlayerIos(player: player)
             .ignoresSafeArea()
             .onDisappear {
-                cleanup(playbackInfo: playbackInfo)
+                cleanup()
                 OrientationManager.shared.lockOrientation(.all)
             }
             .onAppear {
@@ -64,29 +55,23 @@ struct AVMediaPlayerView: View {
     
     private func loadPlaybackInfo() async {
         do {
-            switch mediaItem {
-            case .jellyfin(let item):
-                // Get first available subtitle stream index to make subtitles available in player
-                let subtitleStreamIndex = item.mediaSources?.first?.mediaStreams?.first(where: { $0.type == .subtitle })?.index
-                
-                // Request playback info with device profile for AVPlayer compatibility
-                let info = try await JFAPI.getPlaybackInfo(
-                    for: item,
-                    subtitleStreamIndex: subtitleStreamIndex
-                )
+            let item = self.item
+            // Get first available subtitle stream index to make subtitles available in player
+            let subtitleStreamIndex = item.mediaSources?.first?.mediaStreams?.first(where: { $0.type == .subtitle })?.index
             
-                let player = AVPlayer(url: info.playbackURL)
-                self.player = player
-                self.isLoading = false
-
-                
-            case .local(let file):
-                // Local files use direct URL
-                self.player = AVPlayer(url: file.url)
-                self.isLoading = false
-                
-                reporter.reportStart(positionSeconds: startTimeSeconds)
-            }
+            // Request playback info with device profile for AVPlayer compatibility
+            let info = try await JFAPI.getPlaybackInfo(
+                for: item,
+                subtitleStreamIndex: subtitleStreamIndex
+            )
+        
+            let player = AVPlayer(url: info.playbackURL)
+            self.player = player
+            self.isLoading = false
+            
+            let time = CMTime(seconds: Double(item.startTimeSeconds), preferredTimescale: 1)
+            await player.seek(to: time)
+            player.play()
         } catch {
             self.isLoading = false
         }
@@ -102,13 +87,6 @@ struct AVMediaPlayerView: View {
         reporter.reportProgress(positionSeconds: seconds, isPaused: true)
         reporter.reportStop(positionSeconds: seconds)
         player.pause()
-        
-        // Stop accessing security-scoped resource for local files
-        #if os(macOS)
-        if case .local(let file) = mediaItem {
-            file.stopAccessingSecurityScopedResource()
-        }
-        #endif
         
         Task {
             try? await Task.sleep(nanoseconds: 100_000_000)

@@ -9,7 +9,6 @@ import SwiftUI
 import AVKit
 
 struct AVPlayerIos: UIViewControllerRepresentable {
-    let startTimeSeconds: Int
     let player: AVPlayer
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
@@ -18,10 +17,6 @@ struct AVPlayerIos: UIViewControllerRepresentable {
         controller.entersFullScreenWhenPlaybackBegins = true
         controller.exitsFullScreenWhenPlaybackEnds = true
         controller.allowsPictureInPicturePlayback = true
-        
-        let time = CMTime(seconds: Double(startTimeSeconds), preferredTimescale: 1)
-        controller.player?.seek(to: time)
-        controller.player?.play()
         
         return controller
     }

@@ -10,11 +10,6 @@ import SwiftUI
 struct ContentView: View {
 //    @SceneStorage("selectedTab") private var selectedTab: TabSelection = .home
     @Binding var selectedTab: TabSelection
-    #if os(macOS)
-    @Environment(LocalMediaManager.self) var localMediaManager
-    #endif
-    @Environment(\.openWindow) private var openWindow
-    @Environment(\.dismissWindow) private var dismissWindow
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -37,12 +32,6 @@ struct ContentView: View {
             }
             
             #if os(macOS)
-            Tab(TabSelection.local.title,
-                systemImage: TabSelection.local.systemImage,
-                value: TabSelection.local) {
-                LocalMediaView()
-            }
-
             Tab(TabSelection.settings.title,
                 systemImage: TabSelection.settings.systemImage,
                 value: TabSelection.settings) {
@@ -57,24 +46,6 @@ struct ContentView: View {
         .tabViewStyle(.sidebarAdaptable)
         #if !os(macOS)
         .tabBarMinimizeBehavior(.onScrollDown)
-        #else
-        .onOpenURL { url in
-            if url.isFileURL {
-                Task {
-                    let canAccess = url.startAccessingSecurityScopedResource()
-                    if canAccess {
-                        let enhancedFile = await localMediaManager.getEnhancedMetadata(for: LocalMediaFile(url: url))
-                        localMediaManager.addRecentFile(enhancedFile)
-                        
-                        let mediaItem = MediaItem.local(enhancedFile)
-                        dismissWindow(id: "media-player")
-                        openWindow(id: "media-player", value: mediaItem)
-                    } else {
-                        print("Failed to access security-scoped resource")
-                    }
-                }
-            }
-        }
         #endif
     }
 }

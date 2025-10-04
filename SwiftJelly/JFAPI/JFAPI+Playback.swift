@@ -75,14 +75,6 @@ extension JFAPI {
         return components?.url
     }
 
-    /// Gets the start time in seconds for a media item based on playback position
-    /// - Parameter item: The BaseItemDto to get start time for
-    /// - Returns: Start time in seconds
-    static func getStartTimeSeconds(for item: BaseItemDto) -> Int {
-        guard let ticks = item.userData?.playbackPositionTicks else { return 0 }
-        return Int(ticks / 10_000_000)
-    }
-
     /// Generates a unique play session ID
     /// - Returns: A UUID string for the play session
     static func generatePlaySessionID() -> String {
