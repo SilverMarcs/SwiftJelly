@@ -9,7 +9,7 @@ import Foundation
 import JellyfinAPI
 
 class JellyfinPlaybackReporter: PlaybackReporterProtocol {
-    let playSessionID: String
+    private(set) var playSessionID: String
     private let item: BaseItemDto
     private var hasSentStart = false
 
@@ -22,9 +22,14 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
 
     var hasStarted: Bool { hasSentStart }
 
-    init(item: BaseItemDto) {
+    init(item: BaseItemDto, playSessionID: String? = nil) {
         self.item = item
-        self.playSessionID = JFAPI.generatePlaySessionID()
+        self.playSessionID = playSessionID ?? JFAPI.generatePlaySessionID()
+    }
+    
+    /// Update the play session ID (used when server provides one)
+    func updatePlaySessionID(_ newID: String) {
+        self.playSessionID = newID
     }
     
     func reportPause(positionSeconds: Int) {
