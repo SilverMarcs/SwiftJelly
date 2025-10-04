@@ -6,14 +6,6 @@ struct AVMediaPlayerView: View {
     let item: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true
-    
-    let reporter: JellyfinPlaybackReporter
-    
-    init(item: BaseItemDto) {
-        self.item = item
-        self.reporter = JellyfinPlaybackReporter(item: item)
-        reporter.reportStart(positionSeconds: item.startTimeSeconds)
-    }
 
     var body: some View {
         Group {
@@ -72,6 +64,11 @@ struct AVMediaPlayerView: View {
             let time = CMTime(seconds: Double(item.startTimeSeconds), preferredTimescale: 1)
             await player.seek(to: time)
             player.play()
+            
+            // Send start progress
+            Task {
+                try? await JFAPI.reportPlaybackProgress(for: item, positionTicks: item.startTimeSeconds.toPositionTicks)
+            }
         } catch {
             self.isLoading = false
         }
@@ -83,9 +80,11 @@ struct AVMediaPlayerView: View {
 
         let seconds = Int(time.seconds)
         
-        reporter.reportPause(positionSeconds: seconds)
-        reporter.reportProgress(positionSeconds: seconds, isPaused: true)
-        reporter.reportStop(positionSeconds: seconds)
+        // Send stop progress
+        Task {
+            try? await JFAPI.reportPlaybackProgress(for: item, positionTicks: seconds.toPositionTicks)
+        }
+        
         player.pause()
         
         Task {

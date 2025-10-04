@@ -20,7 +20,7 @@ extension JFAPI {
     /// - Returns: PlaybackInfoResponse with playback URL and session info
     static func getPlaybackInfo(
         for item: BaseItemDto,
-        maxBitrate: Int = 10_000_000,
+        maxBitrate: Int = 20_000_000,
         subtitleStreamIndex: Int? = nil
     ) async throws -> PlaybackInfoResponse {
         guard let itemID = item.id else {
@@ -55,92 +55,22 @@ extension JFAPI {
             client: context.client
         )
     }
-    
-    /// Generates a playback URL for a media item (legacy method - prefer getPlaybackInfo)
-    /// - Parameter item: The BaseItemDto to generate a playback URL for
-    /// - Returns: URL for streaming the media item, or nil if unable to generate
-    static func getPlaybackURL(for item: BaseItemDto) throws -> URL? {
-        guard let id = item.id else { return nil }
-        let context = try getAPIContext()
-
-        var components = URLComponents(url: context.server.url, resolvingAgainstBaseURL: false)
-        components?.path = "/Videos/\(id)/stream"
-        var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "Static", value: "true"),
-            URLQueryItem(name: "mediaSourceId", value: id),
-            URLQueryItem(name: "api_key", value: context.server.accessToken)
-        ]
-        queryItems.append(URLQueryItem(name: "deviceId", value: "deviceId"))
-        components?.queryItems = queryItems
-        return components?.url
-    }
-
-    /// Reports playback start to the Jellyfin server
-    /// - Parameters:
-    ///   - item: The item being played
-    ///   - positionTicks: Current playback position in ticks
-    ///   - audioStreamIndex: Index of the audio stream
-    ///   - subtitleStreamIndex: Index of the subtitle stream
-    static func reportPlaybackStart(for item: BaseItemDto, positionTicks: Int64, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
-        let context = try getAPIContext()
-
-        let startInfo = PlaybackStartInfo(
-            audioStreamIndex: audioStreamIndex,
-            itemID: item.id,
-            mediaSourceID: item.id,
-            playbackStartTimeTicks: Int(Date().timeIntervalSince1970) * 10_000_000,
-            positionTicks: Int(positionTicks),
-            sessionID: nil,
-            subtitleStreamIndex: subtitleStreamIndex
-        )
-
-        let request = Paths.reportPlaybackStart(startInfo)
-        _ = try await context.client.send(request)
-//        print("Sent playback start report for \(item.name ?? "Unknown")")
-    }
 
     /// Reports playback progress to the Jellyfin server
     /// - Parameters:
     ///   - item: The item being played
     ///   - positionTicks: Current playback position in ticks
     ///   - isPaused: Whether playback is currently paused
-    ///   - audioStreamIndex: Index of the audio stream
-    ///   - subtitleStreamIndex: Index of the subtitle stream
-    static func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64, isPaused: Bool, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
+    static func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64) async throws {
         let context = try getAPIContext()
 
         let progressInfo = PlaybackProgressInfo(
-            audioStreamIndex: audioStreamIndex,
-            isPaused: isPaused,
             itemID: item.id,
             mediaSourceID: item.id,
-            playSessionID: nil,
-            positionTicks: Int(positionTicks),
-            sessionID: nil,
-            subtitleStreamIndex: subtitleStreamIndex
+            positionTicks: Int(positionTicks)
         )
 
         let request = Paths.reportPlaybackProgress(progressInfo)
         _ = try await context.client.send(request)
-//        print("Sent playback progress report for \(item.name ?? "Unknown") at \(positionTicks / 10_000_000)s")
-    }
-
-    /// Reports playback stop to the Jellyfin server
-    /// - Parameters:
-    ///   - item: The item that was being played
-    ///   - positionTicks: Final playback position in ticks
-    static func reportPlaybackStopped(for item: BaseItemDto, positionTicks: Int64) async throws {
-        let context = try getAPIContext()
-
-        let stopInfo = PlaybackStopInfo(
-            itemID: item.id,
-            mediaSourceID: item.id,
-            positionTicks: Int(positionTicks),
-            sessionID: nil
-        )
-
-        let request = Paths.reportPlaybackStopped(stopInfo)
-        _ = try await context.client.send(request)
-//        print("Sent playback stop report for \(item.name ?? "Unknown")")
     }
 }
