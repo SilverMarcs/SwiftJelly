@@ -22,12 +22,13 @@ enum JFAPI {
         }
         let configuration = JellyfinClient.Configuration(
             url: server.url,
+            accessToken: accessToken,
             client: "SwiftJelly",
             deviceName: "SwiftJelly",
             deviceID: server.id,
             version: "1.0"
         )
-        return JellyfinClient(configuration: configuration, accessToken: accessToken)
+        return JellyfinClient(configuration: configuration)
     }
 
     /// Returns the API context (server, client) or throws if not available

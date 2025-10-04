@@ -10,41 +10,38 @@ struct AVMediaPlayerView: View {
     var body: some View {
         Group {
             if isLoading {
-                ProgressView("Loading...")
+                UniversalProgressView()
+                .background(.black, ignoresSafeAreaEdges: .all)
+                .frame(width: 1024, height: 576)
             } else if let player = player {
-                playerView(player: player)
+                #if os(macOS)
+                AVPlayerMac(player: player)
+                    .ignoresSafeArea()
+                    .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .gesture(WindowDragGesture())
+                    .navigationTitle(item.name ?? "Media Player")
+                    .onDisappear {
+                        cleanup()
+                    }
+                #else
+                AVPlayerIos(player: player)
+                    .ignoresSafeArea()
+                    .onDisappear {
+                        cleanup()
+                        OrientationManager.shared.lockOrientation(.all)
+                    }
+                    .onAppear {
+                        OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
+                    }
+                #endif
             }
         }
         .task {
             await loadPlaybackInfo()
         }
     }
-    
-    @ViewBuilder
-    private func playerView(player: AVPlayer) -> some View {
-        #if os(macOS)
-        AVPlayerMac(player: player)
-            .ignoresSafeArea()
-            .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-            .aspectRatio(16/9, contentMode: .fit)
-            .gesture(WindowDragGesture())
-            .navigationTitle(item.name ?? "Media Player")
-            .onDisappear {
-                cleanup()
-            }
-        #else
-        AVPlayerIos(player: player)
-            .ignoresSafeArea()
-            .onDisappear {
-                cleanup()
-                OrientationManager.shared.lockOrientation(.all)
-            }
-            .onAppear {
-                OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
-            }
-        #endif
-    }
-    
+
     private func loadPlaybackInfo() async {
         do {
             let item = self.item

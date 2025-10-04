@@ -12,10 +12,9 @@ struct UniversalProgressView: View {
         ProgressView()
             .controlSize(.large)
             .padding()
-//            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+//            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .listRowSeparator(.hidden)
     }
 }
 

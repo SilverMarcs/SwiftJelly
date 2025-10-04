@@ -35,8 +35,7 @@ struct SwiftJellyApp: App {
         }
         .restorationBehavior(.disabled)
         .windowResizability(.contentSize)
-        .defaultSize(width: 1024, height: 576)
-
+//        .defaultSize(width: 1024, height: 576)
         #else
         WindowGroup {
             ContentView(selectedTab: $selectedTab)
