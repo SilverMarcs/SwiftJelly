@@ -7,6 +7,7 @@ extension ItemFields {
         .parentID,
         .taglines,
         .people,
+        .chapters
     ]
 }
 
