@@ -75,20 +75,13 @@ extension JFAPI {
         return components?.url
     }
 
-    /// Generates a unique play session ID
-    /// - Returns: A UUID string for the play session
-    static func generatePlaySessionID() -> String {
-        return UUID().uuidString
-    }
-
     /// Reports playback start to the Jellyfin server
     /// - Parameters:
     ///   - item: The item being played
     ///   - positionTicks: Current playback position in ticks
-    ///   - playSessionID: The play session ID
     ///   - audioStreamIndex: Index of the audio stream
     ///   - subtitleStreamIndex: Index of the subtitle stream
-    static func reportPlaybackStart(for item: BaseItemDto, positionTicks: Int64, playSessionID: String, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
+    static func reportPlaybackStart(for item: BaseItemDto, positionTicks: Int64, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
         let context = try getAPIContext()
 
         let startInfo = PlaybackStartInfo(
@@ -97,7 +90,7 @@ extension JFAPI {
             mediaSourceID: item.id,
             playbackStartTimeTicks: Int(Date().timeIntervalSince1970) * 10_000_000,
             positionTicks: Int(positionTicks),
-            sessionID: playSessionID,
+            sessionID: nil,
             subtitleStreamIndex: subtitleStreamIndex
         )
 
@@ -111,10 +104,9 @@ extension JFAPI {
     ///   - item: The item being played
     ///   - positionTicks: Current playback position in ticks
     ///   - isPaused: Whether playback is currently paused
-    ///   - playSessionID: The play session ID
     ///   - audioStreamIndex: Index of the audio stream
     ///   - subtitleStreamIndex: Index of the subtitle stream
-    static func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64, isPaused: Bool, playSessionID: String, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
+    static func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64, isPaused: Bool, audioStreamIndex: Int? = nil, subtitleStreamIndex: Int? = nil) async throws {
         let context = try getAPIContext()
 
         let progressInfo = PlaybackProgressInfo(
@@ -122,9 +114,9 @@ extension JFAPI {
             isPaused: isPaused,
             itemID: item.id,
             mediaSourceID: item.id,
-            playSessionID: playSessionID,
+            playSessionID: nil,
             positionTicks: Int(positionTicks),
-            sessionID: playSessionID,
+            sessionID: nil,
             subtitleStreamIndex: subtitleStreamIndex
         )
 
@@ -137,15 +129,14 @@ extension JFAPI {
     /// - Parameters:
     ///   - item: The item that was being played
     ///   - positionTicks: Final playback position in ticks
-    ///   - playSessionID: The play session ID
-    static func reportPlaybackStopped(for item: BaseItemDto, positionTicks: Int64, playSessionID: String) async throws {
+    static func reportPlaybackStopped(for item: BaseItemDto, positionTicks: Int64) async throws {
         let context = try getAPIContext()
 
         let stopInfo = PlaybackStopInfo(
             itemID: item.id,
             mediaSourceID: item.id,
             positionTicks: Int(positionTicks),
-            sessionID: playSessionID
+            sessionID: nil
         )
 
         let request = Paths.reportPlaybackStopped(stopInfo)

@@ -8,7 +8,6 @@ import JellyfinAPI
 
 struct PlaybackInfoResponse {
     let playbackURL: URL
-    let playSessionID: String
     let mediaSource: MediaSourceInfo
     let playMethod: PlayMethod
     
@@ -26,10 +25,6 @@ extension PlaybackInfoResponse {
         item: BaseItemDto,
         client: JellyfinClient
     ) throws -> PlaybackInfoResponse {
-        
-        guard let playSessionID = response.playSessionID else {
-            throw PlaybackError.missingPlaySessionID
-        }
         
         guard let mediaSources = response.mediaSources,
               let mediaSource = mediaSources.first else {
@@ -55,7 +50,7 @@ extension PlaybackInfoResponse {
             let streamParameters = Paths.GetVideoStreamParameters(
                 isStatic: true,
                 tag: item.etag,
-                playSessionID: playSessionID,
+                playSessionID: nil,
                 mediaSourceID: mediaSource.id
             )
             
@@ -74,7 +69,6 @@ extension PlaybackInfoResponse {
         
         return PlaybackInfoResponse(
             playbackURL: playbackURL,
-            playSessionID: playSessionID,
             mediaSource: mediaSource,
             playMethod: playMethod
         )
@@ -82,7 +76,6 @@ extension PlaybackInfoResponse {
 }
 
 enum PlaybackError: Error, LocalizedError {
-    case missingPlaySessionID
     case noMediaSources
     case invalidTranscodeURL
     case invalidStreamURL
@@ -90,8 +83,6 @@ enum PlaybackError: Error, LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .missingPlaySessionID:
-            return "Missing play session ID in response"
         case .noMediaSources:
             return "No media sources available"
         case .invalidTranscodeURL:

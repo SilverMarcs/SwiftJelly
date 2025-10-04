@@ -7,7 +7,7 @@ struct AVMediaPlayerView: View {
     @State private var player: AVPlayer?
     @State private var isLoading = true
     
-    let reporter: PlaybackReporterProtocol
+    let reporter: JellyfinPlaybackReporter
     
     init(item: BaseItemDto) {
         self.item = item

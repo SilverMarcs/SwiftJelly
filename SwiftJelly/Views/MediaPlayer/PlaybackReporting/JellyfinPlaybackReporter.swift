@@ -8,8 +8,7 @@
 import Foundation
 import JellyfinAPI
 
-class JellyfinPlaybackReporter: PlaybackReporterProtocol {
-    private(set) var playSessionID: String
+class JellyfinPlaybackReporter {
     private let item: BaseItemDto
     private var hasSentStart = false
 
@@ -22,14 +21,8 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
 
     var hasStarted: Bool { hasSentStart }
 
-    init(item: BaseItemDto, playSessionID: String? = nil) {
+    init(item: BaseItemDto) {
         self.item = item
-        self.playSessionID = playSessionID ?? JFAPI.generatePlaySessionID()
-    }
-    
-    /// Update the play session ID (used when server provides one)
-    func updatePlaySessionID(_ newID: String) {
-        self.playSessionID = newID
     }
     
     func reportPause(positionSeconds: Int) {
@@ -51,8 +44,7 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
             do {
                 try await JFAPI.reportPlaybackStart(
                     for: item,
-                    positionTicks: positionSeconds.toPositionTicks,
-                    playSessionID: playSessionID
+                    positionTicks: positionSeconds.toPositionTicks
                 )
                 self.lastReportedSeconds = positionSeconds
                 self.lastTickSeconds = positionSeconds
@@ -100,8 +92,7 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
             do {
                 try await JFAPI.reportPlaybackStopped(
                     for: item,
-                    positionTicks: positionSeconds.toPositionTicks,
-                    playSessionID: playSessionID
+                    positionTicks: positionSeconds.toPositionTicks
                 )
             } catch {
                 print("Failed to send stop report: \(error)")
@@ -115,8 +106,7 @@ class JellyfinPlaybackReporter: PlaybackReporterProtocol {
                 try await JFAPI.reportPlaybackProgress(
                     for: item,
                     positionTicks: positionSeconds.toPositionTicks,
-                    isPaused: isPaused,
-                    playSessionID: playSessionID
+                    isPaused: isPaused
                 )
                 self.lastReportedSeconds = positionSeconds
             } catch {
