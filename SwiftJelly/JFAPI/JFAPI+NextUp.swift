@@ -12,7 +12,7 @@ import Get
 extension JFAPI {
     /// Loads items for the Continue Watching section: for each show, if there is an in-progress episode, show that; otherwise, show the next up episode. Movies are always included. Deduplicates by show.
     static func loadContinueWatchingSmart() async throws -> [BaseItemDto] {
-        async let resumeItemsRaw = loadResumeItems()
+        async let resumeItemsRaw = loadResumeItems(limit: 10)
         async let nextUpItemsRaw = loadNextUpItems(limit: 10)
         let resumeItems = try await resumeItemsRaw
         let nextUpItems = try await nextUpItemsRaw
@@ -40,19 +40,19 @@ extension JFAPI {
             }
         }
 
-        // Combine and sort by last played date (resume) or premiere date (next up), then limit to 20
+        // Combine and sort by last played date (resume) or premiere date (next up)
         var combined = Array(showToResume.values) + movies
         combined.sort { (lhs, rhs) in
             let lhsDate = lhs.userData?.lastPlayedDate ?? lhs.premiereDate ?? Date.distantPast
             let rhsDate = rhs.userData?.lastPlayedDate ?? rhs.premiereDate ?? Date.distantPast
             return lhsDate > rhsDate
         }
-        return Array(combined.prefix(20))
+        return Array(combined)
     }
     
     /// Loads Next Up items for the current server (episodes to continue watching)
     /// - Returns: Array of BaseItemDto representing next up items without watch progress
-    static func loadNextUpItems(limit: Int = 20) async throws -> [BaseItemDto] {
+    static func loadNextUpItems(limit: Int = 10) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetNextUpParameters()
         parameters.userID = context.userID
@@ -73,14 +73,14 @@ extension JFAPI {
         }
     }
     
-    static func loadResumeItems() async throws -> [BaseItemDto] {
+    static func loadResumeItems(limit: Int = 10) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetResumeItemsParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.includeItemTypes = [.movie, .episode]
-        parameters.limit = 50 // fetch more to allow grouping, then limit to 20 after grouping
+        parameters.limit = limit
         let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
         // Group episodes by seriesID, pick most recent per show; include all movies
@@ -109,13 +109,13 @@ extension JFAPI {
             }
         }
 
-        // Combine and sort by last played date descending, then limit to 20
+        // Combine and sort by last played date descending
         var combined = Array(mostRecentEpisodes.values) + movies
         combined.sort { (lhs, rhs) in
             let lhsDate = lhs.userData?.lastPlayedDate ?? lhs.userData?.playbackPositionTicks.map { Date(timeIntervalSince1970: TimeInterval($0) / 10_000_000) } ?? Date.distantPast
             let rhsDate = rhs.userData?.lastPlayedDate ?? rhs.userData?.playbackPositionTicks.map { Date(timeIntervalSince1970: TimeInterval($0) / 10_000_000) } ?? Date.distantPast
             return lhsDate > rhsDate
         }
-        return Array(combined.prefix(20))
+        return Array(combined)
     }
 }

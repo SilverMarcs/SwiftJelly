@@ -4,10 +4,10 @@ extension ItemFields {
     static let MinimumFields: [ItemFields] = [
         .mediaSources,
         .overview,
-        .parentID,
-        .taglines,
+//        .parentID,
+//        .taglines,
         .people,
-        .chapters
+//        .chapters
     ]
 }
 

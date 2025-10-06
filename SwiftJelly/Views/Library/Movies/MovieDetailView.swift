@@ -80,12 +80,4 @@ struct MovieDetailView: View {
             print(error.localizedDescription)
         }
     }
-    
-    var aspectRatio: CGFloat {
-        #if os(macOS)
-        return 16 / 9
-        #else
-        return 9 / 13
-        #endif
-    }
 }
