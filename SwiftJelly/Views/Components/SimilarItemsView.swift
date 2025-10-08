@@ -15,23 +15,27 @@ struct SimilarItemsView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Recommended")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .padding(.horizontal)
+            if !similarItems.isEmpty {
+                Text("Recommended")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(similarItems) { item in
-                        MediaNavigationLink(item: item)
-                            .frame(width: 120)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(similarItems) { item in
+                            MediaNavigationLink(item: item)
+                                .frame(width: 120)
+                        }
                     }
                 }
             }
-            .overlay {
-                if isLoading {
-                    UniversalProgressView()
-                }
+        }
+        .frame(maxWidth: .infinity)
+        .overlay {
+            if isLoading {
+                ProgressView()
+                    .padding()
             }
         }
         .task {

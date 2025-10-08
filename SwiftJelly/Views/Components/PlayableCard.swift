@@ -62,6 +62,16 @@ struct PlayableCard: View {
                 }
             }
             
+            if item.type == .episode {
+                Section {
+                    NavigationLink {
+                        ShowDetailLoader(episode: item)
+                    } label: {
+                        PlayableItemTypeLabel(item: item)
+                    }
+                }
+            }
+            
             Button {
                 Task {
                     try? await JFAPI.toggleItemPlayedStatus(item: item)

@@ -16,20 +16,8 @@ struct RecentlyAddedView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(items, id: \.id) { item in
-                            NavigationLink {
-                                switch item.type {
-                                case .movie:
-                                    MovieDetailView(item: item)
-                                case .series:
-                                    ShowDetailView(item: item)
-                                default:
-                                    Text("Unsupported item type")
-                                }
-                            } label: {
-                                MediaCard(item: item)
-                                    .frame(width: 150)
-                            }
-                            .buttonStyle(.plain)
+                            MediaNavigationLink(item: item)
+                                .frame(width: 150)
                         }
                     }
                 }
