@@ -28,7 +28,7 @@ struct ShowSeasonsView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(vm.episodes) { episode in
-                            PlayableCard(item: episode)
+                            PlayableCard(item: episode, showRealname: true)
                                 .id(episode.id)
                         }
                     }

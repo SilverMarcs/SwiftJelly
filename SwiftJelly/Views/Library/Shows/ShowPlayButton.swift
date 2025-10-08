@@ -7,8 +7,8 @@ struct ShowPlayButton: View {
     var body: some View {
         HStack {
             animatedButton
-            MarkPlayedButton(item: vm.nextEpisode ?? BaseItemDto())
-            FavoriteButton(item: vm.nextEpisode ?? BaseItemDto())
+            MarkPlayedButton(item: vm.selectedSeason ?? BaseItemDto())
+            FavoriteButton(item: vm.show)
         }
     }
     
