@@ -79,7 +79,6 @@ extension JFAPI {
         parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
-        parameters.includeItemTypes = [.movie, .episode]
         parameters.limit = limit
         let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
