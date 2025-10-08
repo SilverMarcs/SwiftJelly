@@ -24,12 +24,6 @@ import Combine
         self.show = item
     }
     
-//    func ensureSeriesLoaded() async {
-//        if show.type == .episode {
-//            await reloadShow()
-//        }
-//    }
-    
     // refreshes everything: show metadata, seasons, episodes, next episode
     func refreshAll() async {
         isLoading = true

@@ -62,15 +62,7 @@ extension JFAPI {
         let request = Paths.getNextUp(parameters: parameters)
         let items = try await send(request).items ?? []
         
-        // Filter out items with watch progress
-        return items.filter { item in
-            guard let ticks = item.userData?.playbackPositionTicks, let runtime = item.runTimeTicks, runtime > 0 else {
-                // If no watchtime data, include the item
-                return true
-            }
-            // Exclude if any watchtime (only include unwatched items)
-            return ticks == 0
-        }
+        return items
     }
     
     static func loadResumeItems(limit: Int = 10) async throws -> [BaseItemDto] {
@@ -82,39 +74,6 @@ extension JFAPI {
         parameters.limit = limit
         let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
-        // Group episodes by seriesID, pick most recent per show; include all movies
-        var mostRecentEpisodes: [String: BaseItemDto] = [:]
-        var movies: [BaseItemDto] = []
-
-        for item in items {
-            switch item.type {
-            case .episode:
-                if let seriesID = item.seriesID {
-                    let current = mostRecentEpisodes[seriesID]
-                    let isNewer: Bool = {
-                        guard let current = current else { return true }
-                        let lhs = item.userData?.lastPlayedDate ?? item.userData?.playbackPositionTicks.map { Date(timeIntervalSince1970: TimeInterval($0) / 10_000_000) } ?? Date.distantPast
-                        let rhs = current.userData?.lastPlayedDate ?? current.userData?.playbackPositionTicks.map { Date(timeIntervalSince1970: TimeInterval($0) / 10_000_000) } ?? Date.distantPast
-                        return lhs > rhs
-                    }()
-                    if isNewer {
-                        mostRecentEpisodes[seriesID] = item
-                    }
-                }
-            case .movie:
-                movies.append(item)
-            default:
-                continue
-            }
-        }
-
-        // Combine and sort by last played date descending
-        var combined = Array(mostRecentEpisodes.values) + movies
-        combined.sort { (lhs, rhs) in
-            let lhsDate = lhs.userData?.lastPlayedDate ?? lhs.userData?.playbackPositionTicks.map { Date(timeIntervalSince1970: TimeInterval($0) / 10_000_000) } ?? Date.distantPast
-            let rhsDate = rhs.userData?.lastPlayedDate ?? rhs.userData?.playbackPositionTicks.map { Date(timeIntervalSince1970: TimeInterval($0) / 10_000_000) } ?? Date.distantPast
-            return lhsDate > rhsDate
-        }
-        return Array(combined)
+        return items
     }
 }

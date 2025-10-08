@@ -17,7 +17,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                LazyVStack(spacing: 24) {
                     ContinueWatchingView(items: continueWatchingItems)
                         .environment(\.refresh, refreshContinueWatching)
                     

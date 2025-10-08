@@ -123,13 +123,3 @@ struct AVMediaPlayerView: View {
         }
     }
 }
-
-// MARK: - Components
-
-private struct MediaInfoSheet: View {
-    let item: BaseItemDto
-
-    var body: some View {
-        
-    }
-}
