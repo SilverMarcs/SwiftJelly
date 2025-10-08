@@ -35,3 +35,5 @@ extension BaseItemDto {
         return Int(ticks / 10_000_000)
     }
 }
+
+extension BaseItemDto: @unchecked @retroactive Sendable {}

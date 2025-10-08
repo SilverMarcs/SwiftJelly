@@ -5,6 +5,7 @@ import JellyfinAPI
 struct AVMediaPlayerView: View {
     let item: BaseItemDto
     @State private var player: AVPlayer?
+    @State private var timeObserverToken: Any?
     @State private var isLoading = true
 
     var body: some View {
@@ -62,6 +63,14 @@ struct AVMediaPlayerView: View {
             await player.seek(to: time)
             player.play()
             
+            // Attach a very lightweight periodic time observer to report progress every 5 seconds
+            self.timeObserverToken = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 5, preferredTimescale: 1), queue: .main) { time in
+                let seconds = Int(time.seconds)
+                Task {
+                    try? await JFAPI.reportPlaybackProgress(for: item, positionTicks: seconds.toPositionTicks)
+                }
+            }
+            
             // Send start progress
             Task {
                 try? await JFAPI.reportPlaybackProgress(for: item, positionTicks: item.startTimeSeconds.toPositionTicks)
@@ -73,16 +82,12 @@ struct AVMediaPlayerView: View {
     
     private func cleanup() {
         guard let player = player else { return }
-        guard let time = player.currentItem?.currentTime() else { return }
-
-        let seconds = Int(time.seconds)
-        
-        // Send stop progress
-        Task {
-            try? await JFAPI.reportPlaybackProgress(for: item, positionTicks: seconds.toPositionTicks)
-        }
-        
         player.pause()
+
+        if let token = timeObserverToken {
+            player.removeTimeObserver(token)
+            timeObserverToken = nil
+        }
         
         Task {
             try? await Task.sleep(nanoseconds: 100_000_000)
@@ -92,3 +97,4 @@ struct AVMediaPlayerView: View {
         }
     }
 }
+
