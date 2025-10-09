@@ -43,17 +43,11 @@ extension DeviceProfile {
     private static var nativeTranscodingProfiles: [TranscodingProfile] {
         [
             // HLS transcoding with subtitle support
-            // Use fMP4 HLS, copy timestamps and prefer AAC stereo to reduce
-            // audio/video drift on AVPlayer. Some servers/encoders emit
-            // imperfect DTS/PTS when producing MPEG-TS segments which can
-            // lead to audio drifting vs video in AVPlayer for certain files.
             TranscodingProfile(
                 audioCodec: "aac,ac3,eac3,alac,flac",
                 isBreakOnNonKeyFrames: true,
-                // Request fragmented MP4 segments (fMP4) for HLS instead of
-                // MPEG-TS. fMP4 often has better timestamp handling for
-                // AVPlayer and reduces sync issues.
-//                container: "mp4",
+                // see if mp4 better
+                container: "m3u8",
                 context: .streaming,
                 // Copy timestamps from source where possible to preserve PTS/DTS
                 isCopyTimestamps: true,
