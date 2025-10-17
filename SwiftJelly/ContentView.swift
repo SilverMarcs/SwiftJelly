@@ -15,31 +15,31 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             Tab(TabSelection.home.title,
                 systemImage: TabSelection.home.systemImage,
-                value: TabSelection.home) {
+                value: .home) {
                 HomeView()
             }
             
             Tab(TabSelection.favorites.title,
                 systemImage: TabSelection.favorites.systemImage,
-                value: TabSelection.favorites) {
+                value: .favorites) {
                 FavoritesView()
             }
             
             Tab(TabSelection.libraries.title,
                 systemImage: TabSelection.libraries.systemImage,
-                value: TabSelection.libraries) {
+                value: .libraries) {
                 LibraryView()
             }
             
             #if os(macOS)
             Tab(TabSelection.settings.title,
                 systemImage: TabSelection.settings.systemImage,
-                value: TabSelection.settings) {
+                value: .settings) {
                 SettingsView()
             }
             #endif
             
-            Tab(value: TabSelection.search, role: .search) {
+            Tab(TabSelection.search.title, systemImage: TabSelection.search.systemImage, value: .search, role: .search) {
                 SearchView()
             }
         }

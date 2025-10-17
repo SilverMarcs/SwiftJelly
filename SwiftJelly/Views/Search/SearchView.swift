@@ -6,6 +6,7 @@ struct SearchView: View {
     @State private var searchScope: SearchScope = .all
     @State private var results: [BaseItemDto] = []
     @State private var isLoading = false
+    
     @FocusState private var isFocused
     
     var body: some View {
@@ -14,12 +15,13 @@ struct SearchView: View {
                 .contentMargins(.vertical, 10)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
-                .searchable(text: $query, placement: .toolbarPrincipal)
+                .searchable(text: $query, placement: .toolbarPrincipal, prompt: "Search movies or shows")
                 .searchFocused($isFocused)
                 .task {
+                    try? await Task.sleep(nanoseconds: 1_000_000)
                     isFocused = true
                 }
-                .searchScopes($searchScope) {
+                .searchScopes($searchScope, activation: .onSearchPresentation) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
                     }
