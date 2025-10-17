@@ -44,15 +44,18 @@ struct HomeView: View {
                 await loadAll()
             }
             .toolbar {
+                ToolbarItem {
+                    Button {
+                        Task {
+                            await loadAll()
+                        }
+                    } label: {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                    .keyboardShortcut("r")
+                }
                 #if !os(macOS)
                 SettingsToolbar()
-                #else
-                Button {
-                    Task { await loadAll() }
-                } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
-                }
-                .keyboardShortcut("r")
                 #endif
             }
         }
@@ -69,7 +72,7 @@ struct HomeView: View {
             latestMovies = Array(items.filter { $0.type == .movie })
             latestShows = Array(items.filter { $0.type == .series })
         } catch {
-            print(error.localizedDescription)
+            print("Error loading Home items: \(error.localizedDescription)")
         }
     }
 
@@ -81,7 +84,7 @@ struct HomeView: View {
                 continueWatchingItems = items
             }
         } catch {
-            print(error.localizedDescription)
+            print("Error loading Continue Watching: \(error.localizedDescription)")
         }
     }
 }

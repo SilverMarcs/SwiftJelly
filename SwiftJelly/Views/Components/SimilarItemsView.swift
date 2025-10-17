@@ -51,7 +51,7 @@ struct SimilarItemsView: View {
         do {
             similarItems = try await JFAPI.loadSimilarItems(for: item)
         } catch {
-            print(error.localizedDescription)
+            print("Error loading Similar Items: \(error.localizedDescription)")
         }
     }
 }

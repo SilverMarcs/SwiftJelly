@@ -52,7 +52,7 @@ struct FavoritesView: View {
         do {
             favorites = try await JFAPI.loadFavoriteItems(limit: 15)
         } catch {
-            print(error.localizedDescription)
+            print("Error loading Favorites: \(error.localizedDescription)")
         }
     }
 }

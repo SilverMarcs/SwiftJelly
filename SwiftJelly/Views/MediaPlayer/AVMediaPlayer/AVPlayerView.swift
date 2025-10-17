@@ -10,7 +10,7 @@ struct AVMediaPlayerView: View {
     @State private var showInfoSheet = false
 
     var body: some View {
-        Group {
+        VStack {
             if isLoading {
                 ProgressView()
                     .controlSize(.large)
@@ -94,14 +94,6 @@ struct AVMediaPlayerView: View {
                         positionTicks: seconds.toPositionTicks
                     )
                 }
-            }
-
-            // initial progress
-            Task {
-                try? await JFAPI.reportPlaybackProgress(
-                    for: item,
-                    positionTicks: item.startTimeSeconds.toPositionTicks
-                )
             }
         } catch {
             self.isLoading = false

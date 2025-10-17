@@ -77,7 +77,7 @@ struct MovieDetailView: View {
         do {
             movie = try await JFAPI.loadItem(by: movie.id ?? "")
         } catch {
-            print(error.localizedDescription)
+            print("Error loading Movie Detail: \(error.localizedDescription)")
         }
     }
 }
