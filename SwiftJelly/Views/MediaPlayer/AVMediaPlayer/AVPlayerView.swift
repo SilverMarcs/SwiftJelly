@@ -12,7 +12,9 @@ struct AVMediaPlayerView: View {
     var body: some View {
         Group {
             if isLoading {
-                UniversalProgressView()
+                ProgressView()
+                    .controlSize(.large)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black, ignoresSafeAreaEdges: .all)
                     .task { await loadPlaybackInfo() }
             } else if let player {
