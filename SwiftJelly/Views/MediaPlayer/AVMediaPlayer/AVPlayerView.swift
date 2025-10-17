@@ -18,8 +18,14 @@ struct AVMediaPlayerView: View {
                     .background(.black, ignoresSafeAreaEdges: .all)
                     .task { await loadPlaybackInfo() }
             } else if let player {
-                PlatformPlayerContainer(player: player)
-                    .ignoresSafeArea()
+                Group {
+                    #if os(macOS)
+                    AVPlayerMac(player: player)
+                    #else
+                    AVPlayerIos(player: player)
+                    #endif
+                }
+                .ignoresSafeArea()
             }
         }
         .navigationTitle(item.name ?? "Media Player")
@@ -108,6 +114,9 @@ struct AVMediaPlayerView: View {
             player.removeTimeObserver(token)
             timeObserverToken = nil
         }
+        
+        player.replaceCurrentItem(with: nil)
+        self.player = nil
 
         Task {
             try? await Task.sleep(nanoseconds: 100_000_000)

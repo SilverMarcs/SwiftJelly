@@ -9,11 +9,13 @@ import SwiftUI
 import AVKit
 
 struct AVPlayerMac: NSViewRepresentable {
-    let player: AVPlayer
+    let player: AVPlayer?
     
     func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
-        view.player = player
+        if let player {
+            view.player = player
+        }
         view.controlsStyle = .floating
         view.showsFullScreenToggleButton = true
         view.allowsPictureInPicturePlayback = true
@@ -22,6 +24,6 @@ struct AVPlayerMac: NSViewRepresentable {
     }
     
     func updateNSView(_ nsView: AVPlayerView, context: Context) {
-        
+        nsView.player = player
     }
 }
