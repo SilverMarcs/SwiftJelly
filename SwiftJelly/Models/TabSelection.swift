@@ -5,7 +5,7 @@
 //  Created by Zabir Raihan on 24/08/2025.
 //
 
-import Foundation
+import SwiftUI
 
 // Enum for tab cases
 enum TabSelection: String, CaseIterable {
@@ -14,6 +14,12 @@ enum TabSelection: String, CaseIterable {
     case libraries = "libraries"
     case settings = "settings"
     case search = "search"
+    
+    #if os(macOS)
+    static let tabs: [TabSelection] = [.home, .favorites, .libraries, .settings, .search]
+    #else
+    static let tabs: [TabSelection] = [.home, .favorites, .libraries, .search]
+    #endif
     
     var title: String {
         switch self {
@@ -42,6 +48,17 @@ enum TabSelection: String, CaseIterable {
         case .libraries: return "3"
         case .settings: return ","
         case .search: return "f"
+        }
+    }
+    
+    @ViewBuilder
+    var tabView: some View {
+        switch self {
+        case .home: HomeView()
+        case .favorites: FavoritesView()
+        case .libraries: LibraryView()
+        case .settings: SettingsView()
+        case .search: SearchView()
         }
     }
 }
