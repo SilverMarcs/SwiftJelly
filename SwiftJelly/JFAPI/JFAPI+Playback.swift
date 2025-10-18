@@ -65,8 +65,11 @@ extension JFAPI {
         let context = try getAPIContext()
 
         let progressInfo = PlaybackProgressInfo(
+            isPaused: true,
+            item: item,
             itemID: item.id,
             mediaSourceID: item.id,
+            playMethod: .transcode,
             positionTicks: Int(positionTicks)
         )
 

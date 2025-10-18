@@ -5,7 +5,6 @@ import JellyfinAPI
 struct AVMediaPlayerView: View {
     let item: BaseItemDto
     @State private var player: AVPlayer?
-    @State private var timeObserverToken: Any?
     @State private var isLoading = true
     @State private var showInfoSheet = false
 
@@ -57,7 +56,9 @@ struct AVMediaPlayerView: View {
             #if !os(macOS)
             OrientationManager.shared.lockOrientation(.all)
             #endif
-            cleanup()
+            Task {
+                await cleanup()
+            }
         }
         .onAppear {
             #if !os(macOS)
@@ -87,42 +88,29 @@ struct AVMediaPlayerView: View {
             let time = CMTime(seconds: Double(item.startTimeSeconds), preferredTimescale: 1)
             await player.seek(to: time)
             player.play()
-
-            // report every 5s
-            self.timeObserverToken = player.addPeriodicTimeObserver(
-                forInterval: CMTime(seconds: 5, preferredTimescale: 1),
-                queue: .main
-            ) { time in
-                let seconds = Int(time.seconds)
-                Task {
-                    try? await JFAPI.reportPlaybackProgress(
-                        for: item,
-                        positionTicks: seconds.toPositionTicks
-                    )
-                }
-            }
         } catch {
             self.isLoading = false
         }
     }
 
-    private func cleanup() {
+    private func cleanup() async {
         guard let player = player else { return }
         player.pause()
 
-        if let token = timeObserverToken {
-            player.removeTimeObserver(token)
-            timeObserverToken = nil
-        }
+        let currentTime = player.currentTime()
+        let seconds = Int(currentTime.seconds)
+        
+        try? await JFAPI.reportPlaybackProgress(
+            for: item,
+            positionTicks: seconds.toPositionTicks
+        )
         
         player.replaceCurrentItem(with: nil)
         self.player = nil
 
-        Task {
-            try? await Task.sleep(nanoseconds: 100_000_000)
-            if let handler = RefreshHandlerContainer.shared.refresh {
-                await handler()
-            }
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        if let handler = RefreshHandlerContainer.shared.refresh {
+            await handler()
         }
     }
 }
