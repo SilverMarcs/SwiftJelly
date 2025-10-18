@@ -17,8 +17,13 @@ struct FavoritesView: View {
             MediaGrid(items: favorites, isLoading: isLoading)
                 .task {
                     if favorites.isEmpty {
+                        isLoading = true
                         await fetchFavorites()
+                        isLoading = false
                     }
+                }
+                .refreshable {
+                    await fetchFavorites()
                 }
                 .overlay {
                     if isLoading {
@@ -27,9 +32,6 @@ struct FavoritesView: View {
                 }
                 .navigationTitle("Favorites")
                 .toolbarTitleDisplayMode(.inlineLarge)
-                .refreshable {
-                    await fetchFavorites()
-                }
                 .toolbar {
                     #if os(macOS)
                     Button {
@@ -46,9 +48,6 @@ struct FavoritesView: View {
     }
     
     func fetchFavorites() async {
-        isLoading = true
-        defer { isLoading = false }
-        
         do {
             favorites = try await JFAPI.loadFavoriteItems(limit: 15)
         } catch {

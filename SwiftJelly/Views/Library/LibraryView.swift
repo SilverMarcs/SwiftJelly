@@ -41,7 +41,9 @@ struct LibraryView: View {
             .toolbarTitleDisplayMode(.inlineLarge)
             .task {
                 if libraries.isEmpty {
+                    isLoading = true
                     await loadLibraries()
+                    isLoading = false
                 }
             }
             .refreshable {
@@ -56,14 +58,10 @@ struct LibraryView: View {
     }
 
     private func loadLibraries() async {
-        isLoading = true
-
         do {
             libraries = try await JFAPI.loadLibraries()
         } catch {
             print("Error loading Library: \(error.localizedDescription)")
         }
-
-        isLoading = false
     }
 }

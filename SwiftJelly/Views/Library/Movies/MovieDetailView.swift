@@ -61,19 +61,27 @@ struct MovieDetailView: View {
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
+                FavoriteButton(item: movie)
+            }
+            #if os(macOS)
+            ToolbarItem(placement: .primaryAction) {
                 Button {
-                    Task { await fetchMovie() }
+                    Task {
+                        isLoading = true
+                        await fetchMovie()
+                        isLoading = false
+                    }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
                 .keyboardShortcut("r")
             }
+            #endif
         }
+        .environment(\.refresh, fetchMovie)
     }
     
     private func fetchMovie() async {
-        isLoading = true
-        defer { isLoading = false }
         do {
             movie = try await JFAPI.loadItem(by: movie.id ?? "")
         } catch {

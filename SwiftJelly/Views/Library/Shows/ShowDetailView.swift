@@ -52,11 +52,15 @@ struct ShowDetailView: View {
         .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
         .task { await vm.reloadSeasonsAndEpisodes() }
         .refreshable { await vm.refreshAll() }
-        .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
         .ignoresSafeArea(edges: .top)
         .navigationTitle(vm.show.name ?? "Show")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                FavoriteButton(item: vm.show)
+                    .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
+            }
+            #if os(macOS)
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     Task { await vm.refreshAll() }
@@ -65,7 +69,10 @@ struct ShowDetailView: View {
                 }
                 .keyboardShortcut("r")
             }
+            #endif
         }
+        .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
+
     }
 }
 

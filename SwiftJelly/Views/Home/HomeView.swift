@@ -28,6 +28,9 @@ struct HomeView: View {
                 .scenePadding(.bottom)
                 .contentMargins(.horizontal, 15)
             }
+            .refreshable {
+                await loadAll()
+            }
             .overlay {
                 if isLoading {
                     UniversalProgressView()
@@ -37,13 +40,13 @@ struct HomeView: View {
             .toolbarTitleDisplayMode(.inlineLarge)
             .task {
                 if continueWatchingItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
+                    isLoading = true
                     await loadAll()
+                    isLoading = false
                 }
             }
-            .refreshable {
-                await loadAll()
-            }
             .toolbar {
+                #if os(macOS)
                 ToolbarItem {
                     Button {
                         Task {
@@ -54,7 +57,7 @@ struct HomeView: View {
                     }
                     .keyboardShortcut("r")
                 }
-                #if !os(macOS)
+                #else
                 SettingsToolbar()
                 #endif
             }
@@ -62,18 +65,16 @@ struct HomeView: View {
     }
 
     private func loadAll() async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        async let continueWatching = JFAPI.loadContinueWatchingSmart()
-        async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
         do {
+            async let continueWatching = JFAPI.loadContinueWatchingSmart()
+            async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
+            
             continueWatchingItems = try await continueWatching
             let items = try await allItems
             latestMovies = Array(items.filter { $0.type == .movie })
             latestShows = Array(items.filter { $0.type == .series })
         } catch {
-            print("Error loading Home items: \(error.localizedDescription)")
+            print("Error loading Home items: \(error)")
         }
     }
 

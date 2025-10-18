@@ -14,6 +14,7 @@ struct MarkPlayedButton: View {
             Image(systemName: "checkmark")
                 .foregroundStyle((item.userData?.isPlayed == true) ? .accent : .secondary)
                 .fontWeight(.semibold)
+                .animation(.snappy, value: item.userData?.isPlayed)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)

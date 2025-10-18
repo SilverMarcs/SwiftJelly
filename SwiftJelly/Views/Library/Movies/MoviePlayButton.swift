@@ -43,14 +43,13 @@ struct MoviePlayButton: View {
                     }
                 }
             }
+            .animation(.default, value: item.userData?.isPlayed)
             .tint(Color(.accent).secondary)
             .buttonBorderShape(.capsule)
             .controlSize(.extraLarge)
             .buttonStyle(.glassProminent)
             
             MarkPlayedButton(item: item)
-            
-            FavoriteButton(item: item)
         }
     }
 }

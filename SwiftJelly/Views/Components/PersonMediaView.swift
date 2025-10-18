@@ -19,7 +19,9 @@ struct PersonMediaView: View {
             .toolbarTitleDisplayMode(.inline)
             .task {
                 if items.isEmpty {
+                    isLoading = true
                     await loadItems()
+                    isLoading = false
                 }
             }
             .refreshable {
@@ -28,9 +30,6 @@ struct PersonMediaView: View {
     }
 
     private func loadItems() async {
-        isLoading = true
-        defer { isLoading = false }
-
         do {
             items = try await JFAPI.loadPersonMedia(for: person)
         } catch {
