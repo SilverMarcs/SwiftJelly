@@ -61,11 +61,13 @@ struct AVMediaPlayerView: View {
                 await cleanup()
             }
         }
+        #if !os(macOS)
         .onAppear {
-            #if !os(macOS)
             OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
-            #endif
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try? AVAudioSession.sharedInstance().setActive(true)
         }
+        #endif
     }
 
     private func loadPlaybackInfo() async {
@@ -107,6 +109,9 @@ struct AVMediaPlayerView: View {
     private func cleanup() async {
         guard let player = player else { return }
         player.pause()
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setActive(false)
+        #endif
         
         if let observer = timeObserver {
             player.removeTimeObserver(observer)
