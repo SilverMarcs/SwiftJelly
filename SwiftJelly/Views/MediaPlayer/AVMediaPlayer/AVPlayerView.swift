@@ -7,6 +7,7 @@ struct AVMediaPlayerView: View {
     @State private var player: AVPlayer?
     @State private var isLoading = true
     @State private var showInfoSheet = false
+    @State private var timeObserver: Any?
 
     var body: some View {
         VStack {
@@ -88,15 +89,29 @@ struct AVMediaPlayerView: View {
             let time = CMTime(seconds: Double(item.startTimeSeconds), preferredTimescale: 1)
             await player.seek(to: time)
             player.play()
+            
+            setupPeriodicTimeObserver(for: player)
         } catch {
             self.isLoading = false
+        }
+    }
+    
+    private func setupPeriodicTimeObserver(for player: AVPlayer) {
+        timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 5, preferredTimescale: 1), queue: .main) { time in
+            Task {
+                try? await JFAPI.reportPlaybackProgress(for: self.item, positionTicks: time.seconds.toPositionTicks)
+            }
         }
     }
 
     private func cleanup() async {
         guard let player = player else { return }
         player.pause()
-
+        
+        if let observer = timeObserver {
+            player.removeTimeObserver(observer)
+        }
+        
         let currentTime = player.currentTime()
         let seconds = Int(currentTime.seconds)
         
