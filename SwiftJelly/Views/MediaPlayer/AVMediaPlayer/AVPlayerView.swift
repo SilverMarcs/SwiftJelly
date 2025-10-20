@@ -3,6 +3,8 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerView: View {
+    @Environment(\.scenePhase) var scenePhase
+    
     let item: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true
@@ -62,6 +64,20 @@ struct AVMediaPlayerView: View {
             }
         }
         #if !os(macOS)
+        .onChange(of: scenePhase) {
+            if scenePhase == .active {
+                // resume timer tracking
+                if let player = player {
+                    setupPeriodicTimeObserver(for: player)
+                }
+            } else if scenePhase == .background {
+                // pause timer tracking
+                if let observer = timeObserver {
+                    player?.removeTimeObserver(observer)
+                    timeObserver = nil
+                }
+            }
+        }
         .onAppear {
             OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
