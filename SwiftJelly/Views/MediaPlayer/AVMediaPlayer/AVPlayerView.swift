@@ -38,23 +38,6 @@ struct AVMediaPlayerView: View {
                 Image(systemName: "info")
             }
         }
-        .sheet(isPresented: $showInfoSheet) {
-            Form {
-                Section {
-                    Text(item.name ?? "Unknown")
-                }
-
-                if let overview = item.overview, !overview.isEmpty {
-                    Section("Overview") { Text(overview) }
-                }
-
-                if let year = item.productionYear {
-                    Section("Year") { Text(String(year)) }
-                }
-            }
-            .formStyle(.grouped)
-            .frame(maxWidth: 400)
-        }
         .onDisappear {
             #if !os(macOS)
             OrientationManager.shared.lockOrientation(.all)
@@ -80,8 +63,24 @@ struct AVMediaPlayerView: View {
         }
         .onAppear {
             OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try? AVAudioSession.sharedInstance().setActive(true)
+        }
+        #else
+        .sheet(isPresented: $showInfoSheet) {
+            Form {
+                Section {
+                    Text(item.name ?? "Unknown")
+                }
+
+                if let overview = item.overview, !overview.isEmpty {
+                    Section("Overview") { Text(overview) }
+                }
+
+                if let year = item.productionYear {
+                    Section("Year") { Text(String(year)) }
+                }
+            }
+            .formStyle(.grouped)
+            .frame(maxWidth: 400)
         }
         #endif
     }
@@ -106,6 +105,11 @@ struct AVMediaPlayerView: View {
 
             let time = CMTime(seconds: Double(item.startTimeSeconds), preferredTimescale: 1)
             await player.seek(to: time)
+            
+            #if !os(macOS)
+            try? AVAudioSession.sharedInstance().setActive(true)
+            #endif
+            
             player.play()
             
             setupPeriodicTimeObserver(for: player)
@@ -125,10 +129,7 @@ struct AVMediaPlayerView: View {
     private func cleanup() async {
         guard let player = player else { return }
         player.pause()
-        #if !os(macOS)
-        try? AVAudioSession.sharedInstance().setActive(false)
-        #endif
-        
+
         if let observer = timeObserver {
             player.removeTimeObserver(observer)
         }
