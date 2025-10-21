@@ -15,6 +15,7 @@ struct AVPlayerMac: NSViewRepresentable {
         let view = AVPlayerView()
         if let player {
             view.player = player
+            view.player?.preventsDisplaySleepDuringVideoPlayback = true
         }
         view.controlsStyle = .floating
         view.showsFullScreenToggleButton = true
