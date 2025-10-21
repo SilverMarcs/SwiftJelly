@@ -115,7 +115,7 @@ struct AVMediaPlayerView: View {
     }
     
     private func setupPeriodicTimeObserver(for player: AVPlayer) {
-        timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 5, preferredTimescale: 1), queue: .main) { time in
+        timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 10, preferredTimescale: 1), queue: .main) { time in
             Task {
                 try? await JFAPI.reportPlaybackProgress(for: self.item, positionTicks: time.seconds.toPositionTicks)
             }
