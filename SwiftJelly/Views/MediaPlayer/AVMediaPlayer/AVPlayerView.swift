@@ -151,3 +151,25 @@ struct AVMediaPlayerView: View {
         }
     }
 }
+
+// https://developer.apple.com/documentation/avkit/customizing-the-tvos-playback-experience
+
+// Creating a skip button for a preroll ad
+
+//let eventController = AVPlayerInterstitialEventController(primaryPlayer: mediaPlayer)
+//
+//let event = AVPlayerInterstitialEvent(primaryItem: interstitialItem, time: .zero)
+//event.restrictions = [
+//    .requiresPlaybackAtPreferredRateForAdvancement,
+//    .constrainsSeekingForwardInPrimaryContent
+//]
+//
+//eventController.events.append(event)
+//
+//
+//func playerViewController(playerViewController: AVPlayerViewController, willPresent interstitial: AVInterstitialTimeRange) {
+//    showSkipButton(afterTime: 5.0, onPress: {
+//        eventController.cancelCurrentEvent(withResumptionOffset: CMTime.zero)
+//    })
+//}
+
