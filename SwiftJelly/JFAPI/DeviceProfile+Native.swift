@@ -9,6 +9,7 @@ import JellyfinAPI
 extension DeviceProfile {
     
     /// Builds a device profile for native AVPlayer with proper codec and subtitle support
+    /// Forces transcoding for all streams and limits resolution to 1080p max
     static func buildNativeProfile(maxBitrate: Int = 10_000_000) -> DeviceProfile {
         var profile = DeviceProfile()
         
@@ -16,10 +17,11 @@ extension DeviceProfile {
         profile.maxStaticBitrate = maxBitrate
         profile.musicStreamingTranscodingBitrate = maxBitrate
         
-        profile.directPlayProfiles = nativeDirectPlayProfiles
-         profile.transcodingProfiles = nativeTranscodingProfiles
-         profile.subtitleProfiles = nativeSubtitleProfiles
-         profile.codecProfiles = nativeCodecProfiles
+//        profile.directPlayProfiles = nativeDirectPlayProfiles
+        profile.directPlayProfiles = []
+        profile.transcodingProfiles = nativeTranscodingProfiles
+        profile.subtitleProfiles = nativeSubtitleProfiles
+        profile.codecProfiles = nativeCodecProfiles
         
         return profile
     }
@@ -42,11 +44,23 @@ extension DeviceProfile {
     
     private static var nativeTranscodingProfiles: [TranscodingProfile] {
         [
-            // HLS transcoding with subtitle support
             TranscodingProfile(
                 audioCodec: "aac,ac3,eac3,alac,flac",
                 isBreakOnNonKeyFrames: true,
-                // see if mp4 better
+                conditions: [
+                    ProfileCondition(
+                        condition: .lessThanEqual,
+                        isRequired: false,
+                        property: .width,
+                        value: "1920"
+                    ),
+                    ProfileCondition(
+                        condition: .lessThanEqual,
+                        isRequired: false,
+                        property: .height,
+                        value: "1080"
+                    )
+                ],
                 container: "m3u8",
                 context: .streaming,
                 // Copy timestamps from source where possible to preserve PTS/DTS

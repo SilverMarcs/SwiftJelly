@@ -12,15 +12,15 @@ import JellyfinAPI
 extension JFAPI {
     
     /// Gets playback info with device profile for AVPlayer-compatible streaming
-    /// This tells Jellyfin to transcode if the media is not directly playable
+    /// Always requests transcoding with 1080p max resolution
     /// - Parameters:
     ///   - item: The BaseItemDto to get playback info for
-    ///   - maxBitrate: Maximum streaming bitrate (default: 120 Mbps)
+    ///   - maxBitrate: Maximum streaming bitrate (default: 10 Mbps)
     ///   - subtitleStreamIndex: Optional subtitle stream index to enable (nil = no subtitles)
     /// - Returns: PlaybackInfoResponse with playback URL and session info
     static func getPlaybackInfo(
         for item: BaseItemDto,
-        maxBitrate: Int = 20_000_000,
+        maxBitrate: Int = 10_000_000,
         subtitleStreamIndex: Int? = nil
     ) async throws -> PlaybackInfoResponse {
         guard let itemID = item.id else {
@@ -29,16 +29,15 @@ extension JFAPI {
         
         let context = try getAPIContext()
         
-        // Build device profile for native AVPlayer
         let deviceProfile = DeviceProfile.buildNativeProfile(maxBitrate: maxBitrate)
         
-        // Create playback info request with device profile
         let playbackInfoDto = PlaybackInfoDto(deviceProfile: deviceProfile)
         
         let parameters = Paths.GetPostedPlaybackInfoParameters(
             userID: context.userID,
             maxStreamingBitrate: maxBitrate,
-            subtitleStreamIndex: subtitleStreamIndex, mediaSourceID: item.mediaSources?.first?.id
+            subtitleStreamIndex: subtitleStreamIndex, 
+            mediaSourceID: item.mediaSources?.first?.id
         )
         
         let request = Paths.getPostedPlaybackInfo(
