@@ -88,6 +88,12 @@ struct AVMediaPlayerView: View {
     private func loadPlaybackInfo() async {
         do {
             let item = self.item
+            
+            // Load metadata FIRST (before creating player)
+            #if !os(macOS)
+            let metadata = await item.createMetadataItems()
+            #endif
+            
             let subtitleStreamIndex = item.mediaSources?
                 .first?
                 .mediaStreams?
@@ -99,7 +105,14 @@ struct AVMediaPlayerView: View {
                 subtitleStreamIndex: subtitleStreamIndex
             )
 
-            let player = AVPlayer(url: info.playbackURL)
+            let playerItem = AVPlayerItem(url: info.playbackURL)
+            
+            #if !os(macOS)
+            // Apply pre-loaded metadata
+            playerItem.externalMetadata = metadata
+            #endif
+
+            let player = AVPlayer(playerItem: playerItem)
             self.player = player
             self.isLoading = false
 
