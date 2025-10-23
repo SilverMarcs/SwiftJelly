@@ -17,6 +17,7 @@ struct AVPlayerMac: NSViewRepresentable {
             view.player = player
             view.player?.preventsDisplaySleepDuringVideoPlayback = true
         }
+//        view.videoGravity = .resizeAspectFill
         view.controlsStyle = .floating
         view.showsFullScreenToggleButton = true
         view.allowsPictureInPicturePlayback = true
