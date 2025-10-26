@@ -28,12 +28,7 @@ struct SwiftJellyApp: App {
         
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
             if let item = item {
-                AVMediaPlayerView(item: item)
-                    .windowFullScreenBehavior(.disabled)
-                    .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-                    .gesture(WindowDragGesture())
-            } else {
-                Text("Unable to open player window.")
+                AVMediaPlayerViewMac(item: item)
             }
         }
         .restorationBehavior(.disabled)

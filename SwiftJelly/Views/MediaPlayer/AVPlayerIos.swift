@@ -9,13 +9,11 @@ import SwiftUI
 import AVKit
 
 struct AVPlayerIos: UIViewControllerRepresentable {
-    let player: AVPlayer?
+    let player: AVPlayer
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
-        if let player {
-            controller.player = player
-        }
+        controller.player = player
         controller.entersFullScreenWhenPlaybackBegins = true
         controller.exitsFullScreenWhenPlaybackEnds = true
         controller.allowsPictureInPicturePlayback = true

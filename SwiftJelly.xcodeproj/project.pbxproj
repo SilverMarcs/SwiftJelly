@@ -26,8 +26,10 @@
 			platformFiltersByRelativePath = {
 				AppDelegate.swift = (ios, xros, );
 				Utilities/OrientationManager.swift = (ios, xros, );
-				Views/MediaPlayer/AVMediaPlayer/AVPlayerIos.swift = (ios, xros, );
-				Views/MediaPlayer/AVMediaPlayer/AVPlayerMac.swift = (macos, );
+				Views/MediaPlayer/AVMediaPlayerViewIOS.swift = (ios, xros, );
+				Views/MediaPlayer/AVMediaPlayerViewMac.swift = (macos, );
+				Views/MediaPlayer/AVPlayerIos.swift = (ios, xros, );
+				Views/MediaPlayer/AVPlayerMac.swift = (macos, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
 		};

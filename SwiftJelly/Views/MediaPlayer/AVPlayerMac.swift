@@ -13,10 +13,7 @@ struct AVPlayerMac: NSViewRepresentable {
     
     func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
-        if let player {
-            view.player = player
-            view.player?.preventsDisplaySleepDuringVideoPlayback = true
-        }
+        view.player = player
         view.controlsStyle = .floating
         view.showsFullScreenToggleButton = true
         view.allowsPictureInPicturePlayback = true

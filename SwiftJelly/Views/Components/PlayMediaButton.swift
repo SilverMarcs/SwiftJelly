@@ -34,7 +34,7 @@ struct PlayMediaButton<Label: View>: View {
         }
         #if !os(macOS)
         .fullScreenCover(isPresented: $showPlayer) {
-            AVMediaPlayerView(item: item)
+            AVMediaPlayerViewIOS(item: item)
         }
         #endif
     }
