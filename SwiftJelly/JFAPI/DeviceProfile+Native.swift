@@ -10,7 +10,7 @@ extension DeviceProfile {
     
     /// Builds a device profile for native AVPlayer with proper codec and subtitle support
     /// Forces transcoding for all streams and limits resolution to 1080p max
-    static func buildNativeProfile(maxBitrate: Int = 10_000_000) -> DeviceProfile {
+    static func buildNativeProfile(maxBitrate: Int = 15_000_000) -> DeviceProfile {
         var profile = DeviceProfile()
         
         profile.maxStreamingBitrate = maxBitrate

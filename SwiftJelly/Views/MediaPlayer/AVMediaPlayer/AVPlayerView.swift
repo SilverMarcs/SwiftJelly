@@ -12,7 +12,7 @@ struct AVMediaPlayerView: View {
     @State private var timeObserver: Any?
 
     var body: some View {
-        VStack {
+        Group {
             if isLoading {
                 ProgressView()
                     .controlSize(.large)
@@ -20,17 +20,14 @@ struct AVMediaPlayerView: View {
                     .background(.black, ignoresSafeAreaEdges: .all)
                     .task { await loadPlaybackInfo() }
             } else if let player {
-                Group {
-                    #if os(macOS)
-                    AVPlayerMac(player: player)
-                    #else
-                    AVPlayerIos(player: player)
-                    #endif
-                }
-                .ignoresSafeArea()
+                #if os(macOS)
+                AVPlayerMac(player: player)
+                #else
+                AVPlayerIos(player: player)
+                #endif
             }
         }
-        .navigationTitle(item.name ?? "Media Player")
+        .ignoresSafeArea()
         .toolbar {
             Button {
                 showInfoSheet = true
@@ -65,6 +62,30 @@ struct AVMediaPlayerView: View {
             OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
         }
         #else
+        .navigationTitle(item.seriesName ?? item.name ?? "Media Player")
+        .navigationSubtitle(item.seasonEpisodeString ?? "Movie")
+        .onAppear {
+            if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
+                let videoWidth = item.mediaSources?.first?.mediaStreams?.first?.width ?? 1024
+                let videoHeight = item.mediaSources?.first?.mediaStreams?.first?.height ?? 576
+                
+                // Set aspect ratio based on actual video dimensions
+                window.aspectRatio = NSSize(width: videoWidth, height: videoHeight)
+                
+                // Calculate scaled size to fit within 1024x576
+                let maxWidth: CGFloat = 1024
+                let maxHeight: CGFloat = 576
+                
+                let widthRatio = maxWidth / CGFloat(videoWidth)
+                let heightRatio = maxHeight / CGFloat(videoHeight)
+                let scale = min(widthRatio, heightRatio, 1.0) // Don't scale up, only down
+                
+                let scaledWidth = CGFloat(videoWidth) * scale
+                let scaledHeight = CGFloat(videoHeight) * scale
+                
+                window.setContentSize(NSSize(width: scaledWidth, height: scaledHeight))
+            }
+        }
         .sheet(isPresented: $showInfoSheet) {
             Form {
                 Section {
@@ -82,6 +103,7 @@ struct AVMediaPlayerView: View {
             .formStyle(.grouped)
             .frame(maxWidth: 400)
         }
+        
         #endif
     }
 

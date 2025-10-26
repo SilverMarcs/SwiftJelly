@@ -23,8 +23,8 @@ struct ProgressBarOverlay: View {
             
             Spacer()
             
-            if let season = item.parentIndexNumber, let episode = item.indexNumber {
-                Text("S\(season)E\(episode)")
+            if let seasonEpisode = item.seasonEpisodeString {
+                Text(seasonEpisode)
                     .font(.subheadline)
             }
         }

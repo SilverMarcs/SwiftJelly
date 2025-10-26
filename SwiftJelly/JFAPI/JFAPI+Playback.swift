@@ -20,7 +20,7 @@ extension JFAPI {
     /// - Returns: PlaybackInfoResponse with playback URL and session info
     static func getPlaybackInfo(
         for item: BaseItemDto,
-        maxBitrate: Int = 10_000_000,
+        maxBitrate: Int = 15_000_000,
         subtitleStreamIndex: Int? = nil
     ) async throws -> PlaybackInfoResponse {
         guard let itemID = item.id else {

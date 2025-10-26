@@ -17,7 +17,6 @@ struct AVPlayerMac: NSViewRepresentable {
             view.player = player
             view.player?.preventsDisplaySleepDuringVideoPlayback = true
         }
-//        view.videoGravity = .resizeAspectFill
         view.controlsStyle = .floating
         view.showsFullScreenToggleButton = true
         view.allowsPictureInPicturePlayback = true
@@ -26,6 +25,6 @@ struct AVPlayerMac: NSViewRepresentable {
     }
     
     func updateNSView(_ nsView: AVPlayerView, context: Context) {
-        nsView.player = player
+//        nsView.player = player
     }
 }
