@@ -7,7 +7,6 @@
 
 import SwiftUI
 import JellyfinAPI
-import SwiftMediaViewer
 
 @main
 struct SwiftJellyApp: App {
@@ -37,12 +36,5 @@ struct SwiftJellyApp: App {
             ContentView(selectedTab: $selectedTab)
         }
         #endif
-    }
-    
-    init() {
-         CachedAsyncImageConfiguration.configure(
-             memoryCostLimitMB: 100,       // Max 100 MB memory usage
-             diskCacheLimitMB: 400         // Max 500 MB disk cache
-         )
     }
 }
