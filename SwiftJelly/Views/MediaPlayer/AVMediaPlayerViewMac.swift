@@ -21,7 +21,7 @@ struct AVMediaPlayerViewMac: View {
         }
         .ignoresSafeArea()
         .navigationTitle(item.seriesName ?? item.name ?? "Media Player")
-        .navigationSubtitle(item.seasonEpisodeString ?? "Movie")
+        .navigationSubtitle(item.seasonEpisodeString ?? "")
         .windowFullScreenBehavior(.disabled)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .gesture(WindowDragGesture())
