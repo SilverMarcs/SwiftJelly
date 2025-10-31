@@ -13,6 +13,11 @@ struct AVMediaPlayerViewIOS: View {
         Group {
             if let player = player {
                 AVPlayerIos(player: player)
+                    .onChange(of: player.timeControlStatus) {
+                        Task {
+                            await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
+                        }
+                    }
             } else if isLoading {
                 ProgressView()
                     .controlSize(.large)

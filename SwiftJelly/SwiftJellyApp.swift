@@ -7,6 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
+import AVKit
 
 @main
 struct SwiftJellyApp: App {
@@ -36,5 +37,9 @@ struct SwiftJellyApp: App {
             ContentView(selectedTab: $selectedTab)
         }
         #endif
+    }
+    
+    init() {
+        AVPlayer.isObservationEnabled = true
     }
 }

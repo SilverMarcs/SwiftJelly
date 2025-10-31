@@ -1,10 +1,3 @@
-//
-//  PlaybackUtilities.swift
-//  SwiftJelly
-//
-//  Created by Zabir Raihan on 10/07/2025.
-//
-
 import AVKit
 import JellyfinAPI
 
@@ -48,13 +41,11 @@ struct PlaybackUtilities {
         return player
     }
     
-    /// Reports final playback progress and cleans up resources
-    static func reportPlaybackAndCleanup(
+    /// Reports current playback progress to Jellyfin server
+    static func reportPlaybackProgress(
         player: AVPlayer,
         item: BaseItemDto
     ) async {
-        player.pause()
-        
         let currentTime = player.currentTime()
         let seconds = Int(currentTime.seconds)
         
@@ -62,6 +53,16 @@ struct PlaybackUtilities {
             for: item,
             positionTicks: seconds.toPositionTicks
         )
+    }
+    
+    /// Reports final playback progress and cleans up resources
+    static func reportPlaybackAndCleanup(
+        player: AVPlayer,
+        item: BaseItemDto
+    ) async {
+        player.pause()
+        
+        await reportPlaybackProgress(player: player, item: item)
         
         player.replaceCurrentItem(with: nil)
         
