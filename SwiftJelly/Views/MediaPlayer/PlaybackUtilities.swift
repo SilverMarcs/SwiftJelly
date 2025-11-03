@@ -11,10 +11,17 @@ struct PlaybackUtilities {
             .first(where: { $0.type == .subtitle })?
             .index
 
-        let info = try await JFAPI.getPlaybackInfo(
+        // Start fetching playback info and fresh item concurrently
+        async let infoTask = JFAPI.getPlaybackInfo(
             for: item,
             subtitleStreamIndex: subtitleStreamIndex
         )
+        async let freshItemTask: BaseItemDto? = {
+            guard let id = item.id else { return nil }
+            return try? await JFAPI.loadItem(by: id)
+        }()
+
+        let info = try await infoTask
 
         let playerItem = AVPlayerItem(url: info.playbackURL)
         
@@ -29,7 +36,10 @@ struct PlaybackUtilities {
         player.preventsDisplaySleepDuringVideoPlayback = true
         #endif
         
-        let time = CMTime(seconds: Double(item.startTimeSeconds), preferredTimescale: 1)
+        // Prefer start time from freshly fetched item (to avoid stale progress)
+        let latestItem = await freshItemTask
+        let startSeconds = latestItem?.startTimeSeconds ?? item.startTimeSeconds
+        let time = CMTime(seconds: Double(startSeconds), preferredTimescale: 1)
         await player.seek(to: time)
         
         #if !os(macOS)
