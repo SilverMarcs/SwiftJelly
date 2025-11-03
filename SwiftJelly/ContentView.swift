@@ -24,6 +24,7 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .tabViewSearchActivation(.searchTabSelection)
         #if !os(macOS)
         .tabBarMinimizeBehavior(.onScrollDown)
         #endif
