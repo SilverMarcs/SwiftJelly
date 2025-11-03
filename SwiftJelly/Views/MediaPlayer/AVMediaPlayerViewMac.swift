@@ -12,10 +12,8 @@ struct AVMediaPlayerViewMac: View {
         Group {
             if let player = player {
                 AVPlayerMac(player: player)
-                    .onChange(of: player.timeControlStatus) {
-                        Task {
-                            await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
-                        }
+                    .task(id: player.timeControlStatus) {
+                        await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
                     }
             } else if isLoading {
                 ProgressView()

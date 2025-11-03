@@ -3,8 +3,6 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewIOS: View {
-    @Environment(\.scenePhase) var scenePhase
-    
     let item: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true
@@ -13,10 +11,8 @@ struct AVMediaPlayerViewIOS: View {
         Group {
             if let player = player {
                 AVPlayerIos(player: player)
-                    .onChange(of: player.timeControlStatus) {
-                        Task {
-                            await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
-                        }
+                    .task(id: player.timeControlStatus) {
+                        await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
                     }
             } else if isLoading {
                 ProgressView()
