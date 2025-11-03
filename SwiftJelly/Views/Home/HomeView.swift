@@ -9,6 +9,8 @@ import SwiftUI
 import JellyfinAPI
 
 struct HomeView: View {
+    @Environment(\.scenePhase) var scenePhase
+    
     @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
@@ -38,13 +40,6 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
-            .task {
-                if continueWatchingItems.isEmpty && latestMovies.isEmpty && latestShows.isEmpty {
-                    isLoading = true
-                    await loadAll()
-                    isLoading = false
-                }
-            }
             .toolbar {
                 #if os(macOS)
                 ToolbarItem {
@@ -62,9 +57,16 @@ struct HomeView: View {
                 #endif
             }
         }
+        .task(id: scenePhase) {
+            if scenePhase == .active {
+                await loadAll()
+            }
+        }
     }
 
     private func loadAll() async {
+        isLoading = true
+        defer { isLoading = false}
         do {
             async let continueWatching = JFAPI.loadContinueWatchingSmart()
             async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
