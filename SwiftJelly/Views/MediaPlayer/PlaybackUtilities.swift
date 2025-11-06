@@ -84,8 +84,19 @@ struct PlaybackUtilities {
     
     /// Gets video dimensions for window sizing
     static func getVideoDimensions(from item: BaseItemDto) -> (width: Int, height: Int) {
-        let width = item.mediaSources?.first?.mediaStreams?.first?.width ?? 1024
-        let height = item.mediaSources?.first?.mediaStreams?.first?.height ?? 576
+        // Prefer the first VIDEO stream for dimensions
+        let videoStream = item.mediaSources?
+            .first?
+            .mediaStreams?
+            .first(where: { $0.type == .video })
+
+        let width = videoStream?.width ?? 1024
+        let height = videoStream?.height ?? 576
+
+        // Guard against invalid 0/negative sizes sometimes reported by non-video streams
+        if width <= 0 || height <= 0 {
+            return (1024, 576)
+        }
         return (width, height)
     }
 }

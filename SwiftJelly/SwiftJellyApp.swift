@@ -31,6 +31,7 @@ struct SwiftJellyApp: App {
                 AVMediaPlayerViewMac(item: item)
             }
         }
+        .defaultSize(width: 1024, height: 576)
         .restorationBehavior(.disabled)
         #endif
     }
