@@ -18,24 +18,20 @@ struct SwiftJellyApp: App {
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
-        #if os(macOS)
-        Window("SwiftJelly", id: "swiftjelly") {
+        WindowGroup {
             ContentView(selectedTab: $selectedTab)
         }
         .commands {
             AppCommands(selectedTab: $selectedTab)
         }
         
+        #if os(macOS)
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
             if let item = item {
                 AVMediaPlayerViewMac(item: item)
             }
         }
         .restorationBehavior(.disabled)
-        #else
-        WindowGroup {
-            ContentView(selectedTab: $selectedTab)
-        }
         #endif
     }
     
