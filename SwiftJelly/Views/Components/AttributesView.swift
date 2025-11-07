@@ -21,7 +21,7 @@ struct AttributesView: View {
             
             // Community Rating (stars)
             if let communityRating = item.communityRating {
-                AttributeBadge(
+                unsafe AttributeBadge(
                     text: String(format: "%.1f", communityRating),
                     systemImage: "star.fill",
                 )
@@ -29,7 +29,7 @@ struct AttributesView: View {
             
             // Critic Rating (tomato)
             if let criticRating = item.criticRating {
-                AttributeBadge(
+                unsafe AttributeBadge(
                     text: String(format: "%.0f", criticRating),
                     systemImage: criticRating >= 60 ? "checkmark.seal.fill" : "xmark.seal.fill",
                 )

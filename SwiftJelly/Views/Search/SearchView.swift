@@ -2,12 +2,10 @@ import SwiftUI
 import JellyfinAPI
 
 struct SearchView: View {
-    @State private var query: String = ""
+    @Binding var searchText: String
     @State private var searchScope: SearchScope = .all
     @State private var results: [BaseItemDto] = []
     @State private var isLoading = false
-    
-    @FocusState private var isFocused
     
     var body: some View {
         NavigationStack {
@@ -15,12 +13,6 @@ struct SearchView: View {
                 .contentMargins(.vertical, 10)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
-                .searchable(text: $query, placement: .toolbarPrincipal, prompt: "Search movies or shows")
-                .searchFocused($isFocused)
-                .task {
-                    try? await Task.sleep(nanoseconds: 1_000_000)
-                    isFocused = true
-                }
                 .searchScopes($searchScope, activation: .onSearchPresentation) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
@@ -54,11 +46,11 @@ struct SearchView: View {
     }
     
     private func performSearch() async {
-        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isLoading = true
         
         do {
-            let items = try await JFAPI.searchMedia(query: query)
+            let items = try await JFAPI.searchMedia(query: searchText)
             results = items
             isLoading = false
         } catch {

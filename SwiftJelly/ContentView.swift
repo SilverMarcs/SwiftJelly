@@ -8,23 +8,29 @@
 import SwiftUI
 
 struct ContentView: View {
-//    @SceneStorage("selectedTab") private var selectedTab: TabSelection = .home
     @Binding var selectedTab: TabSelection
+    @State private var searchText: String = ""
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            ForEach(TabSelection.tabs, id: \.self) { tab in
+            ForEach(TabSelection.allCases, id: \.self) { tab in
                 Tab(tab.title,
                     systemImage: tab.systemImage,
                     value: tab,
                     role: tab == .search ? .search : .none
                 ) {
-                    tab.tabView
+                    switch tab {
+                    case .search:
+                        SearchView(searchText: $searchText)
+                    default:
+                        tab.tabView
+                    }
                 }
             }
         }
         .tabViewStyle(.sidebarAdaptable)
         .tabViewSearchActivation(.searchTabSelection)
+        .searchable(text: $searchText, placement: .toolbarPrincipal, prompt: "Search movies or shows")
         #if !os(macOS)
         .tabBarMinimizeBehavior(.onScrollDown)
         #endif
