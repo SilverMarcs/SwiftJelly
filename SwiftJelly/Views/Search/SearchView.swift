@@ -31,6 +31,9 @@ struct SearchView: View {
                     }
                     .disabled(results.isEmpty)
                 }
+                #if os(macOS)
+                .searchable(text: $searchText, placement: .toolbarPrincipal, prompt: "Search movies or shows")
+                #endif
         }
     }
     

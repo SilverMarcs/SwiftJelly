@@ -42,12 +42,8 @@ struct MediaGrid: View {
         .overlay {
             if isLoading {
                 UniversalProgressView()
-            } else if  items.isEmpty {
-                ContentUnavailableView {
-                    Label("No Media Found", systemImage: "play.square.stack.fill")
-                } description: {
-                    Text("Try a different query for your search")
-                }
+            } else if items.isEmpty {
+                ContentUnavailableView.search
             }
         }
     }
