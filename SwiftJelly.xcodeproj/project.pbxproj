@@ -24,8 +24,6 @@
 				Info.plist,
 			);
 			platformFiltersByRelativePath = {
-				AppDelegate.swift = (ios, xros, );
-				Utilities/OrientationManager.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayerViewIOS.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayerViewMac.swift = (macos, );
 				Views/MediaPlayer/AVPlayerIos.swift = (ios, xros, );

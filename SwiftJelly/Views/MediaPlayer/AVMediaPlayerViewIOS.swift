@@ -19,15 +19,13 @@ struct AVMediaPlayerViewIOS: View {
                     .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black, ignoresSafeAreaEdges: .all)
+                    .task {
+                        await loadPlaybackInfo()
+                    }
             }
         }
         .ignoresSafeArea()
-        .task {
-            OrientationManager.shared.lockOrientation(.landscape, andRotateTo: .landscapeRight)
-            await loadPlaybackInfo()
-        }
         .onDisappear {
-            OrientationManager.shared.lockOrientation(.all)
             Task {
                 await cleanup()
             }

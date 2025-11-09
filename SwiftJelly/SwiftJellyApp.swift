@@ -10,11 +10,7 @@ import JellyfinAPI
 import AVKit
 
 @main
-struct SwiftJellyApp: App {
-    #if os(iOS)
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    #endif
-    
+struct SwiftJellyApp: App {    
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
@@ -38,5 +34,8 @@ struct SwiftJellyApp: App {
     
     init() {
         AVPlayer.isObservationEnabled = true
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+        #endif
     }
 }
