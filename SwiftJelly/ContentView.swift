@@ -30,10 +30,10 @@ struct ContentView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .tabViewSearchActivation(.searchTabSelection)
-        #if !os(macOS)
-        .tabBarMinimizeBehavior(.onScrollDown)
-        #else
+        #if os(macOS)
         .searchable(text: $searchText, placement: .toolbarPrincipal, prompt: "Search movies or shows")
+        #else
+        .tabBarMinimizeBehavior(.onScrollDown)
         #endif
     }
 }
