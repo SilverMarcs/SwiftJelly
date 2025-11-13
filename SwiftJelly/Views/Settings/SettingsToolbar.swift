@@ -20,10 +20,14 @@ struct SettingsToolbar: ToolbarContent {
             }
             .sheet(isPresented: $isPresented) {
                 SettingsView()
-//                    .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
                     .presentationDetents([.medium])
+                    #if !os(macOS)
+                    .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
+                    #endif
             }
         }
-//        .matchedTransitionSource(id: "settings-button", in: transition)
+        #if !os(macOS)
+        .matchedTransitionSource(id: "settings-button", in: transition)
+        #endif
     }
 }

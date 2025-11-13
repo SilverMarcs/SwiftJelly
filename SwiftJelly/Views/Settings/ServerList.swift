@@ -47,11 +47,15 @@ struct ServerList: View {
                     Image(systemName: "plus")
                 }
             }
-//            .matchedTransitionSource(id: "add-server-button", in: transition)
+            #if !os(macOS)
+            .matchedTransitionSource(id: "add-server-button", in: transition)
+            #endif
         }
         .sheet(isPresented: $showAddSheet) {
             AddServerView()
-//                .navigationTransition(.zoom(sourceID: "add-server-button", in: transition))
+                #if !os(macOS)
+                .navigationTransition(.zoom(sourceID: "add-server-button", in: transition))
+                #endif
                 .presentationDetents([.medium])
         }
     }
