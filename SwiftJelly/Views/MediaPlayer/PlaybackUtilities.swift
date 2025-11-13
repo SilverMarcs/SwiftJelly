@@ -79,6 +79,7 @@ struct PlaybackUtilities {
         try? await Task.sleep(nanoseconds: 100_000_000)
         if let handler = RefreshHandlerContainer.shared.refresh {
             await handler()
+            RefreshHandlerContainer.shared.refresh = nil
         }
     }
     

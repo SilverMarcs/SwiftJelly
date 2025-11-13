@@ -58,7 +58,9 @@ struct ShowDetailView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 FavoriteButton(item: vm.show)
-                    .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
+                    .environment(\.refresh, { [weak vm = vm] in
+                        await vm?.reloadSeasonsAndEpisodes()
+                    })
             }
             #if os(macOS)
             ToolbarItem(placement: .primaryAction) {
@@ -71,8 +73,9 @@ struct ShowDetailView: View {
             }
             #endif
         }
-        .environment(\.refresh, vm.reloadSeasonsAndEpisodes)
+        .environment(\.refresh, { [weak vm = vm] in
+            await vm?.reloadSeasonsAndEpisodes()
+        })
 
     }
 }
-
