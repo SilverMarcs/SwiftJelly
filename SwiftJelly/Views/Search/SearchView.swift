@@ -13,6 +13,9 @@ struct SearchView: View {
                 .contentMargins(.vertical, 10)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
+                #if !os(macOS)
+                .searchable(text: $searchText, prompt: "Search movies or shows")
+                #endif
                 .searchScopes($searchScope, activation: .onSearchPresentation) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
@@ -31,9 +34,6 @@ struct SearchView: View {
                     }
                     .disabled(results.isEmpty)
                 }
-                #if !os(macOS)
-                .searchable(text: $searchText, prompt: "Search movies or shows")
-                #endif
         }
     }
     
