@@ -16,10 +16,18 @@ struct HomeView: View {
     @State private var latestShows: [BaseItemDto] = []
     @State private var isLoading = false
 
+    #if os(tvOS)
+    private let verticalSpacing: CGFloat = 48
+    private let horizontalMargin: CGFloat = 48
+    #else
+    private let verticalSpacing: CGFloat = 24
+    private let horizontalMargin: CGFloat = 15
+    #endif
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 24) {
+                LazyVStack(alignment: .leading, spacing: verticalSpacing) {
                     ContinueWatchingView(items: continueWatchingItems)
                         .environment(\.refresh, refreshContinueWatching)
                     
@@ -28,16 +36,21 @@ struct HomeView: View {
                     RecentlyAddedView(items: latestShows, header: "Recently Added Shows")
                 }
                 .scenePadding(.bottom)
-                .contentMargins(.horizontal, 15)
+                .contentMargins(.horizontal, horizontalMargin)
             }
+            #if !os(tvOS)
             .refreshable {
                 await loadAll()
             }
+            #endif
             .overlay {
                 if isLoading {
                     UniversalProgressView()
                 }
             }
+            #if os(tvOS)
+            .toolbar(.hidden, for: .navigationBar)
+            #else
             .navigationTitle("Home")
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
@@ -56,6 +69,7 @@ struct HomeView: View {
                 SettingsToolbar()
                 #endif
             }
+            #endif
         }
         .task(id: scenePhase) {
             if scenePhase == .active {

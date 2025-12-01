@@ -1,10 +1,3 @@
-//
-//  PersonView.swift
-//  SwiftJelly
-//
-//  Created by Zabir Raihan on 14/07/2025.
-//
-
 import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
@@ -12,54 +5,60 @@ import SwiftMediaViewer
 struct PersonView: View {
     let person: BaseItemPerson
     
-    var body: some View {
-        NavigationLink {
-            PersonMediaView(person: person)
-        } label: {
-            personContent
-        }
-        .buttonStyle(.plain)
-    }
+    #if os(tvOS)
+    private let imageSize: CGFloat = 220
+    #else
+    private let imageSize: CGFloat = 70
+    #endif
     
-    private var personContent: some View {
-        VStack(alignment: .center, spacing: 10) {
-            Group {
-                if let url = ImageURLProvider.personImageURL(for: person) {
-                    CachedAsyncImage(url: url, targetSize: 200)
-                } else {
-                    Rectangle()
-                        .foregroundStyle(.quaternary)
-                        .overlay {
-                            Image(systemName: "person.fill")
-                                .font(.title)
-                                .foregroundStyle(.secondary)
+    var body: some View {
+        VStack {
+            NavigationLink {
+                PersonMediaView(person: person)
+            } label: {
+                VStack {
+                    ZStack {
+                        Color.gray.opacity(0.3)
+                            .frame(width: imageSize, height: imageSize)
+                            .overlay {
+                                Image(systemName: "person.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                        if let url = ImageURLProvider.personImageURL(for: person) {
+                            CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: imageSize, height: imageSize)
                         }
-                }
-            }
-            .aspectRatio(3/4, contentMode: .fill) 
-            .clipShape(.rect(cornerRadius: 6))
-            .overlay {
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(.background.quinary, lineWidth: 1)
-            }
-            
-            VStack(alignment: .leading, spacing: 1) {
-                if let name = person.name {
-                    Text(name)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(1)
+                    }
+                    .hoverEffect(.highlight)
+                    
+                    if let name = person.name {
+                        Text(name)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                    }
+                    
+                    if let role = person.role, !role.isEmpty {
+                        Text(role)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
                 }
                 
-                if let role = person.role, !role.isEmpty {
-                    Text(role)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(1)
-                }
             }
+            .buttonBorderShape(.circle)
+            .buttonStyle(.borderless)
         }
     }
+}
+
+#Preview {
+    PersonView(person: BaseItemPerson.init(id: "ea2acead101e71b7dc93c5bbaf0a8cdc", name: "Some actor"))
 }

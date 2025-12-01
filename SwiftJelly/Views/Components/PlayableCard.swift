@@ -13,14 +13,74 @@ struct PlayableCard: View {
     
     let item: BaseItemDto
     var showRealname: Bool = false
+    var showTitle: Bool = true
     @State private var showPlayer = false
 
+    #if os(tvOS)
+    private let cardWidth: CGFloat = 380
+    private let cardHeight: CGFloat = 214
+    private let cornerRadius: CGFloat = 12
+    #else
+    private let cardWidth: CGFloat = 270
+    private let cardHeight: CGFloat = 168
+    private let cornerRadius: CGFloat = 10
+    #endif
+
     var body: some View {
+        #if os(tvOS)
+        tvOSCard
+        #else
+        standardCard
+        #endif
+    }
+    
+    #if os(tvOS)
+    private var tvOSCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            PlayMediaButton(item: item) {
+                LandscapeImageView(item: item)
+                    .frame(width: cardWidth, height: cardHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                    .overlay(alignment: .bottomLeading) {
+                        HStack(spacing: 6) {
+                            if let progress = item.playbackProgress, progress > 0, progress < 1 {
+                                Image(systemName: "arrow.counterclockwise")
+                                    .font(.caption2)
+                            } else {
+                                Image(systemName: "play.fill")
+                                    .font(.caption2)
+                            }
+                            
+                            Text(item.totalDurationString ?? "")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                        .padding(10)
+                    }
+            }
+            .buttonStyle(.card)
+            
+            if showTitle {
+                Text(item.name ?? "Unknown")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+                    .frame(width: cardWidth, alignment: .leading)
+            }
+        }
+    }
+    #endif
+    
+    private var standardCard: some View {
         PlayMediaButton(item: item) {
             VStack(alignment: .leading) {
                 LandscapeImageView(item: item)
-                    .frame(width: 270, height: 168)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .frame(width: cardWidth, height: cardHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
                     .overlay(alignment: .bottom) {
                         ZStack(alignment: .bottom) {
                             LinearGradient(
@@ -29,7 +89,7 @@ struct PlayableCard: View {
                                 endPoint: .top
                             )
                             .frame(height: 80)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                             
                             ProgressBarOverlay(item: item)
                                 .padding(.horizontal, 10)
@@ -37,7 +97,7 @@ struct PlayableCard: View {
                         }
                     }
                     .overlay {
-                        RoundedRectangle(cornerRadius: 10)
+                        RoundedRectangle(cornerRadius: cornerRadius)
                             .strokeBorder(.background.quinary, lineWidth: 1)
                     }
                 
@@ -51,6 +111,7 @@ struct PlayableCard: View {
             }
         }
         .buttonStyle(.plain)
+        #if !os(tvOS)
         .contextMenu {
             if item.type == .movie {
                 Section {
@@ -82,5 +143,6 @@ struct PlayableCard: View {
                       systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye")
             }
         }
+        #endif
     }
 }

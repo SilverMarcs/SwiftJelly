@@ -5,51 +5,54 @@ struct MoviePlayButton: View {
     let item: BaseItemDto
 
     var body: some View {
-        HStack(spacing: 12) {
-            PlayMediaButton(item: item) {
-                HStack(spacing: 8) {
-                    if item.userData?.isPlayed == true {
-                        Image(systemName: "play.fill")
-                        
-                        Text("Play Again")
-                            .font(.caption)
-                        
-                    } else if let progress = item.playbackProgress, progress > 0, progress < 1 {
-                        Image(systemName: "play.fill")
-                        
-                        Gauge(value: progress) {
-                            EmptyView()
-                        } currentValueLabel: {
-                            EmptyView()
-                        } minimumValueLabel: {
-                            EmptyView()
-                        } maximumValueLabel: {
-                            EmptyView()
-                        }
-                        .tint(.white)
-                        .gaugeStyle(.accessoryLinearCapacity)
-                        .controlSize(.mini)
-                        .frame(width: 40)
-                        
-                        if let remaining = item.timeRemainingString {
-                            Text(remaining)
-                                .font(.caption)
-                        }
-                    } else {
-                        Image(systemName: "play.fill")
-                        
-                        Text("Play")
-                            .font(.caption)
+        PlayMediaButton(item: item) {
+            HStack(spacing: 8) {
+                Image(systemName: "play.fill")
+                
+                if item.userData?.isPlayed == true {
+                    Text("Play Again")
+                } else if let progress = item.playbackProgress, progress > 0, progress < 1 {
+                    #if os(tvOS)
+                    ProgressView(value: progress)
+                        .tint(.primary)
+                        .frame(width: 60)
+                    #else
+                    Gauge(value: progress) {
+                        EmptyView()
+                    } currentValueLabel: {
+                        EmptyView()
+                    } minimumValueLabel: {
+                        EmptyView()
+                    } maximumValueLabel: {
+                        EmptyView()
                     }
+                    .tint(.white)
+                    .gaugeStyle(.accessoryLinearCapacity)
+                    .controlSize(.mini)
+                    .frame(width: 40)
+                    #endif
+                    
+                    if let remaining = item.timeRemainingString {
+                        Text(remaining)
+                    }
+                } else {
+                    Text("Play")
                 }
             }
-            .animation(.default, value: item.userData?.isPlayed)
-            .tint(Color(.accent).secondary)
-            .buttonBorderShape(.capsule)
-            .controlSize(.extraLarge)
-            .buttonStyle(.glassProminent)
-            
-            MarkPlayedButton(item: item)
+            .font(.callout)
+            .fontWeight(.semibold)
         }
+        .animation(.default, value: item.userData?.isPlayed)
+        #if os(tvOS)
+        .tint(Color(.accent).secondary)
+        .controlSize(.extraLarge)
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
+        #else
+        .tint(Color(.accent).secondary)
+        .buttonBorderShape(.capsule)
+        .controlSize(.extraLarge)
+        .buttonStyle(.glassProminent)
+        #endif
     }
 }

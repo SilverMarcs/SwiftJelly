@@ -24,9 +24,9 @@
 				Info.plist,
 			);
 			platformFiltersByRelativePath = {
-				Views/MediaPlayer/AVMediaPlayerViewIOS.swift = (ios, xros, );
+				Views/MediaPlayer/AVMediaPlayerViewIOS.swift = (ios, tvos, xros, );
 				Views/MediaPlayer/AVMediaPlayerViewMac.swift = (macos, );
-				Views/MediaPlayer/AVPlayerIos.swift = (ios, xros, );
+				Views/MediaPlayer/AVPlayerIos.swift = (ios, tvos, xros, );
 				Views/MediaPlayer/AVPlayerMac.swift = (macos, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
@@ -129,7 +129,7 @@
 			mainGroup = 083128A02E0EE1F70096527C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				08BB38712E84994800BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */,
+				08BB38712E84994800BDF671 /* XCLocalSwiftPackageReference "../SwiftMediaViewer" */,
 				08A59A542E918F10006A2A73 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -308,7 +308,7 @@
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 2L782RMCG7;
+				DEVELOPMENT_TEAM = PBYG8F53RH;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readonly;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -347,13 +347,15 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2,3,7";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
@@ -367,7 +369,7 @@
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 2L782RMCG7;
+				DEVELOPMENT_TEAM = PBYG8F53RH;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readonly;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -406,13 +408,15 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2,3,7";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
@@ -440,18 +444,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		08BB38712E84994800BDF671 /* XCLocalSwiftPackageReference "../SwiftMediaViewer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../SwiftMediaViewer;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		08A59A542E918F10006A2A73 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SilverMarcs/jellyfin-sdk-swift";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		08BB38712E84994800BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SilverMarcs/SwiftMediaViewer";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -475,7 +478,7 @@
 		};
 		08BB38722E84994800BDF671 /* SwiftMediaViewer */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 08BB38712E84994800BDF671 /* XCRemoteSwiftPackageReference "SwiftMediaViewer" */;
+			package = 08BB38712E84994800BDF671 /* XCLocalSwiftPackageReference "../SwiftMediaViewer" */;
 			productName = SwiftMediaViewer;
 		};
 /* End XCSwiftPackageProductDependency section */

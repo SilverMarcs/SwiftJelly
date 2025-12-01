@@ -5,9 +5,30 @@ struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     
+    #if os(tvOS)
+    private let episodeSpacing: CGFloat = 32
+    #else
+    private let episodeSpacing: CGFloat = 15
+    #endif
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             if !vm.seasons.isEmpty {
+                #if os(tvOS)
+                HStack(spacing: 16) {
+                    Text("Season")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                    
+                    Picker("Season", selection: $vm.selectedSeason) {
+                        ForEach(vm.seasons) { season in
+                            Text(season.name ?? "Season").tag(season as BaseItemDto?)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+                .focusSection()
+                #else
                 Picker("Season", selection: $vm.selectedSeason) {
                     ForEach(vm.seasons) { season in
                         Text(season.name ?? "Season").tag(season as BaseItemDto?)
@@ -18,15 +39,12 @@ struct ShowSeasonsView: View {
                 .pickerStyle(.menu)
                 .menuStyle(.button)
                 .buttonStyle(.glass)
-                .task(id: vm.selectedSeason) { 
-                    await vm.updateEpisodesForSelectedSeason()
-                    scrollToLatestEpisode()
-                }
+                #endif
             }
             
             if !vm.episodes.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 15) {
+                    HStack(alignment: .top, spacing: episodeSpacing) {
                         ForEach(vm.episodes) { episode in
                             PlayableCard(item: episode, showRealname: true)
                                 .id(episode.id)
@@ -35,7 +53,15 @@ struct ShowSeasonsView: View {
                     .scrollTargetLayout()
                 }
                 .scrollPosition($episodeScrollPosition)
+                #if os(tvOS)
+                .scrollClipDisabled()
+                .focusSection()
+                #endif
             }
+        }
+        .task(id: vm.selectedSeason) {
+            await vm.updateEpisodesForSelectedSeason()
+            scrollToLatestEpisode()
         }
     }
     
@@ -54,9 +80,9 @@ struct ShowSeasonsView: View {
                 return !isWatched
             }
         }
-        if targetEpisode == nil { targetEpisode = sortedEpisodes.last }
+        if targetEpisode == nil { targetEpisode = sortedEpisodes.first }
         if let episode = targetEpisode, let episodeId = episode.id {
-            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing) }
+            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .leading) }
         }
     }
 }

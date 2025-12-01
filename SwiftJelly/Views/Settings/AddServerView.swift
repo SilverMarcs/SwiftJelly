@@ -13,6 +13,63 @@ struct AddServerView: View {
     @State private var showingAlert = false
 
     var body: some View {
+        #if os(tvOS)
+        tvOSForm
+        #else
+        standardForm
+        #endif
+    }
+    
+    #if os(tvOS)
+    private var tvOSForm: some View {
+        Form {
+            Section("Server Details") {
+                TextField("Server Name", text: $serverName)
+                TextField("Server URL", text: $serverURL)
+                    .textContentType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            
+            Section("Authentication") {
+                TextField("Username", text: $username)
+                    .textContentType(.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+            }
+            
+            Section {
+                Button {
+                    saveAndAuthenticate()
+                } label: {
+                    HStack {
+                        Spacer()
+                        if isAuthenticating {
+                            ProgressView()
+                        } else {
+                            Text("Connect")
+                                .fontWeight(.semibold)
+                        }
+                        Spacer()
+                    }
+                }
+                .disabled(serverName.isEmpty || serverURL.isEmpty || username.isEmpty || isAuthenticating)
+            }
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Add Server")
+        .alert("Error", isPresented: $showingAlert) {
+            Button("OK") { }
+        } message: {
+            Text(alertMessage)
+        }
+    }
+    #endif
+    
+    private var standardForm: some View {
         NavigationStack {
             Form {
                 Section("Server Details") {
@@ -22,7 +79,14 @@ struct AddServerView: View {
                 }
                 Section("Authentication") {
                     TextField("Username", text: $username)
+                        .textContentType(.username)
+                        #if !os(macOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                        .autocorrectionDisabled()
+                    
                     SecureField("Password", text: $password)
+                        .textContentType(.password)
                 }
             }
             .formStyle(.grouped)

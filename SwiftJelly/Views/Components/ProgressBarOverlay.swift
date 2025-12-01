@@ -52,6 +52,11 @@ private struct ProgressGauge: View {
     let progress: Double?
     var body: some View {
         if let progress, progress > 0, progress < 1 {
+            #if os(tvOS)
+            ProgressView(value: progress)
+                .tint(.white)
+                .frame(width: 100)
+            #else
             Gauge(value: progress) {
                 EmptyView()
             } currentValueLabel: {
@@ -64,6 +69,7 @@ private struct ProgressGauge: View {
             .controlSize(.mini)
             .gaugeStyle(.accessoryLinearCapacity)
             .frame(width: 60)
+            #endif
         }
     }
 }

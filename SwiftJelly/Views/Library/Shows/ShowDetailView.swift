@@ -1,8 +1,8 @@
 import SwiftUI
 import JellyfinAPI
+import SwiftMediaViewer
 
 struct ShowDetailView: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private var vm: ShowDetailViewModel
     
     init(item: BaseItemDto) {
@@ -10,72 +10,36 @@ struct ShowDetailView: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
-                Group {
-                    if horizontalSizeClass == .compact {
-                        PortraitImageView(item: vm.show)
-                    } else {
-                        LandscapeImageView(item: vm.show)
-                            .frame(maxHeight: 450)
-                    }
-                }
-                #if os(macOS)
-                .backgroundExtensionEffect()
-                #else
-                .stretchy()
-                #endif
-                .overlay(alignment: .bottomLeading) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        AttributesView(item: vm.show)
-                            .padding(.leading, 1)
-                        
-                        ShowPlayButton(vm: vm)
-                    }
-                    .padding(16)
-                }
-                
-                OverviewView(item: vm.show)
-                
+        DetailView(item: vm.show, action: {}) {
+            VStack {
                 ShowSeasonsView(vm: vm)
+                    .padding(.leading, 80)
+                    .padding(.top, 48)
+                    .focusSection()
                 
                 if let people = vm.show.people {
                     PeopleScrollView(people: people)
+                        .padding(.leading, 80)
+                        .padding(.top, 48)
+                        .focusSection()
                 }
                 
                 SimilarItemsView(item: vm.show)
+                    .padding(.leading, 80)
+                    .padding(.top, 48)
+                    .padding(.bottom, 80)
+                    .focusSection()
             }
-            .scenePadding(.bottom)
-            .contentMargins(.horizontal, 18)
-        }
-        .overlay { if vm.isLoading { UniversalProgressView() } }
-        .overlay { if vm.isLoadingEpisodes { UniversalProgressView() } }
-        .task { await vm.reloadSeasonsAndEpisodes() }
-        .refreshable { await vm.refreshAll() }
-        .ignoresSafeArea(edges: .top)
-        .navigationTitle(vm.show.name ?? "Show")
-        .toolbarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+        } itemDetailContent: {
+            HStack(spacing: 16) {
+                ShowPlayButton(vm: vm)
+                MarkPlayedButton(item: vm.selectedSeason ?? BaseItemDto())
                 FavoriteButton(item: vm.show)
                     .environment(\.refresh, { [weak vm = vm] in
                         await vm?.reloadSeasonsAndEpisodes()
                     })
             }
-            #if os(macOS)
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    Task { await vm.refreshAll() }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .keyboardShortcut("r")
-            }
-            #endif
         }
-        .environment(\.refresh, { [weak vm = vm] in
-            await vm?.reloadSeasonsAndEpisodes()
-        })
-
+        .task { await vm.reloadSeasonsAndEpisodes() }
     }
 }

@@ -11,6 +11,9 @@ struct SearchView: View {
         NavigationStack {
             MediaGrid(items: filteredResults, isLoading: isLoading)
                 .contentMargins(.vertical, 10)
+                #if os(tvOS)
+                .toolbar(.hidden, for: .navigationBar)
+                #else
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
                 .searchScopes($searchScope, activation: .onSearchPresentation) {
@@ -18,18 +21,21 @@ struct SearchView: View {
                         Text(scope.rawValue).tag(scope)
                     }
                 }
+                #endif
                 .onSubmit(of: .search) {
                     Task {
                         await performSearch()
                     }
                 }
                 .toolbar {
+                    #if !os(tvOS)
                     Button(role: .close) {
                         results = []
                     } label: {
                         Text("Clear")
                     }
                     .disabled(results.isEmpty)
+                    #endif
                 }
                 #if !os(macOS)
                 .searchable(text: $searchText, prompt: "Search movies or shows")

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#if !os(tvOS)
 struct SettingsToolbar: ToolbarContent {
     @State var isPresented: Bool = false
     @Namespace private var transition
@@ -31,3 +32,4 @@ struct SettingsToolbar: ToolbarContent {
         #endif
     }
 }
+#endif

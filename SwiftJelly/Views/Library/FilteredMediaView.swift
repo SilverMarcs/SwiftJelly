@@ -39,8 +39,10 @@ struct FilteredMediaView: View {
         .task {
             await viewModel.loadInitialItems()
         }
+        #if !os(tvOS)
         .refreshable {
             await viewModel.loadInitialItems()
         }
+        #endif
     }
 }

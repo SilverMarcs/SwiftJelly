@@ -5,49 +5,41 @@ struct RecentlyAddedView: View {
     let items: [BaseItemDto]
     var header: String
     
+    #if os(tvOS)
+    private let itemWidth: CGFloat = 220
+    private let spacing: CGFloat = 40
+    private let headerSpacing: CGFloat = 16
+    #else
+    private let itemWidth: CGFloat = 150
+    private let spacing: CGFloat = 12
+    private let headerSpacing: CGFloat = 8
+    #endif
+    
     var body: some View {
         if !items.isEmpty {
-            // #if os(macOS)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("\(header)")
+            VStack(alignment: .leading, spacing: headerSpacing) {
+                Text(header)
+                    #if os(tvOS)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    #else
                     .font(.title2)
                     .bold()
                     .scenePadding(.leading)
+                    #endif
                 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: spacing) {
                         ForEach(items, id: \.id) { item in
                             MediaNavigationLink(item: item)
-                                .frame(width: 150)
+                                .frame(width: itemWidth)
                         }
                     }
                 }
+                #if os(tvOS)
+                .scrollClipDisabled()
+                #endif
             }
-            // #else
-            // Section {
-            //     ScrollView(.horizontal, showsIndicators: false) {
-            //         HStack(spacing: 12) {
-            //             ForEach(items, id: \.id) { item in
-            //                 MediaNavigationLink(item: item)
-            //                     .frame(width: 150)
-            //             }
-            //         }
-            //     }
-            // } header: {
-            //     #if os(macOS)
-            //     HStack {
-            //         Text(header)
-            //             .font(.headline)
-            //             .bold()
-            //         Spacer()
-            //     }
-            //     .scenePadding(.horizontal)
-            //     #else
-            //     Text(header)
-            //     #endif
-            // }
-            // .headerProminence(.increased)
-            // #endif
         }
     }
 }
