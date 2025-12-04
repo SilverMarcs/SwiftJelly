@@ -119,13 +119,15 @@ struct ServerList: View {
             #endif
         }
         .sheet(isPresented: $showAddSheet) {
-            AddServerView()
-                #if !os(macOS) && !os(tvOS)
-                .navigationTransition(.zoom(sourceID: "add-server-button", in: transition))
-                #endif
-                #if !os(tvOS)
-                .presentationDetents([.medium])
-                #endif
+            NavigationStack {
+                AddServerView()
+                    #if !os(macOS) && !os(tvOS)
+                    .navigationTransition(.zoom(sourceID: "add-server-button", in: transition))
+                    #endif
+                    #if !os(tvOS)
+                    .presentationDetents([.medium])
+                    #endif
+            }
         }
     }
 }
