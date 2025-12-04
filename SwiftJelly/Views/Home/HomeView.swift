@@ -41,12 +41,6 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity, alignment: .center)
             
-            .overlay {
-                if isLoading {
-                    UniversalProgressView()
-                }
-            }
-            
             #if os(tvOS)
             .toolbar(.hidden, for: .navigationBar)
             #else
@@ -55,6 +49,15 @@ struct HomeView: View {
             }
             .navigationTitle("Continue Watching")
             .toolbar {
+                if isLoading {
+                    ToolbarItem {
+                        ProgressView()
+                        #if os(macOS)
+                            .controlSize(.small)
+                            .padding(10)
+                        #endif
+                    }
+                }
                 #if os(macOS)
                 ToolbarItem {
                     Button {

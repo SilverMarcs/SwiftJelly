@@ -25,6 +25,10 @@ struct ShowSeasonsView: View {
                 .pickerStyle(.menu)
                 .menuStyle(.button)
                 .buttonStyle(.glass)
+#if os(tvOS)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .focusSection()
+#endif
             }
             
             if !vm.episodes.isEmpty {

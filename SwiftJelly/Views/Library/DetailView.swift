@@ -7,7 +7,8 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private var logoAlignment: HorizontalAlignment = .center
     private var logoContainerAlignment: Alignment = .center
-    private var logoWidth: CGFloat = 200
+    private var logoWidth: CGFloat = 300
+    private var logoHeight: CGFloat = 100
     private var useCompactLayout: Bool { horizontalSizeClass == .compact }
     private var coverAlignment: HorizontalAlignment { horizontalSizeClass == .compact ? .leading : .center }
 #else
@@ -15,6 +16,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     private var logoContainerAlignment: Alignment = .leading
     private var useCompactLayout: Bool = false
     private var logoWidth: CGFloat = 450
+    private var logoHeight: CGFloat = 300
     private var coverAlignment: HorizontalAlignment = .leading
 #endif
 
@@ -54,8 +56,8 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     let bottomGradient = LinearGradient(
             gradient: Gradient(stops: [
                 .init(color: .white, location: 0),
-                .init(color: .white, location: 0.4),
-                .init(color: .white.opacity(0), location: 1.0)
+                .init(color: .white.opacity(1), location: 0.3),
+                .init(color: .white.opacity(0), location: 0.6)
             ]),
             startPoint: .bottom,
             endPoint: .top
@@ -69,7 +71,8 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
                     CachedAsyncImage(url: url, targetSize: 450, opaque: false)
                         .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: logoWidth)
+                        .frame(maxWidth: logoWidth, maxHeight: logoHeight)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text(item.name ?? "Unknown")
                         .font(.largeTitle)
@@ -180,12 +183,12 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                     VStack(spacing: 0) {
                         backdrop
                             .scaledToFill()
-                            .frame(width: geo.size.width, height: backdropHeight)
+                            .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
                             .clipped()
 
                         backdrop
                             .scaledToFill()
-                            .frame(width: geo.size.width, height: backdropHeight)
+                            .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
                             .scaleEffect(x: 1, y: -1, anchor: .center)
                             .frame(
                                 width: geo.size.width,
@@ -201,9 +204,8 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                                 bottomGradient
                             }
                     }
-                    #if os(macOS)
+                    #if !os(tvOS)
                     .backgroundExtensionEffect()
-                    #elseif !os(tvOS)
                     .stretchy()
                     #endif
                     .overlay(alignment: .bottomLeading) {
@@ -229,6 +231,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         .refreshable { await action() }
         #endif
         .ignoresSafeArea(edges: .top)
+        .navigationTitle("")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
