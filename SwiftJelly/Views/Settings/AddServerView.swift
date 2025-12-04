@@ -70,7 +70,7 @@ struct AddServerView: View {
     #endif
     
     private var standardForm: some View {
-        NavigationStack {
+        Group {
             Form {
                 Section("Server Details") {
                     TextField("Server Name", text: $serverName)

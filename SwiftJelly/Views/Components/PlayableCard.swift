@@ -38,10 +38,6 @@ struct PlayableCard: View {
         )
 
     var body: some View {
-        standardCard
-    }
-    
-    private var standardCard: some View {
         VStack {
             PlayMediaButton(item: item) {
                 VStack(alignment: .leading) {

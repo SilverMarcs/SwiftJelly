@@ -26,7 +26,7 @@ struct HomeView: View {
     #endif
 
     var body: some View {
-        NavigationStack {
+        Group {
             ScrollView {
                 VStack(alignment: .leading, spacing: verticalSpacing) {
                     ContinueWatchingView(items: continueWatchingItems)
@@ -39,19 +39,20 @@ struct HomeView: View {
                 .scenePadding(.bottom)
                 .contentMargins(.horizontal, horizontalMargin)
             }
-            #if !os(tvOS)
-            .refreshable {
-                await loadAll()
-            }
-            #endif
+            .frame(maxWidth: .infinity, alignment: .center)
+            
             .overlay {
                 if isLoading {
                     UniversalProgressView()
                 }
             }
+            
             #if os(tvOS)
             .toolbar(.hidden, for: .navigationBar)
             #else
+            .refreshable {
+                await loadAll()
+            }
             .navigationTitle("Continue Watching")
             .toolbar {
                 #if os(macOS)

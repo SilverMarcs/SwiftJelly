@@ -23,7 +23,7 @@ struct SettingsView: View {
     
     #if os(tvOS)
     private var tvOSSettings: some View {
-        NavigationStack {
+        Group {
             List {
                 NavigationLink {
                     ServerList()
@@ -40,7 +40,7 @@ struct SettingsView: View {
     #endif
     
     private var standardSettings: some View {
-        NavigationStack {
+        Group {
             Form {
                 Section("Server") {
                     NavigationLink {

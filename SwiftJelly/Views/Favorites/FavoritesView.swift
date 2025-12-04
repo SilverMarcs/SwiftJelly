@@ -13,7 +13,7 @@ struct FavoritesView: View {
     @State var favorites: [BaseItemDto] = []
     
     var body: some View {
-        NavigationStack {
+        Group {
             MediaGrid(items: favorites, isLoading: isLoading)
                 .task {
                     if favorites.isEmpty {

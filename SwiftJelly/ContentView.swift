@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
     @State private var searchText: String = ""
+    @Namespace private var animation
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -19,12 +20,18 @@ struct ContentView: View {
                     value: tab,
                     role: tab == .search ? .search : .none
                 ) {
-                    switch tab {
-                    case .search:
-                        SearchView(searchText: $searchText)
-                    default:
-                        tab.tabView
+                    NavigationStack {
+                        Group {
+                            switch tab {
+                            case .search:
+                                SearchView(searchText: $searchText)
+                            default:
+                                tab.tabView
+                            }
+                        }
+                        .addNavigationDestionationsForDetailView(animation: animation)
                     }
+                    .environment(\.zoomNamespace, animation)
                 }
             }
         }

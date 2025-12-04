@@ -8,7 +8,7 @@ struct SearchView: View {
     @State private var isLoading = false
     
     var body: some View {
-        NavigationStack {
+        Group {
             MediaGrid(items: filteredResults, isLoading: isLoading)
                 .contentMargins(.vertical, 10)
                 #if os(tvOS)

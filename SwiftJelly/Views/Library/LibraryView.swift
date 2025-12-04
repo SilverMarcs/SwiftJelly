@@ -25,13 +25,11 @@ struct LibraryView: View {
     #endif
 
     var body: some View {
-        NavigationStack {
+        Group {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: gridSpacing) {
                     ForEach(libraries, id: \.id) { library in
-                        NavigationLink {
-                            FilteredMediaView(filter: .library(library))
-                        } label: {
+                        NavigationLink(value: FilteredMediaViewNavItem(item: library)) {
                             #if os(tvOS)
                             LibraryCardTV(library: library)
                             #else

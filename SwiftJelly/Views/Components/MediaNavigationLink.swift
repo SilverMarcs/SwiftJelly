@@ -8,64 +8,68 @@
 import SwiftUI
 import JellyfinAPI
 
+struct FilteredMediaViewNavItem: Hashable {
+    let item: BaseItemDto
+}
+
 struct MediaNavigationLink: View {
     let item: BaseItemDto
-    @Namespace private var animation
-    
-    @ViewBuilder
-    private var destination: some View {
-        switch item.type {
-        case .movie:
-            MovieDetailView(item: item)
-#if !os(macOS)
-                .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-        case .series:
-            ShowDetailView(item: item)
-#if !os(macOS)
-                .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-        case .boxSet:
-            FilteredMediaView(filter: .library(item))
-#if !os(macOS)
-                .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-        default:
-            Text("Unsupported item type")
-        }
-    }
+    @Environment(\.zoomNamespace) private var animationID
     
     var body: some View {
-        #if os(tvOS)
-        NavigationLink(destination: destination) {
-            PortraitImageView(item: item)
-                .aspectRatio(2/3, contentMode: .fill)
-                .overlay(alignment: .topTrailing) {
-                    if item.userData?.isPlayed ?? false {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.white, .green)
-                            .shadow(radius: 4)
-                            .padding(12)
-                    }
+        Group {
+            if item.type == .boxSet {
+                NavigationLink(value: FilteredMediaViewNavItem(item: item)) {
+                    MediaCard(item: item)
                 }
-                .overlay(alignment: .bottomLeading) {
-                    if item.userData?.isFavorite == true {
-                        Image(systemName: "star.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.yellow)
-                            .shadow(radius: 4)
-                            .padding(12)
-                    }
+                #if os(tvOS)
+                .buttonStyle(.card)
+                #else
+                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
+                .buttonStyle(.plain)
+                #endif
+            } else {
+                NavigationLink(value: item) {
+                    MediaCard(item: item)
                 }
+                #if os(tvOS)
+                .buttonStyle(.card)
+                #else
+                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
+                .buttonStyle(.plain)
+                #endif
+            }
         }
-        .buttonStyle(.card)
-        #else
-        NavigationLink(destination: destination) {
-            MediaCard(item: item)
-        }
-        .matchedTransitionSource(id: item.id, in: animation)
-        .buttonStyle(.plain)
-        #endif
+    }
+}
+
+struct MediaNavigationDestinationModifier: ViewModifier {
+    let animation: Namespace.ID
+    
+    func body(content: Content) -> some View {
+        content
+            .navigationDestination(for: BaseItemDto.self) { item in
+                if item.type == .movie {
+                    MovieDetailView(item: item)
+#if !os(macOS)
+                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
+#endif
+                } else if item.type == .series {
+                    ShowDetailView(item: item)
+#if !os(macOS)
+                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
+#endif
+                }
+            }
+        
+            .navigationDestination(for: FilteredMediaViewNavItem.self) { item in
+                FilteredMediaView(filter: .library(item.item))
+            }
+    }
+}
+
+extension View {
+    public func addNavigationDestionationsForDetailView(animation: Namespace.ID) -> some View {
+        modifier(MediaNavigationDestinationModifier(animation: animation))
     }
 }
