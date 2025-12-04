@@ -16,6 +16,9 @@ struct SearchView: View {
                 #else
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
+                #if !os(macOS)
+                .searchable(text: $searchText, prompt: "Search movies or shows")
+                #endif
                 .searchScopes($searchScope, activation: .onSearchPresentation) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
@@ -37,9 +40,6 @@ struct SearchView: View {
                     .disabled(results.isEmpty)
                     #endif
                 }
-                #if !os(macOS)
-                .searchable(text: $searchText, prompt: "Search movies or shows")
-                #endif
         }
     }
     
