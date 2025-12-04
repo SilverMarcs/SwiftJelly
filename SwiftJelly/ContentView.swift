@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
@@ -51,6 +52,9 @@ struct ContentView: View {
                                 }
                             }
                             .addNavigationDestionationsForDetailView(animation: animation)
+                            .navigationDestination(for: BaseItemPerson.self) { person in
+                                PersonMediaView(person: person)
+                            }
                         }
                         .environment(\.zoomNamespace, animation)
                     }

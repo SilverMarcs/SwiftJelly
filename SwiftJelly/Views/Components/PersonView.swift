@@ -13,9 +13,7 @@ struct PersonView: View {
     
     var body: some View {
         VStack {
-            NavigationLink {
-                PersonMediaView(person: person)
-            } label: {
+            NavigationLink(value: person) {
                 VStack {
                     ZStack {
                         Color.gray.opacity(0.3)
