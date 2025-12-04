@@ -40,7 +40,7 @@ struct SettingsView: View {
     #endif
     
     private var standardSettings: some View {
-        Group {
+        NavigationStack {
             Form {
                 Section("Server") {
                     NavigationLink {
