@@ -25,6 +25,7 @@ struct ShowSeasonsView: View {
                 .pickerStyle(.menu)
                 .menuStyle(.button)
                 .buttonStyle(.glass)
+                .foregroundStyle(.primary)
 #if os(tvOS)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .focusSection()
