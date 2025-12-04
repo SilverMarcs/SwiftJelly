@@ -13,7 +13,9 @@ struct ShowPlayButton: View {
             ZStack {
                 if vm.nextEpisode == nil {
                     HStack(spacing: 8) {
-                        ProgressView().controlSize(.mini)
+                        ProgressView()
+                            .tint(.primary)
+                            .controlSize(.mini)
                         Text("Loading…")
                     }
                     .transition(.opacity)

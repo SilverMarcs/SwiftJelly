@@ -12,7 +12,6 @@ struct FavoriteButton: View {
             }
         } label: {
             Image(systemName: (item.userData?.isFavorite == true) ? "star.fill" : "star")
-                .foregroundStyle((item.userData?.isFavorite == true) ? .yellow : .secondary)
                 .animation(.snappy, value: item.userData?.isFavorite)
         }
         #if os(tvOS)
@@ -25,6 +24,8 @@ struct FavoriteButton: View {
         #elseif !os(tvOS)
         .controlSize(.large)
         #endif
+        .buttonStyle(.glass)
+        .tint((item.userData?.isFavorite == true) ? .yellow : .secondary)
     }
     
     private func toggleFavoriteStatus() async {
