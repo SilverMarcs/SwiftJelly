@@ -39,9 +39,14 @@ struct HomeView: View {
                 .scenePadding(.bottom)
                 .contentMargins(.horizontal, horizontalMargin)
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-            
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
             #if os(tvOS)
+            .overlay {
+                if isLoading {
+                    UniversalProgressView()
+                }
+            }
             .toolbar(.hidden, for: .navigationBar)
             #else
             .refreshable {
