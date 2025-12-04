@@ -8,7 +8,7 @@ struct PersonView: View {
     #if os(tvOS)
     private let imageSize: CGFloat = 220
     #else
-    private let imageSize: CGFloat = 70
+    private let imageSize: CGFloat = 100
     #endif
     
     var body: some View {
@@ -32,7 +32,14 @@ struct PersonView: View {
                                 .frame(width: imageSize, height: imageSize)
                         }
                     }
+                    #if !os(macOS)
                     .hoverEffect(.highlight)
+                    #endif
+                    
+                    #if !os(tvOS)
+                    .clipShape(Circle())
+                    .clipped()
+                    #endif
                     
                     if let name = person.name {
                         Text(name)
@@ -51,8 +58,10 @@ struct PersonView: View {
                             .truncationMode(.tail)
                     }
                 }
+                .frame(maxWidth: imageSize)
                 
             }
+            .foregroundStyle(.primary)
             .buttonBorderShape(.circle)
             .buttonStyle(.borderless)
         }

@@ -4,6 +4,12 @@ import SwiftMediaViewer
 
 struct ShowDetailView: View {
     private var vm: ShowDetailViewModel
+
+#if os(tvOS)
+    private var spacing: CGFloat = 15
+#else
+    private var spacing: CGFloat = 4
+#endif
     
     init(item: BaseItemDto) {
         vm = ShowDetailViewModel(item: item)
@@ -13,31 +19,33 @@ struct ShowDetailView: View {
         DetailView(item: vm.show, action: {}) {
             VStack {
                 ShowSeasonsView(vm: vm)
-                    .padding(.leading, 80)
-                    .padding(.top, 48)
+                    #if os(tvOS)
                     .focusSection()
+                    #endif
                 
                 if let people = vm.show.people {
                     PeopleScrollView(people: people)
-                        .padding(.leading, 80)
-                        .padding(.top, 48)
+                        #if os(tvOS)
                         .focusSection()
+                        #endif
                 }
                 
                 SimilarItemsView(item: vm.show)
-                    .padding(.leading, 80)
-                    .padding(.top, 48)
-                    .padding(.bottom, 80)
+                    #if os(tvOS)
                     .focusSection()
+                    #endif
             }
         } itemDetailContent: {
-            HStack(spacing: 16) {
+            HStack(spacing: spacing) {
                 ShowPlayButton(vm: vm)
                 MarkPlayedButton(item: vm.selectedSeason ?? BaseItemDto())
+                
+                #if os(tvOS)
                 FavoriteButton(item: vm.show)
                     .environment(\.refresh, { [weak vm = vm] in
                         await vm?.reloadSeasonsAndEpisodes()
                     })
+                #endif
             }
         }
         .task { await vm.reloadSeasonsAndEpisodes() }

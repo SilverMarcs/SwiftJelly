@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		082A202D2E82178600F1626F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 082A202C2E82178600F1626F /* JellyfinAPI */; };
 		08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08493C5B2E292DBC007F0D75 /* JellyfinAPI */; };
-		08A59A562E918F10006A2A73 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08A59A552E918F10006A2A73 /* JellyfinAPI */; };
 		08BB38732E84994800BDF671 /* SwiftMediaViewer in Frameworks */ = {isa = PBXBuildFile; productRef = 08BB38722E84994800BDF671 /* SwiftMediaViewer */; };
+		0AECE0662EDD450B009FBA1D /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 0AECE0652EDD450B009FBA1D /* JellyfinAPI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,7 +51,7 @@
 			files = (
 				08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */,
 				082A202D2E82178600F1626F /* JellyfinAPI in Frameworks */,
-				08A59A562E918F10006A2A73 /* JellyfinAPI in Frameworks */,
+				0AECE0662EDD450B009FBA1D /* JellyfinAPI in Frameworks */,
 				08BB38732E84994800BDF671 /* SwiftMediaViewer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -98,7 +98,7 @@
 				08493C5B2E292DBC007F0D75 /* JellyfinAPI */,
 				082A202C2E82178600F1626F /* JellyfinAPI */,
 				08BB38722E84994800BDF671 /* SwiftMediaViewer */,
-				08A59A552E918F10006A2A73 /* JellyfinAPI */,
+				0AECE0652EDD450B009FBA1D /* JellyfinAPI */,
 			);
 			productName = SwiftJelly;
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
@@ -130,7 +130,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				08BB38712E84994800BDF671 /* XCLocalSwiftPackageReference "../SwiftMediaViewer" */,
-				08A59A542E918F10006A2A73 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */,
+				0AECE0642EDD450B009FBA1D /* XCLocalSwiftPackageReference "../jellyfin-sdk-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 083128AA2E0EE1F70096527C /* Products */;
@@ -304,6 +304,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -365,6 +366,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -449,18 +451,11 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../SwiftMediaViewer;
 		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		08A59A542E918F10006A2A73 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SilverMarcs/jellyfin-sdk-swift";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+		0AECE0642EDD450B009FBA1D /* XCLocalSwiftPackageReference "../jellyfin-sdk-swift" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../jellyfin-sdk-swift";
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		082A202C2E82178600F1626F /* JellyfinAPI */ = {
@@ -471,15 +466,14 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = JellyfinAPI;
 		};
-		08A59A552E918F10006A2A73 /* JellyfinAPI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 08A59A542E918F10006A2A73 /* XCRemoteSwiftPackageReference "jellyfin-sdk-swift" */;
-			productName = JellyfinAPI;
-		};
 		08BB38722E84994800BDF671 /* SwiftMediaViewer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 08BB38712E84994800BDF671 /* XCLocalSwiftPackageReference "../SwiftMediaViewer" */;
 			productName = SwiftMediaViewer;
+		};
+		0AECE0652EDD450B009FBA1D /* JellyfinAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = JellyfinAPI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

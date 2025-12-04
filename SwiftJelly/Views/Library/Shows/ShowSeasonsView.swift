@@ -14,39 +14,26 @@ struct ShowSeasonsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if !vm.seasons.isEmpty {
-                #if os(tvOS)
-                HStack(spacing: 16) {
-                    Text("Season")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                    
-                    Picker("Season", selection: $vm.selectedSeason) {
-                        ForEach(vm.seasons) { season in
-                            Text(season.name ?? "Season").tag(season as BaseItemDto?)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-                .focusSection()
-                #else
                 Picker("Season", selection: $vm.selectedSeason) {
                     ForEach(vm.seasons) { season in
                         Text(season.name ?? "Season").tag(season as BaseItemDto?)
                     }
                 }
-                .scenePadding(.horizontal)
+                .padding(.horizontal)
+                .padding(.top)
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .menuStyle(.button)
                 .buttonStyle(.glass)
-                #endif
             }
             
             if !vm.episodes.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: episodeSpacing) {
+                        ListStartItemSpacer()
+
                         ForEach(vm.episodes) { episode in
-                            PlayableCard(item: episode, showRealname: true)
+                            PlayableCard(item: episode, showRealname: true, showDescription: true)
                                 .id(episode.id)
                         }
                     }
@@ -57,6 +44,10 @@ struct ShowSeasonsView: View {
                 .scrollClipDisabled()
                 .focusSection()
                 #endif
+            } else {
+                ProgressView()
+                    .controlSize(.large)
+                    .frame(height: 200)
             }
         }
         .task(id: vm.selectedSeason) {

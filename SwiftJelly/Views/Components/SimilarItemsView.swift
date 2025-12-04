@@ -32,10 +32,13 @@ struct SimilarItemsView: View {
                     .font(.title3)
                     .fontWeight(.semibold)
                     .padding(.horizontal)
+                    .padding(.top)
                     #endif
             
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: spacing) {
+                        ListStartItemSpacer()
+
                         ForEach(similarItems) { item in
                             MediaNavigationLink(item: item)
                                 .frame(width: itemWidth)

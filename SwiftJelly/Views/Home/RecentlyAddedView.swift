@@ -16,29 +16,31 @@ struct RecentlyAddedView: View {
     #endif
     
     var body: some View {
-        if !items.isEmpty {
-            VStack(alignment: .leading, spacing: headerSpacing) {
-                Text(header)
-                    #if os(tvOS)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    #else
-                    .font(.title2)
-                    .bold()
-                    .scenePadding(.leading)
-                    #endif
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
-                        ForEach(items, id: \.id) { item in
-                            MediaNavigationLink(item: item)
-                                .frame(width: itemWidth)
+        Group {
+            if !items.isEmpty {
+                VStack(alignment: .leading, spacing: headerSpacing) {
+                    Text(header)
+                        #if os(tvOS)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        #else
+                        .font(.title2)
+                        .bold()
+                        .scenePadding(.leading)
+                        #endif
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: spacing) {
+                            ForEach(items, id: \.id) { item in
+                                MediaNavigationLink(item: item)
+                                    .frame(width: itemWidth)
+                            }
                         }
                     }
+                    #if os(tvOS)
+                    .scrollClipDisabled()
+                    #endif
                 }
-                #if os(tvOS)
-                .scrollClipDisabled()
-                #endif
             }
         }
     }

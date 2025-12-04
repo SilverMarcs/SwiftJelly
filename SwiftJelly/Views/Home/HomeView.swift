@@ -11,6 +11,7 @@ import JellyfinAPI
 struct HomeView: View {
     @Environment(\.scenePhase) var scenePhase
     
+    @Namespace private var animation
     @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
@@ -27,12 +28,12 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: verticalSpacing) {
+                VStack(alignment: .leading, spacing: verticalSpacing) {
                     ContinueWatchingView(items: continueWatchingItems)
                         .environment(\.refresh, refreshContinueWatching)
                     
                     RecentlyAddedView(items: latestMovies, header: "Recently Added Movies")
-                    
+
                     RecentlyAddedView(items: latestShows, header: "Recently Added Shows")
                 }
                 .scenePadding(.bottom)
@@ -51,8 +52,7 @@ struct HomeView: View {
             #if os(tvOS)
             .toolbar(.hidden, for: .navigationBar)
             #else
-            .navigationTitle("Home")
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .navigationTitle("Continue Watching")
             .toolbar {
                 #if os(macOS)
                 ToolbarItem {

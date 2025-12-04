@@ -23,13 +23,13 @@ struct ShowPlayButton: View {
                         Image(systemName: "play.fill")
                         
                         if let s = nextEpisode.parentIndexNumber, let e = nextEpisode.indexNumber {
-                            Text("S\(s)E\(e)")
+                            Text("S\(s), E\(e)")
                         }
                         
                         if let progress = nextEpisode.playbackProgress, progress > 0, progress < 0.95 {
                             #if os(tvOS)
                             ProgressView(value: progress)
-                                .tint(.white)
+                                .tint(.primary)
                                 .frame(width: 60)
                             #else
                             Gauge(value: progress) {
@@ -59,15 +59,10 @@ struct ShowPlayButton: View {
             .fontWeight(.semibold)
             .animation(.easeInOut(duration: 0.2), value: vm.nextEpisode?.id)
         }
-        #if os(tvOS)
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.capsule)
-        #else
         .tint(Color(.accent).secondary)
         .buttonBorderShape(.capsule)
         .controlSize(.extraLarge)
         .buttonStyle(.glassProminent)
-        #endif
         .environment(\.refresh, vm.refreshAll)
     }
 }

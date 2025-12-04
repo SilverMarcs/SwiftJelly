@@ -3,14 +3,26 @@ import SwiftMediaViewer
 import JellyfinAPI
 
 struct DetailView<Content: View, ItemDetailContent: View>: View {
-    #if !os(tvOS)
+#if !os(tvOS)
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    #endif
+    private var logoAlignment: HorizontalAlignment = .center
+    private var logoContainerAlignment: Alignment = .center
+    private var logoWidth: CGFloat = 200
+    private var useCompactLayout: Bool { horizontalSizeClass == .compact }
+    private var coverAlignment: HorizontalAlignment { horizontalSizeClass == .compact ? .leading : .center }
+#else
+    private var logoAlignment: HorizontalAlignment = .leading
+    private var logoContainerAlignment: Alignment = .leading
+    private var useCompactLayout: Bool = false
+    private var logoWidth: CGFloat = 450
+    private var coverAlignment: HorizontalAlignment = .leading
+#endif
+
     @State private var item: BaseItemDto
     @State private var isLoading = false
     @State private var scrollOffset: CGFloat = 0
-    @State private var blurBackground = false
-    
+    @State private var belowFold = false
+
     let action: () async -> Void
     let content: Content
     let itemDetailContent: ItemDetailContent
@@ -27,14 +39,10 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         self.itemDetailContent = itemDetailContent()
     }
     
-    private var useCompactLayout: Bool {
-        #if os(tvOS)
-        false
-        #else
-        horizontalSizeClass == .compact
-        #endif
+    private var backdropHeight: CGFloat {
+        useCompactLayout ? 450 : 450
     }
-    
+
     var body: some View {
         #if os(tvOS)
         tvOSLayout
@@ -43,63 +51,25 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         #endif
     }
     
-    let gradient = LinearGradient(
+    let bottomGradient = LinearGradient(
             gradient: Gradient(stops: [
                 .init(color: .white, location: 0),
-                .init(color: .white.opacity(0.2), location: 0.5),
-                .init(color: .white.opacity(0.1), location: 1.0)
+                .init(color: .white, location: 0.4),
+                .init(color: .white.opacity(0), location: 1.0)
             ]),
-            startPoint: .top,
-            endPoint: .bottom
+            startPoint: .bottom,
+            endPoint: .top
         )
     
-    #if os(tvOS)
-    private var tvOSLayout: some View {
-        ScrollView() {
-            coverOverlay
-                .padding(40)
-                .frame(maxWidth: 900, alignment: .leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .containerRelativeFrame([.vertical])
-                .onScrollVisibilityChange { isVisible in
-                    withAnimation {
-                        blurBackground = !isVisible
-                    }
-                }
-                .focusSection()
-
-            content
-        }
-        .background {
-            if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) ?? ImageURLProvider.imageURL(for: item, type: .primary) {
-                CachedAsyncImage(url: url, targetSize: 2880)
-                    .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .blur(radius: blurBackground ? 60 : 0)
-                    .scaleEffect(1.1)
-                    .mask(gradient)
-                    .ignoresSafeArea()
-            }
-        }
-        .overlay {
-            if isLoading {
-                UniversalProgressView()
-            }
-        }
-        .toolbar(.hidden, for: .navigationBar)
-        .environment(\.refresh, action)
-    }
-    
     private var coverOverlay: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: coverAlignment, spacing: 5) {
             Spacer()
-                .frame(height: 480)
-            
-            VStack(alignment: .leading, spacing: 12) {
+
+            VStack(alignment: logoAlignment, spacing: 12) {
                 if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
-                    CachedAsyncImage(url: url, targetSize: 450)
+                    CachedAsyncImage(url: url, targetSize: 450, opaque: false)
                         .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: 450)
+                        .frame(maxWidth: logoWidth)
                 } else {
                     Text(item.name ?? "Unknown")
                         .font(.largeTitle)
@@ -108,61 +78,147 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                         .shadow(color: .black.opacity(0.5), radius: 4)
                 }
                 
-                AttributesView(item: item)
-                    .padding(.top, 20)
-                
-                if let overview = item.overview {
-                    Text(overview)
-                        .font(.body)
-                        .foregroundStyle(.white.opacity(0.9))
-                        .lineLimit(3)
-                        .shadow(color: .black.opacity(0.3), radius: 2)
-                }
-                
                 itemDetailContent
-                    .padding(.top, 16)
+                    .padding(.top, 10)
             }
-            .focusSection()
+            .padding(.bottom, 20)
+            .frame(maxWidth: .infinity, alignment: logoContainerAlignment)
+
+            if let overview = item.overview {
+                Text(overview)
+                    .font(.callout)
+                    .opacity(0.7)
+                    .lineLimit(4)
+                    .frame(maxWidth: 800, alignment: .leading)
+            }
+            
+            AttributesView(item: item)
+        }
+        .ignoresSafeArea()
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
+    }
+    
+#if os(tvOS)
+    private var tvOSLayout: some View {
+        GeometryReader { geo in
+            let showcaseHeight = geo.size.height
+
+            ScrollView(.vertical) {
+                VStack(alignment: .leading, spacing: 26) {
+                    coverOverlay
+                        .padding(40)
+                        .frame(maxWidth: 900, alignment: .leading)
+                        .frame(height: geo.size.height + geo.safeAreaInsets.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .focusSection()
+                        .onScrollVisibilityChange { isVisible in
+                            withAnimation {
+                                belowFold = !isVisible
+                            }
+                        }
+
+                    Section {
+                        content
+                    }
+                }
+                .scrollTargetLayout()
+            }
+            .background {
+                if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) ?? ImageURLProvider.imageURL(for: item, type: .primary) {
+                    CachedAsyncImage(url: url, targetSize: 2880)
+                        .aspectRatio(contentMode: .fill)
+                        .overlay {
+                            Rectangle()
+                                .fill(.regularMaterial)
+                                .mask {
+                                    maskView
+                                }
+                        }
+                        .ignoresSafeArea()
+                }
+            }
+            .scrollTargetBehavior(
+                FoldSnappingScrollTargetBehavior(
+                    aboveFold: !belowFold, showcaseHeight: showcaseHeight)
+            )
+            .scrollClipDisabled()
+            .frame(maxHeight: .infinity, alignment: .top)
+            .overlay {
+                if isLoading {
+                    UniversalProgressView()
+                }
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .environment(\.refresh, action)
         }
     }
-    #endif
+    
+    var maskView: some View {
+        LinearGradient(
+            stops: [
+                .init(color: .white, location: 0),
+                .init(color: .white.opacity(belowFold ? 1 : 0.7), location: 0.5),
+                .init(color: .white.opacity(belowFold ? 1 : 0), location: 1)
+            ],
+            startPoint: .bottomLeading, endPoint: .topTrailing
+        )
+    }
+
+#else
     
     private var standardLayout: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
-                Group {
-                    if useCompactLayout {
-                        PortraitImageView(item: item)
-                    } else {
-                        LandscapeImageView(item: item)
-                            .frame(maxHeight: 450)
+            let reflectionHeight: CGFloat = 200
+            let backdrop = CachedAsyncImage(
+                url: ImageURLProvider.imageURL(for: item, type: .backdrop),
+                targetSize: 2880
+            )
+
+            LazyVStack(alignment: .leading) {
+                GeometryReader { geo in
+                    VStack(spacing: 0) {
+                        backdrop
+                            .scaledToFill()
+                            .frame(width: geo.size.width, height: backdropHeight)
+                            .clipped()
+
+                        backdrop
+                            .scaledToFill()
+                            .frame(width: geo.size.width, height: backdropHeight)
+                            .scaleEffect(x: 1, y: -1, anchor: .center)
+                            .frame(
+                                width: geo.size.width,
+                                height: reflectionHeight,
+                                alignment: .top
+                            )
+                            .clipped()
+                    }
+                    .overlay {
+                        Rectangle()
+                            .fill(.regularMaterial)
+                            .mask {
+                                bottomGradient
+                            }
+                    }
+                    #if os(macOS)
+                    .backgroundExtensionEffect()
+                    #elseif !os(tvOS)
+                    .stretchy()
+                    #endif
+                    .overlay(alignment: .bottomLeading) {
+                        coverOverlay
+                            .padding(.bottom, 20)
                     }
                 }
-                #if os(macOS)
-                .backgroundExtensionEffect()
-                #elseif !os(tvOS)
-                .stretchy()
-                #endif
-                .overlay(alignment: .bottomLeading) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        AttributesView(item: item)
-                            .padding(.leading, 1)
-                        
-                        MoviePlayButton(item: item)
-                            .environment(\.refresh, action)
-                        
-                        MarkPlayedButton(item: item)
-                            .environment(\.refresh, action)
-                    }
-                    .padding(16)
-                }
+                .environment(\.colorScheme, .dark)
+                .frame(height: backdropHeight + reflectionHeight)
             
                 OverviewView(item: item)
                 
                 content
+                    .padding(.bottom)
             }
-            .scenePadding(.bottom)
-            .contentMargins(.horizontal, 18)
         }
         .overlay {
             if isLoading {
@@ -173,7 +229,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         .refreshable { await action() }
         #endif
         .ignoresSafeArea(edges: .top)
-        .navigationTitle(item.name ?? "Movie")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -196,6 +251,8 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         }
         .environment(\.refresh, action)
     }
+    
+    #endif
 }
 
 struct ScrollOffsetKey: PreferenceKey {

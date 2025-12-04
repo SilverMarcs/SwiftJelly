@@ -5,6 +5,12 @@ import JellyfinAPI
 struct MovieDetailView: View {
     @State private var movie: BaseItemDto
     
+#if os(tvOS)
+    private var spacing: CGFloat = 15
+#else
+    private var spacing: CGFloat = 4
+#endif
+
     init(item: BaseItemDto) {
         self._movie = State(initialValue: item)
     }
@@ -14,23 +20,25 @@ struct MovieDetailView: View {
             VStack {
                 if let people = movie.people {
                     PeopleScrollView(people: people)
-                        .padding(.leading, 80)
-                        .padding(.top, 48)
+                        #if os(tvOS)
                         .focusSection()
+                        #endif
                 }
                 
                 SimilarItemsView(item: movie)
-                    .padding(.leading, 80)
-                    .padding(.top, 48)
-                    .padding(.bottom, 80)
+                    #if os(tvOS)
                     .focusSection()
+                    #endif
             }
         } itemDetailContent: {
-            HStack(spacing: 16) {
+            HStack(spacing: spacing) {
                 MoviePlayButton(item: movie)
                     .environment(\.refresh, fetchMovie)
                 MarkPlayedButton(item: movie)
+                
+                #if os(tvOS)
                 FavoriteButton(item: movie)
+                #endif
             }
         }
     }

@@ -21,7 +21,9 @@ extension JFAPI {
     static func getPlaybackInfo(
         for item: BaseItemDto,
         maxBitrate: Int = 15_000_000,
-        subtitleStreamIndex: Int? = nil
+        subtitleStreamIndex: Int? = nil,
+        audioStreamIndex: Int? = nil,
+        startPositionTicks: Int64? = nil
     ) async throws -> PlaybackInfoResponse {
         guard let itemID = item.id else {
             throw PlaybackError.missingItemID
@@ -31,13 +33,33 @@ extension JFAPI {
         
         let deviceProfile = DeviceProfile.buildNativeProfile(maxBitrate: maxBitrate)
         
-        let playbackInfoDto = PlaybackInfoDto(deviceProfile: deviceProfile)
+        let playbackInfoDto = PlaybackInfoDto(
+            allowAudioStreamCopy: true,
+            allowVideoStreamCopy: true,
+            audioStreamIndex: audioStreamIndex,
+            deviceProfile: deviceProfile,
+            enableDirectPlay: true,
+            enableDirectStream: true,
+            enableTranscoding: true,
+            maxStreamingBitrate: maxBitrate,
+            mediaSourceID: item.mediaSources?.first?.id,
+            startTimeTicks: startPositionTicks.map { Int($0) },
+            subtitleStreamIndex: subtitleStreamIndex,
+            userID: context.userID
+        )
         
         let parameters = Paths.GetPostedPlaybackInfoParameters(
             userID: context.userID,
             maxStreamingBitrate: maxBitrate,
-            subtitleStreamIndex: subtitleStreamIndex, 
-            mediaSourceID: item.mediaSources?.first?.id
+            startTimeTicks: startPositionTicks.map { Int($0) },
+            audioStreamIndex: audioStreamIndex,
+            subtitleStreamIndex: subtitleStreamIndex,
+            mediaSourceID: item.mediaSources?.first?.id,
+            enableDirectPlay: true,
+            enableDirectStream: true,
+            enableTranscoding: true,
+            allowVideoStreamCopy: true,
+            allowAudioStreamCopy: true
         )
         
         let request = Paths.getPostedPlaybackInfo(
@@ -55,24 +77,135 @@ extension JFAPI {
         )
     }
 
-    /// Reports playback progress to the Jellyfin server
-    /// - Parameters:
-    ///   - item: The item being played
-    ///   - positionTicks: Current playback position in ticks
-    ///   - isPaused: Whether playback is currently paused
-    static func reportPlaybackProgress(for item: BaseItemDto, positionTicks: Int64) async throws {
-        let context = try getAPIContext()
+    static func reportPlaybackStart(
+        itemID: String,
+        mediaSourceID: String?,
+        playSessionID: String?,
+        playMethod: JellyfinAPI.PlayMethod?,
+        audioStreamIndex: Int?,
+        subtitleStreamIndex: Int?,
+        canSeek: Bool,
+        positionTicks: Int64?
+    ) async {
+        do {
+            let context = try getAPIContext()
+            let payload = PlaybackStartInfoPayload(
+                canSeek: canSeek,
+                itemId: itemID,
+                mediaSourceId: mediaSourceID,
+                audioStreamIndex: audioStreamIndex,
+                subtitleStreamIndex: subtitleStreamIndex,
+                positionTicks: positionTicks,
+                playMethod: playMethod,
+                playSessionId: playSessionID
+            )
+            let request = Request<Void>(
+                path: "/Sessions/Playing",
+                method: "POST",
+                body: payload,
+                id: "ReportPlaybackStart"
+            )
+            _ = try await context.client.send(request)
+        } catch {
+            print("Failed to report playback start: \(error)")
+        }
+    }
+    
+    static func reportPlaybackProgress(
+        itemID: String,
+        mediaSourceID: String?,
+        playSessionID: String?,
+        playMethod: JellyfinAPI.PlayMethod?,
+        audioStreamIndex: Int?,
+        subtitleStreamIndex: Int?,
+        positionTicks: Int64,
+        canSeek: Bool,
+        isPaused: Bool
+    ) async {
+        do {
+            let context = try getAPIContext()
+            var progressInfo = PlaybackProgressInfo()
+            progressInfo.canSeek = canSeek
+            progressInfo.isPaused = isPaused
+            progressInfo.itemID = itemID
+            progressInfo.mediaSourceID = mediaSourceID
+            progressInfo.playMethod = playMethod
+            progressInfo.playSessionID = playSessionID
+            progressInfo.audioStreamIndex = audioStreamIndex
+            progressInfo.subtitleStreamIndex = subtitleStreamIndex
+            progressInfo.positionTicks = Int(positionTicks)
+            let request = Paths.reportPlaybackProgress(progressInfo)
+            _ = try await context.client.send(request)
+        } catch {
+            print("Failed to report playback progress: \(error)")
+        }
+    }
+    
+    static func reportPlaybackStopped(
+        itemID: String,
+        mediaSourceID: String?,
+        playSessionID: String?,
+        positionTicks: Int64
+    ) async {
+        do {
+            let context = try getAPIContext()
+            let payload = PlaybackStopInfoPayload(
+                itemId: itemID,
+                mediaSourceId: mediaSourceID,
+                positionTicks: positionTicks,
+                playSessionId: playSessionID
+            )
+            let request = Request<Void>(
+                path: "/Sessions/Playing/Stopped",
+                method: "POST",
+                body: payload,
+                id: "ReportPlaybackStopped"
+            )
+            _ = try await context.client.send(request)
+        } catch {
+            print("Failed to report playback stop: \(error)")
+        }
+    }
+}
 
-        let progressInfo = PlaybackProgressInfo(
-            isPaused: true,
-            item: item,
-            itemID: item.id,
-            mediaSourceID: item.id,
-            playMethod: .transcode,
-            positionTicks: Int(positionTicks)
-        )
+private struct PlaybackStartInfoPayload: Encodable {
+    var canSeek: Bool
+    var itemId: String
+    var mediaSourceId: String?
+    var audioStreamIndex: Int?
+    var subtitleStreamIndex: Int?
+    var isPaused: Bool = false
+    var isMuted: Bool = false
+    var positionTicks: Int64?
+    var playbackStartTimeTicks: Int64?
+    var playMethod: JellyfinAPI.PlayMethod?
+    var playSessionId: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case canSeek = "CanSeek"
+        case itemId = "ItemId"
+        case mediaSourceId = "MediaSourceId"
+        case audioStreamIndex = "AudioStreamIndex"
+        case subtitleStreamIndex = "SubtitleStreamIndex"
+        case isPaused = "IsPaused"
+        case isMuted = "IsMuted"
+        case positionTicks = "PositionTicks"
+        case playbackStartTimeTicks = "PlaybackStartTimeTicks"
+        case playMethod = "PlayMethod"
+        case playSessionId = "PlaySessionId"
+    }
+}
 
-        let request = Paths.reportPlaybackProgress(progressInfo)
-        _ = try await context.client.send(request)
+private struct PlaybackStopInfoPayload: Encodable {
+    var itemId: String
+    var mediaSourceId: String?
+    var positionTicks: Int64
+    var playSessionId: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case itemId = "ItemId"
+        case mediaSourceId = "MediaSourceId"
+        case positionTicks = "PositionTicks"
+        case playSessionId = "PlaySessionId"
     }
 }

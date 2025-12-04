@@ -29,10 +29,13 @@ struct PeopleScrollView: View {
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal)
+                .padding(.top)
                 #endif
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: spacing) {
+                    ListStartItemSpacer()
+
                     ForEach(people, id: \.self) { person in
                         PersonView(person: person)
                     }

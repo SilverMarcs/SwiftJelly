@@ -14,6 +14,6 @@ extension BaseItemDto {
               let episode = indexNumber else {
             return nil
         }
-        return "S\(season)E\(episode)"
+        return "S\(season), E\(episode)"
     }
 }

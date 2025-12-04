@@ -10,6 +10,7 @@ struct PlaybackInfoResponse {
     let playbackURL: URL
     let mediaSource: MediaSourceInfo
     let playMethod: PlayMethod
+    let playSessionId: String?
     
     enum PlayMethod {
         case directPlay
@@ -70,7 +71,8 @@ extension PlaybackInfoResponse {
         return PlaybackInfoResponse(
             playbackURL: playbackURL,
             mediaSource: mediaSource,
-            playMethod: playMethod
+            playMethod: playMethod,
+            playSessionId: response.playSessionID
         )
     }
 }

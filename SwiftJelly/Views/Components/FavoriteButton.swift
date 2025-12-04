@@ -16,10 +16,8 @@ struct FavoriteButton: View {
                 .animation(.snappy, value: item.userData?.isFavorite)
         }
         #if os(tvOS)
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.circle)
-        #else
-        .buttonStyle(.glass)
+        .controlSize(.extraLarge)
+//        .buttonStyle(.bordered)
         .buttonBorderShape(.circle)
         #endif
         #if os(macOS)
