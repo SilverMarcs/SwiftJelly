@@ -8,17 +8,19 @@ import Combine
     private(set) var show: BaseItemDto
     
     // Seasons / Episodes
-     private(set) var seasons: [BaseItemDto] = []
-     var selectedSeason: BaseItemDto? = nil
-     private(set) var episodes: [BaseItemDto] = []
-     private var allEpisodes: [String: [BaseItemDto]] = [:]
+    private(set) var seasons: [BaseItemDto] = []
+    var selectedSeason: BaseItemDto? = nil
+    private(set) var episodes: [BaseItemDto] = []
+    private var allEpisodes: [String: [BaseItemDto]] = [:]
      
     // Next Episode / play button
-     private(set) var nextEpisode: BaseItemDto? = nil
+    private(set) var nextEpisode: BaseItemDto? = nil
     
-     // Loadimg states
-     var isLoading: Bool = false
-     var isLoadingEpisodes: Bool = false
+    // Loadimg states
+    var isLoading: Bool = false
+    var isLoadingEpisodes: Bool = false
+    
+    var playButtonDisabled: Bool { nextEpisode == nil || isLoading }
     
     init(item: BaseItemDto) {
         self.show = item

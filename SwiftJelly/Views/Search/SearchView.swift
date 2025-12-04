@@ -11,17 +11,23 @@ struct SearchView: View {
         Group {
             MediaGrid(items: filteredResults, isLoading: isLoading)
                 .contentMargins(.vertical, 10)
-                #if os(tvOS)
-                .toolbar(.hidden, for: .navigationBar)
-                #else
+                #if !os(tvOS)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
-                #if !os(macOS)
-                .searchable(text: $searchText, prompt: "Search movies or shows")
-                #endif
                 .searchScopes($searchScope, activation: .onSearchPresentation) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
+                    }
+                }
+                #endif
+                #if !os(macOS)
+                .searchable(text: $searchText, prompt: "Search movies or shows")
+                .onChange(of: searchText) { _, newValue in
+                    Task {
+                        try? await Task.sleep(for: .seconds(0.5))
+                        if !newValue.isEmpty && newValue == searchText {
+                            await performSearch()
+                        }
                     }
                 }
                 #endif
@@ -29,16 +35,6 @@ struct SearchView: View {
                     Task {
                         await performSearch()
                     }
-                }
-                .toolbar {
-                    #if !os(tvOS)
-                    Button(role: .close) {
-                        results = []
-                    } label: {
-                        Text("Clear")
-                    }
-                    .disabled(results.isEmpty)
-                    #endif
                 }
         }
     }
