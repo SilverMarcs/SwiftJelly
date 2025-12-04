@@ -70,7 +70,7 @@ extension DeviceProfile {
                 minSegments: 2,
                 protocol: .hls,
                 type: .video,
-                videoCodec: "h264,hevc,mpeg4"
+                videoCodec: "h264"
             ),
             // Dedicated audio renditions so the manifest can expose named tracks
             TranscodingProfile(
