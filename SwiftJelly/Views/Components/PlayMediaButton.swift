@@ -3,6 +3,7 @@ import JellyfinAPI
 
 struct PlayMediaButton<Label: View>: View {
     @Environment(\.refresh) var refresh
+    @Namespace var transition
     
     let item: BaseItemDto
     let label: Label
@@ -33,8 +34,11 @@ struct PlayMediaButton<Label: View>: View {
             label
         }
         #if !os(macOS)
+        .matchedTransitionSource(id: "player-view", in: transition)
+
         .fullScreenCover(isPresented: $showPlayer) {
             AVMediaPlayerViewIOS(item: item)
+                .navigationTransition(.zoom(sourceID: "player-view", in: transition))
         }
         #endif
     }

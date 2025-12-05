@@ -37,13 +37,13 @@ struct AttributesView: View {
             
             // Year
             if let year = item.productionYear {
-                AttributeBadge(text: String(year))
+                AttributeBadge(text: String(year), systemImage: "calendar")
             }
             
             // Runtime
             if let runTimeTicks = item.runTimeTicks {
                 let minutes = runTimeTicks / 10_000_000 / 60
-                AttributeBadge(text: "\(minutes)m")
+                AttributeBadge(text: "\(minutes)m", systemImage: "clock")
             }
         }
     }

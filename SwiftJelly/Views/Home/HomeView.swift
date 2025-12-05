@@ -11,36 +11,58 @@ import JellyfinAPI
 struct HomeView: View {
     @Environment(\.scenePhase) var scenePhase
     
+    @Namespace private var animation
     @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
     @State private var isLoading = false
 
+    #if os(tvOS)
+    private let verticalSpacing: CGFloat = 48
+    private let horizontalMargin: CGFloat = 48
+    #else
+    private let verticalSpacing: CGFloat = 24
+    private let horizontalMargin: CGFloat = 15
+    #endif
+
     var body: some View {
-        NavigationStack {
+        Group {
             ScrollView {
-                LazyVStack(spacing: 24) {
+                VStack(alignment: .leading, spacing: verticalSpacing) {
                     ContinueWatchingView(items: continueWatchingItems)
                         .environment(\.refresh, refreshContinueWatching)
                     
                     RecentlyAddedView(items: latestMovies, header: "Recently Added Movies")
-                    
+
                     RecentlyAddedView(items: latestShows, header: "Recently Added Shows")
                 }
                 .scenePadding(.bottom)
-                .contentMargins(.horizontal, 15)
+                .contentMargins(.horizontal, horizontalMargin)
             }
-            .refreshable {
-                await loadAll()
-            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
+            #if os(tvOS)
             .overlay {
                 if isLoading {
                     UniversalProgressView()
                 }
             }
-            .navigationTitle("Home")
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar(.hidden, for: .navigationBar)
+            #else
+            .refreshable {
+                await loadAll()
+            }
+            .navigationTitle("Continue Watching")
             .toolbar {
+                if isLoading {
+                    ToolbarItem {
+                        ProgressView()
+                        #if os(macOS)
+                            .controlSize(.small)
+                            .padding(10)
+                        #endif
+                    }
+                }
                 #if os(macOS)
                 ToolbarItem {
                     Button {
@@ -56,6 +78,7 @@ struct HomeView: View {
                 SettingsToolbar()
                 #endif
             }
+            #endif
         }
         .task(id: scenePhase) {
             if scenePhase == .active {

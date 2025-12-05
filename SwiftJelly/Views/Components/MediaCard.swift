@@ -13,6 +13,41 @@ struct MediaCard: View {
     let item: BaseItemDto
     
     var body: some View {
+        #if os(tvOS)
+        tvOSCard
+        #else
+        standardCard
+        #endif
+    }
+    
+    #if os(tvOS)
+    private var tvOSCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            PortraitImageView(item: item)
+                .aspectRatio(2/3, contentMode: .fill)
+                .overlay(alignment: .topTrailing) {
+                    if item.userData?.isPlayed ?? false {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.white, .green)
+                            .shadow(radius: 4)
+                            .padding(12)
+                    }
+                }
+                .overlay(alignment: .bottomLeading) {
+                    if item.userData?.isFavorite == true {
+                        Image(systemName: "star.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.yellow)
+                            .shadow(radius: 4)
+                            .padding(12)
+                    }
+                }
+        }
+    }
+    #endif
+    
+    private var standardCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             PortraitImageView(item: item)
                 .aspectRatio(2/3, contentMode: .fill)
@@ -21,7 +56,8 @@ struct MediaCard: View {
                     RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(.background.quinary, lineWidth: 1)
                 }
-                .overlay(alignment: .topTrailing) {                        
+                #if !os(tvOS)
+                .overlay(alignment: .topTrailing) {
                     if item.userData?.isPlayed ?? false {
                         Button {} label: {
                             Image(systemName: "checkmark")
@@ -34,6 +70,7 @@ struct MediaCard: View {
                         .padding(6)
                     }
                 }
+                #endif
             
             Text(item.name ?? "Unknown")
                 .font(.caption)
@@ -43,6 +80,7 @@ struct MediaCard: View {
                 .multilineTextAlignment(.leading)
         }
         .contentShape(.rect)
+        #if !os(tvOS)
         .contextMenu {
             if item.type == .movie || item.type == .series {
                 Button {
@@ -56,5 +94,6 @@ struct MediaCard: View {
                 }
             }
         }
+        #endif
     }
 }

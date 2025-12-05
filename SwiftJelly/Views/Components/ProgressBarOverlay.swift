@@ -32,7 +32,7 @@ struct ProgressBarOverlay: View {
     }
 }
 
-private struct ProgressIcon: View {
+struct ProgressIcon: View {
     let isPlayed: Bool
     var body: some View {
         // TODO: use glass button here
@@ -48,10 +48,15 @@ private struct ProgressIcon: View {
     }
 }
 
-private struct ProgressGauge: View {
+struct ProgressGauge: View {
     let progress: Double?
     var body: some View {
         if let progress, progress > 0, progress < 1 {
+            #if os(tvOS)
+            ProgressView(value: progress)
+                .tint(.primary)
+                .frame(width: 100)
+            #else
             Gauge(value: progress) {
                 EmptyView()
             } currentValueLabel: {
@@ -64,6 +69,7 @@ private struct ProgressGauge: View {
             .controlSize(.mini)
             .gaugeStyle(.accessoryLinearCapacity)
             .frame(width: 60)
+            #endif
         }
     }
 }

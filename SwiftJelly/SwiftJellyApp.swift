@@ -10,16 +10,22 @@ import JellyfinAPI
 import AVKit
 
 @main
-struct SwiftJellyApp: App {    
+struct SwiftJellyApp: App {
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    #endif
+    
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
         WindowGroup {
             ContentView(selectedTab: $selectedTab)
         }
+        #if !os(tvOS)
         .commands {
             AppCommands(selectedTab: $selectedTab)
         }
+        #endif
         
         #if os(macOS)
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in

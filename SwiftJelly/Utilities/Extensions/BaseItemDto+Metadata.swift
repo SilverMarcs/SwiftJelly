@@ -55,7 +55,7 @@ extension BaseItemDto {
         
         // For TV shows, show season and episode
         if let season = parentIndexNumber, let episode = indexNumber {
-            return "S\(season)E\(episode)"
+            return "S\(season), E\(episode)"
         }
         
         return nil

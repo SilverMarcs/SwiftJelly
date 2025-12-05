@@ -12,21 +12,26 @@ struct MediaGrid: View {
         self.onLoadMore = onLoadMore
     }
     
-    private static var defaultSize: CGFloat {
-        #if os(macOS)
-        140
-        #else
-        105
-        #endif
-    }
-    
+    #if os(tvOS)
     private let columns = [
-        GridItem(.adaptive(minimum: defaultSize), spacing: 12)
+        GridItem(.adaptive(minimum: 220), spacing: 48)
     ]
+    private let verticalSpacing: CGFloat = 48
+    #elseif os(macOS)
+    private let columns = [
+        GridItem(.adaptive(minimum: 140), spacing: 12)
+    ]
+    private let verticalSpacing: CGFloat = 16
+    #else
+    private let columns = [
+        GridItem(.adaptive(minimum: 105), spacing: 12)
+    ]
+    private let verticalSpacing: CGFloat = 16
+    #endif
     
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
+            LazyVGrid(columns: columns, spacing: verticalSpacing) {
                 ForEach(items) { item in
                     MediaNavigationLink(item: item)
                         .onAppear {
@@ -38,6 +43,9 @@ struct MediaGrid: View {
             }
             .scenePadding(.horizontal)
             .scenePadding(.bottom)
+            #if os(tvOS)
+            .padding(.top, 20)
+            #endif
         }
         .overlay {
             if isLoading {

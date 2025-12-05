@@ -8,24 +8,68 @@
 import SwiftUI
 import JellyfinAPI
 
+struct FilteredMediaViewNavItem: Hashable {
+    let item: BaseItemDto
+}
+
 struct MediaNavigationLink: View {
     let item: BaseItemDto
+    @Environment(\.zoomNamespace) private var animationID
     
     var body: some View {
-        NavigationLink {
-            switch item.type {
-            case .movie:
-                MovieDetailView(item: item)
-            case .series:
-                ShowDetailView(item: item)
-            case .boxSet:
-                FilteredMediaView(filter: .library(item))
-            default:
-                Text("Unsupported item type")
+        Group {
+            if item.type == .boxSet {
+                NavigationLink(value: FilteredMediaViewNavItem(item: item)) {
+                    MediaCard(item: item)
+                }
+                #if os(tvOS)
+                .buttonStyle(.card)
+                #else
+                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
+                .buttonStyle(.plain)
+                #endif
+            } else {
+                NavigationLink(value: item) {
+                    MediaCard(item: item)
+                }
+                #if os(tvOS)
+                .buttonStyle(.card)
+                #else
+                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
+                .buttonStyle(.plain)
+                #endif
             }
-        } label: {
-            MediaCard(item: item)
         }
-        .buttonStyle(.plain)
+    }
+}
+
+struct MediaNavigationDestinationModifier: ViewModifier {
+    let animation: Namespace.ID
+    
+    func body(content: Content) -> some View {
+        content
+            .navigationDestination(for: BaseItemDto.self) { item in
+                if item.type == .movie {
+                    MovieDetailView(item: item)
+#if !os(macOS)
+                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
+#endif
+                } else if item.type == .series {
+                    ShowDetailView(item: item)
+#if !os(macOS)
+                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
+#endif
+                }
+            }
+        
+            .navigationDestination(for: FilteredMediaViewNavItem.self) { item in
+                FilteredMediaView(filter: .library(item.item))
+            }
+    }
+}
+
+extension View {
+    public func addNavigationDestionationsForDetailView(animation: Namespace.ID) -> some View {
+        modifier(MediaNavigationDestinationModifier(animation: animation))
     }
 }

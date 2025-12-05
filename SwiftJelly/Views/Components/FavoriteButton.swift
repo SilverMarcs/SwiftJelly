@@ -12,9 +12,20 @@ struct FavoriteButton: View {
             }
         } label: {
             Image(systemName: (item.userData?.isFavorite == true) ? "star.fill" : "star")
-                .foregroundStyle((item.userData?.isFavorite == true) ? .orange : .secondary)
                 .animation(.snappy, value: item.userData?.isFavorite)
         }
+        #if os(tvOS)
+        .buttonStyle(.glass)
+        .controlSize(.extraLarge)
+//        .buttonStyle(.bordered)
+        .buttonBorderShape(.circle)
+        #endif
+        #if os(macOS)
+        .controlSize(.extraLarge)
+        #elseif !os(tvOS)
+        .controlSize(.large)
+        #endif
+        .tint((item.userData?.isFavorite == true) ? .yellow : .secondary)
     }
     
     private func toggleFavoriteStatus() async {

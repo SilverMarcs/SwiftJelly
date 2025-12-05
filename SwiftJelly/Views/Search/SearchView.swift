@@ -8,31 +8,33 @@ struct SearchView: View {
     @State private var isLoading = false
     
     var body: some View {
-        NavigationStack {
+        Group {
             MediaGrid(items: filteredResults, isLoading: isLoading)
                 .contentMargins(.vertical, 10)
+                #if !os(tvOS)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
-                #if !os(macOS)
-                .searchable(text: $searchText, prompt: "Search movies or shows")
-                #endif
                 .searchScopes($searchScope, activation: .onSearchPresentation) {
                     ForEach(SearchScope.allCases) { scope in
                         Text(scope.rawValue).tag(scope)
                     }
                 }
+                #endif
+                #if !os(macOS)
+                .searchable(text: $searchText, prompt: "Search movies or shows")
+                .onChange(of: searchText) { _, newValue in
+                    Task {
+                        try? await Task.sleep(for: .seconds(0.5))
+                        if !newValue.isEmpty && newValue == searchText {
+                            await performSearch()
+                        }
+                    }
+                }
+                #endif
                 .onSubmit(of: .search) {
                     Task {
                         await performSearch()
                     }
-                }
-                .toolbar {
-                    Button(role: .close) {
-                        results = []
-                    } label: {
-                        Text("Clear")
-                    }
-                    .disabled(results.isEmpty)
                 }
         }
     }
