@@ -5,7 +5,6 @@
 //  Created by Julian Baumann on 27/06/2025.
 //
 
-#if os(iOS)
 import SwiftUI
 
 enum AppUtility {
@@ -26,4 +25,3 @@ enum AppUtility {
         }
     }
 }
-#endif

@@ -4,7 +4,7 @@
 //
 //  Created by Julian Baumann on 27/06/2025.
 //
-#if os(iOS)
+
 import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -14,4 +14,3 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return AppDelegate.orientationLock
     }
 }
-#endif

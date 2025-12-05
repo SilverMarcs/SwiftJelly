@@ -35,13 +35,13 @@ struct AVMediaPlayerViewIOS: View {
             }
         }
         .ignoresSafeArea()
+        #if !os(tvOS)
         .onAppear {
-            #if !os(tvOS)
             DispatchQueue.main.async {
                 AppUtility.lockOrientation(.all, andRotateTo: .landscapeRight)
             }
-            #endif
         }
+        #endif
         .onDisappear {
             Task {
                 await cleanup()
