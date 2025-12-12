@@ -20,8 +20,8 @@ struct ShowPlayButton: View {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")
                         
-                        if let s = nextEpisode.parentIndexNumber, let e = nextEpisode.indexNumber {
-                            Text("S\(s)E\(e)")
+                        if let seasonEpisodeString = nextEpisode.seasonEpisodeString {
+                            Text(seasonEpisodeString)
                         }
                         
                         if let progress = nextEpisode.playbackProgress, progress > 0, progress < 0.95 {

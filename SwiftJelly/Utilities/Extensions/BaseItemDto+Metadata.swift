@@ -21,7 +21,7 @@ extension BaseItemDto {
         metadata.append(titleItem)
         
         // Subtitle (for TV shows only)
-        if let subtitle = metadataSubtitle {
+        if let subtitle = seasonEpisodeString {
             let subtitleItem = AVMutableMetadataItem()
             subtitleItem.identifier = .iTunesMetadataTrackSubTitle
             subtitleItem.value = subtitle as NSString
@@ -47,18 +47,6 @@ extension BaseItemDto {
         } else {
             return seriesName ?? name ?? "Unknown"
         }
-    }
-    
-    private var metadataSubtitle: String? {
-        // No subtitle for movies
-        guard type != .movie else { return nil }
-        
-        // For TV shows, show season and episode
-        if let season = parentIndexNumber, let episode = indexNumber {
-            return "S\(season), E\(episode)"
-        }
-        
-        return nil
     }
     
     private func loadArtwork() async -> Data? {

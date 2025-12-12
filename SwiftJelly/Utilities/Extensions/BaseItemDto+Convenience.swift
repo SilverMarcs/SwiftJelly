@@ -10,10 +10,12 @@ import JellyfinAPI
 
 extension BaseItemDto {
     var seasonEpisodeString: String? {
+        guard type != .movie else { return nil }
+
         guard let season = parentIndexNumber,
               let episode = indexNumber else {
             return nil
         }
-        return "S\(season), E\(episode)"
+        return "S\(season)E\(episode)"
     }
 }
