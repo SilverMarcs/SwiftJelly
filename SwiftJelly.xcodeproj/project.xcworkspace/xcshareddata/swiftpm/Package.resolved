@@ -1,0 +1,42 @@
+{
+  "originHash" : "740ef4b9310b2606a60a2cfa86d5bafebe2f4108b10607619e889280c1a10b0b",
+  "pins" : [
+    {
+      "identity" : "get",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kean/Get",
+      "state" : {
+        "revision" : "31249885da1052872e0ac91a2943f62567c0d96d",
+        "version" : "2.2.1"
+      }
+    },
+    {
+      "identity" : "jellyfin-sdk-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SilverMarcs/jellyfin-sdk-swift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "0e8f3639346fd637766d8ea3453157b90e177191"
+      }
+    },
+    {
+      "identity" : "swiftmediaviewer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SilverMarcs/SwiftMediaViewer",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e026ae4dd6cc03ad5e96fbb4cce1a904a1c86279"
+      }
+    },
+    {
+      "identity" : "urlqueryencoder",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/CreateAPI/URLQueryEncoder",
+      "state" : {
+        "revision" : "4ce950479707ea109f229d7230ec074a133b15d7",
+        "version" : "0.2.1"
+      }
+    }
+  ],
+  "version" : 3
+}

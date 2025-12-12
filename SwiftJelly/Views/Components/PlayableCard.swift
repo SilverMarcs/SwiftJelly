@@ -27,7 +27,7 @@ struct PlayableCard: View {
                         .clipShape(.rect(cornerRadius: cornerRadius))
                         .overlay(alignment: .bottom) {
                             LinearGradient(
-                                colors: [.black.opacity(0.6), .black.opacity(0.3), .clear],
+                                colors: [.black.opacity(0.8), .black.opacity(0.5), .black.opacity(0.2), .clear],
                                 startPoint: .bottom,
                                 endPoint: .top
                             )
