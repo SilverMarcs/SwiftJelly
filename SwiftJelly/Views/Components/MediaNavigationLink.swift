@@ -16,33 +16,22 @@ struct MediaNavigationLink: View {
     let item: BaseItemDto
     @Environment(\.zoomNamespace) private var animationID
     
+    private var navigationValue: any Hashable {
+        item.type == .boxSet ? FilteredMediaViewNavItem(item: item) : item
+    }
+    
     var body: some View {
-        Group {
-            if item.type == .boxSet {
-                NavigationLink(value: FilteredMediaViewNavItem(item: item)) {
-                    MediaCard(item: item)
-                }
-                #if os(tvOS)
-                .buttonStyle(.card)
-                #else
-                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
-                .buttonStyle(.plain)
-                #endif
-            } else {
-                NavigationLink(value: item) {
-                    MediaCard(item: item)
-                }
-                #if os(tvOS)
-                .buttonStyle(.card)
-                #else
-                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
-                .buttonStyle(.plain)
-                #endif
-            }
+        NavigationLink(value: navigationValue) {
+            MediaCard(item: item)
         }
+        #if os(tvOS)
+        .buttonStyle(.borderless)
+        #else
+        .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
+        .buttonStyle(.plain)
+        #endif
     }
 }
-
 struct MediaNavigationDestinationModifier: ViewModifier {
     let animation: Namespace.ID
     
