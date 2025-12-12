@@ -26,7 +26,7 @@ struct SettingsToolbar: ToolbarContent {
                     #endif
             }
         }
-        #if !os(macOS)
+        #if !os(macOS) && !os(tvOS)
         .matchedTransitionSource(id: "settings-button", in: transition)
         #endif
     }

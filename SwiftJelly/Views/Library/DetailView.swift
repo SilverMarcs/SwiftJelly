@@ -153,7 +153,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .environment(\.refresh, action)
+            .environment(\.refresh, refresh)
         }
     }
     

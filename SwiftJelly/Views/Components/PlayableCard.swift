@@ -15,46 +15,32 @@ struct PlayableCard: View {
     var showRealname: Bool = false
     var showTitle: Bool = true
     var showDescription: Bool = false
-    @State private var showPlayer = false
     
-    let gradient = LinearGradient(
-            gradient: Gradient(stops: [
-                .init(color: .white, location: 0),
-                .init(color: .white, location: 0.6),
-                .init(color: .white.opacity(0.1), location: 1.0)
-            ]),
-            startPoint: .top,
-            endPoint: .bottom
-        )
+    @State private var showPlayer = false
     
     var body: some View {
         VStack {
             PlayMediaButton(item: item) {
                 VStack(alignment: .leading) {
                     LandscapeImageView(item: item)
-                        .mask {
-                            Rectangle()
-                                .fill(.regularMaterial)
-                                .mask {
-                                    gradient
-                                }
-                        }
                         .frame(width: cardWidth, height: cardHeight)
-                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                        .clipShape(.rect(cornerRadius: cornerRadius))
+                        .overlay(alignment: .bottom) {
+                            LinearGradient(
+                                colors: [.black.opacity(0.6), .black.opacity(0.3), .clear],
+                                startPoint: .bottom,
+                                endPoint: .top
+                            )
+                            .frame(height: 70)
+                        }
                         .overlay(alignment: .bottom) {
                             ProgressBarOverlay(item: item)
                                 .padding(.horizontal, 10)
                                 .padding(.bottom, 8)
                         }
-                        .background {
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .fill(.black)
-                        }
-
                         #if !os(macOS)
                         .hoverEffect(.highlight)
                         #endif
-                        
                         #if !os(tvOS)
                         .overlay {
                             RoundedRectangle(cornerRadius: cornerRadius)
@@ -74,8 +60,12 @@ struct PlayableCard: View {
                 }
                 .frame(maxWidth: cardWidth)
             }
-            .foregroundStyle(.primary)
+            #if os(tvOS)
             .buttonStyle(.borderless)
+            #else
+            .buttonStyle(.plain)
+            #endif
+            .foregroundStyle(.primary)
             .contextMenu {
                 if item.type == .movie {
                     Section {
@@ -120,9 +110,7 @@ struct PlayableCard: View {
         }
         .frame(maxWidth: cardWidth)
     }
-    
-    // MARK: - Platform-specific values
-    
+
     private var cardWidth: CGFloat {
         #if os(tvOS)
         456
@@ -146,5 +134,4 @@ struct PlayableCard: View {
         10
         #endif
     }
-
 }
