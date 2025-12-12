@@ -19,14 +19,16 @@ struct SettingsToolbar: ToolbarContent {
                 Label("Settings", systemImage: "gear")
             }
             .sheet(isPresented: $isPresented) {
-                SettingsView()
-                    .presentationDetents([.medium])
-                    #if !os(macOS)
-                    .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
-                    #endif
+                NavigationStack {
+                    SettingsView()
+                        .presentationDetents([.medium])
+                        #if !os(macOS)
+                        .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
+                        #endif
+                }
             }
         }
-        #if !os(macOS) && !os(tvOS)
+        #if os(iOS)
         .matchedTransitionSource(id: "settings-button", in: transition)
         #endif
     }
