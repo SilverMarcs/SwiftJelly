@@ -22,9 +22,7 @@ struct NoServerView: View {
             .buttonStyle(.borderedProminent)
         }
         .sheet(isPresented: $showAddServerSheet) {
-            NavigationStack {
-                AddServerView()
-            }
+            AddServerView()
         }
     }
 }
