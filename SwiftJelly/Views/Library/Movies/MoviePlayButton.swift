@@ -12,25 +12,14 @@ struct MoviePlayButton: View {
                 if item.userData?.isPlayed == true {
                     Text("Play Again")
                 } else if let progress = item.playbackProgress, progress > 0, progress < 1 {
-                    #if os(tvOS)
                     ProgressView(value: progress)
                         .tint(.primary)
+                        #if os(tvOS)
                         .frame(width: 60)
-                    #else
-                    Gauge(value: progress) {
-                        EmptyView()
-                    } currentValueLabel: {
-                        EmptyView()
-                    } minimumValueLabel: {
-                        EmptyView()
-                    } maximumValueLabel: {
-                        EmptyView()
-                    }
-                    .tint(.white)
-                    .gaugeStyle(.accessoryLinearCapacity)
-                    .controlSize(.mini)
-                    .frame(width: 40)
-                    #endif
+                        #else
+                        .controlSize(.mini)
+                        .frame(width: 40)
+                        #endif
                     
                     if let remaining = item.timeRemainingString {
                         Text(remaining)
@@ -43,16 +32,9 @@ struct MoviePlayButton: View {
             .fontWeight(.semibold)
         }
         .animation(.default, value: item.userData?.isPlayed)
-        #if os(tvOS)
         .tint(Color(.accent).secondary)
         .controlSize(.extraLarge)
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
-        #else
-        .tint(Color(.accent).secondary)
-        .buttonBorderShape(.capsule)
-        .controlSize(.extraLarge)
-        .buttonStyle(.glassProminent)
-        #endif
     }
 }
