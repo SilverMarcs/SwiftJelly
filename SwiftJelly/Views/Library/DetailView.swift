@@ -234,9 +234,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         .navigationTitle("")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                FavoriteButton(item: item)
-            }
             #if os(macOS)
             ToolbarItem(placement: .primaryAction) {
                 Button {

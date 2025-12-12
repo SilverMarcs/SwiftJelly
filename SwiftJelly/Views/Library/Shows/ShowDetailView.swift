@@ -4,12 +4,6 @@ import SwiftMediaViewer
 
 struct ShowDetailView: View {
     private var vm: ShowDetailViewModel
-
-#if os(tvOS)
-    private var spacing: CGFloat = 15
-#else
-    private var spacing: CGFloat = 4
-#endif
     
     init(item: BaseItemDto) {
         vm = ShowDetailViewModel(item: item)
@@ -38,16 +32,28 @@ struct ShowDetailView: View {
         } itemDetailContent: {
             HStack(spacing: spacing) {
                 ShowPlayButton(vm: vm)
-                MarkPlayedButton(item: vm.selectedSeason ?? BaseItemDto())
                 
-                #if os(tvOS)
+                if let season = vm.selectedSeason {
+                    MarkPlayedButton(item: season)
+                        .animation(.snappy, value: vm.selectedSeason) // likely doesnt work
+                }
+                
                 FavoriteButton(item: vm.show)
                     .environment(\.refresh, { [weak vm = vm] in
                         await vm?.reloadSeasonsAndEpisodes()
                     })
-                #endif
             }
         }
         .task { await vm.reloadSeasonsAndEpisodes() }
+    }
+    
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        15
+        #elseif os(macOS)
+        8
+        #else
+        4
+        #endif
     }
 }

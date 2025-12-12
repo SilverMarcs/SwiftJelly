@@ -4,12 +4,6 @@ import JellyfinAPI
 
 struct MovieDetailView: View {
     @State private var movie: BaseItemDto
-    
-#if os(tvOS)
-    private var spacing: CGFloat = 15
-#else
-    private var spacing: CGFloat = 4
-#endif
 
     init(item: BaseItemDto) {
         self._movie = State(initialValue: item)
@@ -34,11 +28,10 @@ struct MovieDetailView: View {
             HStack(spacing: spacing) {
                 MoviePlayButton(item: movie)
                     .environment(\.refresh, fetchMovie)
+                
                 MarkPlayedButton(item: movie)
                 
-                #if os(tvOS)
                 FavoriteButton(item: movie)
-                #endif
             }
         }
     }
@@ -49,5 +42,15 @@ struct MovieDetailView: View {
         } catch {
             print("Error loading Movie Detail: \(error.localizedDescription)")
         }
+    }
+    
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        15
+        #elseif os(macOS)
+        8
+        #else
+        4
+        #endif
     }
 }

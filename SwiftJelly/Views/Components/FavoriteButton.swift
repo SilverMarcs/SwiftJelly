@@ -14,17 +14,9 @@ struct FavoriteButton: View {
             Image(systemName: (item.userData?.isFavorite == true) ? "star.fill" : "star")
                 .animation(.snappy, value: item.userData?.isFavorite)
         }
-        #if os(tvOS)
         .controlSize(.extraLarge)
-//        .buttonStyle(.bordered)
-        .buttonBorderShape(.circle)
-        #endif
-        #if os(macOS)
-        .controlSize(.extraLarge)
-        #elseif !os(tvOS)
-        .controlSize(.large)
-        #endif
         .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
         .tint((item.userData?.isFavorite == true) ? .yellow : .secondary)
     }
     

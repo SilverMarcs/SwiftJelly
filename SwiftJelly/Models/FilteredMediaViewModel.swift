@@ -14,7 +14,6 @@ enum MediaFilter {
     case studio(NameGuidPair)
 }
 
-
 @Observable class FilteredMediaViewModel {
     var items: [BaseItemDto] = []
     var isLoading = false
