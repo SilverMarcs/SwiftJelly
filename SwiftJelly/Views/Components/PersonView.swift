@@ -8,29 +8,18 @@ struct PersonView: View {
     var body: some View {
         NavigationLink(value: person) {
             VStack {
-                ZStack {
-                    Rectangle()
-                        .fill(.background.secondary)
+                if let url = ImageURLProvider.personImageURL(for: person) {
+                    CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
+                        .aspectRatio(contentMode: .fill)
                         .frame(width: imageSize, height: imageSize)
-                        .overlay {
-                            Image(systemName: "person.fill")
-                                .font(.title2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                    if let url = ImageURLProvider.personImageURL(for: person) {
-                        CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: imageSize, height: imageSize)
-                    }
+                        #if !os(macOS)
+                        .hoverEffect(.highlight)
+                        #endif
+                        #if !os(tvOS)
+                        .clipShape(.circle)
+                        .clipped()
+                        #endif
                 }
-                #if !os(macOS)
-                .hoverEffect(.highlight)
-                #endif
-                #if !os(tvOS)
-                .clipShape(Circle())
-                .clipped()
-                #endif
                 
                 if let name = person.name {
                     Text(name)
@@ -53,7 +42,11 @@ struct PersonView: View {
         }
         .foregroundStyle(.primary)
         .buttonBorderShape(.circle)
+        #if os(tvOS)
         .buttonStyle(.borderless)
+        #else
+        .buttonStyle(.plain)
+        #endif
     }
 
     private var imageSize: CGFloat {

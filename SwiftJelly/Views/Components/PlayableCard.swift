@@ -24,7 +24,6 @@ struct PlayableCard: View {
                 VStack(alignment: .leading) {
                     LandscapeImageView(item: item)
                         .frame(width: cardWidth, height: cardHeight)
-                        .clipShape(.rect(cornerRadius: cornerRadius))
                         .overlay(alignment: .bottom) {
                             LinearGradient(
                                 colors: [.black.opacity(0.8), .black.opacity(0.5), .black.opacity(0.2), .clear],
@@ -38,6 +37,7 @@ struct PlayableCard: View {
                                 .padding(.horizontal, 10)
                                 .padding(.bottom, 8)
                         }
+                        .clipShape(.rect(cornerRadius: cornerRadius))
                         #if !os(macOS)
                         .hoverEffect(.highlight)
                         #endif

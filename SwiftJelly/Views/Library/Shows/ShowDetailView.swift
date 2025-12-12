@@ -41,6 +41,7 @@ struct ShowDetailView: View {
                 FavoriteButton(item: vm.show)
             }
         }
+        .navigationTitle(vm.show.name ?? "")
         .environment(\.refresh, { [weak vm = vm] in
             await vm?.reloadSeasonsAndEpisodes()
         })

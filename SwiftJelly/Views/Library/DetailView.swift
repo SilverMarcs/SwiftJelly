@@ -229,7 +229,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         }
         .refreshable { await refresh() }
         .ignoresSafeArea(edges: .top)
-        .navigationTitle("")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             #if os(macOS)

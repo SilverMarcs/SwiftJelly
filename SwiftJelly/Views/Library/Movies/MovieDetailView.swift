@@ -33,6 +33,7 @@ struct MovieDetailView: View {
                 FavoriteButton(item: movie)
             }
         }
+        .navigationTitle(movie.name ?? "")
         .environment(\.refresh, fetchMovie)
     }
 
