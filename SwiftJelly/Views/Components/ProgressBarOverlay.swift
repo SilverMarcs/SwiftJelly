@@ -53,8 +53,8 @@ struct ProgressGauge: View {
     var body: some View {
         if let progress, progress > 0, progress < 1 {
             ProgressView(value: progress)
-                .tint(.primary)
                 #if os(tvOS)
+//                .tint(.primary)
                 .frame(width: 100)
                 #else
                 .controlSize(.mini)

@@ -60,12 +60,12 @@ struct PlayableCard: View {
                 }
                 .frame(maxWidth: cardWidth)
             }
+            .foregroundStyle(.primary)
             #if os(tvOS)
             .buttonStyle(.borderless)
             #else
             .buttonStyle(.plain)
             #endif
-            .foregroundStyle(.primary)
             .contextMenu {
                 if item.type == .movie {
                     Section {
