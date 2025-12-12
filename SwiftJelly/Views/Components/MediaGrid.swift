@@ -16,13 +16,9 @@ struct MediaGrid: View {
         [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: columnSpacing)]
     }
     
-    private var verticalSpacing: CGFloat {
-        gridVerticalSpacing
-    }
-    
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: verticalSpacing) {
+            LazyVGrid(columns: columns, spacing: gridVerticalSpacing) {
                 ForEach(items) { item in
                     MediaNavigationLink(item: item)
                         .onAppear {

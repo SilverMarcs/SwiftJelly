@@ -9,8 +9,6 @@ import SwiftUI
 import JellyfinAPI
 
 struct FilteredMediaView: View {
-    @Environment(\.scenePhase) var scenePhase
-
     let filter: MediaFilter
     var viewModel: FilteredMediaViewModel
     
@@ -38,13 +36,13 @@ struct FilteredMediaView: View {
         })
         .navigationTitle(navigationTitle)
         .toolbarTitleDisplayMode(.inline)
-        .onFirstAppear {
-            await viewModel.loadInitialItems()
+        .task {
+            if viewModel.items.isEmpty {
+                await viewModel.loadInitialItems()
+            }
         }
-        #if !os(tvOS)
         .refreshable {
             await viewModel.loadInitialItems()
         }
-        #endif
     }
 }
