@@ -5,43 +5,40 @@ struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     
-    #if os(tvOS)
-    private let episodeSpacing: CGFloat = 32
-    #else
-    private let episodeSpacing: CGFloat = 15
-    #endif
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            if vm.isLoadingEpisodes {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+            }
+            
             if !vm.seasons.isEmpty {
                 Picker("Season", selection: $vm.selectedSeason) {
                     ForEach(vm.seasons) { season in
                         Text(season.name ?? "Season").tag(season as BaseItemDto?)
                     }
                 }
-                .padding(.horizontal)
+                .scenePadding(.horizontal)
                 .padding(.top)
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .menuStyle(.button)
                 .buttonStyle(.glass)
                 .foregroundStyle(.primary)
-#if os(tvOS)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                #if os(tvOS)
                 .focusSection()
-#endif
-            }
-            
-            if !vm.episodes.isEmpty {
+                #endif
+                
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: episodeSpacing) {
-                        ListStartItemSpacer()
-
                         ForEach(vm.episodes) { episode in
                             PlayableCard(item: episode, showRealname: true, showDescription: true)
                                 .id(episode.id)
                         }
                     }
+                    .scenePadding(.horizontal)
                     .scrollTargetLayout()
                 }
                 .scrollPosition($episodeScrollPosition)
@@ -49,10 +46,6 @@ struct ShowSeasonsView: View {
                 .scrollClipDisabled()
                 .focusSection()
                 #endif
-            } else {
-                ProgressView()
-                    .controlSize(.large)
-                    .frame(height: 200)
             }
         }
         .task(id: vm.selectedSeason) {
@@ -76,9 +69,17 @@ struct ShowSeasonsView: View {
                 return !isWatched
             }
         }
-        if targetEpisode == nil { targetEpisode = sortedEpisodes.first }
+        if targetEpisode == nil { targetEpisode = sortedEpisodes.first } // why .last vs .first?
         if let episode = targetEpisode, let episodeId = episode.id {
-            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .leading) }
+            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing) } // trailing so it doesnt getcut off for smaller window sizes
         }
+    }
+
+    private var episodeSpacing: CGFloat {
+        #if os(tvOS)
+        32
+        #else
+        15
+        #endif
     }
 }
