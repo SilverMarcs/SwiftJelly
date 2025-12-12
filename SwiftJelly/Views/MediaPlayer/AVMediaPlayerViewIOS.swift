@@ -25,7 +25,8 @@ struct AVMediaPlayerViewIOS: View {
                     }
             } else if isLoading {
                 ProgressView()
-                    .controlSize(.large)
+                    .tint(.primary)
+                    .controlSize(.extraLarge)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black, ignoresSafeAreaEdges: .all)
                     .task(id: playbackToken) {
@@ -34,10 +35,22 @@ struct AVMediaPlayerViewIOS: View {
             }
         }
         .ignoresSafeArea()
+        .onAppear {
+            #if !os(tvOS)
+            DispatchQueue.main.async {
+                AppUtility.lockOrientation(.all, andRotateTo: .landscapeRight)
+            }
+            #endif
+        }
         .onDisappear {
             Task {
                 await cleanup()
             }
+            #if !os(tvOS)
+            DispatchQueue.main.async {
+                AppUtility.lockOrientation(.portrait, andRotateTo: .portrait)
+            }
+            #endif
         }
         .overlay {
             if isAutoLoadingNext {
