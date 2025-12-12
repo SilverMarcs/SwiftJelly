@@ -34,8 +34,8 @@ struct ProgressBarOverlay: View {
 
 struct ProgressIcon: View {
     let isPlayed: Bool
+    
     var body: some View {
-        // TODO: use glass button here
         if isPlayed {
             Image(systemName: "checkmark.circle.fill")
                 .font(.subheadline)
@@ -52,24 +52,14 @@ struct ProgressGauge: View {
     let progress: Double?
     var body: some View {
         if let progress, progress > 0, progress < 1 {
-            #if os(tvOS)
             ProgressView(value: progress)
                 .tint(.primary)
+                #if os(tvOS)
                 .frame(width: 100)
-            #else
-            Gauge(value: progress) {
-                EmptyView()
-            } currentValueLabel: {
-                EmptyView()
-            } minimumValueLabel: {
-                EmptyView()
-            } maximumValueLabel: {
-                EmptyView()
-            }
-            .controlSize(.mini)
-            .gaugeStyle(.accessoryLinearCapacity)
-            .frame(width: 60)
-            #endif
+                #else
+                .controlSize(.mini)
+                .frame(width: 60)
+                #endif
         }
     }
 }
