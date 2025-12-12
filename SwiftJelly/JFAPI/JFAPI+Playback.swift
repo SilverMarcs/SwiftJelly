@@ -89,22 +89,18 @@ extension JFAPI {
     ) async {
         do {
             let context = try getAPIContext()
-            let payload = PlaybackStartInfoPayload(
-                canSeek: canSeek,
-                itemId: itemID,
-                mediaSourceId: mediaSourceID,
-                audioStreamIndex: audioStreamIndex,
-                subtitleStreamIndex: subtitleStreamIndex,
-                positionTicks: positionTicks,
-                playMethod: playMethod,
-                playSessionId: playSessionID
-            )
-            let request = Request<Void>(
-                path: "/Sessions/Playing",
-                method: "POST",
-                body: payload,
-                id: "ReportPlaybackStart"
-            )
+            var startInfo = PlaybackStartInfo()
+            startInfo.canSeek = canSeek
+            startInfo.itemID = itemID
+            startInfo.mediaSourceID = mediaSourceID
+            startInfo.audioStreamIndex = audioStreamIndex
+            startInfo.subtitleStreamIndex = subtitleStreamIndex
+            startInfo.positionTicks = positionTicks.map { Int($0) }
+            startInfo.playMethod = playMethod
+            startInfo.playSessionID = playSessionID
+            startInfo.isPaused = false
+            startInfo.isMuted = false
+            let request = Paths.reportPlaybackStart(startInfo)
             _ = try await context.client.send(request)
         } catch {
             print("Failed to report playback start: \(error)")
@@ -149,63 +145,15 @@ extension JFAPI {
     ) async {
         do {
             let context = try getAPIContext()
-            let payload = PlaybackStopInfoPayload(
-                itemId: itemID,
-                mediaSourceId: mediaSourceID,
-                positionTicks: positionTicks,
-                playSessionId: playSessionID
-            )
-            let request = Request<Void>(
-                path: "/Sessions/Playing/Stopped",
-                method: "POST",
-                body: payload,
-                id: "ReportPlaybackStopped"
-            )
+            var stopInfo = PlaybackStopInfo()
+            stopInfo.itemID = itemID
+            stopInfo.mediaSourceID = mediaSourceID
+            stopInfo.positionTicks = Int(positionTicks)
+            stopInfo.playSessionID = playSessionID
+            let request = Paths.reportPlaybackStopped(stopInfo)
             _ = try await context.client.send(request)
         } catch {
             print("Failed to report playback stop: \(error)")
         }
-    }
-}
-
-private struct PlaybackStartInfoPayload: Encodable {
-    var canSeek: Bool
-    var itemId: String
-    var mediaSourceId: String?
-    var audioStreamIndex: Int?
-    var subtitleStreamIndex: Int?
-    var isPaused: Bool = false
-    var isMuted: Bool = false
-    var positionTicks: Int64?
-    var playbackStartTimeTicks: Int64?
-    var playMethod: JellyfinAPI.PlayMethod?
-    var playSessionId: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case canSeek = "CanSeek"
-        case itemId = "ItemId"
-        case mediaSourceId = "MediaSourceId"
-        case audioStreamIndex = "AudioStreamIndex"
-        case subtitleStreamIndex = "SubtitleStreamIndex"
-        case isPaused = "IsPaused"
-        case isMuted = "IsMuted"
-        case positionTicks = "PositionTicks"
-        case playbackStartTimeTicks = "PlaybackStartTimeTicks"
-        case playMethod = "PlayMethod"
-        case playSessionId = "PlaySessionId"
-    }
-}
-
-private struct PlaybackStopInfoPayload: Encodable {
-    var itemId: String
-    var mediaSourceId: String?
-    var positionTicks: Int64
-    var playSessionId: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case itemId = "ItemId"
-        case mediaSourceId = "MediaSourceId"
-        case positionTicks = "PositionTicks"
-        case playSessionId = "PlaySessionId"
     }
 }
