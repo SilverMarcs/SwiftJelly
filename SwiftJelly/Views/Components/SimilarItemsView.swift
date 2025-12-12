@@ -23,26 +23,10 @@ struct SimilarItemsView: View {
             }
             
             if !similarItems.isEmpty {
-                Text("Recommended")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .padding(.top)
-                    .scenePadding(.horizontal)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
-                        ForEach(similarItems) { item in
-                            MediaNavigationLink(item: item)
-                                .frame(width: itemWidth)
-                        }
-                    }
-                    .scenePadding(.horizontal)
-                }
-                #if os(tvOS)
-                .scrollClipDisabled()
-                #endif
+                RecentlyAddedView(items: similarItems, header: "Recommended")
             }
         }
+        .padding(.top)
         .task {
             if similarItems.isEmpty {
                 await fetchSimilarItems()
@@ -58,21 +42,5 @@ struct SimilarItemsView: View {
         } catch {
             print("Error loading Similar Items: \(error.localizedDescription)")
         }
-    }
-    
-    private var itemWidth: CGFloat {
-        #if os(tvOS)
-        180
-        #else
-        120
-        #endif
-    }
-
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        40
-        #else
-        12
-        #endif
     }
 }

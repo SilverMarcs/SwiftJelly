@@ -31,7 +31,9 @@ struct ContinueWatchingView: View {
                     PlayableCard(item: item, showTitle: false)
                 }
             }
+            #if !os(tvOS)
             .scenePadding(.horizontal)
+            #endif
         }
     }
     

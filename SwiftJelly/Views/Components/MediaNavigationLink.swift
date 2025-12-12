@@ -32,6 +32,8 @@ struct MediaNavigationLink: View {
         #endif
     }
 }
+
+// TODO: fix teh namespace errors
 struct MediaNavigationDestinationModifier: ViewModifier {
     let animation: Namespace.ID
     

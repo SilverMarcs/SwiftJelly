@@ -13,7 +13,7 @@ struct RecentlyAddedView: View {
                     .scrollClipDisabled()
             }
             #else
-            VStack(alignment: .leading, spacing: headerSpacing) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(header)
                     .font(.title3.bold())
                     .scenePadding(.horizontal)
@@ -32,13 +32,15 @@ struct RecentlyAddedView: View {
                         .frame(width: itemWidth)
                 }
             }
+            #if !os(tvOS)
             .scenePadding(.horizontal)
+            #endif
         }
     }
     
     private var itemWidth: CGFloat {
         #if os(tvOS)
-        220
+        250
         #else
         150
         #endif
@@ -49,14 +51,6 @@ struct RecentlyAddedView: View {
         40
         #else
         12
-        #endif
-    }
-    
-    private var headerSpacing: CGFloat {
-        #if os(tvOS)
-        16
-        #else
-        8
         #endif
     }
 }
