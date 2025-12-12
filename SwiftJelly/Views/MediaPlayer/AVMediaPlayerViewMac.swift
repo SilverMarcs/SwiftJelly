@@ -46,38 +46,7 @@ struct AVMediaPlayerViewMac: View {
         .windowFullScreenBehavior(.disabled)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .gesture(WindowDragGesture())
-        .toolbar {
-            Button {
-                showInfoSheet = true
-            } label: {
-                Image(systemName: "info")
-            }
-
-            if !audioTracks.isEmpty {
-                Menu {
-                    ForEach(audioTracks) { track in
-                        Button(track.displayName) {
-                            Task { await switchAudioTrack(to: track) }
-                        }
-                        .disabled(isSwitchingAudio || track == selectedAudioTrack)
-                    }
-                } label: {
-                    Image(systemName: "speaker.wave.2.fill")
-                }
-            }
-        }
-        .onAppear {
-            if !didConfigureWindow {
-                configureWindow()
-                didConfigureWindow = true
-            }
-        }
-        .onDisappear {
-            Task {
-                await cleanup()
-            }
-        }
-        .sheet(isPresented: $showInfoSheet) {
+        .inspector(isPresented: $showInfoSheet) {
             Form {
                 Section {
                     Text(nowPlaying.name ?? "Unknown")
@@ -92,7 +61,36 @@ struct AVMediaPlayerViewMac: View {
                 }
             }
             .formStyle(.grouped)
-            .frame(maxWidth: 400)
+        }
+        .toolbar {
+            Button {
+                showInfoSheet.toggle()
+            } label: {
+                Image(systemName: "info")
+            }
+
+            if audioTracks.count > 1 {
+                Menu {
+                    ForEach(audioTracks) { track in
+                        Button(track.displayName) {
+                            Task { await switchAudioTrack(to: track) }
+                        }
+                        .disabled(isSwitchingAudio || track == selectedAudioTrack)
+                    }
+                } label: {
+                    Image(systemName: "speaker.wave.2.fill")
+                }
+//                .menuIndicatorVisibility()
+            }
+        }
+        .onAppear {
+            if !didConfigureWindow {
+                configureWindow()
+                didConfigureWindow = true
+            }
+        }
+        .onDisappear {
+            Task { await cleanup() }
         }
     }
 
