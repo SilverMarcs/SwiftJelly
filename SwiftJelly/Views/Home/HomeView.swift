@@ -41,7 +41,7 @@ struct HomeView: View {
         .refreshable {
             await loadAll()
         }
-        .navigationTitle("Continue Watching")
+        .navigationTitle("Home")
         #if os(tvOS)
         .toolbar(.hidden, for: .navigationBar)
         #elseif os(macOS)

@@ -18,18 +18,15 @@ struct SearchView: View {
                     Text(scope.rawValue).tag(scope)
                 }
             }
-            .task(id: searchText) {
+            .onSubmit(of: .search) {
                 Task {
-                    try? await Task.sleep(for: .seconds(0.5))
-                    if !searchText.isEmpty {
-                        await performSearch()
-                    }
+                    await performSearch()
                 }
             }
-            #if !os(tvOS)
-            .toolbarTitleDisplayMode(.inlineLarge)
-            #else
+            #if os(tvOS)
             .toolbar(.hidden, for: .navigationBar)
+            #else
+            .toolbarTitleDisplayMode(.inlineLarge)
             #endif
     }
     
@@ -47,14 +44,13 @@ struct SearchView: View {
     private func performSearch() async {
         guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isLoading = true
+        defer { isLoading = false }
         
         do {
             let items = try await JFAPI.searchMedia(query: searchText)
             results = items
-            isLoading = false
         } catch {
             results = []
-            isLoading = false
         }
     }
     
