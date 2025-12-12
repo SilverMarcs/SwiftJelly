@@ -10,6 +10,7 @@ struct AVMediaPlayerViewIOS: View {
     @State private var playbackToken = UUID()
     @State private var playbackEndObserver: NSObjectProtocol?
     @State private var isAutoLoadingNext = false
+    
     init(item: BaseItemDto) {
         self.item = item
         _nowPlaying = State(initialValue: item)
@@ -36,6 +37,13 @@ struct AVMediaPlayerViewIOS: View {
         .onDisappear {
             Task {
                 await cleanup()
+            }
+        }
+        .overlay {
+            if isAutoLoadingNext {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }

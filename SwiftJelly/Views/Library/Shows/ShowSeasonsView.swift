@@ -7,7 +7,7 @@ struct ShowSeasonsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if vm.isLoadingEpisodes {
+            if vm.isLoadingEpisodes && vm.seasons.isEmpty {
                 ProgressView()
                     .controlSize(.extraLarge)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

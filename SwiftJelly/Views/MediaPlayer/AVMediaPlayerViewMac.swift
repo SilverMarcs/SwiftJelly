@@ -83,6 +83,13 @@ struct AVMediaPlayerViewMac: View {
 //                .menuIndicatorVisibility()
             }
         }
+        .overlay {
+            if isAutoLoadingNext {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
         .onAppear {
             if !didConfigureWindow {
                 configureWindow()
