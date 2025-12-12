@@ -3,6 +3,9 @@ import SwiftMediaViewer
 import JellyfinAPI
 
 struct DetailView<Content: View, ItemDetailContent: View>: View {
+    // need to test this
+    @Environment(\.refresh) private var refresh
+    
 #if !os(tvOS)
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private var logoAlignment: HorizontalAlignment = .center
@@ -25,18 +28,15 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var belowFold = false
 
-    let action: () async -> Void
     let content: Content
     let itemDetailContent: ItemDetailContent
     
     init(
         item: BaseItemDto,
-        action: @escaping () async -> Void,
         @ViewBuilder content: () -> Content,
         @ViewBuilder itemDetailContent: () -> ItemDetailContent
     ) {
         self._item = State(initialValue: item)
-        self.action = action
         self.content = content()
         self.itemDetailContent = itemDetailContent()
     }
@@ -227,9 +227,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 UniversalProgressView()
             }
         }
-        #if !os(tvOS)
-        .refreshable { await action() }
-        #endif
+        .refreshable { await refresh() }
         .ignoresSafeArea(edges: .top)
         .navigationTitle("")
         .toolbarTitleDisplayMode(.inline)
@@ -239,7 +237,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 Button {
                     Task {
                         isLoading = true
-                        await action()
+                        await refresh()
                         isLoading = false
                     }
                 } label: {
@@ -249,15 +247,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             }
             #endif
         }
-        .environment(\.refresh, action)
     }
-    
     #endif
-}
-
-struct ScrollOffsetKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
 }

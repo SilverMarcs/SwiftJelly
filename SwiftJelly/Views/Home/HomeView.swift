@@ -33,8 +33,8 @@ struct HomeView: View {
                 UniversalProgressView()
             }
         }
-        .task(id: scenePhase) {
-            if scenePhase == .active {
+        .task {
+            if  continueWatchingItems.isEmpty {
                 await loadAll()
             }
         }

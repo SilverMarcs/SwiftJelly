@@ -10,7 +10,7 @@ struct ShowDetailView: View {
     }
     
     var body: some View {
-        DetailView(item: vm.show, action: {}) {
+        DetailView(item: vm.show) {
             VStack {
                 ShowSeasonsView(vm: vm)
                     #if os(tvOS)
@@ -39,11 +39,11 @@ struct ShowDetailView: View {
                 }
                 
                 FavoriteButton(item: vm.show)
-                    .environment(\.refresh, { [weak vm = vm] in
-                        await vm?.reloadSeasonsAndEpisodes()
-                    })
             }
         }
+        .environment(\.refresh, { [weak vm = vm] in
+            await vm?.reloadSeasonsAndEpisodes()
+        })
         .task { await vm.reloadSeasonsAndEpisodes() }
     }
     

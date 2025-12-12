@@ -10,7 +10,7 @@ struct MovieDetailView: View {
     }
     
     var body: some View {
-        DetailView(item: movie, action: {}) {
+        DetailView(item: movie) {
             VStack {
                 if let people = movie.people {
                     PeopleScrollView(people: people)
@@ -27,13 +27,13 @@ struct MovieDetailView: View {
         } itemDetailContent: {
             HStack(spacing: spacing) {
                 MoviePlayButton(item: movie)
-                    .environment(\.refresh, fetchMovie)
                 
                 MarkPlayedButton(item: movie)
                 
                 FavoriteButton(item: movie)
             }
         }
+        .environment(\.refresh, fetchMovie)
     }
 
     private func fetchMovie() async {
