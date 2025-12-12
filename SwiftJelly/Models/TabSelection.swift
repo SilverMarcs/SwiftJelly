@@ -58,7 +58,7 @@ enum TabSelection: String, CaseIterable {
         case .favorites: FavoritesView()
         case .libraries: LibraryView()
         case .settings: SettingsView()
-        case .search: EmptyView()
+        case .search: SearchView()
         }
     }
 }

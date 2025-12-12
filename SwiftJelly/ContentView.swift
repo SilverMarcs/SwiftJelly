@@ -16,20 +16,7 @@ struct ContentView: View {
 
     var body: some View {
         if dataManager.servers.isEmpty {
-            NavigationStack {
-                ContentUnavailableView {
-                    Label("No Server Found", systemImage: "server.rack")
-                } description: {
-                    Text("Please connect to a Jellyfin server to continue.")
-                } actions: {
-                    NavigationLink {
-                        AddServerView()
-                    } label: {
-                        Text("Add Server")
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-            }
+            NoServerView()
         } else {
             TabView(selection: $selectedTab) {
                 ForEach(TabSelection.allCases, id: \.self) { tab in
@@ -39,15 +26,8 @@ struct ContentView: View {
                         role: tab == .search ? .search : .none
                     ) {
                         NavigationStack {
-                            Group {
-                                switch tab {
-                                case .search:
-                                    SearchView()
-                                default:
-                                    tab.tabView
-                                }
-                            }
-                            .addNavigationDestionationsForDetailView(animation: animation)
+                            tab.tabView
+                                .addNavigationDestionationsForDetailView(animation: animation)
                         }
                         .environment(\.zoomNamespace, animation)
                     }
