@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct SearchView: View {
-    @Binding var searchText: String
+    @State var searchText: String = ""
     @State private var searchScope: SearchScope = .all
     @State private var results: [BaseItemDto] = []
     @State private var isLoading = false

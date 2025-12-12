@@ -10,10 +10,10 @@ import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
-    @State private var searchText: String = ""
     @Namespace private var animation
-    @State private var dataManager = DataManager.shared
     
+    @State private var dataManager = DataManager.shared
+
     var body: some View {
         if dataManager.servers.isEmpty {
             NavigationStack {
@@ -27,11 +27,7 @@ struct ContentView: View {
                     } label: {
                         Text("Add Server")
                     }
-                    #if os(tvOS)
                     .buttonStyle(.borderedProminent)
-                    #else
-                    .buttonStyle(.borderedProminent)
-                    #endif
                 }
             }
         } else {
@@ -46,15 +42,12 @@ struct ContentView: View {
                             Group {
                                 switch tab {
                                 case .search:
-                                    SearchView(searchText: $searchText)
+                                    SearchView()
                                 default:
                                     tab.tabView
                                 }
                             }
                             .addNavigationDestionationsForDetailView(animation: animation)
-                            .navigationDestination(for: BaseItemPerson.self) { person in
-                                PersonMediaView(person: person)
-                            }
                         }
                         .environment(\.zoomNamespace, animation)
                     }

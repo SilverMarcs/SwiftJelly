@@ -61,7 +61,9 @@ struct MediaNavigationDestinationModifier: ViewModifier {
 #endif
                 }
             }
-        
+            .navigationDestination(for: BaseItemPerson.self) { person in
+                PersonMediaView(person: person)
+            }
             .navigationDestination(for: FilteredMediaViewNavItem.self) { item in
                 FilteredMediaView(filter: .library(item.item))
             }
