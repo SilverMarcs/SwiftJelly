@@ -5,63 +5,19 @@ import JellyfinAPI
 struct DetailView<Content: View, ItemDetailContent: View>: View {
     // need to test this
     @Environment(\.refresh) private var refresh
-    
-#if !os(tvOS)
+    #if !os(tvOS)
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    private var logoAlignment: HorizontalAlignment = .center
-    private var logoContainerAlignment: Alignment = .center
-    private var logoWidth: CGFloat = 300
-    private var logoHeight: CGFloat = 100
-    private var useCompactLayout: Bool { horizontalSizeClass == .compact }
-    private var coverAlignment: HorizontalAlignment { horizontalSizeClass == .compact ? .leading : .center }
-#else
-    private var logoAlignment: HorizontalAlignment = .leading
-    private var logoContainerAlignment: Alignment = .leading
-    private var useCompactLayout: Bool = false
-    private var logoWidth: CGFloat = 450
-    private var logoHeight: CGFloat = 300
-    private var coverAlignment: HorizontalAlignment = .leading
-#endif
+    #endif
 
-    @State private var item: BaseItemDto
+    let item: BaseItemDto
+    @ViewBuilder let content: Content
+    @ViewBuilder let itemDetailContent: ItemDetailContent
+    
     @State private var isLoading = false
-    @State private var scrollOffset: CGFloat = 0
-    @State private var belowFold = false
-
-    let content: Content
-    let itemDetailContent: ItemDetailContent
-    
-    init(
-        item: BaseItemDto,
-        @ViewBuilder content: () -> Content,
-        @ViewBuilder itemDetailContent: () -> ItemDetailContent
-    ) {
-        self._item = State(initialValue: item)
-        self.content = content()
-        self.itemDetailContent = itemDetailContent()
-    }
-    
-    private var backdropHeight: CGFloat {
-        useCompactLayout ? 450 : 450
-    }
 
     var body: some View {
-        #if os(tvOS)
-        tvOSLayout
-        #else
-        standardLayout
-        #endif
+        layout
     }
-    
-    let bottomGradient = LinearGradient(
-            gradient: Gradient(stops: [
-                .init(color: .white, location: 0),
-                .init(color: .white.opacity(1), location: 0.3),
-                .init(color: .white.opacity(0), location: 0.6)
-            ]),
-            startPoint: .bottom,
-            endPoint: .top
-        )
     
     private var coverOverlay: some View {
         VStack(alignment: coverAlignment, spacing: 5) {
@@ -85,7 +41,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                     .padding(.top, 10)
             }
             .padding(.bottom, 20)
-            .frame(maxWidth: .infinity, alignment: logoContainerAlignment)
+            .frame(maxWidth: .infinity, alignment: Alignment(horizontal: logoAlignment, vertical: .center))
 
             if let overview = item.overview {
                 Text(overview)
@@ -103,7 +59,9 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     }
     
 #if os(tvOS)
-    private var tvOSLayout: some View {
+    @State private var belowFold = false
+    
+    private var layout: some View {
         GeometryReader { geo in
             let showcaseHeight = geo.size.height
 
@@ -167,10 +125,8 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             startPoint: .bottomLeading, endPoint: .topTrailing
         )
     }
-
 #else
-    
-    private var standardLayout: some View {
+    private var layout: some View {
         ScrollView {
             let reflectionHeight: CGFloat = 200
             let backdrop = CachedAsyncImage(
@@ -201,13 +157,19 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                         Rectangle()
                             .fill(.regularMaterial)
                             .mask {
-                                bottomGradient
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .white, location: 0),
+                                        .init(color: .white.opacity(1), location: 0.3),
+                                        .init(color: .white.opacity(0), location: 0.6)
+                                    ],
+                                    startPoint: .bottom,
+                                    endPoint: .top
+                                )
                             }
                     }
-                    #if !os(tvOS)
                     .backgroundExtensionEffect()
                     .stretchy()
-                    #endif
                     .overlay(alignment: .bottomLeading) {
                         coverOverlay
                             .padding(.bottom, 20)
@@ -247,5 +209,42 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             #endif
         }
     }
+#endif
+    
+
+    private let backdropHeight: CGFloat = 450
+    
+    private var logoAlignment: HorizontalAlignment {
+    #if os(tvOS)
+        .leading
+    #else
+        .center
     #endif
+    }
+
+
+
+    private var logoWidth: CGFloat {
+    #if os(tvOS)
+        450
+    #else
+        300
+    #endif
+    }
+
+    private var logoHeight: CGFloat {
+    #if os(tvOS)
+        300
+    #else
+        100
+    #endif
+    }
+
+    private var coverAlignment: HorizontalAlignment {
+    #if os(tvOS)
+        .leading
+    #else
+        horizontalSizeClass == .compact ? .leading : .center
+    #endif
+    }
 }
