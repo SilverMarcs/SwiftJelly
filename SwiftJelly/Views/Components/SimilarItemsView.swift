@@ -13,48 +13,34 @@ struct SimilarItemsView: View {
     @State private var isLoading: Bool = false
     @State private var similarItems: [BaseItemDto] = []
     
-    #if os(tvOS)
-    private let itemWidth: CGFloat = 180
-    private let spacing: CGFloat = 40
-    #else
-    private let itemWidth: CGFloat = 120
-    private let spacing: CGFloat = 12
-    #endif
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            if isLoading {
+                ProgressView()
+                    .controlSize(.extraLarge)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+            }
+            
             if !similarItems.isEmpty {
                 Text("Recommended")
-                    #if os(tvOS)
                     .font(.title3)
                     .fontWeight(.bold)
-                    #else
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal)
                     .padding(.top)
-                    #endif
-            
+                    .scenePadding(.horizontal)
+                
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: spacing) {
-                        ListStartItemSpacer()
-
                         ForEach(similarItems) { item in
                             MediaNavigationLink(item: item)
                                 .frame(width: itemWidth)
                         }
                     }
+                    .scenePadding(.horizontal)
                 }
                 #if os(tvOS)
                 .scrollClipDisabled()
                 #endif
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay {
-            if isLoading {
-                ProgressView()
-                    .padding()
             }
         }
         .task {
@@ -72,5 +58,21 @@ struct SimilarItemsView: View {
         } catch {
             print("Error loading Similar Items: \(error.localizedDescription)")
         }
+    }
+    
+    private var itemWidth: CGFloat {
+        #if os(tvOS)
+        180
+        #else
+        120
+        #endif
+    }
+
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        40
+        #else
+        12
+        #endif
     }
 }

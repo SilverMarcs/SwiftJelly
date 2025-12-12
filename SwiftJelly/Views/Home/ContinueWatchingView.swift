@@ -11,12 +11,6 @@ import JellyfinAPI
 struct ContinueWatchingView: View {
     let items: [BaseItemDto]
 
-    #if os(tvOS)
-    private let spacing: CGFloat = 40
-    #else
-    private let spacing: CGFloat = 12
-    #endif
-
     var body: some View {
         if !items.isEmpty {
             #if os(tvOS)
@@ -25,24 +19,30 @@ struct ContinueWatchingView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
-                        ForEach(items, id: \.id) { item in
-                            PlayableCard(item: item, showTitle: false)
-                        }
-                    }
-                }
-                .scrollClipDisabled()
+                carousell
+                    .scrollClipDisabled()
             }
             #else
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: spacing) {
-                    ForEach(items, id: \.id) { item in
-                        PlayableCard(item: item)
-                    }
-                }
-            }
+            carousell
             #endif
         }
+    }
+    
+    var carousell: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    PlayableCard(item: item, showTitle: false)
+                }
+            }
+        }
+    }
+    
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        40
+        #else
+        12
+        #endif
     }
 }

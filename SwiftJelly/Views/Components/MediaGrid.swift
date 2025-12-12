@@ -12,22 +12,13 @@ struct MediaGrid: View {
         self.onLoadMore = onLoadMore
     }
     
-    #if os(tvOS)
-    private let columns = [
-        GridItem(.adaptive(minimum: 220), spacing: 48)
-    ]
-    private let verticalSpacing: CGFloat = 48
-    #elseif os(macOS)
-    private let columns = [
-        GridItem(.adaptive(minimum: 140), spacing: 12)
-    ]
-    private let verticalSpacing: CGFloat = 16
-    #else
-    private let columns = [
-        GridItem(.adaptive(minimum: 105), spacing: 12)
-    ]
-    private let verticalSpacing: CGFloat = 16
-    #endif
+    private var columns: [GridItem] {
+        [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: columnSpacing)]
+    }
+    
+    private var verticalSpacing: CGFloat {
+        gridVerticalSpacing
+    }
     
     var body: some View {
         ScrollView {
@@ -54,5 +45,35 @@ struct MediaGrid: View {
                 ContentUnavailableView.search
             }
         }
+    }
+    
+    private var columnMinimumWidth: CGFloat {
+        #if os(tvOS)
+        220
+        #elseif os(macOS)
+        140
+        #else
+        105
+        #endif
+    }
+
+    private var columnSpacing: CGFloat {
+        #if os(tvOS)
+        48
+        #elseif os(macOS)
+        12
+        #else
+        12
+        #endif
+    }
+
+    private var gridVerticalSpacing: CGFloat {
+        #if os(tvOS)
+        48
+        #elseif os(macOS)
+        16
+        #else
+        16
+        #endif
     }
 }

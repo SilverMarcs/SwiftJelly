@@ -16,16 +16,6 @@ struct PlayableCard: View {
     var showTitle: Bool = true
     var showDescription: Bool = false
     @State private var showPlayer = false
-
-    #if os(tvOS)
-    private let cardWidth: CGFloat = 456
-    private let cardHeight: CGFloat = 257
-    private let cornerRadius: CGFloat = 12
-    #else
-    private let cardWidth: CGFloat = 270
-    private let cardHeight: CGFloat = 168
-    private let cornerRadius: CGFloat = 10
-    #endif
     
     let gradient = LinearGradient(
             gradient: Gradient(stops: [
@@ -36,7 +26,7 @@ struct PlayableCard: View {
             startPoint: .top,
             endPoint: .bottom
         )
-
+    
     var body: some View {
         VStack {
             PlayMediaButton(item: item) {
@@ -124,10 +114,37 @@ struct PlayableCard: View {
                     .font(.caption2)
                     .opacity(0.7)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(5, reservesSpace: true)
+                    .lineLimit(3, reservesSpace: true)
                     .padding(.horizontal, 4)
             }
         }
         .frame(maxWidth: cardWidth)
     }
+    
+    // MARK: - Platform-specific values
+    
+    private var cardWidth: CGFloat {
+        #if os(tvOS)
+        456
+        #else
+        270
+        #endif
+    }
+    
+    private var cardHeight: CGFloat {
+        #if os(tvOS)
+        257
+        #else
+        168
+        #endif
+    }
+    
+    private var cornerRadius: CGFloat {
+        #if os(tvOS)
+        12
+        #else
+        10
+        #endif
+    }
+
 }

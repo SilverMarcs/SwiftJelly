@@ -13,42 +13,40 @@ struct FavoritesView: View {
     @State var favorites: [BaseItemDto] = []
     
     var body: some View {
-        Group {
-            MediaGrid(items: favorites, isLoading: isLoading)
-                .task {
-                    if favorites.isEmpty {
-                        isLoading = true
-                        await fetchFavorites()
-                        isLoading = false
-                    }
-                }
-                .refreshable {
+        MediaGrid(items: favorites, isLoading: isLoading)
+            .task {
+                if favorites.isEmpty {
+                    isLoading = true
                     await fetchFavorites()
+                    isLoading = false
                 }
-                .overlay {
-                    if isLoading {
-                        UniversalProgressView()
-                    }
+            }
+            .refreshable {
+                await fetchFavorites()
+            }
+            .overlay {
+                if isLoading {
+                    UniversalProgressView()
                 }
-                #if os(tvOS)
-                .toolbar(.hidden, for: .navigationBar)
+            }
+            #if os(tvOS)
+            .toolbar(.hidden, for: .navigationBar)
+            #else
+            .navigationTitle("Favorites")
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar {
+                #if os(macOS)
+                Button {
+                    Task { await fetchFavorites() }
+                } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .keyboardShortcut("r")
                 #else
-                .navigationTitle("Favorites")
-                .toolbarTitleDisplayMode(.inlineLarge)
-                .toolbar {
-                    #if os(macOS)
-                    Button {
-                        Task { await fetchFavorites() }
-                    } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
-                    }
-                    .keyboardShortcut("r")
-                    #else
-                    SettingsToolbar()
-                    #endif
-                }
+                SettingsToolbar()
                 #endif
-        }
+            }
+            #endif
     }
     
     func fetchFavorites() async {
