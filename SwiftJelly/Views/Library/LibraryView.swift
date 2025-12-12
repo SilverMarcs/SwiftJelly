@@ -38,10 +38,10 @@ struct LibraryView: View {
                 UniversalProgressView()
             }
         }
+        .navigationTitle("Libraries")
         #if os(tvOS)
         .toolbar(.hidden, for: .navigationBar)
         #else
-        .navigationTitle("Libraries")
         .toolbarTitleDisplayMode(.inlineLarge)
         #endif
         .task {
@@ -54,11 +54,6 @@ struct LibraryView: View {
         .refreshable {
             await loadLibraries()
         }
-        #if !os(macOS) && !os(tvOS)
-        .toolbar {
-            SettingsToolbar()
-        }
-        #endif
     }
     
     private func loadLibraries() async {

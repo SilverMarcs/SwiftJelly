@@ -29,23 +29,20 @@ struct FavoritesView: View {
                     UniversalProgressView()
                 }
             }
+            .navigationTitle("Favorites")
             #if os(tvOS)
             .toolbar(.hidden, for: .navigationBar)
-            #else
-            .navigationTitle("Favorites")
-            .toolbarTitleDisplayMode(.inlineLarge)
+            #elseif os(macOS)
             .toolbar {
-                #if os(macOS)
                 Button {
                     Task { await fetchFavorites() }
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 .keyboardShortcut("r")
-                #else
-                SettingsToolbar()
-                #endif
             }
+            #else
+            .toolbarTitleDisplayMode(.inlineLarge)
             #endif
     }
     

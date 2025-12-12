@@ -38,16 +38,14 @@ struct HomeView: View {
                 await loadAll()
             }
         }
-        .navigationTitle("Continue Watching")
-        #if os(tvOS)
-        .toolbar(.hidden, for: .navigationBar)
-        #else
-        .toolbarTitleDisplayMode(.inlineLarge)
         .refreshable {
             await loadAll()
         }
+        .navigationTitle("Continue Watching")
+        #if os(tvOS)
+        .toolbar(.hidden, for: .navigationBar)
+        #elseif os(macOS)
         .toolbar {
-            #if os(macOS)
             ToolbarItem {
                 Button {
                     Task {
@@ -58,10 +56,9 @@ struct HomeView: View {
                 }
                 .keyboardShortcut("r")
             }
-            #else
-            SettingsToolbar()
-            #endif
         }
+        #else
+        .toolbarTitleDisplayMode(.inlineLarge)
         #endif
     }
 

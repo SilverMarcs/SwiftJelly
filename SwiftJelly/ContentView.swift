@@ -28,6 +28,11 @@ struct ContentView: View {
                         NavigationStack {
                             tab.tabView
                                 .addNavigationDestionationsForDetailView(animation: animation)
+                                #if os(iOS)
+                                .toolbar {
+                                    SettingsToolbar()
+                                }
+                                #endif
                         }
                         .environment(\.zoomNamespace, animation)
                     }
