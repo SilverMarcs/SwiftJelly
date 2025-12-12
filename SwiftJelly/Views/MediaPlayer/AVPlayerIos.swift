@@ -14,12 +14,12 @@ struct AVPlayerIos: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
         controller.player = player
+        controller.allowsPictureInPicturePlayback = true
         #if os(tvOS)
         controller.transportBarIncludesTitleView = true
         #else
         controller.entersFullScreenWhenPlaybackBegins = true
         controller.exitsFullScreenWhenPlaybackEnds = true
-        controller.allowsPictureInPicturePlayback = true
         #endif
         
         return controller
