@@ -60,7 +60,7 @@ struct PersonView: View {
         #if os(tvOS)
         200
         #else
-        1000
+        100
         #endif
     }
 }
