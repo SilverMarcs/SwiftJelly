@@ -28,7 +28,6 @@ struct HomeView: View {
             }
             .scenePadding(.bottom)
         }
-//        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .overlay {
             if isLoading {
                 UniversalProgressView()
