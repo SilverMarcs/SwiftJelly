@@ -8,35 +8,29 @@ struct SearchView: View {
     @State private var isLoading = false
     
     var body: some View {
-        Group {
-            MediaGrid(items: filteredResults, isLoading: isLoading)
-                .contentMargins(.vertical, 10)
-                #if !os(tvOS)
-                .navigationTitle("Search")
-                .toolbarTitleDisplayMode(.inlineLarge)
-                .searchScopes($searchScope, activation: .onSearchPresentation) {
-                    ForEach(SearchScope.allCases) { scope in
-                        Text(scope.rawValue).tag(scope)
-                    }
+        MediaGrid(items: filteredResults, isLoading: isLoading)
+            .contentMargins(.vertical, 10)
+            .navigationTitle("Search")
+            .searchable(text: $searchText, placement: placement, prompt: "Search movies or shows")
+            .searchPresentationToolbarBehavior(.avoidHidingContent)
+            .searchScopes($searchScope) {
+                ForEach(SearchScope.allCases) { scope in
+                    Text(scope.rawValue).tag(scope)
                 }
-                #endif
-                #if !os(macOS)
-                .searchable(text: $searchText, prompt: "Search movies or shows")
-                .onChange(of: searchText) { _, newValue in
-                    Task {
-                        try? await Task.sleep(for: .seconds(0.5))
-                        if !newValue.isEmpty && newValue == searchText {
-                            await performSearch()
-                        }
-                    }
-                }
-                #endif
-                .onSubmit(of: .search) {
-                    Task {
+            }
+            .task(id: searchText) {
+                Task {
+                    try? await Task.sleep(for: .seconds(0.5))
+                    if !searchText.isEmpty {
                         await performSearch()
                     }
                 }
-        }
+            }
+            #if !os(tvOS)
+            .toolbarTitleDisplayMode(.inlineLarge)
+            #else
+            .toolbar(.hidden, for: .navigationBar)
+            #endif
     }
     
     private var filteredResults: [BaseItemDto] {
@@ -62,6 +56,14 @@ struct SearchView: View {
             results = []
             isLoading = false
         }
+    }
+    
+    private var placement: SearchFieldPlacement {
+        #if os(tvOS)
+        .automatic
+        #else
+        .toolbarPrincipal
+        #endif
     }
 }
 

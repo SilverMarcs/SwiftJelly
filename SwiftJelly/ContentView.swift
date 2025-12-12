@@ -61,14 +61,12 @@ struct ContentView: View {
                 }
             }
             #if os(tvOS)
-            .tabViewStyle(.sidebarAdaptable)
+            .tabViewStyle(.tabBarOnly)
             #else
             .tabViewStyle(.sidebarAdaptable)
             .tabViewSearchActivation(.searchTabSelection)
             #endif
-            #if os(macOS)
-            .searchable(text: $searchText, placement: .toolbarPrincipal, prompt: "Search movies or shows")
-            #elseif !os(tvOS)
+            #if os(iOS)
             .tabBarMinimizeBehavior(.onScrollDown)
             #endif
         }
