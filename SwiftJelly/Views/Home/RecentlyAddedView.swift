@@ -5,29 +5,13 @@ struct RecentlyAddedView: View {
     let items: [BaseItemDto]
     var header: String
     
-    #if os(tvOS)
-    private let itemWidth: CGFloat = 220
-    private let spacing: CGFloat = 40
-    private let headerSpacing: CGFloat = 16
-    #else
-    private let itemWidth: CGFloat = 150
-    private let spacing: CGFloat = 12
-    private let headerSpacing: CGFloat = 8
-    #endif
-    
     var body: some View {
         Group {
             if !items.isEmpty {
                 VStack(alignment: .leading, spacing: headerSpacing) {
                     Text(header)
-                        #if os(tvOS)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        #else
-                        .font(.title2)
-                        .bold()
-                        .scenePadding(.leading)
-                        #endif
+                        .font(.title3.bold())
+                        .scenePadding(.horizontal)
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: spacing) {
@@ -36,6 +20,7 @@ struct RecentlyAddedView: View {
                                     .frame(width: itemWidth)
                             }
                         }
+                        .scenePadding(.horizontal)
                     }
                     #if os(tvOS)
                     .scrollClipDisabled()
@@ -43,5 +28,29 @@ struct RecentlyAddedView: View {
                 }
             }
         }
+    }
+    
+    private var itemWidth: CGFloat {
+        #if os(tvOS)
+        220
+        #else
+        150
+        #endif
+    }
+    
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        40
+        #else
+        12
+        #endif
+    }
+    
+    private var headerSpacing: CGFloat {
+        #if os(tvOS)
+        16
+        #else
+        8
+        #endif
     }
 }

@@ -16,8 +16,8 @@ struct ContinueWatchingView: View {
             #if os(tvOS)
             VStack(alignment: .leading, spacing: 16) {
                 Text("Continue Watching")
-                    .font(.title3)
-                    .fontWeight(.bold)
+                    .font(.title3.bold())
+                    .scenePadding(.horizontal)
                 
                 carousell
                     .scrollClipDisabled()
@@ -35,6 +35,7 @@ struct ContinueWatchingView: View {
                     PlayableCard(item: item, showTitle: false)
                 }
             }
+            .scenePadding(.horizontal)
         }
     }
     
