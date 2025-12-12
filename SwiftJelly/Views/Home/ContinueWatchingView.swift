@@ -14,11 +14,7 @@ struct ContinueWatchingView: View {
     var body: some View {
         if !items.isEmpty {
             #if os(tvOS)
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Continue Watching")
-                    .font(.title3.bold())
-                    .scenePadding(.horizontal)
-                
+            Section("Continue Watching") {
                 carousell
                     .scrollClipDisabled()
             }

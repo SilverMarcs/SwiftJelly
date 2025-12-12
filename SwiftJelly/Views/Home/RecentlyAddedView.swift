@@ -6,27 +6,33 @@ struct RecentlyAddedView: View {
     var header: String
     
     var body: some View {
-        Group {
-            if !items.isEmpty {
-                VStack(alignment: .leading, spacing: headerSpacing) {
-                    Text(header)
-                        .font(.title3.bold())
-                        .scenePadding(.horizontal)
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: spacing) {
-                            ForEach(items, id: \.id) { item in
-                                MediaNavigationLink(item: item)
-                                    .frame(width: itemWidth)
-                            }
-                        }
-                        .scenePadding(.horizontal)
-                    }
-                    #if os(tvOS)
+        if !items.isEmpty {
+            #if os(tvOS)
+            Section(header) {
+                scrollView
                     .scrollClipDisabled()
-                    #endif
+            }
+            #else
+            VStack(alignment: .leading, spacing: headerSpacing) {
+                Text(header)
+                    .font(.title3.bold())
+                    .scenePadding(.horizontal)
+
+                scrollView
+            }
+            #endif
+        }
+    }
+    
+    var scrollView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    MediaNavigationLink(item: item)
+                        .frame(width: itemWidth)
                 }
             }
+            .scenePadding(.horizontal)
         }
     }
     

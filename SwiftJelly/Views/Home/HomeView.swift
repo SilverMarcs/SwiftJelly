@@ -17,8 +17,8 @@ struct HomeView: View {
     @State private var isLoading = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: verticalSpacing) {
+        ScrollView([.vertical]) {
+            VStack(alignment: .leading, spacing: 26) {
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
                 
@@ -88,13 +88,5 @@ struct HomeView: View {
         } catch {
             print("Error loading Continue Watching: \(error.localizedDescription)")
         }
-    }
-    
-    private var verticalSpacing: CGFloat {
-        #if os(tvOS)
-        48
-        #else
-        24
-        #endif
     }
 }
