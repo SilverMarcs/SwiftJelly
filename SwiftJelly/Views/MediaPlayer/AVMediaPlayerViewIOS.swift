@@ -35,22 +35,10 @@ struct AVMediaPlayerViewIOS: View {
             }
         }
         .ignoresSafeArea()
-        #if !os(tvOS)
-        .onAppear {
-            DispatchQueue.main.async {
-                AppUtility.lockOrientation(.all, andRotateTo: .landscapeRight)
-            }
-        }
-        #endif
         .onDisappear {
             Task {
                 await cleanup()
             }
-            #if !os(tvOS)
-            DispatchQueue.main.async {
-                AppUtility.lockOrientation(.portrait, andRotateTo: .portrait)
-            }
-            #endif
         }
         .overlay {
             if isAutoLoadingNext {
