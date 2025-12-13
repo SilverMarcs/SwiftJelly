@@ -103,37 +103,37 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     }
     
     private var backdropSection: some View {
-        GeometryReader { geometry in
-            CachedAsyncImage(
-                url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-                targetSize: 1500
-            )
-            .scaledToFill()
-            .frame(width: geometry.size.width, height: height)
-            .clipped()
-            .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(.regularMaterial)
-                    .mask {
-                        LinearGradient(
-                            colors: [.white, .white.opacity(0.95), .clear],
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                    }
-                    .frame(height: 300)
-            }
-            .backgroundExtensionEffect()
-            .overlay(alignment: .bottomLeading) {
-                CoverOverlayView(item: item) {
-                    itemDetailContent
-                }
-                .padding(.bottom, 20)
-            }
-            .environment(\.colorScheme, .dark)
-        }
+        CachedAsyncImage(
+            url: ImageURLProvider.imageURL(for: item, type: .backdrop),
+            targetSize: 1500
+        )
+        .scaledToFill()
+        #if os(iOS)
+        .containerRelativeFrame(.horizontal)
+        #endif
         .frame(height: height)
+        .clipped()
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(.regularMaterial)
+                .mask {
+                    LinearGradient(
+                        colors: [.white, .white.opacity(0.95), .clear],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                }
+                .frame(height: 300)
+        }
+        .backgroundExtensionEffect()
+        .overlay(alignment: .bottomLeading) {
+            CoverOverlayView(item: item) {
+                itemDetailContent
+            }
+            .padding(.bottom, 20)
+        }
         .stretchy()
+        .environment(\.colorScheme, .dark)
     }
     
     var height: CGFloat {
