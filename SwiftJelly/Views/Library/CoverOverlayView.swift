@@ -31,6 +31,7 @@ struct CoverOverlayView<ItemDetailContent: View>: View {
             
             AttributesView(item: item)
         }
+        .scenePadding(.horizontal)
         .frame(maxWidth: .infinity, alignment: Alignment(horizontal: logoAlignment, vertical: .center))
     }
 
@@ -62,7 +63,7 @@ struct CoverOverlayView<ItemDetailContent: View>: View {
     #if os(tvOS)
         .leading
     #else
-        horizontalSizeClass == .compact ? .leading : .center
+        .center
     #endif
     }
 }

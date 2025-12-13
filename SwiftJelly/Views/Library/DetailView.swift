@@ -81,7 +81,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             }
             .scenePadding(.bottom)
         }
-        .refreshable { await refresh() }
+//        .refreshable { await refresh() }
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
         #if os(macOS)
@@ -103,34 +103,45 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     }
     
     private var backdropSection: some View {
-        CachedAsyncImage(
-            url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1500
-        )
-        .scaledToFill()
-        .frame(height: 480)
-        .clipped()
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(.regularMaterial)
-                .mask {
-                    LinearGradient(
-                        colors: [.white, .white.opacity(0.95), .clear],
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                }
-                .frame(height: 300)
-        }
-        .backgroundExtensionEffect()
-        .overlay(alignment: .bottomLeading) {
-            CoverOverlayView(item: item) {
-                itemDetailContent
+        GeometryReader { geometry in
+            CachedAsyncImage(
+                url: ImageURLProvider.imageURL(for: item, type: .backdrop),
+                targetSize: 1500
+            )
+            .scaledToFill()
+            .frame(width: geometry.size.width, height: height)
+            .clipped()
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(.regularMaterial)
+                    .mask {
+                        LinearGradient(
+                            colors: [.white, .white.opacity(0.95), .clear],
+                            startPoint: .bottom,
+                            endPoint: .top
+                        )
+                    }
+                    .frame(height: 300)
             }
-            .padding(.bottom, 20)
+            .backgroundExtensionEffect()
+            .overlay(alignment: .bottomLeading) {
+                CoverOverlayView(item: item) {
+                    itemDetailContent
+                }
+                .padding(.bottom, 20)
+            }
+            .environment(\.colorScheme, .dark)
         }
+        .frame(height: height)
         .stretchy()
-        .environment(\.colorScheme, .dark)
     }
+    
+    var height: CGFloat {
+        #if os(macOS)
+        480
+        #else
+        600
+        #endif
+    }    
 #endif
 }

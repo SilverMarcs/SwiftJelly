@@ -76,9 +76,9 @@ struct AVMediaPlayerViewMac: View {
                         .disabled(isSwitchingAudio || track == selectedAudioTrack)
                     }
                 } label: {
-                    Label("Audio", systemName: "speaker.wave.2.fill")
+                    Label("Audio", systemImage: "speaker.wave.2.fill")
                 }
-                .menuIndicator(.visible)
+                .menuIndicator(.hidden)
             }
         }
         .overlay {
@@ -101,7 +101,7 @@ struct AVMediaPlayerViewMac: View {
 
     private func configureWindow() {
         if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
-            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: item)
+            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: nowPlaying)
             
             window.aspectRatio = NSSize(width: videoWidth, height: videoHeight)
             

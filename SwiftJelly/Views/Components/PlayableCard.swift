@@ -23,6 +23,20 @@ struct PlayableCard: View {
             LabelStack(alignment: .leading) {
                 LandscapeImageView(item: item)
                     .frame(width: cardWidth, height: cardHeight)
+                #if os(tvOS)
+                    .overlay(alignment: .bottom) {
+                        Rectangle()
+                            .fill(.regularMaterial)
+                            .mask {
+                                LinearGradient(
+                                    colors: [.black, .clear],
+                                    startPoint: .bottom,
+                                    endPoint: .top
+                                )
+                            }
+                            .frame(height: cardHeight * 0.8)
+                    }
+                #else
                     .overlay(alignment: .bottom) {
                         LinearGradient(
                             colors: [.black.opacity(0.8), .black.opacity(0.5), .black.opacity(0.2), .clear],
@@ -31,10 +45,14 @@ struct PlayableCard: View {
                         )
                         .frame(height: 70)
                     }
+                #endif
                     .overlay(alignment: .bottom) {
                         ProgressBarOverlay(item: item)
                             .padding(.horizontal, 10)
                             .padding(.bottom, 8)
+                        #if os(tvOS)
+                            .padding(7)
+                        #endif
                     }
                     .clipShape(.rect(cornerRadius: cornerRadius))
                     #if !os(macOS)
@@ -111,7 +129,7 @@ struct PlayableCard: View {
 
     private var cardWidth: CGFloat {
         #if os(tvOS)
-        456
+        548
         #else
         270
         #endif
@@ -119,7 +137,7 @@ struct PlayableCard: View {
     
     private var cardHeight: CGFloat {
         #if os(tvOS)
-        257
+        309
         #else
         168
         #endif

@@ -19,9 +19,16 @@ struct OverviewView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(4)
+                    .lineLimit(lineLimit)
             }
         }
-        .scenePadding(.horizontal)
+    }
+    
+    var lineLimit: Int {
+        #if os(iOS)
+        2
+        #else
+        4
+        #endif
     }
 }
