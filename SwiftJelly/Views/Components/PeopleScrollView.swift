@@ -13,7 +13,7 @@ struct PeopleScrollView: View {
     
     var body: some View {
         SectionContainer("Cast & Crew", spacing: spacing) {
-            ForEach(people, id: \.self) { person in
+            ForEach(people, id: \.id) { person in
                 PersonView(person: person)
             }
         }

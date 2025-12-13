@@ -35,6 +35,11 @@ struct MediaGrid: View {
             #if os(tvOS)
             .padding(.top, 20)
             #endif
+            
+            if isLoading && !items.isEmpty {
+                UniversalProgressView()
+                    .padding(.vertical, 24)
+            }
         }
         .overlay {
             if isLoading && items.isEmpty {

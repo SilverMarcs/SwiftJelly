@@ -28,10 +28,20 @@ enum MediaFilter {
     }
     
     func loadInitialItems() async {
-        currentPage = 0
-        hasNextPage = true
-        items = []
-        await loadNextPage()
+        guard !isLoading else { return }
+        
+        isLoading = true
+        
+        do {
+            let newItems = try await loadItems(page: 0)
+            items = newItems
+            hasNextPage = newItems.count >= pageSize
+            currentPage = 1
+        } catch {
+            print("Error loading items: \(error.localizedDescription)")
+        }
+        
+        isLoading = false
     }
     
     func loadNextPage() async {
