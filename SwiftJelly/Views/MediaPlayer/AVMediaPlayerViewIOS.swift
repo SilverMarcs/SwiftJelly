@@ -3,8 +3,6 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewIOS: View {
-    let item: BaseItemDto
-    
     @State private var nowPlaying: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true
@@ -13,7 +11,6 @@ struct AVMediaPlayerViewIOS: View {
     @State private var isAutoLoadingNext = false
     
     init(item: BaseItemDto) {
-        self.item = item
         _nowPlaying = State(initialValue: item)
     }
 
@@ -27,7 +24,7 @@ struct AVMediaPlayerViewIOS: View {
             } else if isLoading {
                 ProgressView()
                     .tint(.primary)
-                    .controlSize(.extraLarge)
+                    .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black, ignoresSafeAreaEdges: .all)
                     .task(id: playbackToken) {

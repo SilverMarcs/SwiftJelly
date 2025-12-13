@@ -3,7 +3,6 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewMac: View {
-    let item: BaseItemDto
     @State private var nowPlaying: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true
@@ -19,7 +18,6 @@ struct AVMediaPlayerViewMac: View {
     @State private var isSwitchingAudio = false
 
     init(item: BaseItemDto) {
-        self.item = item
         _nowPlaying = State(initialValue: item)
     }
 
@@ -78,9 +76,9 @@ struct AVMediaPlayerViewMac: View {
                         .disabled(isSwitchingAudio || track == selectedAudioTrack)
                     }
                 } label: {
-                    Image(systemName: "speaker.wave.2.fill")
+                    Label("Audio", systemName: "speaker.wave.2.fill")
                 }
-//                .menuIndicatorVisibility()
+                .menuIndicator(.visible)
             }
         }
         .overlay {
