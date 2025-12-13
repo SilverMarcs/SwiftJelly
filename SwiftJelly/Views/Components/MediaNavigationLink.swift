@@ -24,11 +24,7 @@ struct MediaNavigationLink<Label: View>: View {
         NavigationLink(value: navigationValue) {
             label()
         }
-        #if os(tvOS)
-        .buttonStyle(.borderless)
-        #else
-        .buttonStyle(.plain)
-        #endif
+        .adaptiveButtonStyle()
     }
 }
 

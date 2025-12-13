@@ -90,11 +90,7 @@ struct PlayableCard: View {
             }
         }
         .foregroundStyle(.primary)
-        #if os(tvOS)
-        .buttonStyle(.borderless)
-        #else
-        .buttonStyle(.plain)
-        #endif
+        .adaptiveButtonStyle()
         .contextMenu {
             if !isInSeasonView {
                 Section {

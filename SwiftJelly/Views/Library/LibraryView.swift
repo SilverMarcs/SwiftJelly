@@ -20,15 +20,12 @@ struct LibraryView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: gridSpacing) {
                 ForEach(libraries, id: \.id) { library in
-                    NavigationLink(value: FilteredMediaViewNavItem(item: library)) {
+                    MediaNavigationLink(item: library) {
                         LandscapeImageView(item: library)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            #if !os(tvOS)
+                            .clipShape(.rect(cornerRadius: 12))
+                            #endif
                     }
-                    #if os(tvOS)
-                    .buttonStyle(.card)
-                    #else
-                    .buttonStyle(.plain)
-                    #endif
                 }
             }
             .scenePadding(.horizontal)

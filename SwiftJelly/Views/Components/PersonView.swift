@@ -44,11 +44,7 @@ struct PersonView: View {
             }
         }
         .buttonBorderShape(.circle)
-        #if os(tvOS)
-        .buttonStyle(.borderless)
-        #else
-        .buttonStyle(.plain)
-        #endif
+        .adaptiveButtonStyle()
     }
     private var imageSize: CGFloat {
         #if os(tvOS)
