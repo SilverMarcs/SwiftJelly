@@ -23,7 +23,8 @@ struct PlayableCard: View {
         PlayMediaButton(item: item) {
             LabelStack(alignment: .leading) {
                 LandscapeImageView(item: item)
-                    .frame(width: cardWidth, height: cardHeight)
+                    .aspectRatio(16/9, contentMode: .fit)
+                    .frame(width: cardWidth)
                 #if os(tvOS)
                     .overlay(alignment: .bottom) {
                         Rectangle()
@@ -35,7 +36,7 @@ struct PlayableCard: View {
                                     endPoint: .top
                                 )
                             }
-                            .frame(height: cardHeight * 0.8)
+                            .frame(height: cardWidth * 9/16 * 0.8)
                     }
                 #else
                     .overlay(alignment: .bottom) {
@@ -120,14 +121,6 @@ struct PlayableCard: View {
         548
         #else
         270
-        #endif
-    }
-    
-    private var cardHeight: CGFloat {
-        #if os(tvOS)
-        309
-        #else
-        168
         #endif
     }
     
