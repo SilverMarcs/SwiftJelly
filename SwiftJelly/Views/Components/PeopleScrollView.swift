@@ -12,32 +12,22 @@ struct PeopleScrollView: View {
     let people: [BaseItemPerson]
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Cast & Crew")
-                .font(.title3)
-                .fontWeight(.bold)
-                .padding(.top)
-                .scenePadding(.horizontal)
-            
+        SectionContainer("Cast & Crew") {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: spacing) {
                     ForEach(people, id: \.self) { person in
                         PersonView(person: person)
                     }
                 }
+                #if !os(tvOS)
                 .scenePadding(.horizontal)
+                #endif
             }
-            #if os(tvOS)
-            .scrollClipDisabled()
-            #endif
         }
-    }
-    
-    private var personWidth: CGFloat {
         #if os(tvOS)
-        130
+        .frame(maxWidth: .infinity, alignment: .leading)
         #else
-        80
+        .padding(.top)
         #endif
     }
 

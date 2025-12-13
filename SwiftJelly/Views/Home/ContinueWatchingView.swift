@@ -13,28 +13,27 @@ struct ContinueWatchingView: View {
 
     var body: some View {
         if !items.isEmpty {
-            #if os(tvOS)
-            Section("Continue Watching") {
-                carousell
-                    .scrollClipDisabled()
+            SectionContainer("Continue Watching", showHeader: isTVOS) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: spacing) {
+                        ForEach(items, id: \.id) { item in
+                            PlayableCard(item: item, showTitle: false)
+                        }
+                    }
+                    #if !os(tvOS)
+                    .scenePadding(.horizontal)
+                    #endif
+                }
             }
-            #else
-            carousell
-            #endif
         }
     }
     
-    var carousell: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: spacing) {
-                ForEach(items, id: \.id) { item in
-                    PlayableCard(item: item, showTitle: false)
-                }
-            }
-            #if !os(tvOS)
-            .scenePadding(.horizontal)
-            #endif
-        }
+    private var isTVOS: Bool {
+        #if os(tvOS)
+        true
+        #else
+        false
+        #endif
     }
     
     private var spacing: CGFloat {
