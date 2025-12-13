@@ -25,28 +25,7 @@ struct PlayableCard: View {
                 LandscapeImageView(item: item)
                     .aspectRatio(16/9, contentMode: .fit)
                     .frame(width: cardWidth)
-                #if os(tvOS)
-                    .overlay(alignment: .bottom) {
-                        Rectangle()
-                            .fill(.regularMaterial)
-                            .mask {
-                                LinearGradient(
-                                    colors: [.black, .clear],
-                                    startPoint: .bottom,
-                                    endPoint: .top
-                                )
-                            }
-                            .frame(height: cardWidth * 9/16 * 0.8)
-                    }
-                #else
-                    .overlay {
-                        LinearGradient(
-                            colors: [.clear, .black.opacity(0.8)],
-                            startPoint: .center,
-                            endPoint: .bottom
-                        )
-                    }
-                #endif
+                    .blurredBottomOverlay()
                     .overlay(alignment: .bottom) {
                         ProgressBarOverlay(item: item)
                             .padding(.horizontal, 10)
@@ -55,9 +34,8 @@ struct PlayableCard: View {
                             .padding(7)
                         #endif
                     }
-                    #if !os(tvOS)
                     .cardBorder()
-                    #else
+                    #if os(tvOS)
                     .hoverEffect(.highlight)
                     #endif
 
@@ -110,7 +88,7 @@ struct PlayableCard: View {
         #if os(tvOS)
         548
         #else
-        300
+        280
         #endif
     }
 }

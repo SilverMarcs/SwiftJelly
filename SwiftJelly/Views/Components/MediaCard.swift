@@ -16,6 +16,7 @@ struct MediaCard: View {
         LabelStack(alignment: .leading) {
             PortraitImageView(item: item)
                 .cardBorder()
+//                .blurredBottomOverlay()
                 .overlay(alignment: .topTrailing) {
                     if item.userData?.isPlayed ?? false {
                         Image(systemName: "checkmark.circle.fill")

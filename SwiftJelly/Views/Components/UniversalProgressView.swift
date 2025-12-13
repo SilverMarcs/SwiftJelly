@@ -10,7 +10,7 @@ import SwiftUI
 struct UniversalProgressView: View {
     var body: some View {
         ProgressView()
-            .controlSize(.extraLarge)
+            .controlSize(.large)
             .padding()
 //            .glassEffect(in: .circle)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
