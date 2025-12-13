@@ -53,6 +53,9 @@ struct MediaCard: View {
                         }
                     }
                 }
+                #if os(tvOS)
+                .hoverEffect(.highlight)
+                #endif
             
             Text(item.name ?? "Unknown")
                 .font(.caption)

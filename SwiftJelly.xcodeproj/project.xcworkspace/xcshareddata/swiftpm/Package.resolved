@@ -16,7 +16,7 @@
       "location" : "https://github.com/SilverMarcs/jellyfin-sdk-swift",
       "state" : {
         "branch" : "main",
-        "revision" : "0e8f3639346fd637766d8ea3453157b90e177191"
+        "revision" : "e6c33998260367bf536693f9d38670dcb29beaa1"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/SilverMarcs/SwiftMediaViewer",
       "state" : {
         "branch" : "main",
-        "revision" : "e026ae4dd6cc03ad5e96fbb4cce1a904a1c86279"
+        "revision" : "f7b11e31a425f7ccb468253a9cd7606b4f14c419"
       }
     },
     {
