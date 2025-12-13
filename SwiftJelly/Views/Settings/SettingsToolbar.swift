@@ -24,7 +24,9 @@ struct SettingsModifier: ViewModifier {
                         Label("Settings", systemImage: "gear")
                     }
                 }
+                #if !os(tvOS)
                 .matchedTransitionSource(id: "settings-button", in: transition)
+                #endif
             }
             .sheet(isPresented: $isPresented) {
                 NavigationStack {

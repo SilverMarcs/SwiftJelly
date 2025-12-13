@@ -59,7 +59,7 @@ struct MediaGrid: View {
         #if os(tvOS)
         48
         #elseif os(macOS)
-        12
+        18
         #else
         12
         #endif
@@ -68,8 +68,6 @@ struct MediaGrid: View {
     private var gridVerticalSpacing: CGFloat {
         #if os(tvOS)
         48
-        #elseif os(macOS)
-        16
         #else
         16
         #endif

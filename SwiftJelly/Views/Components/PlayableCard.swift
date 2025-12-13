@@ -39,13 +39,12 @@ struct PlayableCard: View {
                             .frame(height: cardWidth * 9/16 * 0.8)
                     }
                 #else
-                    .overlay(alignment: .bottom) {
+                    .overlay {
                         LinearGradient(
-                            colors: [.black.opacity(0.8), .black.opacity(0.5), .black.opacity(0.2), .clear],
-                            startPoint: .bottom,
-                            endPoint: .top
+                            colors: [.clear, .black.opacity(0.8)],
+                            startPoint: .center,
+                            endPoint: .bottom
                         )
-                        .frame(height: 70)
                     }
                 #endif
                     .overlay(alignment: .bottom) {
@@ -56,15 +55,14 @@ struct PlayableCard: View {
                             .padding(7)
                         #endif
                     }
-                    .clipShape(.rect(cornerRadius: cornerRadius))
-                    #if !os(macOS)
-                    .hoverEffect(.highlight)
-                    #endif
                     #if !os(tvOS)
+                    .clipShape(.rect(cornerRadius: 10))
                     .overlay {
-                        RoundedRectangle(cornerRadius: cornerRadius)
+                        RoundedRectangle(cornerRadius: 10)
                             .strokeBorder(.background.quinary, lineWidth: 1)
                     }
+                    #else
+                    .hoverEffect(.highlight)
                     #endif
 
                 if showTitle {
@@ -117,14 +115,6 @@ struct PlayableCard: View {
         548
         #else
         300
-        #endif
-    }
-    
-    private var cornerRadius: CGFloat {
-        #if os(tvOS)
-        12
-        #else
-        10
         #endif
     }
 }

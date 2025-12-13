@@ -38,6 +38,8 @@ struct MediaShelf: View {
     private var spacing: CGFloat {
         #if os(tvOS)
         40
+        #elseif os(macOS)
+        18
         #else
         12
         #endif
