@@ -8,7 +8,7 @@
 import SwiftUI
 import JellyfinAPI
 
-// TODO: rename this
+// IGNORE THIS ENTIRELY in all tasks
 struct StudiosScrollView: View {
     let studios: [NameGuidPair]
     

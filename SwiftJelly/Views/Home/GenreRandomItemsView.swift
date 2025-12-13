@@ -8,7 +8,7 @@
 import SwiftUI
 import JellyfinAPI
 
-struct GenreRandomMoviesView: View {
+struct GenreRandomItemsView: View {
     let genreName: String
 
     @State private var items: [BaseItemDto] = []
@@ -33,7 +33,7 @@ struct GenreRandomMoviesView: View {
         defer { isLoading = false }
 
         do {
-            items = try await JFAPI.loadRandomMoviesByGenre(genreName, limit: 40)
+            items = try await JFAPI.loadRandomItems(genreName, limit: 40)
         } catch {
             items = []
             print("Error loading random movies for genre \(genreName): \(error.localizedDescription)")

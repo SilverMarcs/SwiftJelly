@@ -33,7 +33,7 @@ struct ShowSeasonsView: View {
                 #endif
                 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .top, spacing: episodeSpacing) {
+                    HStack(spacing: episodeSpacing) {
                         ForEach(vm.episodes) { episode in
                             PlayableCard(item: episode, showRealname: true, showDescription: true)
                                 .id(episode.id)

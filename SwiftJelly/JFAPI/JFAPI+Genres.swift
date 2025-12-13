@@ -23,13 +23,13 @@ extension JFAPI {
         return try await send(request).items ?? []
     }
 
-    static func loadRandomMoviesByGenre(_ genre: String, limit: Int = 40) async throws -> [BaseItemDto] {
+    static func loadRandomItems(_ genre: String, limit: Int = 40) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.isRecursive = true
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
-        parameters.includeItemTypes = [.movie]
+        parameters.includeItemTypes = [.movie, .series]
         parameters.genres = [genre]
         parameters.limit = limit
         parameters.sortBy = ["Random"]
