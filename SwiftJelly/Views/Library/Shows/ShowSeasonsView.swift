@@ -6,6 +6,7 @@ struct ShowSeasonsView: View {
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     
     var body: some View {
+        // TODO: use section in tvos to put teh season picker
         VStack(alignment: .leading, spacing: 16) {
             if vm.isLoadingEpisodes && vm.seasons.isEmpty {
                 ProgressView()
@@ -79,7 +80,7 @@ struct ShowSeasonsView: View {
         #if os(tvOS)
         32
         #else
-        15
+        8
         #endif
     }
 }

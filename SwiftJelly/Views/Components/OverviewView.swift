@@ -13,11 +13,13 @@ struct OverviewView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let firstTagline = item.taglines?.first {
-                Text(firstTagline)
-                    .font(.title3)
+            if let overview = item.overview ??  item.taglines?.first {
+                Text(overview)
+                    .font(.callout)
                     .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(4)
             }
         }
         .scenePadding(.horizontal)
