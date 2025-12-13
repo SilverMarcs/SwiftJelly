@@ -27,6 +27,9 @@ struct PersonMediaView: View {
             .refreshable {
                 await loadItems()
             }
+            .refreshToolbar {
+                await loadItems()
+            }
     }
 
     private func loadItems() async {

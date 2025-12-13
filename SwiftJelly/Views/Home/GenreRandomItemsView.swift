@@ -26,6 +26,9 @@ struct GenreRandomItemsView: View {
             .refreshable {
                 await load()
             }
+            .refreshToolbar {
+                await load()
+            }
     }
 
     private func load() async {
@@ -40,4 +43,3 @@ struct GenreRandomItemsView: View {
         }
     }
 }
-

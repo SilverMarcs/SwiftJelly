@@ -84,19 +84,10 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
 //        .refreshable { await refresh() }
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    Task {
-                        isLoading = true
-                        await refresh()
-                        isLoading = false
-                    }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .keyboardShortcut("r")
-            }
+        .refreshToolbar {
+            isLoading = true
+            await refresh()
+            isLoading = false
         }
         .scrollEdgeEffectHidden(true, for: .top)
     }

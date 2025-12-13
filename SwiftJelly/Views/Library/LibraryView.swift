@@ -51,6 +51,9 @@ struct LibraryView: View {
         .refreshable {
             await loadLibraries()
         }
+        .refreshToolbar {
+            await loadLibraries()
+        }
     }
     
     private func loadLibraries() async {

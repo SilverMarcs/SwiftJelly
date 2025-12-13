@@ -45,21 +45,11 @@ struct HomeView: View {
             await loadAll()
         }
         .navigationTitle("Home")
+        .refreshToolbar {
+            await loadAll()
+        }
         #if os(tvOS)
         .toolbar(.hidden, for: .navigationBar)
-        #elseif os(macOS)
-        .toolbar {
-            ToolbarItem {
-                Button {
-                    Task {
-                        await loadAll()
-                    }
-                } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
-                }
-                .keyboardShortcut("r")
-            }
-        }
         #else
         .toolbarTitleDisplayMode(.inlineLarge)
         #endif

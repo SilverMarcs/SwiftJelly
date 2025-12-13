@@ -30,17 +30,11 @@ struct FavoritesView: View {
                 }
             }
             .navigationTitle("Favorites")
+            .refreshToolbar {
+                await fetchFavorites()
+            }
             #if os(tvOS)
             .toolbar(.hidden, for: .navigationBar)
-            #elseif os(macOS)
-            .toolbar {
-                Button {
-                    Task { await fetchFavorites() }
-                } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
-                }
-                .keyboardShortcut("r")
-            }
             #else
             .toolbarTitleDisplayMode(.inlineLarge)
             #endif

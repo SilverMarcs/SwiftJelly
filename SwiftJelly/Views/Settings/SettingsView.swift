@@ -30,7 +30,6 @@ struct SettingsView: View {
         .toolbarTitleDisplayMode(.inline)
         #if os(tvOS)
         .toolbar(.hidden, for: .navigationBar)
-//        .frame(maxWidth: 800)
         #endif
         #if os(iOS)
         .toolbar {
