@@ -18,7 +18,7 @@ struct ShowDetailView: View {
                     guard let seriesId = series.id,
                           let fullSeries = try? await JFAPI.loadItem(by: seriesId) else { return }
                     let viewModel = ShowDetailViewModel(item: fullSeries)
-                    await viewModel.reloadSeasonsAndEpisodes()
+                    await viewModel.loadSeasonsAndEpisodes()
                     vm = viewModel
                 }
         }
@@ -56,7 +56,7 @@ struct ShowDetailView: View {
             }
         }
         .environment(\.refresh, { [weak vm = vm] in
-            await vm?.reloadSeasonsAndEpisodes()
+            await vm?.loadSeasonsAndEpisodes()
         })
     }
     

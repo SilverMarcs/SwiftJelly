@@ -98,6 +98,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 .keyboardShortcut("r")
             }
         }
+        .scrollEdgeEffectHidden(true, for: .top)
     }
     
     private var backdropSection: some View {

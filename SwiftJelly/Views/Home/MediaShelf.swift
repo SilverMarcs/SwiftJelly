@@ -28,6 +28,8 @@ struct MediaShelf: View {
     private var itemWidth: CGFloat {
         #if os(tvOS)
         250
+        #elseif os(iOS)
+        125
         #else
         150
         #endif

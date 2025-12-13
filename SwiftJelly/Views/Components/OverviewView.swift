@@ -16,7 +16,7 @@ struct OverviewView: View {
             if let overview = item.overview ??  item.taglines?.first {
                 Text(overview)
                     .font(.callout)
-                    .fontWeight(.semibold)
+//                    .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
                     .lineLimit(lineLimit)

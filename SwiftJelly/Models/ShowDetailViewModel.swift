@@ -31,8 +31,8 @@ import Combine
         isLoading = true
         defer { isLoading = false }
         await withTaskGroup(of: Void.self) { group in
-            group.addTask { await self.reloadShow() }
-            group.addTask { await self.reloadSeasonsAndEpisodes() }
+            group.addTask { await self.loadShowDetail() }
+            group.addTask { await self.loadSeasonsAndEpisodes() }
         }
     }
     
@@ -45,14 +45,14 @@ import Combine
     func markEpisodePlayed(_ episode: BaseItemDto) async {
         do {
             try await JFAPI.toggleItemPlayedStatus(item: episode)
-            await reloadSeasonsAndEpisodes()
+            await loadSeasonsAndEpisodes()
         } catch { 
             print("Toggle played failed: \(error)") 
         }
     }
     
     // loads show metadata like genre studios etc
-    func reloadShow() async {
+    func loadShowDetail() async {
         do {
             let itemId = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !itemId.isEmpty else { return }
@@ -63,7 +63,7 @@ import Combine
     }
     
     // loads all seasons and episodes, inferring seasons if needed
-    func reloadSeasonsAndEpisodes() async {
+    func loadSeasonsAndEpisodes() async {
         isLoadingEpisodes = true
         defer { isLoadingEpisodes = false }
         do {

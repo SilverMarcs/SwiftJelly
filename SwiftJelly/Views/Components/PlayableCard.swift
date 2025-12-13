@@ -116,7 +116,7 @@ struct PlayableCard: View {
         #if os(tvOS)
         548
         #else
-        270
+        300
         #endif
     }
     
