@@ -29,35 +29,41 @@ struct SectionContainer<RowContent: View>: View {
     }
     
     var body: some View {
-        let shelf = ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: spacing) {
-                content()
+        Group {
+            let shelf = ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: spacing) {
+                    content()
+                }
+#if !os(tvOS)
+                .scenePadding(.horizontal)
+#endif
             }
-            #if !os(tvOS)
-            .scenePadding(.horizontal)
-            #endif
-        }
-
-        #if os(tvOS)
-        if showHeader {
-            Section(header) {
+            
+#if os(tvOS)
+            if showHeader {
+                Section(header) {
+                    shelf
+                        .scrollClipDisabled()
+                }
+            } else {
                 shelf
                     .scrollClipDisabled()
             }
-        } else {
-            shelf
-                .scrollClipDisabled()
-        }
-        #else
-        VStack(alignment: .leading, spacing: 8) {
-            if showHeader {
-                Text(header)
-                    .font(.title3.bold())
-                    .scenePadding(.horizontal)
+#else
+            VStack(alignment: .leading, spacing: 8) {
+                if showHeader {
+                    Text(header)
+                        .font(.title3.bold())
+                        .scenePadding(.horizontal)
+                }
+                
+                shelf
             }
-            
-            shelf
+#endif
         }
+        #if os(tvOS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .focusSection()
         #endif
     }
 }

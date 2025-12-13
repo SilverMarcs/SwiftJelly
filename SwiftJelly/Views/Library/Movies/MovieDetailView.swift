@@ -12,15 +12,9 @@ struct MovieDetailView: View {
         DetailView(item: movie) {
             if let people = movie.people {
                 PeopleScrollView(people: people)
-                    #if os(tvOS)
-                    .focusSection()
-                    #endif
             }
             
             SimilarItemsView(item: movie)
-                #if os(tvOS)
-                .focusSection()
-                #endif
         } itemDetailContent: {
             HStack(spacing: spacing) {
                 MovieOrEpisodePlayButton(item: movie)

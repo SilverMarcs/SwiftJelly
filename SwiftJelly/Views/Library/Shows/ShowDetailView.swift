@@ -28,21 +28,13 @@ struct ShowDetailView: View {
     private func detailContent(vm: ShowDetailViewModel) -> some View {
         DetailView(item: vm.show) {
             ShowSeasonsView(vm: vm)
-                #if os(tvOS)
-                .focusSection()
-                #endif
             
             if let people = vm.show.people {
                 PeopleScrollView(people: people)
-                    #if os(tvOS)
-                    .focusSection()
-                    #endif
             }
             
             SimilarItemsView(item: vm.show)
-                #if os(tvOS)
-                .focusSection()
-                #endif
+
         } itemDetailContent: {
             HStack(spacing: spacing) {
                 ShowPlayButton(vm: vm)

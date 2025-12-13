@@ -30,7 +30,7 @@ struct GenreCardView: View {
     
     private var itemWidth: CGFloat {
         #if os(tvOS)
-        200
+        225
         #elseif os(iOS)
         75
         #else
