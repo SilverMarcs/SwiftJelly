@@ -1,7 +1,7 @@
 import SwiftUI
 import JellyfinAPI
 
-struct MoviePlayButton: View {
+struct MovieOrEpisodePlayButton: View {
     let item: BaseItemDto
 
     var body: some View {

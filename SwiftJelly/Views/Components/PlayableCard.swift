@@ -95,23 +95,16 @@ struct PlayableCard: View {
         .buttonStyle(.plain)
         #endif
         .contextMenu {
-            if item.type == .movie {
-                Section {
-                    NavigationLink {
-                        MovieDetailView(item: item)
-                    } label: {
-                        PlayableItemTypeLabel(item: item)
+            Section {
+                if item.type == .episode, let seriesId = item.seriesID {
+                    let showItem =  BaseItemDto(id: seriesId, type: .series)
+                    NavigationLink(value: showItem) {
+                        PlayableItemTypeLabel(item: showItem)
                     }
                 }
-            }
-            
-            if item.type == .episode {
-                Section {
-                    NavigationLink {
-                        ShowDetailLoader(episode: item)
-                    } label: {
-                        PlayableItemTypeLabel(item: item)
-                    }
+                
+                NavigationLink(value: item) {
+                    PlayableItemTypeLabel(item: item)
                 }
             }
             
@@ -125,7 +118,6 @@ struct PlayableCard: View {
                       systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye")
             }
         }
-
     }
 
     private var cardWidth: CGFloat {

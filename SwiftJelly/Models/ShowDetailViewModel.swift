@@ -16,7 +16,7 @@ import Combine
     // Next Episode / play button
     private(set) var nextEpisode: BaseItemDto? = nil
     
-    // Loadimg states
+    // Loading states
     var isLoading: Bool = false
     var isLoadingEpisodes: Bool = false
     

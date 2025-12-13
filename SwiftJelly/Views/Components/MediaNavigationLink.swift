@@ -40,8 +40,9 @@ struct MediaNavigationDestinationModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: BaseItemDto.self) { item in
-                if item.type == .movie {
-                    MovieDetailView(item: item)
+                // TODO: use Group {} for teh transitions
+                if item.type == .movie || item.type == .episode {
+                    MovieOrEpisodeDetailView(item: item)
 #if !os(macOS)
                         .navigationTransition(.zoom(sourceID: item.id, in: animation))
 #endif

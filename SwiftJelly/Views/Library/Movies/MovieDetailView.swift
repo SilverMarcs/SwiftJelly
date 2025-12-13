@@ -1,34 +1,35 @@
 import SwiftUI
-import SwiftMediaViewer
 import JellyfinAPI
 
-struct MovieDetailView: View {
-    @State private var movie: BaseItemDto
+struct MovieOrEpisodeDetailView: View {
+    @State private var item: BaseItemDto
 
     init(item: BaseItemDto) {
-        self._movie = State(initialValue: item)
+        self._item = State(initialValue: item)
     }
     
     var body: some View {
-        DetailView(item: movie) {
-            if let people = movie.people {
+        DetailView(item: item) {
+            if let people = item.people {
                 PeopleScrollView(people: people)
                     #if os(tvOS)
                     .focusSection()
                     #endif
             }
             
-            SimilarItemsView(item: movie)
+            SimilarItemsView(item: item)
                 #if os(tvOS)
                 .focusSection()
                 #endif
         } itemDetailContent: {
             HStack(spacing: spacing) {
-                MoviePlayButton(item: movie)
+                MovieOrEpisodePlayButton(item: item)
                 
-                MarkPlayedButton(item: movie)
+                MarkPlayedButton(item: item)
                 
-                FavoriteButton(item: movie)
+                if item.type != .episode {
+                    FavoriteButton(item: item)
+                }
             }
         }
 //        .navigationTitle(movie.name ?? "")
@@ -37,7 +38,7 @@ struct MovieDetailView: View {
 
     private func fetchMovie() async {
         do {
-            movie = try await JFAPI.loadItem(by: movie.id ?? "")
+            item = try await JFAPI.loadItem(by: item.id ?? "")
         } catch {
             print("Error loading Movie Detail: \(error.localizedDescription)")
         }

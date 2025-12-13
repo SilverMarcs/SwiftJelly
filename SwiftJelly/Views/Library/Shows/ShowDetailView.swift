@@ -1,15 +1,31 @@
 import SwiftUI
 import JellyfinAPI
-import SwiftMediaViewer
 
 struct ShowDetailView: View {
-    private var vm: ShowDetailViewModel
+    private let series: BaseItemDto
+    @State private var vm: ShowDetailViewModel?
     
     init(item: BaseItemDto) {
-        vm = ShowDetailViewModel(item: item)
+        self.series = item
     }
     
     var body: some View {
+        if let vm = vm {
+            detailContent(vm: vm)
+        } else {
+            UniversalProgressView()
+                .task {
+                    guard let seriesId = series.id,
+                          let fullSeries = try? await JFAPI.loadItem(by: seriesId) else { return }
+                    let viewModel = ShowDetailViewModel(item: fullSeries)
+                    await viewModel.reloadSeasonsAndEpisodes()
+                    vm = viewModel
+                }
+        }
+    }
+    
+    @ViewBuilder
+    private func detailContent(vm: ShowDetailViewModel) -> some View {
         DetailView(item: vm.show) {
             ShowSeasonsView(vm: vm)
                 #if os(tvOS)
@@ -33,17 +49,15 @@ struct ShowDetailView: View {
                 
                 if let season = vm.selectedSeason {
                     MarkPlayedButton(item: season)
-                        .animation(.snappy, value: vm.selectedSeason) // likely doesnt work
+                        .animation(.snappy, value: vm.selectedSeason)
                 }
                 
                 FavoriteButton(item: vm.show)
             }
         }
-//        .navigationTitle(vm.show.name ?? "")
         .environment(\.refresh, { [weak vm = vm] in
             await vm?.reloadSeasonsAndEpisodes()
         })
-        .task { await vm.reloadSeasonsAndEpisodes() }
     }
     
     private var spacing: CGFloat {
@@ -56,3 +70,4 @@ struct ShowDetailView: View {
         #endif
     }
 }
+
