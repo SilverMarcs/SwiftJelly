@@ -37,10 +37,8 @@ struct MediaGrid: View {
             #endif
         }
         .overlay {
-            if isLoading {
+            if isLoading && items.isEmpty {
                 UniversalProgressView()
-            } else if items.isEmpty {
-                ContentUnavailableView.search
             }
         }
     }

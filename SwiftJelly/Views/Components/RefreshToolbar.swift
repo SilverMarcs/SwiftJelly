@@ -9,23 +9,38 @@ import SwiftUI
 
 private struct RefreshToolbarModifier: ViewModifier {
     let action: () async -> Void
+    @State private var isRefreshing = false
 
     func body(content: Content) -> some View {
-        #if os(macOS)
         content
+            .refreshable {
+                await runRefresh()
+            }
+            #if os(macOS)
             .toolbar {
                 ToolbarItem {
                     Button {
-                        Task { await action() }
+                        Task { await runRefresh() }
                     } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
+                        if isRefreshing {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label("Refresh", systemImage: "arrow.clockwise")
+                        }
                     }
+                    .disabled(isRefreshing)
                     .keyboardShortcut("r")
                 }
             }
-        #else
-        content
-        #endif
+            #endif
+    }
+
+    private func runRefresh() async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+        await action()
     }
 }
 
@@ -36,4 +51,3 @@ extension View {
         modifier(RefreshToolbarModifier(action: action))
     }
 }
-

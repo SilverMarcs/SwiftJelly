@@ -41,9 +41,6 @@ struct FilteredMediaView: View {
                 await viewModel.loadInitialItems()
             }
         }
-        .refreshable {
-            await viewModel.loadInitialItems()
-        }
         .refreshToolbar {
             await viewModel.loadInitialItems()
         }

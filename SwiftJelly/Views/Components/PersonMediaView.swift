@@ -24,9 +24,6 @@ struct PersonMediaView: View {
                     isLoading = false
                 }
             }
-            .refreshable {
-                await loadItems()
-            }
             .refreshToolbar {
                 await loadItems()
             }

@@ -31,7 +31,7 @@ struct LibraryView: View {
             .scenePadding(.horizontal)
         }
         .overlay {
-            if isLoading {
+            if isLoading && libraries.isEmpty {
                 UniversalProgressView()
             }
         }
@@ -43,9 +43,6 @@ struct LibraryView: View {
                 await loadLibraries()
                 isLoading = false
             }
-        }
-        .refreshable {
-            await loadLibraries()
         }
         .refreshToolbar {
             await loadLibraries()

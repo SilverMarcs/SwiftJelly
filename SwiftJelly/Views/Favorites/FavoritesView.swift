@@ -21,11 +21,8 @@ struct FavoritesView: View {
                     isLoading = false
                 }
             }
-            .refreshable {
-                await fetchFavorites()
-            }
             .overlay {
-                if isLoading {
+                if isLoading && favorites.isEmpty {
                     UniversalProgressView()
                 }
             }

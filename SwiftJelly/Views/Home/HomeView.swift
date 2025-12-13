@@ -32,7 +32,7 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         .overlay {
-            if isLoading {
+            if isLoading && continueWatchingItems.isEmpty {
                 UniversalProgressView()
             }
         }
@@ -40,9 +40,6 @@ struct HomeView: View {
             if  continueWatchingItems.isEmpty {
                 await loadAll()
             }
-        }
-        .refreshable {
-            await loadAll()
         }
         .navigationTitle("Home")
         .refreshToolbar {
