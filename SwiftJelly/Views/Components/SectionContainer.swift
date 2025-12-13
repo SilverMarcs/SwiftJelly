@@ -7,29 +7,45 @@
 
 import SwiftUI
 
-/// A container that wraps content in a Section on tvOS, or a VStack with styled header on other platforms.
-/// On tvOS, content is wrapped in Section with scrollClipDisabled applied.
-/// On other platforms, content is wrapped in a VStack with a bold title3 header.
-struct SectionContainer<Content: View>: View {
+/// A horizontally-scrolling shelf with a consistent section header treatment across platforms.
+/// - tvOS: wraps the shelf in a `Section` (optional header) and applies `scrollClipDisabled`.
+/// - other platforms: uses a `VStack` with a bold `title3` header and horizontal scene padding.
+struct SectionContainer<RowContent: View>: View {
     let header: String
     let showHeader: Bool
-    @ViewBuilder let content: () -> Content
+    let spacing: CGFloat
+    @ViewBuilder let content: () -> RowContent
     
-    init(_ header: String, showHeader: Bool = true, @ViewBuilder content: @escaping () -> Content) {
+    init(
+        _ header: String,
+        showHeader: Bool = true,
+        spacing: CGFloat,
+        @ViewBuilder content: @escaping () -> RowContent
+    ) {
         self.header = header
         self.showHeader = showHeader
+        self.spacing = spacing
         self.content = content
     }
     
     var body: some View {
+        let shelf = ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: spacing) {
+                content()
+            }
+            #if !os(tvOS)
+            .scenePadding(.horizontal)
+            #endif
+        }
+
         #if os(tvOS)
         if showHeader {
             Section(header) {
-                content()
+                shelf
                     .scrollClipDisabled()
             }
         } else {
-            content()
+            shelf
                 .scrollClipDisabled()
         }
         #else
@@ -40,7 +56,7 @@ struct SectionContainer<Content: View>: View {
                     .scenePadding(.horizontal)
             }
             
-            content()
+            shelf
         }
         #endif
     }

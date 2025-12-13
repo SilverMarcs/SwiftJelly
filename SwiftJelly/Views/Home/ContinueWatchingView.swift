@@ -13,16 +13,9 @@ struct ContinueWatchingView: View {
 
     var body: some View {
         if !items.isEmpty {
-            SectionContainer("Continue Watching", showHeader: isTVOS) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
-                        ForEach(items, id: \.id) { item in
-                            PlayableCard(item: item, showTitle: false)
-                        }
-                    }
-                    #if !os(tvOS)
-                    .scenePadding(.horizontal)
-                    #endif
+            SectionContainer("Continue Watching", showHeader: isTVOS, spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    PlayableCard(item: item, showTitle: false)
                 }
             }
         }

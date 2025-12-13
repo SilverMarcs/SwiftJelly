@@ -23,6 +23,9 @@ struct GenreCardView: View {
             }
             .frame(width: itemWidth * 1.5, height: itemWidth * 0.5)
             .cardBorder()
+            #if os(tvOS)
+            .hoverEffect(.highlight)
+            #endif
     }
     
     private var itemWidth: CGFloat {

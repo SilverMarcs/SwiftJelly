@@ -7,19 +7,12 @@ struct MediaShelf: View {
     
     var body: some View {
         if !items.isEmpty {
-            SectionContainer(header) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
-                        ForEach(items, id: \.id) { item in
-                            MediaNavigationLink(item: item) {
-                                MediaCard(item: item)
-                            }
-                            .frame(width: itemWidth)
-                        }
+            SectionContainer(header, spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    MediaNavigationLink(item: item) {
+                        MediaCard(item: item)
                     }
-                    #if !os(tvOS)
-                    .scenePadding(.horizontal)
-                    #endif
+                    .frame(width: itemWidth)
                 }
             }
         }

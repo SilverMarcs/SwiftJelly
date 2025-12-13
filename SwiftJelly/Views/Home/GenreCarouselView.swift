@@ -13,21 +13,14 @@ struct GenreCarouselView: View {
 
     var body: some View {
         if !genres.isEmpty {
-            SectionContainer("Genres") {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: spacing) {
-                        ForEach(genres.shuffled()) { genre in
-                            NavigationLink {
-                                GenreRandomItemsView(genreName: genre.name ?? "Genre")
-                            } label: {
-                                GenreCardView(name: genre.name ?? "Genre")
-                            }
-                            .adaptiveButtonStyle()
-                        }
+            SectionContainer("Genres", spacing: spacing) {
+                ForEach(genres.shuffled()) { genre in
+                    NavigationLink {
+                        GenreRandomItemsView(genreName: genre.name ?? "Genre")
+                    } label: {
+                        GenreCardView(name: genre.name ?? "Genre")
                     }
-                    #if !os(tvOS)
-                    .scenePadding(.horizontal)
-                    #endif
+                    .adaptiveButtonStyle()
                 }
             }
         }

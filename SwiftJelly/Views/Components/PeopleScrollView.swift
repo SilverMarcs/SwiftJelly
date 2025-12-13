@@ -12,16 +12,9 @@ struct PeopleScrollView: View {
     let people: [BaseItemPerson]
     
     var body: some View {
-        SectionContainer("Cast & Crew") {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: spacing) {
-                    ForEach(people, id: \.self) { person in
-                        PersonView(person: person)
-                    }
-                }
-                #if !os(tvOS)
-                .scenePadding(.horizontal)
-                #endif
+        SectionContainer("Cast & Crew", spacing: spacing) {
+            ForEach(people, id: \.self) { person in
+                PersonView(person: person)
             }
         }
         #if os(tvOS)
