@@ -10,6 +10,7 @@ import JellyfinAPI
 
 struct ProgressBarOverlay: View {
     let item: BaseItemDto
+    var showSeasonNumber: Bool = true
 
     var body: some View {
         HStack(spacing: 12) {
@@ -23,8 +24,8 @@ struct ProgressBarOverlay: View {
             
             Spacer()
             
-            if let seasonEpisode = item.seasonEpisodeString {
-                Text(seasonEpisode)
+            if let episodeText = showSeasonNumber ? item.seasonEpisodeString : item.episodeOnlyString {
+                Text(episodeText)
                     .font(.subheadline)
             }
         }

@@ -84,7 +84,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
 //        .refreshable { await refresh() }
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
-        #if os(macOS)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -99,7 +98,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 .keyboardShortcut("r")
             }
         }
-        #endif
     }
     
     private var backdropSection: some View {
@@ -140,7 +138,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         #if os(macOS)
         480
         #else
-        600
+        620
         #endif
     }    
 #endif

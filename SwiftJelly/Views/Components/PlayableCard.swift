@@ -15,6 +15,7 @@ struct PlayableCard: View {
     var showRealname: Bool = false
     var showTitle: Bool = true
     var showDescription: Bool = false
+    var showSeasonNumber: Bool = true
     
     @State private var showPlayer = false
     
@@ -47,7 +48,7 @@ struct PlayableCard: View {
                     }
                 #endif
                     .overlay(alignment: .bottom) {
-                        ProgressBarOverlay(item: item)
+                        ProgressBarOverlay(item: item, showSeasonNumber: showSeasonNumber)
                             .padding(.horizontal, 10)
                             .padding(.bottom, 8)
                         #if os(tvOS)

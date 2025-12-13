@@ -18,4 +18,10 @@ extension BaseItemDto {
         }
         return "S\(season)E\(episode)"
     }
+    
+    var episodeOnlyString: String? {
+        guard type != .movie else { return nil }
+        guard let episode = indexNumber else { return nil }
+        return "E\(episode)"
+    }
 }
