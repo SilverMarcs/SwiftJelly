@@ -46,11 +46,16 @@ struct MediaNavigationDestinationModifier: ViewModifier {
 #if !os(macOS)
                         .navigationTransition(.zoom(sourceID: item.id, in: animation))
 #endif
-                } else if item.type == .series || item.type == .episode {
-                    let item = BaseItemDto(id: item.seriesID)
+                } else if item.type == .series {
                     ShowDetailView(item: item)
 #if !os(macOS)
                         .navigationTransition(.zoom(sourceID: item.id, in: animation))
+#endif
+                } else if item.type == .episode {
+                    let seriesItem = BaseItemDto(id: item.seriesID)
+                    ShowDetailView(item: seriesItem)
+#if !os(macOS)
+                        .navigationTransition(.zoom(sourceID: seriesItem.id, in: animation))
 #endif
                 }
             }
