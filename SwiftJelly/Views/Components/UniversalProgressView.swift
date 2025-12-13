@@ -12,7 +12,7 @@ struct UniversalProgressView: View {
         ProgressView()
             .controlSize(.extraLarge)
             .padding()
-            .glassEffect(in: .circle)
+//            .glassEffect(in: .circle)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

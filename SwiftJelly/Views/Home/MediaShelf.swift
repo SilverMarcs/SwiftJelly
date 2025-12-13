@@ -1,7 +1,7 @@
 import SwiftUI
 import JellyfinAPI
 
-struct RecentlyAddedView: View {
+struct MediaShelf: View {
     let items: [BaseItemDto]
     var header: String
     

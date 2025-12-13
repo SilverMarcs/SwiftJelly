@@ -22,9 +22,6 @@ struct SettingsToolbar: ToolbarContent {
                 NavigationStack {
                     SettingsView()
                         .presentationDetents([.medium])
-                        #if os(iOS)
-                        .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
-                        #endif
                 }
             }
         }

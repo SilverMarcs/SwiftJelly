@@ -15,7 +15,6 @@ struct FilteredMediaViewNavItem: Hashable {
 struct MediaNavigationLink<Label: View>: View {
     let item: BaseItemDto
     @ViewBuilder let label: () -> Label
-    @Environment(\.zoomNamespace) private var animationID
     
     private var navigationValue: any Hashable {
         item.type == .boxSet ? FilteredMediaViewNavItem(item: item) : item
@@ -28,7 +27,6 @@ struct MediaNavigationLink<Label: View>: View {
         #if os(tvOS)
         .buttonStyle(.borderless)
         #else
-        .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
         .buttonStyle(.plain)
         #endif
     }
@@ -36,29 +34,10 @@ struct MediaNavigationLink<Label: View>: View {
 
 // TODO: fix teh namespace errors
 struct MediaNavigationDestinationModifier: ViewModifier {
-    let animation: Namespace.ID
-    
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: BaseItemDto.self) { item in
-                // TODO: use Group {} for teh transitions
-                if item.type == .movie {
-                    MovieDetailView(item: item)
-#if !os(macOS)
-                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-                } else if item.type == .series {
-                    ShowDetailView(item: item)
-#if !os(macOS)
-                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-                } else if item.type == .episode {
-                    let seriesItem = BaseItemDto(id: item.seriesID)
-                    ShowDetailView(item: seriesItem)
-#if !os(macOS)
-                        .navigationTransition(.zoom(sourceID: seriesItem.id, in: animation))
-#endif
-                }
+                destinationView(for: item)
             }
             .navigationDestination(for: BaseItemPerson.self) { person in
                 PersonMediaView(person: person)
@@ -67,10 +46,28 @@ struct MediaNavigationDestinationModifier: ViewModifier {
                 FilteredMediaView(filter: .library(item.item))
             }
     }
+    
+    @ViewBuilder
+    private func destinationView(for item: BaseItemDto) -> some View {
+        switch item.type {
+        case .movie:
+            MovieDetailView(item: item)
+        case .series:
+            ShowDetailView(item: item)
+        case .episode:
+            ShowDetailView(item: BaseItemDto(id: item.seriesID))
+        default:
+            ContentUnavailableView(
+                "Unsupported Media Type",
+                systemImage: "questionmark.circle",
+                description: Text("Cannot display \(item.type?.rawValue.capitalized ?? "unknown") items")
+            )
+        }
+    }
 }
 
 extension View {
-    public func addNavigationDestionationsForDetailView(animation: Namespace.ID) -> some View {
-        modifier(MediaNavigationDestinationModifier(animation: animation))
+    public func navigationDestinations() -> some View {
+        modifier(MediaNavigationDestinationModifier())
     }
 }

@@ -22,9 +22,9 @@ struct HomeView: View {
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
                 
-                RecentlyAddedView(items: latestMovies, header: "Recently Added Movies")
+                MediaShelf(items: latestMovies, header: "Recently Added Movies")
 
-                RecentlyAddedView(items: latestShows, header: "Recently Added Shows")
+                MediaShelf(items: latestShows, header: "Recently Added Shows")
             }
             .scenePadding(.bottom)
         }

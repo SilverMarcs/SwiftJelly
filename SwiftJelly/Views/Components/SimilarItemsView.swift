@@ -23,7 +23,7 @@ struct SimilarItemsView: View {
             }
             
             if !similarItems.isEmpty {
-                RecentlyAddedView(items: similarItems, header: "Recommended")
+                MediaShelf(items: similarItems, header: "Recommended")
             }
         }
         .padding(.top)

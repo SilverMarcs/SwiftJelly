@@ -10,7 +10,6 @@ import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
-    @Namespace private var animation
     
     @State private var dataManager = DataManager.shared
 
@@ -27,14 +26,13 @@ struct ContentView: View {
                     ) {
                         NavigationStack {
                             tab.tabView
-                                .addNavigationDestionationsForDetailView(animation: animation)
+                                .navigationDestinations()
                                 #if os(iOS)
                                 .toolbar {
                                     SettingsToolbar()
                                 }
                                 #endif
                         }
-                        .environment(\.zoomNamespace, animation)
                     }
                 }
             }
