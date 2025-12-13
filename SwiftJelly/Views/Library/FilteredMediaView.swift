@@ -22,18 +22,18 @@ struct FilteredMediaView: View {
         case .library(let library):
             return library.name ?? "Library"
         case .genre(let genre):
-            return genre
+            return genre.capitalized
         case .studio(let studio):
             return studio.name ?? "Studio"
         }
     }
     
     var body: some View {
-        MediaGrid(items: viewModel.items, isLoading: viewModel.isLoading, onLoadMore: {
+        MediaGrid(items: viewModel.items, isLoading: viewModel.isLoading) {
             Task {
                 await viewModel.loadNextPage()
             }
-        })
+        }
         .navigationTitle(navigationTitle)
         .toolbarTitleDisplayMode(.inline)
         .task {

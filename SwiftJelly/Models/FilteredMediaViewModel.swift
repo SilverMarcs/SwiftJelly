@@ -56,8 +56,9 @@ enum MediaFilter {
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
-        parameters.sortBy = [ItemSortBy.sortName.rawValue]
-        parameters.sortOrder = [SortOrder.ascending]
+//        parameters.sortBy = [ItemSortBy.sortName.rawValue]
+//        parameters.sortOrder = [SortOrder.ascending]
+        parameters.sortBy = ["Random"]
         parameters.limit = pageSize
         parameters.startIndex = page * pageSize
         

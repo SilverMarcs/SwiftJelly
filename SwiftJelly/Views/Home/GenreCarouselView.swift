@@ -16,7 +16,7 @@ struct GenreCarouselView: View {
             SectionContainer("Genres", spacing: spacing) {
                 ForEach(genres.shuffled()) { genre in
                     NavigationLink {
-                        GenreRandomItemsView(genreName: genre.name ?? "Genre")
+                        FilteredMediaView(filter: .genre(genre.name ?? "Genre"))
                     } label: {
                         GenreCardView(name: genre.name ?? "Genre")
                     }

@@ -17,7 +17,7 @@ struct PlaybackAudioTrack: Identifiable, Equatable {
                 let languageName = languageCode
                     .flatMap { Locale.current.localizedString(forLanguageCode: $0) }
                     ?? stream.language
-                let titleComponents = [stream.displayTitle, languageName, stream.codec?.uppercased()]
+                let titleComponents = [stream.displayTitle, languageName, stream.codec]
                     .compactMap { $0 }
                     .filter { !$0.isEmpty }
                 let displayName = titleComponents.isEmpty

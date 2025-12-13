@@ -23,11 +23,7 @@ struct SearchView: View {
                     await performSearch()
                 }
             }
-            #if os(tvOS)
-            .toolbar(.hidden, for: .navigationBar)
-            #else
-            .toolbarTitleDisplayMode(.inlineLarge)
-            #endif
+            .platformNavigationToolbar()
     }
     
     private var filteredResults: [BaseItemDto] {

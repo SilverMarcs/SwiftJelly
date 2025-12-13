@@ -23,6 +23,7 @@ extension JFAPI {
         return try await send(request).items ?? []
     }
 
+    // Unused atm
     static func loadRandomItems(_ genre: String, limit: Int = 40) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()

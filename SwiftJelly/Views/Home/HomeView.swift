@@ -48,11 +48,7 @@ struct HomeView: View {
         .refreshToolbar {
             await loadAll()
         }
-        #if os(tvOS)
-        .toolbar(.hidden, for: .navigationBar)
-        #else
-        .toolbarTitleDisplayMode(.inlineLarge)
-        #endif
+        .platformNavigationToolbar()
     }
 
     private func loadAll() async {

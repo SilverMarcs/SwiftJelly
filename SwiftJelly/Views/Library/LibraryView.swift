@@ -36,11 +36,7 @@ struct LibraryView: View {
             }
         }
         .navigationTitle("Libraries")
-        #if os(tvOS)
-        .toolbar(.hidden, for: .navigationBar)
-        #else
-        .toolbarTitleDisplayMode(.inlineLarge)
-        #endif
+        .platformNavigationToolbar()
         .task {
             if libraries.isEmpty {
                 isLoading = true

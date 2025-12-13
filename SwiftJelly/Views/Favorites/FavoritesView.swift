@@ -33,11 +33,7 @@ struct FavoritesView: View {
             .refreshToolbar {
                 await fetchFavorites()
             }
-            #if os(tvOS)
-            .toolbar(.hidden, for: .navigationBar)
-            #else
-            .toolbarTitleDisplayMode(.inlineLarge)
-            #endif
+            .platformNavigationToolbar()
     }
     
     func fetchFavorites() async {
