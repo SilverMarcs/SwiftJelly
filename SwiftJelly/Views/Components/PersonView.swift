@@ -7,7 +7,7 @@ struct PersonView: View {
     
     var body: some View {
         NavigationLink(value: person) {
-            VStack {
+            LabelStack {
                 if let url = ImageURLProvider.personImageURL(for: person) {
                     CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
                         .aspectRatio(contentMode: .fill)
@@ -27,6 +27,8 @@ struct PersonView: View {
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
+                        .frame(maxWidth: imageSize)
+
                 }
                 
                 if let role = person.role, !role.isEmpty {
@@ -36,11 +38,11 @@ struct PersonView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .truncationMode(.tail)
+                        .frame(maxWidth: imageSize)
+
                 }
             }
-            .frame(maxWidth: imageSize)   
         }
-        .foregroundStyle(.primary)
         .buttonBorderShape(.circle)
         #if os(tvOS)
         .buttonStyle(.borderless)
@@ -48,7 +50,6 @@ struct PersonView: View {
         .buttonStyle(.plain)
         #endif
     }
-
     private var imageSize: CGFloat {
         #if os(tvOS)
         200

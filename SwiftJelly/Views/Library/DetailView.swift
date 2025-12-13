@@ -66,7 +66,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             let showcaseHeight = geo.size.height
 
             ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 30) {
                     coverOverlay
                         .padding(40)
                         .frame(maxWidth: 900, alignment: .leading)
@@ -79,9 +79,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                             }
                         }
 
-                    Section {
-                        content
-                    }
+                    content
                 }
                 .scrollTargetLayout()
             }

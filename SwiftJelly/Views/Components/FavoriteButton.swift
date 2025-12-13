@@ -13,6 +13,7 @@ struct FavoriteButton: View {
         } label: {
             Image(systemName: (item.userData?.isFavorite == true) ? "star.fill" : "star")
                 .animation(.snappy, value: item.userData?.isFavorite)
+                .scaleEffect(0.95)
         }
         .controlSize(.extraLarge)
         .buttonStyle(.glass)
