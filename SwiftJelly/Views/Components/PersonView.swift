@@ -52,7 +52,7 @@ struct PersonView: View {
     }
     private var imageSize: CGFloat {
         #if os(tvOS)
-        200
+        175
         #else
         100
         #endif

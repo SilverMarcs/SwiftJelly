@@ -21,7 +21,5 @@ struct AVPlayerMac: NSViewRepresentable {
         return view
     }
     
-    func updateNSView(_ nsView: AVPlayerView, context: Context) {
-//        nsView.player = player
-    }
+    func updateNSView(_ nsView: AVPlayerView, context: Context) { }
 }

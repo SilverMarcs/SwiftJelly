@@ -4,6 +4,7 @@ import JellyfinAPI
 
 struct AVMediaPlayerViewIOS: View {
     let item: BaseItemDto
+    
     @State private var nowPlaying: BaseItemDto
     @State private var player: AVPlayer?
     @State private var isLoading = true

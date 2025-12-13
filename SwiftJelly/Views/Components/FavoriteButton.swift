@@ -15,10 +15,10 @@ struct FavoriteButton: View {
                 .animation(.snappy, value: item.userData?.isFavorite)
                 .scaleEffect(0.95)
         }
-        .controlSize(.extraLarge)
+        .tint((item.userData?.isFavorite == true) ? Color.yellow : Color.primary)
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
-        .tint((item.userData?.isFavorite == true) ? .yellow : .secondary)
+        .controlSize(.extraLarge)
     }
     
     private func toggleFavoriteStatus() async {

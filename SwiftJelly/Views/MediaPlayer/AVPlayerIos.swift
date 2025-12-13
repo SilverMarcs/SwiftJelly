@@ -9,7 +9,7 @@ import SwiftUI
 import AVKit
 
 struct AVPlayerIos: UIViewControllerRepresentable {
-    let player: AVPlayer
+    let player: AVPlayer?
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
