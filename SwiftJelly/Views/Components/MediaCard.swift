@@ -15,13 +15,7 @@ struct MediaCard: View {
     var body: some View {
         LabelStack(alignment: .leading) {
             PortraitImageView(item: item)
-                #if !os(tvOS)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(.background.quinary, lineWidth: 1)
-                }
-                #endif
+                .cardBorder()
                 .overlay(alignment: .topTrailing) {
                     if item.userData?.isPlayed ?? false {
                         Image(systemName: "checkmark.circle.fill")

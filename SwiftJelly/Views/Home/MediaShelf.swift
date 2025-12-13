@@ -39,7 +39,7 @@ struct MediaShelf: View {
         #if os(tvOS)
         40
         #elseif os(macOS)
-        18
+        15
         #else
         12
         #endif

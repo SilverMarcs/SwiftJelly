@@ -47,6 +47,14 @@ enum ImageURLProvider {
 
         return url(forItemID: id, imageType: .primary)
     }
+
+    static func genreImageURL(forGenreName name: String) -> URL? {
+        guard let client = try? JFAPI.getClient() else { return nil }
+        guard let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return nil }
+
+        let request = Paths.getGenreImage(name: encodedName, imageType: ImageType.primary.rawValue)
+        return client.fullURL(with: request, queryAPIKey: true)
+    }
 }
 
 private extension ImageURLProvider {

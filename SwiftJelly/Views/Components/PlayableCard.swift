@@ -56,11 +56,7 @@ struct PlayableCard: View {
                         #endif
                     }
                     #if !os(tvOS)
-                    .clipShape(.rect(cornerRadius: 10))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(.background.quinary, lineWidth: 1)
-                    }
+                    .cardBorder()
                     #else
                     .hoverEffect(.highlight)
                     #endif
