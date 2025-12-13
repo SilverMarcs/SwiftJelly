@@ -40,8 +40,8 @@ struct AttributesView: View {
                 AttributeBadge(text: String(year), systemImage: "calendar")
             }
             
-            // Runtime
-            if let runTimeTicks = item.runTimeTicks {
+            // Runtime (dont show for shows
+            if let runTimeTicks = item.runTimeTicks, item.type != .series {
                 let minutes = runTimeTicks / 10_000_000 / 60
                 AttributeBadge(text: "\(minutes)m", systemImage: "clock")
             }

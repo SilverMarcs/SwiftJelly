@@ -8,6 +8,7 @@
 import SwiftUI
 import JellyfinAPI
 
+// TODO: rename this
 struct StudiosScrollView: View {
     let studios: [NameGuidPair]
     

@@ -8,27 +8,18 @@
 import SwiftUI
 import JellyfinAPI
 
-struct FilteredMediaViewNavItem: Hashable {
-    let item: BaseItemDto
-}
-
 struct MediaNavigationLink<Label: View>: View {
     let item: BaseItemDto
     @ViewBuilder let label: () -> Label
     
-    private var navigationValue: any Hashable {
-        item.type == .boxSet ? FilteredMediaViewNavItem(item: item) : item
-    }
-    
     var body: some View {
-        NavigationLink(value: navigationValue) {
+        NavigationLink(value: item) {
             label()
         }
         .adaptiveButtonStyle()
     }
 }
 
-// TODO: fix teh namespace errors
 struct MediaNavigationDestinationModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -37,9 +28,6 @@ struct MediaNavigationDestinationModifier: ViewModifier {
             }
             .navigationDestination(for: BaseItemPerson.self) { person in
                 PersonMediaView(person: person)
-            }
-            .navigationDestination(for: FilteredMediaViewNavItem.self) { item in
-                FilteredMediaView(filter: .library(item.item))
             }
     }
     
@@ -52,6 +40,8 @@ struct MediaNavigationDestinationModifier: ViewModifier {
             ShowDetailView(item: item)
         case .episode:
             ShowDetailView(item: BaseItemDto(id: item.seriesID))
+        case .collectionFolder, .boxSet:
+            FilteredMediaView(filter: .library(item))
         default:
             ContentUnavailableView(
                 "Unsupported Media Type",
