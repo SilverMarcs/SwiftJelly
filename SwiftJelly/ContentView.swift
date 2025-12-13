@@ -27,11 +27,7 @@ struct ContentView: View {
                         NavigationStack {
                             tab.tabView
                                 .navigationDestinations()
-                                #if os(iOS)
-                                .toolbar {
-                                    SettingsToolbar()
-                                }
-                                #endif
+                                .settingsSheet()
                         }
                     }
                 }
