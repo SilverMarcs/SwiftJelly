@@ -16,7 +16,7 @@ struct PlayableItemTypeLabel: View {
         case .movie:
             Label("Go to Movie", systemImage: "film")
         case .episode:
-            Label("Go to Episode", systemImage: "tv")
+            Label("Go to Show", systemImage: "play.tv")
         case .series:
             Label("Go to Show", systemImage: "play.tv")
         default:

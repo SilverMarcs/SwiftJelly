@@ -41,12 +41,13 @@ struct MediaNavigationDestinationModifier: ViewModifier {
         content
             .navigationDestination(for: BaseItemDto.self) { item in
                 // TODO: use Group {} for teh transitions
-                if item.type == .movie || item.type == .episode {
-                    MovieOrEpisodeDetailView(item: item)
+                if item.type == .movie {
+                    MovieDetailView(item: item)
 #if !os(macOS)
                         .navigationTransition(.zoom(sourceID: item.id, in: animation))
 #endif
-                } else if item.type == .series {
+                } else if item.type == .series || item.type == .episode {
+                    let item = BaseItemDto(id: item.seriesID)
                     ShowDetailView(item: item)
 #if !os(macOS)
                         .navigationTransition(.zoom(sourceID: item.id, in: animation))

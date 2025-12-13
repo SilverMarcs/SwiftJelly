@@ -9,8 +9,9 @@ import SwiftUI
 import JellyfinAPI
 
 struct ProgressBarOverlay: View {
+    @Environment(\.isInSeasonView) private var isInSeasonView
+    
     let item: BaseItemDto
-    var showSeasonNumber: Bool = true
 
     var body: some View {
         HStack(spacing: 12) {
@@ -24,7 +25,7 @@ struct ProgressBarOverlay: View {
             
             Spacer()
             
-            if let episodeText = showSeasonNumber ? item.seasonEpisodeString : item.episodeOnlyString {
+            if let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
                 Text(episodeText)
                     .font(.subheadline)
             }

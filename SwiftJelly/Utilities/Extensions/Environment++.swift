@@ -13,4 +13,6 @@ extension EnvironmentValues {
     }
     
     @Entry var zoomNamespace: Namespace.ID? = nil
+    
+    @Entry var isInSeasonView: Bool = false
 }

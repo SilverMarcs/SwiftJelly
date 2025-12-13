@@ -35,7 +35,7 @@ struct ShowSeasonsView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: episodeSpacing) {
                         ForEach(vm.episodes) { episode in
-                            PlayableCard(item: episode, showRealname: true, showDescription: true, showSeasonNumber: false)
+                            PlayableCard(item: episode, showRealname: true, showDescription: true)
                                 .id(episode.id)
                         }
                     }
@@ -43,6 +43,7 @@ struct ShowSeasonsView: View {
                     .scrollTargetLayout()
                 }
                 .scrollPosition($episodeScrollPosition)
+                .environment(\.isInSeasonView, true)
                 #if os(tvOS)
                 .scrollClipDisabled()
                 .focusSection()

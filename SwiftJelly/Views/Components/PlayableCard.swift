@@ -10,12 +10,12 @@ import JellyfinAPI
 
 struct PlayableCard: View {
     @Environment(\.refresh) var refresh
+    @Environment(\.isInSeasonView) private var isInSeasonView
     
     let item: BaseItemDto
     var showRealname: Bool = false
     var showTitle: Bool = true
     var showDescription: Bool = false
-    var showSeasonNumber: Bool = true
     
     @State private var showPlayer = false
     
@@ -48,7 +48,7 @@ struct PlayableCard: View {
                     }
                 #endif
                     .overlay(alignment: .bottom) {
-                        ProgressBarOverlay(item: item, showSeasonNumber: showSeasonNumber)
+                        ProgressBarOverlay(item: item)
                             .padding(.horizontal, 10)
                             .padding(.bottom, 8)
                         #if os(tvOS)
@@ -95,16 +95,11 @@ struct PlayableCard: View {
         .buttonStyle(.plain)
         #endif
         .contextMenu {
-            Section {
-                if item.type == .episode, let seriesId = item.seriesID {
-                    let showItem =  BaseItemDto(id: seriesId, type: .series)
-                    NavigationLink(value: showItem) {
-                        PlayableItemTypeLabel(item: showItem)
+            if !isInSeasonView {
+                Section {
+                    NavigationLink(value: item) {
+                        PlayableItemTypeLabel(item: item)
                     }
-                }
-                
-                NavigationLink(value: item) {
-                    PlayableItemTypeLabel(item: item)
                 }
             }
             
