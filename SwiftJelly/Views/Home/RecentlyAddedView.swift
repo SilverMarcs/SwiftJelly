@@ -11,8 +11,10 @@ struct RecentlyAddedView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: spacing) {
                         ForEach(items, id: \.id) { item in
-                            MediaNavigationLink(item: item)
-                                .frame(width: itemWidth)
+                            MediaNavigationLink(item: item) {
+                                MediaCard(item: item)
+                            }
+                            .frame(width: itemWidth)
                         }
                     }
                     #if !os(tvOS)

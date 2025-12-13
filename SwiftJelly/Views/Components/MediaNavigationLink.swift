@@ -12,8 +12,9 @@ struct FilteredMediaViewNavItem: Hashable {
     let item: BaseItemDto
 }
 
-struct MediaNavigationLink: View {
+struct MediaNavigationLink<Label: View>: View {
     let item: BaseItemDto
+    @ViewBuilder let label: () -> Label
     @Environment(\.zoomNamespace) private var animationID
     
     private var navigationValue: any Hashable {
@@ -22,7 +23,7 @@ struct MediaNavigationLink: View {
     
     var body: some View {
         NavigationLink(value: navigationValue) {
-            MediaCard(item: item)
+            label()
         }
         #if os(tvOS)
         .buttonStyle(.borderless)

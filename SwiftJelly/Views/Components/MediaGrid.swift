@@ -20,12 +20,14 @@ struct MediaGrid: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: gridVerticalSpacing) {
                 ForEach(items) { item in
-                    MediaNavigationLink(item: item)
-                        .onAppear {
-                            if item == items.last, let onLoadMore {
-                                onLoadMore()
-                            }
+                    MediaNavigationLink(item: item) {
+                        MediaCard(item: item)
+                    }
+                    .onAppear {
+                        if item == items.last, let onLoadMore {
+                            onLoadMore()
                         }
+                    }
                 }
             }
             .scenePadding(.horizontal)

@@ -98,7 +98,7 @@ struct PlayableCard: View {
         .contextMenu {
             if !isInSeasonView {
                 Section {
-                    NavigationLink(value: item) {
+                    MediaNavigationLink(item: item) {
                         PlayableItemTypeLabel(item: item)
                     }
                 }
