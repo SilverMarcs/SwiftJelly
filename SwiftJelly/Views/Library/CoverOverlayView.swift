@@ -13,10 +13,12 @@ struct CoverOverlayView<ItemDetailContent: View>: View {
             Spacer()
 
             if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
-                CachedAsyncImage(url: url, targetSize: 450)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: logoWidth, maxHeight: logoHeight)
-                    .fixedSize(horizontal: false, vertical: true)
+                CachedAsyncImage(url: url, targetSize: 450) {
+                    EmptyView()
+                }
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: logoWidth, maxHeight: logoHeight)
+                .fixedSize(horizontal: false, vertical: true)
             } else {
                 Text(item.name ?? "Unknown")
                     .font(.largeTitle)

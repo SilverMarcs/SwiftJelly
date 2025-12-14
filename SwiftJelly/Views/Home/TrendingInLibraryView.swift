@@ -15,7 +15,7 @@ struct TrendingInLibraryView: View {
     
     var body: some View {
         if !tmdbAPIKey.isEmpty {
-            MediaShelf(items: matchedItems.shuffled(), header: "Trending in Your Library")
+            MediaShelf(items: matchedItems, header: "Trending in Your Library")
                 .task(id: tmdbAPIKey) {
                     if matchedItems.isEmpty {
                         await loadTrendingInLibrary()
@@ -44,10 +44,8 @@ struct TrendingInLibraryView: View {
             if !result.contains(where: { $0.id == item.id }) { result.append(item) }
         }
         
-        await MainActor.run {
-//            withAnimation {
-                matchedItems = unique
-//            }
+        withAnimation {
+            matchedItems = unique.shuffled()
         }
     }
     
