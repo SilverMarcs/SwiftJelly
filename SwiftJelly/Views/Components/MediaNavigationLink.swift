@@ -27,7 +27,7 @@ struct MediaNavigationDestinationModifier: ViewModifier {
                 destinationView(for: item)
             }
             .navigationDestination(for: BaseItemPerson.self) { person in
-                PersonMediaView(person: person)
+                FilteredMediaView(filter: .person(person))
             }
     }
     

@@ -13,6 +13,7 @@ enum MediaFilter {
     case genre(String)
     case studio(NameGuidPair)
     case favorites
+    case person(BaseItemPerson)
 }
 
 enum MediaSortOption: String, CaseIterable {
@@ -163,6 +164,10 @@ enum MediaSortOption: String, CaseIterable {
             parameters.isFavorite = true
             parameters.isRecursive = true
             parameters.includeItemTypes = [.movie, .series, .boxSet]
+        case .person(let person):
+            parameters.personIDs = [person.id].compactMap { $0 }
+            parameters.isRecursive = true
+            parameters.includeItemTypes = [.movie, .series]
         }
         
         let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)

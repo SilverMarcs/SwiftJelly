@@ -27,6 +27,8 @@ struct FilteredMediaView: View {
             return studio.name ?? "Studio"
         case .favorites:
             return "Favorites"
+        case .person(let person):
+            return person.name ?? "Person"
         }
     }
     
