@@ -63,6 +63,7 @@ extension JFAPI {
         var parameters = Paths.GetLatestMediaParameters()
         parameters.userID = context.userID
         parameters.fields = .MinimumFields
+        parameters.includeItemTypes = [.movie, .series]
         parameters.enableUserData = true
         parameters.limit = limit
         

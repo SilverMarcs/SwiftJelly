@@ -15,7 +15,6 @@ struct HomeView: View {
     @State private var favorites: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
-    @State private var genres: [BaseItemDto] = []
     @State private var isLoading = false
 
     var body: some View {
@@ -25,13 +24,12 @@ struct HomeView: View {
             }
             
             VStack(alignment: .leading, spacing: 26) {
-                
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
 
                 MediaShelf(items: favorites, header: "Favorites")
                 
-                GenreCarouselView(genres: genres)
+                GenreCarouselView()
                 
                 MediaShelf(items: latestMovies, header: "Recently Added Movies")
 
@@ -62,9 +60,9 @@ struct HomeView: View {
         defer { isLoading = false }
         do {
             async let continueWatching = JFAPI.loadContinueWatchingSmart()
-            async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
-            async let loadedGenres = JFAPI.loadGenres(limit: 20)
+            async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 15)
             async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
+            
             // TODO: Animate this
             continueWatchingItems = try await continueWatching
             let items = try await allItems
@@ -72,7 +70,6 @@ struct HomeView: View {
             latestMovies = Array(items.filter { $0.type == .movie })
             latestShows = Array(items.filter { $0.type == .series })
             
-            genres = try await loadedGenres
             favorites = try await loadedFavorites
         } catch {
             print("Error loading Home items: \(error)")
