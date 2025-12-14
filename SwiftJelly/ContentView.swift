@@ -28,7 +28,9 @@ struct ContentView: View {
                             tab.tabView
                                 .navigationDestinations()
                                 .settingsSheet()
+                            #if os(macOS)
                                 .frame(minWidth: 900)
+                            #endif
                         }
                     }
                 }

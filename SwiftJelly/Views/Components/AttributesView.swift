@@ -61,12 +61,17 @@ struct AttributeBadge: View {
     var body: some View {
         Label {
             Text(text)
+                .lineLimit(1)
         } icon: {
             if let systemImage = systemImage {
                 Image(systemName: systemImage)
             }
         }
+        #if os(iOS)
+        .font(.caption)
+        #else
         .font(.subheadline)
+        #endif
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
         .glassEffect(in: .rect(cornerRadius: 6))
