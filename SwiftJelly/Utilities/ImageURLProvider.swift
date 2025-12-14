@@ -42,8 +42,8 @@ enum ImageURLProvider {
     /// - Parameters:
     ///   - person: The BaseItemPerson to get image for
     /// - Returns: URL for the person's image or nil if not available
-    static func personImageURL(for person: BaseItemPerson) -> URL? {
-        guard let id = person.id else { return nil }
+    static func personImageURL(for personId: String?) -> URL? {
+        guard let id = personId else { return nil }
 
         return url(forItemID: id, imageType: .primary)
     }

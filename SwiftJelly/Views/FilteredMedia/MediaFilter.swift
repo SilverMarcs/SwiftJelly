@@ -13,7 +13,7 @@ enum MediaFilter {
     case genre(String)
     case studio(NameGuidPair)
     case favorites
-    case person(BaseItemPerson)
+    case person(id: String, name: String)
     
     var navigationTitle: String {
         switch self {
@@ -25,8 +25,8 @@ enum MediaFilter {
             return studio.name ?? "Studio"
         case .favorites:
             return "Favorites"
-        case .person(let person):
-            return person.name ?? "Person"
+        case .person(_, let name):
+            return name
         }
     }
 }

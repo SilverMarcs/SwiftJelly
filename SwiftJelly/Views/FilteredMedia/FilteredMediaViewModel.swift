@@ -134,8 +134,8 @@ import JellyfinAPI
             parameters.isFavorite = true
             parameters.isRecursive = true
             parameters.includeItemTypes = [.movie, .series, .boxSet]
-        case .person(let person):
-            parameters.personIDs = [person.id].compactMap { $0 }
+        case .person(let id, _):
+            parameters.personIDs = [id]
             parameters.isRecursive = true
             parameters.includeItemTypes = [.movie, .series]
         }

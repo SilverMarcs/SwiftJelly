@@ -13,6 +13,8 @@ struct MediaNavigationLink<Label: View>: View {
     @ViewBuilder let label: () -> Label
     
     var body: some View {
+        let item: any Hashable = item.type == .person ? Person(from: item) : item
+        
         NavigationLink(value: item) {
             label()
         }
@@ -26,8 +28,8 @@ struct MediaNavigationDestinationModifier: ViewModifier {
             .navigationDestination(for: BaseItemDto.self) { item in
                 destinationView(for: item)
             }
-            .navigationDestination(for: BaseItemPerson.self) { person in
-                FilteredMediaView(filter: .person(person))
+            .navigationDestination(for: Person.self) { person in
+                FilteredMediaView(filter: .person(id: person.id, name: person.name))
             }
     }
     

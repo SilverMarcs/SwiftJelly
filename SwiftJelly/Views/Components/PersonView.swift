@@ -3,12 +3,12 @@ import JellyfinAPI
 import SwiftMediaViewer
 
 struct PersonView: View {
-    let person: BaseItemPerson
+    let person: Person
     
     var body: some View {
         NavigationLink(value: person) {
             LabelStack {
-                if let url = ImageURLProvider.personImageURL(for: person) {
+                if let url = ImageURLProvider.personImageURL(for: person.id) {
                     CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
                         .aspectRatio(contentMode: .fill)
                         .frame(width: imageSize, height: imageSize)
@@ -21,31 +21,28 @@ struct PersonView: View {
                         #endif
                 }
                 
-                if let name = person.name {
-                    Text(name)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .frame(maxWidth: imageSize)
-
-                }
+                Text(person.name)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
                 
-                if let role = person.role, !role.isEmpty {
-                    Text(role)
+                if let subtitle = person.subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .truncationMode(.tail)
-                        .frame(maxWidth: imageSize)
-
+     
                 }
             }
         }
+        .frame(maxWidth: imageSize)
         .buttonBorderShape(.circle)
         .adaptiveButtonStyle()
     }
+    
     private var imageSize: CGFloat {
         #if os(tvOS)
         175
@@ -53,8 +50,4 @@ struct PersonView: View {
         100
         #endif
     }
-}
-
-#Preview {
-    PersonView(person: BaseItemPerson.init(id: "ea2acead101e71b7dc93c5bbaf0a8cdc", name: "Some actor"))
 }

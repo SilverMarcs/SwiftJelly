@@ -14,7 +14,7 @@ struct PeopleScrollView: View {
     var body: some View {
         SectionContainer("Cast & Crew", spacing: spacing) {
             ForEach(people, id: \.id) { person in
-                PersonView(person: person)
+                PersonView(person: Person(from: person))
             }
         }
         #if os(tvOS)
