@@ -16,6 +16,16 @@ struct ContinueWatchingView: View {
             ForEach(items, id: \.id) { item in
                 PlayableCard(item: item)
             }
+        } destination: {
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 12)], spacing: 16) {
+                    ForEach(items, id: \.id) { item in
+                        PlayableCard(item: item)
+                    }
+                }
+                .scenePadding()
+            }
+            .navigationTitle("Continue Watching")
         }
     }
     

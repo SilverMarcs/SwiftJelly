@@ -13,6 +13,9 @@ struct MediaShelf: View {
                 }
                 .frame(width: itemWidth)
             }
+        } destination: {
+            MediaGrid(items: items, isLoading: false)
+                .navigationTitle(header)
         }
     }
 
