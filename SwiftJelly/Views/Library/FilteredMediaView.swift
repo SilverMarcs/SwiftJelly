@@ -25,6 +25,8 @@ struct FilteredMediaView: View {
             return genre.capitalized
         case .studio(let studio):
             return studio.name ?? "Studio"
+        case .favorites:
+            return "Favorites"
         }
     }
     

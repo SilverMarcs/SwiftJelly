@@ -55,7 +55,7 @@ enum TabSelection: String, CaseIterable {
     var tabView: some View {
         switch self {
         case .home: HomeView()
-        case .favorites: FavoritesView()
+        case .favorites: FilteredMediaView(filter: .favorites)
         case .libraries: LibraryView()
         case .settings: SettingsView()
         case .search: SearchView()
