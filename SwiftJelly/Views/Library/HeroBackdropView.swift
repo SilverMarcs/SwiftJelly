@@ -2,9 +2,9 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-struct HeroBackdropView<ItemDetailContent: View>: View {
+struct HeroBackdropView<HeroActions: View>: View {
     let item: BaseItemDto
-    @ViewBuilder let itemDetailContent: ItemDetailContent
+    @ViewBuilder let heroActions: HeroActions
     
     var body: some View {
         #if os(tvOS)
@@ -26,7 +26,7 @@ struct HeroBackdropView<ItemDetailContent: View>: View {
     private var backdropImage: some View {
         CachedAsyncImage(
             url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1500
+            targetSize: 2000
         )
         .scaledToFill()
         #if os(iOS)
@@ -79,7 +79,7 @@ struct HeroBackdropView<ItemDetailContent: View>: View {
                     .shadow(color: .black.opacity(0.5), radius: 4)
             }
             
-            itemDetailContent
+            heroActions
 
             OverviewView(item: item)
             

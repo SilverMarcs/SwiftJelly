@@ -7,6 +7,7 @@
 
 import SwiftUI
 import JellyfinAPI
+import SwiftMediaViewer
 
 /// Displays trending movies/shows from TMDB that exist in the user's Jellyfin library
 struct TrendingInLibraryView: View {
@@ -23,15 +24,36 @@ struct TrendingInLibraryView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 0) {
                 ForEach(matchedItems, id: \.id) { item in
+                    Group {
+                    #if !os(tvOS)
                     MediaNavigationLink(item: item) {
-                        switch item.type {
-                        case .movie:
-                            MovieHeroView(movie: item)
-                        case .series:
-                            ShowHeroView(show: item)
-                        default:
-                            EmptyView()
+                        hero(item: item)
+                    }
+                    #else
+                    hero(item: item)
+                    .frame(height: 1080 * 0.75)
+                    .padding(40)
+                    .background {
+                        if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
+                            CachedAsyncImage(url: url, targetSize: 2000)
+                                .scaledToFill()
+                                .overlay {
+                                    Rectangle()
+                                        .fill(.regularMaterial)
+                                        .mask {
+                                            LinearGradient(
+                                                stops: [
+                                                    .init(color: .white, location: 0),
+                                                    .init(color: .white.opacity(0.7), location: 0.5),
+                                                    .init(color: .white.opacity(0), location: 1)
+                                                ],
+                                                startPoint: .bottomLeading, endPoint: .topTrailing
+                                            )
+                                        }
+                                }
                         }
+                    }
+                    #endif
                     }
                     .id(item.id)
                     .containerRelativeFrame(.horizontal)
@@ -40,7 +62,11 @@ struct TrendingInLibraryView: View {
             .scrollTargetLayout()
         }
         .scrollPosition(id: $scrolledID, anchor: .center)
-        .scrollTargetBehavior(.paging)
+        .scrollTargetBehavior(.viewAligned)
+        #if os(tvOS)
+        .ignoresSafeArea()
+        .contentMargins(.horizontal, 1, for: .scrollContent) // peek tiny bit of next card for scroll to workj
+        #endif
         .task(id: tmdbAPIKey) {
             if matchedItems.isEmpty {
                 await loadTrendingInLibrary()
@@ -49,12 +75,10 @@ struct TrendingInLibraryView: View {
         .onChange(of: matchedItems) {
             // Start at 2nd element (index 1) when items load
             if matchedItems.count >= 2 {
-//                Task { @MainActor in
-//                    try? await Task.sleep(for: .milliseconds(100))
-                    scrolledID = matchedItems[1].id
-//                }
+                scrolledID = matchedItems[1].id
             }
         }
+        #if !os(tvOS)
         .overlay {
             // Navigation chevrons
             if matchedItems.count > 1 {
@@ -87,6 +111,19 @@ struct TrendingInLibraryView: View {
                 #endif
                 .padding(.horizontal, 16)
             }
+        }
+        #endif
+    }
+    
+    @ViewBuilder
+    private func hero(item: BaseItemDto) -> some View {
+        switch item.type {
+        case .movie:
+            MovieHeroView(movie: item)
+        case .series:
+            ShowHeroView(show: item)
+        default:
+            EmptyView()
         }
     }
     

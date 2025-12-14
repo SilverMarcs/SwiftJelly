@@ -46,6 +46,7 @@ struct AttributesView: View {
                 AttributeBadge(text: "\(minutes)m", systemImage: "clock")
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

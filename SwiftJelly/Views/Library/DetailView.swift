@@ -37,7 +37,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         }
         .background {
             if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
-                CachedAsyncImage(url: url, targetSize: 1500)
+                CachedAsyncImage(url: url, targetSize: 1000)
                     .scaledToFill()
                     .overlay {
                         Rectangle()
