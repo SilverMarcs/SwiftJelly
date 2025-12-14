@@ -10,6 +10,7 @@ import SwiftMediaViewer
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
 
     var body: some View {
         Form {
@@ -23,6 +24,14 @@ struct SettingsView: View {
 
             Section("Images") {
                 CacheManagerView()
+            }
+            
+            Section {
+                SecureField("Bearer Token", text: $tmdbAPIKey)
+            } header: {
+                Text("TMDB API")
+            } footer: {
+                Text("Enter your TMDB API Bearer token to show trending content from your library.")
             }
         }
         .formStyle(.grouped)

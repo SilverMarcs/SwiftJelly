@@ -9,6 +9,7 @@ extension ItemFields {
 //        .parentID,
 //        .taglines,
         .people,
+        .providerIDs,
 //        .chapters
     ]
 }

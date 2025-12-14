@@ -31,7 +31,6 @@ struct SettingsModifier: ViewModifier {
             .sheet(isPresented: $isPresented) {
                 NavigationStack {
                     SettingsView()
-                        .presentationDetents([.medium])
                 }
                 .navigationTransition(.zoom(sourceID: "settings-button", in: transition))
             }

@@ -20,6 +20,8 @@ struct HomeView: View {
     var body: some View {
         ScrollView([.vertical]) {
             VStack(alignment: .leading, spacing: 26) {
+                TrendingInLibraryView()
+                
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
 
@@ -55,7 +57,7 @@ struct HomeView: View {
             async let continueWatching = JFAPI.loadContinueWatchingSmart()
             async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
             async let loadedGenres = JFAPI.loadGenres(limit: 20)
-            
+            // TODO: Animate this
             continueWatchingItems = try await continueWatching
             let items = try await allItems
             
