@@ -78,17 +78,16 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 backdropSection
                 
                 content
+                    .refreshToolbar {
+                        isLoading = true
+                        await refresh()
+                        isLoading = false
+                    }
             }
             .scenePadding(.bottom)
         }
-//        .refreshable { await refresh() }
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
-        .refreshToolbar {
-            isLoading = true
-            await refresh()
-            isLoading = false
-        }
         .scrollEdgeEffectHidden(true, for: .top)
     }
     

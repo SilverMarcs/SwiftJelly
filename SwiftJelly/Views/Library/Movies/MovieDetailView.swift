@@ -3,18 +3,22 @@ import JellyfinAPI
 
 struct MovieDetailView: View {
     @State private var movie: BaseItemDto
+    let showFullContent: Bool
 
-    init(item: BaseItemDto) {
+    init(item: BaseItemDto, showFullContent: Bool = true) {
         self._movie = State(initialValue: item)
+        self.showFullContent = showFullContent
     }
     
     var body: some View {
         DetailView(item: movie) {
-            if let people = movie.people {
-                PeopleScrollView(people: people)
+            if showFullContent {
+                if let people = movie.people {
+                    PeopleScrollView(people: people)
+                }
+                
+                SimilarItemsView(item: movie)
             }
-            
-            SimilarItemsView(item: movie)
         } itemDetailContent: {
             HStack(spacing: spacing) {
                 MovieOrEpisodePlayButton(item: movie)

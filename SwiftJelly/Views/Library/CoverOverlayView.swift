@@ -14,7 +14,7 @@ struct CoverOverlayView<ItemDetailContent: View>: View {
 
             if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
                 CachedAsyncImage(url: url, targetSize: 450) {
-                    EmptyView()
+                    Color.clear
                 }
                 .aspectRatio(contentMode: .fit)
                 .frame(maxWidth: logoWidth, maxHeight: logoHeight)

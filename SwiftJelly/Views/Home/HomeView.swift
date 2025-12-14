@@ -9,7 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct HomeView: View {
-    @Environment(\.scenePhase) var scenePhase
+    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     
     @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var favorites: [BaseItemDto] = []
@@ -19,9 +19,12 @@ struct HomeView: View {
     @State private var isLoading = false
 
     var body: some View {
-        ScrollView([.vertical]) {
+        ScrollView {
             VStack(alignment: .leading, spacing: 26) {
-                TrendingInLibraryView()
+                if !tmdbAPIKey.isEmpty {
+                    TrendingInLibraryView()
+                        .padding(.bottom, -20)
+                }
                 
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
@@ -36,13 +39,14 @@ struct HomeView: View {
             }
             .scenePadding(.bottom)
         }
+        .ignoresSafeArea(edges: tmdbAPIKey.isEmpty ? [] : .top)
         .overlay {
             if isLoading && continueWatchingItems.isEmpty {
                 UniversalProgressView()
             }
         }
         .task {
-            if  continueWatchingItems.isEmpty {
+            if continueWatchingItems.isEmpty {
                 await loadAll()
             }
         }

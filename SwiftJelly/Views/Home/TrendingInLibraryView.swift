@@ -14,17 +14,34 @@ struct TrendingInLibraryView: View {
     @State private var matchedItems: [BaseItemDto] = []
     
     var body: some View {
-        if !tmdbAPIKey.isEmpty {
-            MediaShelf(items: matchedItems, header: "Trending in Your Library")
-                .task(id: tmdbAPIKey) {
-                    if matchedItems.isEmpty {
-                        await loadTrendingInLibrary()
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 0) {
+                ForEach(matchedItems, id: \.id) { item in
+                    Group {
+                        switch item.type {
+                        case .movie:
+                            MovieDetailView(item: item, showFullContent: false)
+                        case .series:
+                            ShowDetailView(item: item, showFullContent: false)
+                        default:
+                            EmptyView()
+                        }
                     }
+                    .containerRelativeFrame(.horizontal)
                 }
+            }
+            .scrollTargetLayout()
+        }
+//        .backgroundExtensionEffect()
+        .scrollTargetBehavior(.paging)
+        .task(id: tmdbAPIKey) {
+            if matchedItems.isEmpty {
+                await loadTrendingInLibrary()
+            }
         }
     }
-    
-    private func loadTrendingInLibrary() async {
+
+    func loadTrendingInLibrary() async {
         guard let trendingItems = try? await TMDBAPI.fetchTrending(apiKey: tmdbAPIKey) else { return }
         
         var matched: [(Int, BaseItemDto)] = []
@@ -44,9 +61,14 @@ struct TrendingInLibraryView: View {
             if !result.contains(where: { $0.id == item.id }) { result.append(item) }
         }
         
-        withAnimation {
-            matchedItems = unique.shuffled()
-        }
+        // withAnimation {
+            var shuffled = unique.shuffled()
+            // Ensure first item is not a series - swap with second if needed
+            if shuffled.count >= 2 && shuffled[0].type == .series {
+                shuffled.swapAt(0, 1)
+            }
+            matchedItems = shuffled
+        // }
     }
     
     private func findMatch(for trending: TMDBAPI.TrendingItem) async -> BaseItemDto? {
