@@ -12,6 +12,12 @@ import JellyfinAPI
 struct TrendingInLibraryView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @State private var matchedItems: [BaseItemDto] = []
+    @State private var scrolledID: String?
+    
+    private var currentIndex: Int {
+        guard let scrolledID else { return 0 }
+        return matchedItems.firstIndex { $0.id == scrolledID } ?? 0
+    }
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -27,18 +33,71 @@ struct TrendingInLibraryView: View {
                             EmptyView()
                         }
                     }
+                    .id(item.id)
                     .containerRelativeFrame(.horizontal)
                 }
             }
             .scrollTargetLayout()
         }
-//        .backgroundExtensionEffect()
+        .scrollPosition(id: $scrolledID, anchor: .center)
         .scrollTargetBehavior(.paging)
         .task(id: tmdbAPIKey) {
             if matchedItems.isEmpty {
                 await loadTrendingInLibrary()
             }
         }
+        .onChange(of: matchedItems) {
+            // Start at 2nd element (index 1) when items load
+            if matchedItems.count >= 2 {
+//                Task { @MainActor in
+//                    try? await Task.sleep(for: .milliseconds(100))
+                    scrolledID = matchedItems[1].id
+//                }
+            }
+        }
+        .overlay {
+            // Navigation chevrons
+            if matchedItems.count > 1 {
+                HStack {
+                    Button {
+                        withAnimation {
+                            scrollToPrevious()
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(currentIndex <= 0)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            scrollToNext()
+                        }
+                    } label: {
+                        Image(systemName: "chevron.right")
+    
+                    }
+                    .disabled(currentIndex >= matchedItems.count - 1)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+                #if os(macOS)
+                .controlSize(.large)
+                #endif
+                .padding(.horizontal, 16)
+            }
+        }
+    }
+    
+    private func scrollToPrevious() {
+        guard currentIndex > 0 else { return }
+        scrolledID = matchedItems[currentIndex - 1].id
+    }
+    
+    private func scrollToNext() {
+        guard currentIndex < matchedItems.count - 1 else { return }
+        scrolledID = matchedItems[currentIndex + 1].id
     }
 
     func loadTrendingInLibrary() async {

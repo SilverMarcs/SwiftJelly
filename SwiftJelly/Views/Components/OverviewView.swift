@@ -18,16 +18,8 @@ struct OverviewView: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(lineLimit, reservesSpace: true)
+                    .lineLimit(2, reservesSpace: true)
             }
         }
-    }
-    
-    var lineLimit: Int {
-        #if os(iOS) || os(tvOS)
-        2
-        #else
-        3
-        #endif
     }
 }
