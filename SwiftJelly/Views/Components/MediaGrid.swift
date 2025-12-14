@@ -44,7 +44,7 @@ struct MediaGrid: View {
         .overlay {
             if isLoading && items.isEmpty {
                 UniversalProgressView()
-            } else {
+            } else if !isLoading && items.isEmpty {
                 ContentUnavailableView(
                     "No Media",
                     systemImage: "play.tv",
