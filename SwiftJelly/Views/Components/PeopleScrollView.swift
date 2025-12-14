@@ -27,6 +27,7 @@ struct PeopleScrollView: View {
                     .scenePadding()
                 }
                 .navigationTitle("Cast & Crew")
+                .toolbarTitleDisplayMode(.inline)
             }
             #if os(tvOS)
             .frame(maxWidth: .infinity, alignment: .leading)

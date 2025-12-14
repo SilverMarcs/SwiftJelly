@@ -36,6 +36,7 @@ struct GenreCarouselView: View {
                 .scenePadding()
             }
             .navigationTitle("Genres")
+            .toolbarTitleDisplayMode(.inline)
         }
         .task {
             if genres.isEmpty {

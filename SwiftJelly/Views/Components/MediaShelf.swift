@@ -16,6 +16,7 @@ struct MediaShelf: View {
         } destination: {
             MediaGrid(items: items, isLoading: false)
                 .navigationTitle(header)
+                .toolbarTitleDisplayMode(.inline)
         }
     }
 
