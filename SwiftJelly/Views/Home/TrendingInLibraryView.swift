@@ -17,7 +17,7 @@ struct TrendingInLibraryView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 0) {
                 ForEach(matchedItems, id: \.id) { item in
-                    Group {
+                    MediaNavigationLink(item: item) {
                         switch item.type {
                         case .movie:
                             MovieHeroView(movie: item)
