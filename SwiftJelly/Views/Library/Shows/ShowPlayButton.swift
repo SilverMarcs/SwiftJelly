@@ -12,8 +12,12 @@ struct ShowPlayButton: View {
                         ProgressView()
                             .tint(.primary)
                             .controlSize(.mini)
+
                         Text("Loading…")
                     }
+                    #if os(macOS)
+                    .padding(.vertical, 0.5)
+                    #endif
                     .transition(.opacity)
                     
                 } else if let nextEpisode = vm.nextEpisode {
@@ -44,7 +48,6 @@ struct ShowPlayButton: View {
             }
             .font(.callout)
             .fontWeight(.semibold)
-            .animation(.easeInOut(duration: 0.2), value: vm.nextEpisode?.id)
         }
         .tint(Color(.accent).secondary)
         .buttonBorderShape(.capsule)

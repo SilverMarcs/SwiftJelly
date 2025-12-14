@@ -26,15 +26,16 @@ struct MediaCard: View {
                             .padding(12)
                     }
                 }
-                .overlay(alignment: .bottomLeading) {
-                    if item.userData?.isFavorite == true {
-                        Image(systemName: "star.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.yellow)
-                            .shadow(radius: 4)
-                            .padding(12)
-                    }
-                }
+            // since can understand contextually anyway
+//                .overlay(alignment: .bottomLeading) {
+//                    if item.userData?.isFavorite == true {
+//                        Image(systemName: "star.fill")
+//                            .font(.subheadline)
+//                            .foregroundStyle(.yellow)
+//                            .shadow(radius: 4)
+//                            .padding(12)
+//                    }
+//                }
                 .contextMenu {
                     if item.type == .movie || item.type == .series {
                         Button {

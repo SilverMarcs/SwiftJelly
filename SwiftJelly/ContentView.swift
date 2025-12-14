@@ -29,7 +29,7 @@ struct ContentView: View {
                                 .navigationDestinations()
                                 .settingsSheet()
                             #if os(macOS)
-                                .frame(minWidth: 900)
+                                .frame(minWidth: 800)
                             #endif
                         }
                     }

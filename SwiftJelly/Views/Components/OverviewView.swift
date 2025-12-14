@@ -16,19 +16,18 @@ struct OverviewView: View {
             if let overview = item.overview ??  item.taglines?.first {
                 Text(overview)
                     .font(.callout)
-//                    .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(lineLimit)
+                    .lineLimit(lineLimit, reservesSpace: true)
             }
         }
     }
     
     var lineLimit: Int {
-        #if os(iOS)
+        #if os(iOS) || os(tvOS)
         2
         #else
-        4
+        3
         #endif
     }
 }

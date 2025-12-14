@@ -12,7 +12,7 @@ struct GenreCarouselView: View {
     @State private var genres: [BaseItemDto] = []
 
     var body: some View {
-        SectionContainer("Genres", spacing: spacing) {
+        SectionContainer("Genres", showHeader: !genres.isEmpty, spacing: spacing) {
             ForEach(genres.shuffled()) { genre in
                 NavigationLink {
                     FilteredMediaView(filter: .genre(genre.name ?? "Genre"))

@@ -20,9 +20,9 @@ struct TrendingInLibraryView: View {
                     Group {
                         switch item.type {
                         case .movie:
-                            MovieDetailView(item: item, showFullContent: false)
+                            MovieHeroView(movie: item)
                         case .series:
-                            ShowDetailView(item: item, showFullContent: false)
+                            ShowHeroView(show: item)
                         default:
                             EmptyView()
                         }

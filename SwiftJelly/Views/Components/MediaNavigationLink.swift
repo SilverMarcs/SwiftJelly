@@ -13,9 +13,18 @@ struct MediaNavigationLink<Label: View>: View {
     @ViewBuilder let label: () -> Label
     
     var body: some View {
-        let item: any Hashable = item.type == .person ? Person(from: item) : item
+        let navigationItem: any Hashable = {
+            switch item.type {
+            case .person:
+                return Person(from: item)
+            case .episode:
+                return item.toSeries() ?? item
+            default:
+                return item
+            }
+        }()
         
-        NavigationLink(value: item) {
+        NavigationLink(value: navigationItem) {
             label()
         }
         .adaptiveButtonStyle()

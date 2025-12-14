@@ -1,7 +1,6 @@
 import Foundation
 import JellyfinAPI
 import SwiftUI
-import Combine
 
 @Observable class ShowDetailViewModel {
     // Input
@@ -106,7 +105,9 @@ import Combine
     }
     
     private func computeNextEpisode() async {
-        let sortedSeasons = seasons // already sorted in reloadSeasonsAndEpisodes
+        var computed: BaseItemDto? = nil
+        
+        let sortedSeasons = seasons
         for season in sortedSeasons {
             let sid = season.id ?? ""
             let sortedEpisodes = allEpisodes[sid] ?? []
@@ -117,7 +118,7 @@ import Combine
                 let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return hasProgress && !isFullyWatched
             }) {
-                nextEpisode = inProgress
+                computed = inProgress
                 break
             }
             
@@ -126,24 +127,28 @@ import Combine
                 let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return !isWatched
             }) {
-                nextEpisode = firstUnwatched
+                computed = firstUnwatched
                 break
             }
-            
-            // else: this season finished, continue
         }
         
         // All watched: choose last episode of last season
-        if nextEpisode == nil, let lastSeason = sortedSeasons.last {
+        if computed == nil, let lastSeason = sortedSeasons.last {
             let sid = lastSeason.id ?? ""
-            let sortedEpisodes = allEpisodes[sid] ?? []
-            nextEpisode = sortedEpisodes.last
+            computed = allEpisodes[sid]?.last
         }
         
-        // Try to auto-select the season of next episode if different
-        if let ne = nextEpisode, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
-            if selectedSeason?.id != targetSeason.id { 
-                selectedSeason = targetSeason
+        // Single animated assignment
+        withAnimation {
+            nextEpisode = computed
+        }
+        
+        // Auto-select season if different
+        if let ne = computed, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
+            if selectedSeason?.id != targetSeason.id {
+                withAnimation {
+                    selectedSeason = targetSeason
+                }
                 await updateEpisodesForSelectedSeason()
             }
         }

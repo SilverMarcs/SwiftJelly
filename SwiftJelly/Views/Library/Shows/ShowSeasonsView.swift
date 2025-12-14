@@ -25,22 +25,25 @@ struct ShowSeasonsView: View {
         }
     }
     
+    @ViewBuilder
     private var seasonPicker: some View {
-        Picker("Season", selection: $vm.selectedSeason) {
-            ForEach(vm.seasons) { season in
-                Text(season.name ?? "Season").tag(season as BaseItemDto?)
+        if !vm.seasons.isEmpty {
+            Picker("Season", selection: $vm.selectedSeason) {
+                ForEach(vm.seasons) { season in
+                    Text(season.name ?? "Season").tag(season as BaseItemDto?)
+                }
             }
+            .scenePadding(.horizontal)
+            .padding(.top)
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .menuStyle(.button)
+            .buttonStyle(.glass)
+            .foregroundStyle(.primary)
+            #if os(tvOS)
+            .focusSection()
+            #endif
         }
-        .scenePadding(.horizontal)
-        .padding(.top)
-        .labelsHidden()
-        .pickerStyle(.menu)
-        .menuStyle(.button)
-        .buttonStyle(.glass)
-        .foregroundStyle(.primary)
-        #if os(tvOS)
-        .focusSection()
-        #endif
     }
 
     private var scroller: some View {

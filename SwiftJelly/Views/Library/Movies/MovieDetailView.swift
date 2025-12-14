@@ -3,34 +3,23 @@ import JellyfinAPI
 
 struct MovieDetailView: View {
     @State private var movie: BaseItemDto
-    let showFullContent: Bool
 
-    init(item: BaseItemDto, showFullContent: Bool = true) {
+    init(item: BaseItemDto) {
         self._movie = State(initialValue: item)
-        self.showFullContent = showFullContent
     }
     
     var body: some View {
         DetailView(item: movie) {
-            if showFullContent {
-                if let people = movie.people {
-                    PeopleScrollView(people: people)
-                }
-                
-                SimilarItemsView(item: movie)
-            }
-        } itemDetailContent: {
-            HStack(spacing: spacing) {
-                MovieOrEpisodePlayButton(item: movie)
-                
-                MarkPlayedButton(item: movie)
-                
-                if movie.type != .episode {
-                    FavoriteButton(item: movie)
-                }
-            }
+            PeopleScrollView(people: movie.people)
+            
+            SimilarItemsView(item: movie)
+        } heroView: {
+            MovieHeroView(movie: movie)
         }
-//        .navigationTitle(movie.name ?? "")
+        .navigationTitle("")
+        .refreshToolbar {
+            await fetchMovie()
+        }
         .environment(\.refresh, fetchMovie)
     }
 
@@ -40,15 +29,5 @@ struct MovieDetailView: View {
         } catch {
             print("Error loading Movie Detail: \(error.localizedDescription)")
         }
-    }
-    
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        15
-        #elseif os(macOS)
-        8
-        #else
-        4
-        #endif
     }
 }

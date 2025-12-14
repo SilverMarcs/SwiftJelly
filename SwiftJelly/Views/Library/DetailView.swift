@@ -7,19 +7,13 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
 
     let item: BaseItemDto
     @ViewBuilder let content: Content
-    @ViewBuilder let itemDetailContent: ItemDetailContent
+    @ViewBuilder let heroView: ItemDetailContent
     
-    @State private var isLoading = false
-
     var body: some View {
         layout
-            .overlay {
-                if isLoading {
-                    UniversalProgressView()
-                }
-            }
     }
     
+// TODO: Re-enable tvOS support with unified hero view
 #if os(tvOS)
     @State private var belowFold = false
     private let showcaseHeight = 1080 * 0.85
@@ -27,9 +21,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     private var layout: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 30) {
-                CoverOverlayView(item: item) {
-                    itemDetailContent
-                }
+                heroView
                 .scenePadding()
                 .frame(height: showcaseHeight)
                 .focusSection()
@@ -75,14 +67,9 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     private var layout: some View {
         ScrollView {
             VStack {
-                backdropSection
+                heroView
                 
                 content
-                    .refreshToolbar {
-                        isLoading = true
-                        await refresh()
-                        isLoading = false
-                    }
             }
             .scenePadding(.bottom)
         }
@@ -90,47 +77,5 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         .toolbarTitleDisplayMode(.inline)
         .scrollEdgeEffectHidden(true, for: .top)
     }
-    
-    private var backdropSection: some View {
-        CachedAsyncImage(
-            url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1500
-        )
-        .scaledToFill()
-        #if os(iOS)
-        .containerRelativeFrame(.horizontal)
-        #endif
-        .frame(height: height)
-        .clipped()
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(.regularMaterial)
-                .mask {
-                    LinearGradient(
-                        colors: [.white, .white.opacity(0.95), .clear],
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                }
-                .frame(height: 300)
-        }
-        .backgroundExtensionEffect()
-        .overlay(alignment: .bottomLeading) {
-            CoverOverlayView(item: item) {
-                itemDetailContent
-            }
-            .padding(.bottom, 20)
-        }
-        .stretchy()
-        .environment(\.colorScheme, .dark)
-    }
-    
-    var height: CGFloat {
-        #if os(macOS)
-        480
-        #else
-        620
-        #endif
-    }    
 #endif
 }

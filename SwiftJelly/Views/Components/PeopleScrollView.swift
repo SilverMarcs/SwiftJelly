@@ -9,19 +9,21 @@ import SwiftUI
 import JellyfinAPI
 
 struct PeopleScrollView: View {
-    let people: [BaseItemPerson]
+    let people: [BaseItemPerson]?
     
     var body: some View {
-        SectionContainer("Cast & Crew", spacing: spacing) {
-            ForEach(people, id: \.id) { person in
-                PersonView(person: Person(from: person))
+        if let people = people {
+            SectionContainer("Cast & Crew", spacing: spacing) {
+                ForEach(people, id: \.id) { person in
+                    PersonView(person: Person(from: person))
+                }
             }
+            #if os(tvOS)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            #else
+            .padding(.top)
+            #endif
         }
-        #if os(tvOS)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        #else
-        .padding(.top)
-        #endif
     }
 
     private var spacing: CGFloat {
