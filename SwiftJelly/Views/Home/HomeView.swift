@@ -12,6 +12,7 @@ struct HomeView: View {
     @Environment(\.scenePhase) var scenePhase
     
     @State private var continueWatchingItems: [BaseItemDto] = []
+    @State private var favorites: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
     @State private var genres: [BaseItemDto] = []
@@ -25,6 +26,8 @@ struct HomeView: View {
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
 
+                MediaShelf(items: favorites, header: "Favorites")
+                
                 GenreCarouselView(genres: genres)
                 
                 MediaShelf(items: latestMovies, header: "Recently Added Movies")
@@ -57,6 +60,7 @@ struct HomeView: View {
             async let continueWatching = JFAPI.loadContinueWatchingSmart()
             async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
             async let loadedGenres = JFAPI.loadGenres(limit: 20)
+            async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
             // TODO: Animate this
             continueWatchingItems = try await continueWatching
             let items = try await allItems
@@ -65,6 +69,7 @@ struct HomeView: View {
             latestShows = Array(items.filter { $0.type == .series })
             
             genres = try await loadedGenres
+            favorites = try await loadedFavorites
         } catch {
             print("Error loading Home items: \(error)")
         }

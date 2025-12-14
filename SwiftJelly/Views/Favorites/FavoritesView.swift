@@ -35,7 +35,7 @@ struct FavoritesView: View {
     
     func fetchFavorites() async {
         do {
-            favorites = try await JFAPI.loadFavoriteItems(limit: 15)
+            favorites = try await JFAPI.loadFavoriteItems()
         } catch {
             print("Error loading Favorites: \(error.localizedDescription)")
         }

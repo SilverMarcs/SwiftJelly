@@ -34,8 +34,9 @@ extension JFAPI {
         parameters.includeItemTypes = [.movie, .series, .boxSet]
         parameters.isFavorite = true
         parameters.isRecursive = true
-        parameters.sortBy = [ItemSortBy.sortName.rawValue]
-        parameters.sortOrder = [SortOrder.ascending]
+//        parameters.sortBy = [ItemSortBy.sortName.rawValue]
+//        parameters.sortOrder = [SortOrder.ascending]
+        parameters.sortBy = ["Random"]
         parameters.limit = limit
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
