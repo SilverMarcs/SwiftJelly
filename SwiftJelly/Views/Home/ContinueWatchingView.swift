@@ -15,7 +15,7 @@ struct ContinueWatchingView: View {
         if !items.isEmpty {
             SectionContainer("Continue Watching", showHeader: isTVOS, spacing: spacing) {
                 ForEach(items, id: \.id) { item in
-                    PlayableCard(item: item, showTitle: false)
+                    PlayableCard(item: item)
                 }
             }
         }

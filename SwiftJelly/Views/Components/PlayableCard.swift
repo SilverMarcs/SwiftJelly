@@ -86,7 +86,7 @@ struct PlayableCard: View {
 
     private var cardWidth: CGFloat {
         #if os(tvOS)
-        548
+        480
         #else
         280
         #endif

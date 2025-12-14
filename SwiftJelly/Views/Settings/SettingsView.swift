@@ -27,7 +27,7 @@ struct SettingsView: View {
             }
             
             Section {
-                SecureField("Bearer Token", text: $tmdbAPIKey)
+                SecureField("Bearer Token", text: $tmdbAPIKey, prompt: Text("ey..."))
             } header: {
                 Text("TMDB API")
             } footer: {
