@@ -2,8 +2,10 @@ import JellyfinAPI
 
 extension ItemFields {
     static let MinimumFields: [ItemFields] = [
-        .mediaSources,
+//        .mediaSources,
         .overview,
+        .customRating,
+        .genres,
 //        .parentID,
 //        .taglines,
         .people,

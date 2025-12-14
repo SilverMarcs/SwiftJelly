@@ -70,5 +70,6 @@ struct AttributeBadge: View {
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
         .glassEffect(in: .rect(cornerRadius: 6))
+        .lineLimit(1)
     }
 }

@@ -11,7 +11,7 @@ struct GenreCardView: View {
     let name: String
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
             .fill(background(for: name))
             .overlay {
                 Text(name)
@@ -31,8 +31,6 @@ struct GenreCardView: View {
     private var itemWidth: CGFloat {
         #if os(tvOS)
         225
-        #elseif os(iOS)
-        75
         #else
         100
         #endif
