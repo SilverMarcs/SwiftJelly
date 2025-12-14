@@ -20,11 +20,11 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
+            if !tmdbAPIKey.isEmpty {
+                TrendingInLibraryView()
+            }
+            
             VStack(alignment: .leading, spacing: 26) {
-                if !tmdbAPIKey.isEmpty {
-                    TrendingInLibraryView()
-                        .padding(.bottom, -20)
-                }
                 
                 ContinueWatchingView(items: continueWatchingItems)
                     .environment(\.refresh, refreshContinueWatching)
