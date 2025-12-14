@@ -14,10 +14,34 @@ enum MediaFilter {
     case studio(NameGuidPair)
 }
 
+enum MediaSortOption: String, CaseIterable {
+    case random = "Random"
+    case nameAscending = "Name A-Z"
+    case nameDescending = "Name Z-A"
+    case ratingDescending = "Highest Rated"
+    case ratingAscending = "Lowest Rated"
+    case criticRatingDescending = "Best Critic Score"
+    case criticRatingAscending = "Worst Critic Score"
+    case yearDescending = "Newest First"
+    case yearAscending = "Oldest First"
+    
+    var systemImage: String {
+        switch self {
+        case .random: "shuffle"
+        case .nameAscending, .nameDescending: "textformat"
+        case .ratingDescending, .ratingAscending: "star.fill"
+        case .criticRatingDescending, .criticRatingAscending: "checkmark.seal.fill"
+        case .yearDescending, .yearAscending: "calendar"
+        }
+    }
+}
+
 @Observable class FilteredMediaViewModel {
     var items: [BaseItemDto] = []
     var isLoading = false
+    var isSorting = false
     var hasNextPage = true
+    var sortOption: MediaSortOption = .random
     
     @ObservationIgnored private let filter: MediaFilter
     @ObservationIgnored private let pageSize = 50
@@ -25,6 +49,14 @@ enum MediaFilter {
     
     init(filter: MediaFilter) {
         self.filter = filter
+    }
+    
+    func setSortOption(_ option: MediaSortOption) async {
+        guard option != sortOption, !isLoading else { return }
+        sortOption = option
+        isSorting = true
+        await loadInitialItems()
+        isSorting = false
     }
     
     func loadInitialItems() async {
@@ -66,9 +98,37 @@ enum MediaFilter {
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
-//        parameters.sortBy = [ItemSortBy.sortName.rawValue]
-//        parameters.sortOrder = [SortOrder.ascending]
-        parameters.sortBy = ["Random"]
+        
+        // Apply sort option
+        switch sortOption {
+        case .random:
+            parameters.sortBy = ["Random"]
+        case .nameAscending:
+            parameters.sortBy = [ItemSortBy.sortName.rawValue]
+            parameters.sortOrder = [.ascending]
+        case .nameDescending:
+            parameters.sortBy = [ItemSortBy.sortName.rawValue]
+            parameters.sortOrder = [.descending]
+        case .ratingDescending:
+            parameters.sortBy = [ItemSortBy.communityRating.rawValue]
+            parameters.sortOrder = [.descending]
+        case .ratingAscending:
+            parameters.sortBy = [ItemSortBy.communityRating.rawValue]
+            parameters.sortOrder = [.ascending]
+        case .criticRatingDescending:
+            parameters.sortBy = [ItemSortBy.criticRating.rawValue]
+            parameters.sortOrder = [.descending]
+        case .criticRatingAscending:
+            parameters.sortBy = [ItemSortBy.criticRating.rawValue]
+            parameters.sortOrder = [.ascending]
+        case .yearDescending:
+            parameters.sortBy = [ItemSortBy.premiereDate.rawValue]
+            parameters.sortOrder = [.descending]
+        case .yearAscending:
+            parameters.sortBy = [ItemSortBy.premiereDate.rawValue]
+            parameters.sortOrder = [.ascending]
+        }
+        
         parameters.limit = pageSize
         parameters.startIndex = page * pageSize
         

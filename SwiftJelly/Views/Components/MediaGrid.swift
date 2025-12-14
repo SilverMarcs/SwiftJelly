@@ -44,6 +44,12 @@ struct MediaGrid: View {
         .overlay {
             if isLoading && items.isEmpty {
                 UniversalProgressView()
+            } else if !isLoading && items.isEmpty {
+                ContentUnavailableView(
+                    "No Media",
+                    systemImage: "play.tv",
+                    description: Text("Add content ot explore other sections")
+                )
             }
         }
     }
