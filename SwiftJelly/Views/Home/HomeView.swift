@@ -39,7 +39,7 @@ struct HomeView: View {
         }
         .ignoresSafeArea(edges: tmdbAPIKey.isEmpty ? [] : .top)
         .overlay {
-            if isLoading && continueWatchingItems.isEmpty {
+            if isLoading {
                 UniversalProgressView()
             }
         }
