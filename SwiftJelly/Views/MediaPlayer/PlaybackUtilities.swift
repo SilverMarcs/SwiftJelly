@@ -30,6 +30,7 @@ private struct PlaybackSessionContext: Sendable {
 struct PlaybackLoadResult {
     let player: AVPlayer
     let info: PlaybackInfoResponse
+    let item: BaseItemDto
 }
 
 struct PlaybackUtilities {
@@ -38,6 +39,7 @@ struct PlaybackUtilities {
     /// Loads playback information and creates an AVPlayer
     static func loadPlaybackInfo(
         for item: BaseItemDto,
+        into existingPlayer: AVPlayer? = nil,
         audioStreamIndex: Int? = nil,
         resumeSeconds: Double? = nil
     ) async throws -> PlaybackLoadResult {
@@ -47,7 +49,7 @@ struct PlaybackUtilities {
             .first(where: { $0.type == .subtitle })?
             .index
 
-        // Start fetching playback info and fresh item concurrently
+        // Start fetching playback info and a fresh item concurrently
         let resumeTicks: Int64? = {
             guard let resumeSeconds else { return nil }
             return Int64(resumeSeconds * 10_000_000)
@@ -60,7 +62,7 @@ struct PlaybackUtilities {
             startPositionTicks: resumeTicks
         )
         async let freshItemTask: BaseItemDto? = {
-            guard resumeSeconds == nil, let id = item.id else { return nil }
+            guard let id = item.id else { return nil }
             return try? await JFAPI.loadItem(by: id)
         }()
 
@@ -70,22 +72,25 @@ struct PlaybackUtilities {
             throw PlaybackError.missingItemID
         }
 
+        let latestItem = await freshItemTask ?? item
+
         let playerItem = AVPlayerItem(url: info.playbackURL)
         
         #if !os(macOS)
-        let metadata = await item.createMetadataItems()
+        let metadata = await latestItem.createMetadataItems()
         playerItem.externalMetadata = metadata
         #endif
         
-        let player = AVPlayer(playerItem: playerItem)
+        let player = existingPlayer ?? AVPlayer()
+        player.pause()
+        player.replaceCurrentItem(with: playerItem)
         
         #if os(macOS)
         player.preventsDisplaySleepDuringVideoPlayback = true
         #endif
         
         // Prefer start time from freshly fetched item (to avoid stale progress)
-        let latestItem = await freshItemTask
-        let fallbackStartSeconds = Double(latestItem?.startTimeSeconds ?? item.startTimeSeconds)
+        let fallbackStartSeconds = Double(latestItem.startTimeSeconds)
         let targetStartSeconds = resumeSeconds ?? fallbackStartSeconds
         let time = CMTime(seconds: targetStartSeconds, preferredTimescale: 1)
         await player.seek(to: time)
@@ -120,7 +125,7 @@ struct PlaybackUtilities {
             )
         }
         
-        return PlaybackLoadResult(player: player, info: info)
+        return PlaybackLoadResult(player: player, info: info, item: latestItem)
     }
     
     /// Reports current playback progress to Jellyfin server
@@ -155,7 +160,7 @@ struct PlaybackUtilities {
         
         player.replaceCurrentItem(with: nil)
         
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        try? await Task.sleep(for: .milliseconds(100))
         if let handler = RefreshHandlerContainer.shared.refresh {
             await handler()
             RefreshHandlerContainer.shared.refresh = nil

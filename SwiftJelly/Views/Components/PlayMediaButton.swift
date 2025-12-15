@@ -32,6 +32,8 @@ struct PlayMediaButton<Label: View>: View {
         #if !os(macOS)
         .fullScreenCover(isPresented: $showPlayer) {
             AVMediaPlayerViewIOS(item: item)
+                .ignoresSafeArea()
+                .tint(.primary)
         }
         #endif
     }

@@ -16,12 +16,16 @@ struct HomeView: View {
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
     @State private var isLoading = false
+    @State var showScrollEffect = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 26) {
                 if !tmdbAPIKey.isEmpty {
                     TrendingInLibraryView()
+                        .onScrollVisibilityChange { isVisible in
+                            showScrollEffect = isVisible
+                        }
                 }
                 
                 ContinueWatchingView(items: continueWatchingItems)
@@ -39,6 +43,7 @@ struct HomeView: View {
             }
             .scenePadding(.bottom)
         }
+        .scrollEdgeEffectHidden(showScrollEffect, for: .top)
         .ignoresSafeArea(edges: tmdbAPIKey.isEmpty ? [] : .top)
         .overlay {
             if isLoading {
@@ -47,7 +52,9 @@ struct HomeView: View {
         }
         .task {
             if continueWatchingItems.isEmpty {
+                isLoading = true
                 await loadAll()
+                isLoading = false
             }
         }
         .navigationTitle("Home")
@@ -58,8 +65,6 @@ struct HomeView: View {
     }
 
     private func loadAll() async {
-        isLoading = true
-        defer { isLoading = false }
         do {
             async let continueWatching = JFAPI.loadContinueWatchingSmart()
             async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 15)

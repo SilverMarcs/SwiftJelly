@@ -19,7 +19,7 @@ struct AVPlayerIos: UIViewControllerRepresentable {
         controller.transportBarIncludesTitleView = true
         #else
         controller.entersFullScreenWhenPlaybackBegins = true
-        controller.exitsFullScreenWhenPlaybackEnds = true
+        controller.exitsFullScreenWhenPlaybackEnds = false
         #endif
         
         return controller

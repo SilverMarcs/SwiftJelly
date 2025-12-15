@@ -3,123 +3,33 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewIOS: View {
-    @State private var nowPlaying: BaseItemDto
-    @State private var player: AVPlayer?
-    @State private var isLoading = true
-    @State private var playbackToken = UUID()
-    @State private var playbackEndObserver: NSObjectProtocol?
-    @State private var isAutoLoadingNext = false
+    @State private var model: MediaPlaybackViewModel
     
     init(item: BaseItemDto) {
-        _nowPlaying = State(initialValue: item)
+        _model = State(initialValue: MediaPlaybackViewModel(item: item))
     }
 
     var body: some View {
-        Group {
-            if let player = player {
-                AVPlayerIos(player: player)
-                    .task(id: player.timeControlStatus) {
-                        await PlaybackUtilities.reportPlaybackProgress(player: player, item: nowPlaying)
-                    }
-            } else if isLoading {
-                ProgressView()
-                    .tint(.primary)
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.black, ignoresSafeAreaEdges: .all)
-                    .task(id: playbackToken) {
-                        await loadPlayer()
-                    }
+        if let player = model.player {
+            AVPlayerIos(player: player)
+            .allowsTightening(!model.isAutoLoadingNext)
+            .overlay {
+                MediaPlayerOverlayControls(model: model)
             }
-        }
-        .ignoresSafeArea()
-        .onDisappear {
-            Task {
-                await cleanup()
+            .task(id: player.timeControlStatus) {
+                await PlaybackUtilities.reportPlaybackProgress(player: player, item: model.item)
             }
-        }
-        .overlay {
-            if isAutoLoadingNext {
-                ProgressView()
-                    .controlSize(.extraLarge)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onDisappear {
+                Task { await model.cleanup() }
             }
-        }
-    }
-
-    private func loadPlayer() async {
-        do {
-            let session = try await PlaybackUtilities.loadPlaybackInfo(for: nowPlaying)
-            await MainActor.run {
-                removePlaybackEndObserver()
-                player = session.player
-                isLoading = false
-                registerEndObserver(for: session.player)
-            }
-        } catch {
-            await MainActor.run {
-                isLoading = false
-            }
-        }
-    }
-
-    private func cleanup() async {
-        removePlaybackEndObserver()
-        guard let player = player else { return }
-        await PlaybackUtilities.reportPlaybackAndCleanup(player: player, item: nowPlaying)
-        await MainActor.run {
-            self.player = nil
-        }
-    }
-
-    private func registerEndObserver(for player: AVPlayer) {
-        playbackEndObserver = NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: player.currentItem,
-            queue: .main
-        ) { _ in
-            handlePlaybackCompletion()
-        }
-    }
-
-    private func removePlaybackEndObserver() {
-        if let observer = playbackEndObserver {
-            NotificationCenter.default.removeObserver(observer)
-            playbackEndObserver = nil
-        }
-    }
-
-    private func handlePlaybackCompletion() {
-        guard nowPlaying.type == .episode,
-              !isAutoLoadingNext,
-              let currentPlayer = player else {
-            return
-        }
-        
-        isAutoLoadingNext = true
-        removePlaybackEndObserver()
-        let finishedItem = nowPlaying
-
-        Task {
-            await PlaybackUtilities.reportPlaybackStop(player: currentPlayer, item: finishedItem)
-            await MainActor.run {
-                currentPlayer.replaceCurrentItem(with: nil)
-            }
-            
-            let nextEpisode = try? await JFAPI.loadNextEpisode(after: finishedItem)
-            
-            await MainActor.run {
-                defer { isAutoLoadingNext = false }
-                guard let nextEpisode,
-                      nextEpisode.id != finishedItem.id else {
-                    return
+        } else if model.isLoading {
+            ProgressView()
+                .controlSize(.large)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.black, ignoresSafeAreaEdges: .all)
+                .task(id: model.playbackToken) {
+                    await model.load()
                 }
-                
-                nowPlaying = nextEpisode
-                player = nil
-                isLoading = true
-                playbackToken = UUID()
-            }
         }
     }
 }

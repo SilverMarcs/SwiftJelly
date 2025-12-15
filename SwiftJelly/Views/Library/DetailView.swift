@@ -64,10 +64,15 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         .toolbar(.hidden, for: .navigationBar)
     }
 #else
+    @State var showScrollEffect = false
+    
     private var layout: some View {
         ScrollView {
             VStack {
                 heroView
+                    .onScrollVisibilityChange { isVisible in
+                        showScrollEffect = isVisible
+                    }
                 
                 content
             }
@@ -75,7 +80,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         }
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
-        .scrollEdgeEffectHidden(true, for: .top)
+        .scrollEdgeEffectHidden(showScrollEffect, for: .top)
     }
 #endif
 }
