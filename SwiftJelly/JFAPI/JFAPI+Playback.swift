@@ -20,7 +20,6 @@ extension JFAPI {
     /// - Returns: PlaybackInfoResponse with playback URL and session info
     static func getPlaybackInfo(
         for item: BaseItemDto,
-        maxBitrate: Int = 15_000_000,
         subtitleStreamIndex: Int? = nil,
         audioStreamIndex: Int? = nil,
         startPositionTicks: Int64? = nil
@@ -31,7 +30,7 @@ extension JFAPI {
         
         let context = try getAPIContext()
         
-        let deviceProfile = DeviceProfile.buildNativeProfile(maxBitrate: maxBitrate)
+        let deviceProfile = DeviceProfile.buildNativeProfile()
         
         let playbackInfoDto = PlaybackInfoDto(
             allowAudioStreamCopy: true,
@@ -41,7 +40,6 @@ extension JFAPI {
             enableDirectPlay: true,
             enableDirectStream: true,
             enableTranscoding: true,
-            maxStreamingBitrate: maxBitrate,
             mediaSourceID: item.mediaSources?.first?.id,
             startTimeTicks: startPositionTicks.map { Int($0) },
             subtitleStreamIndex: subtitleStreamIndex,
@@ -50,7 +48,6 @@ extension JFAPI {
         
         let parameters = Paths.GetPostedPlaybackInfoParameters(
             userID: context.userID,
-            maxStreamingBitrate: maxBitrate,
             startTimeTicks: startPositionTicks.map { Int($0) },
             audioStreamIndex: audioStreamIndex,
             subtitleStreamIndex: subtitleStreamIndex,
