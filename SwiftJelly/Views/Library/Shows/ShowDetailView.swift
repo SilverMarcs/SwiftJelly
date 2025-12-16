@@ -1,9 +1,6 @@
 import SwiftUI
 import JellyfinAPI
 
-import SwiftUI
-import JellyfinAPI
-
 struct ShowDetailView: View {
     @State private var vm: ShowDetailViewModel
     
@@ -19,19 +16,15 @@ struct ShowDetailView: View {
             
             SimilarItemsView(item: vm.show)
         } heroView: {
-            ShowHeroView(show: vm.show)
+            ShowHeroDetailView(vm: vm)
         }
         .navigationTitle("")
-        .environment(\.refresh, {
-            await vm.loadSeasonsAndEpisodes()
-        })
+        .environment(\.refresh, vm.refreshAll)
         .task {
-            await vm.loadShowDetail()
-            await vm.loadSeasonsAndEpisodes()
+            await vm.refreshAll()
         }
         .refreshToolbar {
-            await vm.loadShowDetail()
-            await vm.loadSeasonsAndEpisodes()
+            await vm.refreshAll()
         }
     }
 }

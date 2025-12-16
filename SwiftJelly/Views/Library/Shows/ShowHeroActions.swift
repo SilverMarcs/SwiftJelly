@@ -18,8 +18,9 @@ struct ShowHeroActions: View {
             
             FavoriteButton(item: vm.show)
         }
+        .environment(\.refresh, vm.refreshAll)
         .task {
-            await vm.loadSeasonsAndEpisodes()
+            await vm.refreshAll()
         }
     }
     

@@ -37,17 +37,17 @@ struct MediaCard: View {
 //                    }
 //                }
                 .contextMenu {
-                    if item.type == .movie || item.type == .series {
-                        Button {
-                            Task {
-                                try? await JFAPI.toggleItemFavoriteStatus(item: item)
-                                await refresh()
-                            }
-                        } label: {
-                            Label(item.userData?.isFavorite == true ? "Remove Favorite" : "Add to Favorites",
-                                  systemImage: item.userData?.isFavorite == true ? "star.slash" : "star")
-                        }
-                    }
+//                    if item.type == .movie || item.type == .series {
+//                        Button {
+//                            Task {
+//                                try? await JFAPI.toggleItemFavoriteStatus(item: item)
+//                                await refresh()
+//                            }
+//                        } label: {
+//                            Label(item.userData?.isFavorite == true ? "Remove Favorite" : "Add to Favorites",
+//                                  systemImage: item.userData?.isFavorite == true ? "star.slash" : "star")
+//                        }
+//                    }
                 }
                 #if os(tvOS)
                 .hoverEffect(.highlight)
