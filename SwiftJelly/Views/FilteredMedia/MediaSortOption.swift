@@ -8,6 +8,7 @@
 import Foundation
 
 enum MediaSortOption: String, CaseIterable {
+    case none = "Default"
     case random = "Random"
     case nameAscending = "Name A-Z"
     case nameDescending = "Name Z-A"
@@ -20,6 +21,7 @@ enum MediaSortOption: String, CaseIterable {
     
     var systemImage: String {
         switch self {
+        case .none: "line.3.horizontal.decrease.circle"
         case .random: "shuffle"
         case .nameAscending, .nameDescending: "textformat"
         case .ratingDescending, .ratingAscending: "star.fill"

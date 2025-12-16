@@ -14,12 +14,17 @@ struct MediaSortToolbar: ToolbarContent {
         ToolbarItem(placement: .automatic) {
             Menu {
                 Button {
+                    Task { await viewModel.setSortOption(.none) }
+                } label: {
+                    Label("Default", systemImage: "line.3.horizontal.decrease.circle")
+                }
+                
+                Divider()
+                
+                Button {
                     Task { await viewModel.setSortOption(.random) }
                 } label: {
                     Label("Random", systemImage: "shuffle")
-                    if viewModel.sortOption == .random {
-                        Image(systemName: "checkmark")
-                    }
                 }
                 
                 Divider()
@@ -29,17 +34,11 @@ struct MediaSortToolbar: ToolbarContent {
                         Task { await viewModel.setSortOption(.nameAscending) }
                     } label: {
                         Text("A → Z")
-                        if viewModel.sortOption == .nameAscending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                     Button {
                         Task { await viewModel.setSortOption(.nameDescending) }
                     } label: {
                         Text("Z → A")
-                        if viewModel.sortOption == .nameDescending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                 }
                 
@@ -48,17 +47,11 @@ struct MediaSortToolbar: ToolbarContent {
                         Task { await viewModel.setSortOption(.ratingDescending) }
                     } label: {
                         Text("Highest First")
-                        if viewModel.sortOption == .ratingDescending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                     Button {
                         Task { await viewModel.setSortOption(.ratingAscending) }
                     } label: {
                         Text("Lowest First")
-                        if viewModel.sortOption == .ratingAscending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                 }
                 
@@ -67,17 +60,11 @@ struct MediaSortToolbar: ToolbarContent {
                         Task { await viewModel.setSortOption(.criticRatingDescending) }
                     } label: {
                         Text("Highest First")
-                        if viewModel.sortOption == .criticRatingDescending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                     Button {
                         Task { await viewModel.setSortOption(.criticRatingAscending) }
                     } label: {
                         Text("Lowest First")
-                        if viewModel.sortOption == .criticRatingAscending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                 }
                 
@@ -86,17 +73,11 @@ struct MediaSortToolbar: ToolbarContent {
                         Task { await viewModel.setSortOption(.yearDescending) }
                     } label: {
                         Text("Newest First")
-                        if viewModel.sortOption == .yearDescending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                     Button {
                         Task { await viewModel.setSortOption(.yearAscending) }
                     } label: {
                         Text("Oldest First")
-                        if viewModel.sortOption == .yearAscending {
-                            Image(systemName: "checkmark")
-                        }
                     }
                 }
             } label: {

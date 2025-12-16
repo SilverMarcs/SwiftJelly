@@ -8,12 +8,13 @@
 import Foundation
 import JellyfinAPI
 
+@MainActor
 @Observable class FilteredMediaViewModel {
     var items: [BaseItemDto] = []
     var isLoading = false
     var isSorting = false
     var hasNextPage = true
-    var sortOption: MediaSortOption = .random
+    var sortOption: MediaSortOption = .none
     
     @ObservationIgnored private let filter: MediaFilter
     @ObservationIgnored private let pageSize = 50
@@ -73,6 +74,8 @@ import JellyfinAPI
         
         // Apply sort option
         switch sortOption {
+        case .none:
+            break
         case .random:
             parameters.sortBy = ["Random"]
         case .nameAscending:
@@ -113,6 +116,10 @@ import JellyfinAPI
                 parameters.includeItemTypes = [.movie]
             case .tvshows:
                 parameters.includeItemTypes = [.series]
+            case .boxsets:
+                parameters.includeItemTypes = [.boxSet]
+            case .folders:
+                parameters.includeItemTypes = [.folder]
             case .music:
                 parameters.includeItemTypes = [.musicAlbum]
             case .books:

@@ -17,11 +17,7 @@ extension JFAPI {
         let parameters = Paths.GetUserViewsParameters(userID: context.userID)
         let request = Paths.getUserViews(parameters: parameters)
         let items = try await send(request).items ?? []
-        let supportedTypes: [CollectionType] = [.movies, .tvshows]
-        return items.filter { item in
-            guard let collectionType = item.collectionType else { return false }
-            return supportedTypes.contains(collectionType)
-        }
+        return items
     }
     /// Loads items for a specific library
     /// - Parameter library: The library to load items from
