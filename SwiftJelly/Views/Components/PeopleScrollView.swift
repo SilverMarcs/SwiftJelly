@@ -33,8 +33,6 @@ struct PeopleScrollView: View {
             }
             #if os(tvOS)
             .frame(maxWidth: .infinity, alignment: .leading)
-            #else
-            .padding(.top)
             #endif
         }
     }

@@ -35,7 +35,13 @@ extension TMDBAPI {
 
 struct Review: Decodable, Identifiable, Hashable {
     struct AuthorDetails: Decodable, Hashable {
+        let avatarPath: String?
         let rating: Double?
+
+        enum CodingKeys: String, CodingKey {
+            case avatarPath = "avatar_path"
+            case rating
+        }
     }
 
     let id: String

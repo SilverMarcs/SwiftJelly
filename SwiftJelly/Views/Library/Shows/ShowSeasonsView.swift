@@ -7,12 +7,9 @@ struct ShowSeasonsView: View {
     
     var body: some View {
         // TODO: use section in tvos to put teh season picker
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 15) {
             if vm.isLoadingEpisodes && vm.seasons.isEmpty {
-                ProgressView()
-                    .controlSize(.extraLarge)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding()
+                UniversalProgressView()
             }
             
             seasonPicker
@@ -34,7 +31,6 @@ struct ShowSeasonsView: View {
                 }
             }
             .scenePadding(.horizontal)
-            .padding(.top)
             .labelsHidden()
             .pickerStyle(.menu)
             .menuStyle(.button)

@@ -57,9 +57,11 @@ struct GenreCarouselView: View {
 
     private var spacing: CGFloat {
         #if os(tvOS)
-        35
+        40
+        #elseif os(macOS)
+        12
         #else
-        10
+        12
         #endif
     }
 }

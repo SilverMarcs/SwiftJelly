@@ -8,53 +8,60 @@ struct TMDBReviewsView: View {
 
     @State private var isLoading = false
     @State private var reviews: [Review] = []
-    @State private var errorMessage: String?
+    @State private var selectedReview: Review?
 
     var body: some View {
         if !tmdbAPIKey.isEmpty {
-            SectionContainer("Reviews", showHeader: !reviews.isEmpty || isLoading || errorMessage != nil) {
-                VStack(alignment: .leading, spacing: 10) {
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .foregroundStyle(.secondary)
-                    }
-                    
+            SectionContainer("Reviews", showHeader: !reviews.isEmpty) {
+                HorizontalShelf(spacing: 12) {
                     ForEach(reviews) { review in
-                        DisclosureGroup {
-                            Text(review.content)
-                                .textSelection(.enabled)
-                        } label: {
-                            VStack(alignment: .leading) {
-                                HStack(alignment: .firstTextBaseline) {
-                                    Text(review.author)
-                                        .bold()
-                                    
-                                    Spacer()
-                                    
-                                    if let rating = review.authorDetails?.rating {
-                                        Text(rating, format: .number.precision(.fractionLength(1)))
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                
-                                if let createdAt = review.createdAt {
-                                    Text(createdAt, format: .dateTime.year().month().day())
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    
-                    if isLoading {
-                        UniversalProgressView()
+                        cardButton(review: review)
                     }
                 }
-                .scenePadding(.horizontal)
+                
+                if isLoading {
+                    UniversalProgressView()
+                }                
+            } destination: {
+                ScrollView {
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 320), spacing: 12, alignment: .top)],
+                        alignment: .leading,
+                        spacing: 12
+                    ) {
+                        ForEach(reviews) { review in
+                            cardButton(review: review)
+                        }
+                    }
+                    .scenePadding()
+                }
+            }
+            .sheet(item: $selectedReview) { review in
+                ScrollView {
+                    Text(review.content)
+                        .textSelection(.enabled)
+                        .scenePadding()
+                }
+                .frame(maxWidth: 500, maxHeight: 500)
+                .presentationDetents([.medium, .large])
             }
             .task {
                 await load()
             }
         }
+    }
+    
+    func cardButton(review: Review) -> some View {
+        Button {
+            selectedReview = review
+        } label: {
+            TMDBReviewCard(review: review)
+        }
+        #if os(tvOS)
+        .buttonStyle(.card)
+        #else
+        .buttonStyle(.plain)
+        #endif
     }
 
     private func load() async {
@@ -63,7 +70,6 @@ struct TMDBReviewsView: View {
         guard let tmdbID = item.tmdbID else { return }
 
         isLoading = true
-        errorMessage = nil
         defer { isLoading = false }
 
         do {
@@ -76,8 +82,7 @@ struct TMDBReviewsView: View {
                 break
             }
         } catch {
-            errorMessage = "Couldn’t load reviews."
-            print("Error loading Reviews: \(error)")
+            print("Error loading Reviews: \(error.localizedDescription)")
         }
     }
 }

@@ -30,57 +30,45 @@ struct SectionContainer<RowContent: View, Destination: View>: View {
     }
     
     var body: some View {
-        Group {
 #if os(tvOS)
+        Group {
             if showHeader {
-                Section(header) {
-                    content()
-                }
+                Section(header) { content() }
             } else {
                 content()
             }
-#else
-            VStack(alignment: .leading, spacing: 8) {
-                if showHeader {
-                    sectionHeader
-                }
-                
-                content()
-            }
-#endif
         }
-        #if os(tvOS)
         .frame(maxWidth: .infinity, alignment: .leading)
         .focusSection()
-        #endif
-    }
-    
-#if !os(tvOS)
-    @ViewBuilder
-    private var sectionHeader: some View {
-        if Destination.self != EmptyView.self {
-            NavigationLink {
-                destination()
-            } label: {
-                HStack(alignment: .lastTextBaseline, spacing: 3) {
+#else
+        VStack(alignment: .leading) {
+            if showHeader {
+                if Destination.self == EmptyView.self {
                     Text(header)
                         .font(.title3.bold())
+                        .scenePadding(.horizontal)
+                } else {
+                    NavigationLink {
+                        destination()
+                    } label: {
+                        HStack(alignment: .lastTextBaseline) {
+                            Text(header)
+                                .font(.title3.bold())
 
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.secondary)
-                        .font(.callout.bold())
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.secondary)
+                                .font(.callout.bold())
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .scenePadding(.horizontal)
                 }
-       
             }
-            .buttonStyle(.plain)
-            .scenePadding(.horizontal)
-        } else {
-            Text(header)
-                .font(.title3.bold())
-                .scenePadding(.horizontal)
+
+            content()
         }
-    }
 #endif
+    }
 }
 
 // Convenience initializer when no destination is needed

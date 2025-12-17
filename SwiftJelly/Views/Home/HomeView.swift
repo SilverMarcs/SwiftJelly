@@ -20,7 +20,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 26) {
+            VStack(alignment: .leading, spacing: 20) {
                 if !tmdbAPIKey.isEmpty {
                     TrendingInLibraryView()
                         .onScrollVisibilityChange { isVisible in

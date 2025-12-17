@@ -21,7 +21,7 @@ struct GenreCardView: View {
                     .lineLimit(2)
                     .padding(12)
             }
-            .frame(width: itemWidth * 1.5, height: itemWidth * 0.5)
+            .frame(width: itemWidth, height: itemWidth * 0.35)
             .cardBorder()
             #if os(tvOS)
             .hoverEffect(.highlight)
@@ -30,9 +30,11 @@ struct GenreCardView: View {
     
     private var itemWidth: CGFloat {
         #if os(tvOS)
-        225
+        250
+        #elseif os(iOS)
+        125
         #else
-        100
+        150
         #endif
     }
 

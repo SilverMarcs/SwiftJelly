@@ -12,7 +12,6 @@ struct MediaShelf: View {
                     MediaNavigationLink(item: item) {
                         MediaCard(item: item)
                     }
-                    .frame(width: itemWidth)
                 }
             }
         } destination: {
@@ -20,16 +19,6 @@ struct MediaShelf: View {
                 .navigationTitle(header)
                 .toolbarTitleDisplayMode(.inline)
         }
-    }
-
-    private var itemWidth: CGFloat {
-        #if os(tvOS)
-        250
-        #elseif os(iOS)
-        125
-        #else
-        150
-        #endif
     }
     
     private var spacing: CGFloat {
