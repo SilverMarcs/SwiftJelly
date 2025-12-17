@@ -107,25 +107,15 @@ extension JFAPI {
     static func reportPlaybackProgress(
         itemID: String,
         mediaSourceID: String?,
-        playSessionID: String?,
-        playMethod: JellyfinAPI.PlayMethod?,
-        audioStreamIndex: Int?,
-        subtitleStreamIndex: Int?,
         positionTicks: Int64,
-        canSeek: Bool,
         isPaused: Bool
     ) async {
         do {
             let context = try getAPIContext()
             var progressInfo = PlaybackProgressInfo()
-            progressInfo.canSeek = canSeek
             progressInfo.isPaused = isPaused
             progressInfo.itemID = itemID
             progressInfo.mediaSourceID = mediaSourceID
-            progressInfo.playMethod = playMethod
-            progressInfo.playSessionID = playSessionID
-            progressInfo.audioStreamIndex = audioStreamIndex
-            progressInfo.subtitleStreamIndex = subtitleStreamIndex
             progressInfo.positionTicks = Int(positionTicks)
             let request = Paths.reportPlaybackProgress(progressInfo)
             _ = try await context.client.send(request)

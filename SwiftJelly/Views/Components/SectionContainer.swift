@@ -81,6 +81,7 @@ struct SectionContainer<RowContent: View, Destination: View>: View {
                         .font(.title3.bold())
 
                     Image(systemName: "chevron.right")
+                        .foregroundStyle(.secondary)
                         .font(.callout.bold())
                 }
        

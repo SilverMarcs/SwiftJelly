@@ -80,7 +80,14 @@ import Observation
         isFetchingNextEpisode = false
 
         guard let player else { return }
-        await PlaybackUtilities.reportPlaybackAndCleanup(player: player, item: item)
+        player.pause()
+        player.replaceCurrentItem(with: nil)
+
+        try? await Task.sleep(for: .milliseconds(100))
+        if let handler = RefreshHandlerContainer.shared.refresh {
+            await handler()
+            RefreshHandlerContainer.shared.refresh = nil
+        }
         self.player = nil
     }
 
@@ -124,7 +131,6 @@ import Observation
         stopObservingTime()
 
         let finishedItem = item
-        await PlaybackUtilities.reportPlaybackStop(player: currentPlayer, item: finishedItem)
 
         let nextEpisode: BaseItemDto?
         if let cachedNextEpisode = prefetchedNextEpisode {

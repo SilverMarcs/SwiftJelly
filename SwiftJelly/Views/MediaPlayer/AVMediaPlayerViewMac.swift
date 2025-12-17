@@ -18,7 +18,12 @@ struct AVMediaPlayerViewMac: View {
                     MediaPlayerOverlayControls(model: model)
                 }
                 .task(id: player.timeControlStatus) {
-                    await PlaybackUtilities.reportPlaybackProgress(player: player, item: model.item)
+                    await PlaybackUtilities.reportPlaybackProgress(
+                        player: player,
+                        item: model.item,
+    //                    isPaused: player.timeControlStatus != .playing
+                        isPaused: false
+                    )
                 }
             } else if model.isLoading {
                 ProgressView()
