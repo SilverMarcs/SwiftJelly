@@ -12,14 +12,16 @@ struct GenreCarouselView: View {
     @State private var genres: [BaseItemDto] = []
 
     var body: some View {
-        SectionContainer("Genres", showHeader: !genres.isEmpty, spacing: spacing) {
-            ForEach(genres.shuffled()) { genre in
-                NavigationLink {
-                    FilteredMediaView(filter: .genre(genre.name ?? "Genre"))
-                } label: {
-                    GenreCardView(name: genre.name ?? "Genre")
+        SectionContainer("Genres", showHeader: !genres.isEmpty) {
+            HorizontalShelf(spacing: spacing) {
+                ForEach(genres.shuffled()) { genre in
+                    NavigationLink {
+                        FilteredMediaView(filter: .genre(genre.name ?? "Genre"))
+                    } label: {
+                        GenreCardView(name: genre.name ?? "Genre")
+                    }
+                    .adaptiveButtonStyle()
                 }
-                .adaptiveButtonStyle()
             }
         } destination: {
             ScrollView {

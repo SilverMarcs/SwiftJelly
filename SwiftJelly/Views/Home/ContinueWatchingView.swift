@@ -12,9 +12,11 @@ struct ContinueWatchingView: View {
     let items: [BaseItemDto]
 
     var body: some View {
-        SectionContainer("Continue Watching", showHeader: !items.isEmpty, spacing: spacing) {
-            ForEach(items, id: \.id) { item in
-                PlayableCard(item: item)
+        SectionContainer("Continue Watching", showHeader: !items.isEmpty) {
+            HorizontalShelf(spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    PlayableCard(item: item)
+                }
             }
         } destination: {
             ScrollView {

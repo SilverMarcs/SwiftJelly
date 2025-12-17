@@ -47,16 +47,17 @@ struct ShowSeasonsView: View {
     }
 
     private var scroller: some View {
-        SectionContainer("Seasons", showHeader: false, spacing: episodeSpacing) {
-            ForEach(vm.episodes) { episode in
-                PlayableCard(item: episode, showRealname: true, showDescription: true)
-                    .id(episode.id)
+        SectionContainer("Seasons", showHeader: false) {
+            HorizontalShelf(spacing: episodeSpacing) {
+                ForEach(vm.episodes) { episode in
+                    PlayableCard(item: episode, showRealname: true, showDescription: true)
+                        .id(episode.id)
+                }
             }
+            .scrollPosition($episodeScrollPosition)
         }
-        .scrollPosition($episodeScrollPosition)
         .environment(\.isInSeasonView, true)
         #if os(tvOS)
-        .scrollClipDisabled()
         .focusSection()
         #endif
     }

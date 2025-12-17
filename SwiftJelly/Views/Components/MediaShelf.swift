@@ -6,12 +6,14 @@ struct MediaShelf: View {
     var header: String
     
     var body: some View {
-        SectionContainer(header, showHeader: !items.isEmpty, spacing: spacing) {
-            ForEach(items, id: \.id) { item in
-                MediaNavigationLink(item: item) {
-                    MediaCard(item: item)
+        SectionContainer(header, showHeader: !items.isEmpty) {
+            HorizontalShelf(spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    MediaNavigationLink(item: item) {
+                        MediaCard(item: item)
+                    }
+                    .frame(width: itemWidth)
                 }
-                .frame(width: itemWidth)
             }
         } destination: {
             MediaGrid(items: items, isLoading: false)

@@ -9,7 +9,6 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-/// Displays trending movies/shows from TMDB that exist in the user's Jellyfin library
 struct TrendingInLibraryView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @State private var matchedItems: [BaseItemDto] = []
@@ -167,7 +166,7 @@ struct TrendingInLibraryView: View {
         // }
     }
     
-    private func findMatch(for trending: TMDBAPI.TrendingItem) async -> BaseItemDto? {
+    private func findMatch(for trending: TrendingItem) async -> BaseItemDto? {
         guard let results = try? await JFAPI.searchMedia(query: trending.displayTitle) else { return nil }
         let expectedType: BaseItemKind = trending.isMovie ? .movie : .series
         let tmdbID = String(trending.id)

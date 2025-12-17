@@ -13,9 +13,11 @@ struct PeopleScrollView: View {
     
     var body: some View {
         if let people = people {
-            SectionContainer("Cast & Crew", spacing: spacing) {
-                ForEach(people, id: \.id) { person in
-                    PersonView(person: Person(from: person))
+            SectionContainer("Cast & Crew") {
+                HorizontalShelf(spacing: spacing) {
+                    ForEach(people, id: \.id) { person in
+                        PersonView(person: Person(from: person))
+                    }
                 }
             } destination: {
                 ScrollView {

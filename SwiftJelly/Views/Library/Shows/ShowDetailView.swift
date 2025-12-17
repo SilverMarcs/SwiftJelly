@@ -15,6 +15,8 @@ struct ShowDetailView: View {
             PeopleScrollView(people: vm.show.people)
             
             SimilarItemsView(item: vm.show)
+            
+            TMDBReviewsView(item: vm.show)
         } heroView: {
             ShowHeroDetailView(vm: vm)
         }

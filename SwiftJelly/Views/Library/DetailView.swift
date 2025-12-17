@@ -68,7 +68,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     
     private var layout: some View {
         ScrollView {
-            VStack {
+            VStack(spacing: 20) {
                 heroView
                     .onScrollVisibilityChange { isVisible in
                         showScrollEffect = isVisible

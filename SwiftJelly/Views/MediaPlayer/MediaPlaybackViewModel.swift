@@ -122,7 +122,7 @@ import Observation
     }
 
     func transitionToNextEpisode() async {
-        guard item.type == .episode, !isAutoLoadingNext, let currentPlayer = player else { return }
+        guard item.type == .episode, !isAutoLoadingNext else { return }
 
         isAutoLoadingNext = true
         defer { isAutoLoadingNext = false }

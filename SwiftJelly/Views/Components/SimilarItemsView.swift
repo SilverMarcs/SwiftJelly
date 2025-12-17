@@ -16,17 +16,13 @@ struct SimilarItemsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if isLoading {
-                ProgressView()
-                    .controlSize(.extraLarge)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding()
+                UniversalProgressView()
             }
             
             if !similarItems.isEmpty {
                 MediaShelf(items: similarItems, header: "Recommended")
             }
         }
-        .padding(.top)
         .task {
             if similarItems.isEmpty {
                 await fetchSimilarItems()
