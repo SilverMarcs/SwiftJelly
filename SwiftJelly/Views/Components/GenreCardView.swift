@@ -11,12 +11,16 @@ struct GenreCardView: View {
     let name: String
 
     var body: some View {
+        let baseHue = baseHue(for: name)
+        let baseColor = baseColor(forHue: baseHue)
         RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .fill(background(for: name))
+            .fill(baseColor.gradient)
             .overlay {
                 Text(name)
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.secondary)
+                    .foregroundStyle(baseColor)
+                    .brightness(1.25)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .padding(12)
@@ -38,20 +42,22 @@ struct GenreCardView: View {
         #endif
     }
 
-    private func background(for name: String) -> LinearGradient {
+    private func baseHue(for name: String) -> Double {
         let raw = stableHash64(name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
-        let hue1 = Double(raw % 360) / 360.0
-        let hue2 = Double((raw / 7) % 360) / 360.0
-        let c1 = Color(hue: hue1, saturation: 0.78, brightness: 0.54)
-        let c2 = Color(hue: hue2, saturation: 0.74, brightness: 0.44)
-        return LinearGradient(
-            colors: [
-                c1.opacity(0.95),
-                c2.opacity(0.90),
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        return Double(raw % 360) / 360.0
+    }
+
+    private func baseColor(forHue hue: Double) -> Color {
+        // Shift hues away from the muddy brown/orange range (25-65 degrees)
+        let adjustedHue: Double
+        if hue > 0.07 && hue < 0.18 { // ~25-65 degrees
+            // Push towards either red or yellow-green
+            adjustedHue = hue < 0.125 ? hue - 0.07 : hue + 0.10
+        } else {
+            adjustedHue = hue
+        }
+        
+        return Color(hue: adjustedHue, saturation: 0.82, brightness: 0.45)
     }
 
     private func stableHash64(_ string: String) -> UInt64 {
