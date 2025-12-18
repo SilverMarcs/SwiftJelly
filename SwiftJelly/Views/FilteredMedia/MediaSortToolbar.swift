@@ -16,7 +16,7 @@ struct MediaSortToolbar: ToolbarContent {
                 Button {
                     Task { await viewModel.setSortOption(.none) }
                 } label: {
-                    Label("Default", systemImage: "line.3.horizontal.decrease")
+                    Label("Default", systemImage: "line.3.horizontal.decrease.circle")
                 }
                 
                 Divider()

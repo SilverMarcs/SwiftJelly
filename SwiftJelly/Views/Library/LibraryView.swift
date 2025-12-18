@@ -51,7 +51,10 @@ struct LibraryView: View {
     
     private func loadLibraries() async {
         do {
-            libraries = try await JFAPI.loadLibraries()
+            let loaded = try await JFAPI.loadLibraries()
+            withAnimation {
+                libraries = loaded
+            }
         } catch {
             print("Error loading Library: \(error.localizedDescription)")
         }

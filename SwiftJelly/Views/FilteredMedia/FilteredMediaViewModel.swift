@@ -5,7 +5,7 @@
 //  Created by Zabir Raihan on 22/09/2025.
 //
 
-import Foundation
+import SwiftUI
 import JellyfinAPI
 
 @MainActor
@@ -39,7 +39,9 @@ import JellyfinAPI
         
         do {
             let newItems = try await loadItems(page: 0)
-            items = newItems
+            withAnimation {
+                items = newItems
+            }
             hasNextPage = newItems.count >= pageSize
             currentPage = 1
         } catch {

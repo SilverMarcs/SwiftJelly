@@ -9,7 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct ContinueWatchingView: View {
-    let items: [BaseItemDto]
+    @State private var items: [BaseItemDto] = []
 
     var body: some View {
         SectionContainer("Continue Watching", showHeader: !items.isEmpty) {
@@ -29,6 +29,23 @@ struct ContinueWatchingView: View {
             }
             .navigationTitle("Continue Watching")
             .toolbarTitleDisplayMode(.inline)
+        }
+        .task {
+            if items.isEmpty {
+                await loadContinueWatching()
+            }
+        }
+        .environment(\.refresh, loadContinueWatching)
+    }
+    
+    private func loadContinueWatching() async {
+        do {
+            let continueItems = try await JFAPI.loadContinueWatchingSmart()
+            withAnimation {
+                items = continueItems
+            }
+        } catch {
+            print("Error loading Home items: \(error)")
         }
     }
     

@@ -11,7 +11,6 @@ import JellyfinAPI
 struct HomeView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     
-    @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var favorites: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
@@ -28,8 +27,7 @@ struct HomeView: View {
                         }
                 }
                 
-                ContinueWatchingView(items: continueWatchingItems)
-                    .environment(\.refresh, refreshContinueWatching)
+                ContinueWatchingView()
 
                 MediaShelf(items: favorites, header: "Favorites")
                 
@@ -51,7 +49,7 @@ struct HomeView: View {
             }
         }
         .task {
-            if continueWatchingItems.isEmpty {
+            if latestMovies.isEmpty {
                 isLoading = true
                 await loadAll()
                 isLoading = false
@@ -66,32 +64,19 @@ struct HomeView: View {
 
     private func loadAll() async {
         do {
-            async let continueWatching = JFAPI.loadContinueWatchingSmart()
             async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 15)
             async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
             
-            // TODO: Animate this
-            continueWatchingItems = try await continueWatching
             let items = try await allItems
-            
-            latestMovies = Array(items.filter { $0.type == .movie })
-            latestShows = Array(items.filter { $0.type == .series })
-            
-            favorites = try await loadedFavorites
-        } catch {
-            print("Error loading Home items: \(error)")
-        }
-    }
+            let loadedFavs = try await loadedFavorites
 
-    private func refreshContinueWatching() async {
-        do {
-            let items = try await JFAPI.loadContinueWatchingSmart()
-            
             withAnimation {
-                continueWatchingItems = items
+                latestMovies = Array(items.filter { $0.type == .movie })
+                latestShows = Array(items.filter { $0.type == .series })
+                favorites = loadedFavs
             }
         } catch {
-            print("Error loading Continue Watching: \(error.localizedDescription)")
+            print("Error loading Home items: \(error)")
         }
     }
 }

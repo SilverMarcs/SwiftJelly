@@ -21,7 +21,7 @@ enum MediaSortOption: String, CaseIterable {
     
     var systemImage: String {
         switch self {
-        case .none: "line.3.horizontal.decrease.circle"
+        case .none: "line.3.horizontal.decrease"
         case .random: "shuffle"
         case .nameAscending, .nameDescending: "textformat"
         case .ratingDescending, .ratingAscending: "star.fill"

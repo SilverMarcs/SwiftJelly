@@ -49,7 +49,10 @@ struct GenreCarouselView: View {
     
     private func loadGenres() async {
         do {
-            genres = try await JFAPI.loadGenres(limit: 20)
+            let genres = try await JFAPI.loadGenres(limit: 20)
+            withAnimation {
+                self.genres = genres
+            }
         } catch {
             print("Error loading genres: \(error)")
         }
