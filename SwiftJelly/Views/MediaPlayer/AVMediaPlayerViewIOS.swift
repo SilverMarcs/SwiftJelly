@@ -21,7 +21,7 @@ struct AVMediaPlayerViewIOS: View {
                     player: player,
                     item: model.item,
 //                    isPaused: player.timeControlStatus != .playing
-                    isPaused: false
+                    isPaused: true
                 )
             }
             .onDisappear {
