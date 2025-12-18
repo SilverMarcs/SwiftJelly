@@ -25,7 +25,6 @@ import Observation
 
     @ObservationIgnored private var markers = MediaChapterMarkers(introRangeSeconds: nil, creditsStartSeconds: nil)
     @ObservationIgnored private var prefetchedNextEpisode: BaseItemDto?
-    @ObservationIgnored private var playbackEndObserver: NSObjectProtocol?
     @ObservationIgnored private var timeObserverToken: Any?
     @ObservationIgnored private var requestedAudioStreamIndex: Int?
     @ObservationIgnored private var isLoadingTaskActive = false
@@ -46,7 +45,6 @@ import Observation
         isLoading = true
         requestedAudioStreamIndex = audioIndex ?? requestedAudioStreamIndex
         stopObservingTime()
-        removePlaybackEndObserver()
 
         do {
             let session = try await PlaybackUtilities.loadPlaybackInfo(
@@ -65,7 +63,6 @@ import Observation
             selectedAudioTrack = resolveSelectedTrack(preferredIndex: audioIndex)
 
             startObservingTime(for: session.player)
-            registerEndObserver(for: session.player)
         } catch {
             // Intentionally ignore; just stop loading.
         }
@@ -74,7 +71,6 @@ import Observation
     }
 
     func cleanup() async {
-        removePlaybackEndObserver()
         stopObservingTime()
         prefetchedNextEpisode = nil
         isFetchingNextEpisode = false
@@ -127,7 +123,6 @@ import Observation
         isAutoLoadingNext = true
         defer { isAutoLoadingNext = false }
 
-        removePlaybackEndObserver()
         stopObservingTime()
 
         let finishedItem = item
@@ -156,26 +151,6 @@ import Observation
 
         let resumeSeconds = player?.currentTime().seconds ?? 0
         await load(audioIndex: track.index, resumeSeconds: resumeSeconds)
-    }
-
-    private func registerEndObserver(for player: AVPlayer) {
-        playbackEndObserver = NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: player.currentItem,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self else { return }
-            Task { @MainActor in
-                await self.transitionToNextEpisode()
-            }
-        }
-    }
-
-    private func removePlaybackEndObserver() {
-        if let observer = playbackEndObserver {
-            NotificationCenter.default.removeObserver(observer)
-            playbackEndObserver = nil
-        }
     }
 
     private func startObservingTime(for player: AVPlayer) {
