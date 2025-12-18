@@ -156,14 +156,15 @@ struct TrendingInLibraryView: View {
             if !result.contains(where: { $0.id == item.id }) { result.append(item) }
         }
         
-        // withAnimation {
-            var shuffled = unique.shuffled()
-            // Ensure first item is not a series - swap with second if needed
-            if shuffled.count >= 2 && shuffled[0].type == .series {
-                shuffled.swapAt(0, 1)
-            }
+        var shuffled = unique.shuffled()
+        // Ensure first item is not a series - swap with second if needed
+        if shuffled.count >= 2 && shuffled[0].type == .series {
+            shuffled.swapAt(0, 1)
+        }
+        
+        withAnimation {
             matchedItems = shuffled
-        // }
+         }
     }
     
     private func findMatch(for trending: TrendingItem) async -> BaseItemDto? {
