@@ -42,7 +42,7 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
-        .ignoresSafeArea(edges: tmdbAPIKey.isEmpty ? [] : .top)
+        .ignoresSafeArea(edges: tmdbAPIKey.isEmpty ? [] : .top) // TODO: ideally this should instead check if trendign items is empty or not and adjust safe area accoridngly
         .overlay {
             if isLoading {
                 UniversalProgressView()

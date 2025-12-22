@@ -11,13 +11,14 @@ struct GenreCardView: View {
     let name: String
 
     var body: some View {
-        let baseHue = baseHue(for: name)
-        let baseColor = baseColor(forHue: baseHue)
+        let baseColor = color(for: name)
         RoundedRectangle(cornerRadius: 10, style: .continuous)
             .fill(baseColor.gradient)
+            .brightness(-0.25)
             .overlay {
                 Text(name)
                     .font(.headline)
+                    .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                     .foregroundStyle(baseColor)
                     .brightness(1.25)
@@ -42,23 +43,26 @@ struct GenreCardView: View {
         #endif
     }
 
-    private func baseHue(for name: String) -> Double {
-        let raw = stableHash64(name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
-        return Double(raw % 360) / 360.0
+    private func color(for name: String) -> Color {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let raw = stableHash64(normalizedName)
+        return Self.systemPalette[Int(raw % UInt64(Self.systemPalette.count))]
     }
 
-    private func baseColor(forHue hue: Double) -> Color {
-        // Shift hues away from the muddy brown/orange range (25-65 degrees)
-        let adjustedHue: Double
-        if hue > 0.07 && hue < 0.18 { // ~25-65 degrees
-            // Push towards either red or yellow-green
-            adjustedHue = hue < 0.125 ? hue - 0.07 : hue + 0.10
-        } else {
-            adjustedHue = hue
-        }
-        
-        return Color(hue: adjustedHue, saturation: 0.82, brightness: 0.45)
-    }
+    private static let systemPalette: [Color] = [
+        .red,
+        .orange,
+        .yellow,
+        .green,
+        .mint,
+        .teal,
+        .cyan,
+        .blue,
+        .indigo,
+        .purple,
+        .pink,
+        .brown
+    ]
 
     private func stableHash64(_ string: String) -> UInt64 {
         var hash: UInt64 = 0xcbf29ce484222326
