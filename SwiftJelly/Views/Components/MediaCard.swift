@@ -61,16 +61,5 @@ struct MediaCard: View {
                 .multilineTextAlignment(.leading)
                 .padding(.leading, 1)
         }
-            .frame(width: itemWidth)
-    }
-    
-    private var itemWidth: CGFloat {
-        #if os(tvOS)
-        250
-        #elseif os(iOS)
-        125
-        #else
-        150
-        #endif
     }
 }
