@@ -24,7 +24,6 @@ struct PlayableCard: View {
             LabelStack(alignment: .leading) {
                 LandscapeImageView(item: item)
                     .aspectRatio(16/9, contentMode: .fit)
-                    .frame(width: cardWidth)
                     .blurredBottomOverlay()
                     .overlay(alignment: .bottom) {
                         ProgressBarOverlay(item: item)
@@ -41,7 +40,6 @@ struct PlayableCard: View {
 
                 if showTitle {
                     Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
-                        .frame(maxWidth: cardWidth, alignment: .leading)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(1)
@@ -52,7 +50,6 @@ struct PlayableCard: View {
                 
                 if showDescription {
                     Text(item.overview ?? "")
-                        .frame(maxWidth: cardWidth, alignment: .leading)
                         .font(.caption2)
                         .opacity(0.7)
                         .multilineTextAlignment(.leading)
@@ -82,13 +79,5 @@ struct PlayableCard: View {
                       systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye")
             }
         }
-    }
-
-    private var cardWidth: CGFloat {
-        #if os(tvOS)
-        480
-        #else
-        280
-        #endif
     }
 }

@@ -46,6 +46,7 @@ struct ShowSeasonsView: View {
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
                     PlayableCard(item: episode, showRealname: true, showDescription: true)
+                        .frame(width: cardWidth)
                         .id(episode.id)
                 }
             }
@@ -83,6 +84,16 @@ struct ShowSeasonsView: View {
         32
         #else
         8
+        #endif
+    }
+
+    private var cardWidth: CGFloat {
+        #if os(tvOS)
+        480
+        #elseif os(macOS)
+        300
+        #else
+        280
         #endif
     }
 }

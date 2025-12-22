@@ -16,6 +16,7 @@ struct ContinueWatchingView: View {
             HorizontalShelf(spacing: spacing) {
                 ForEach(items, id: \.id) { item in
                     PlayableCard(item: item)
+                        .frame(width: cardWidth)
                 }
             }
         } destination: {
@@ -53,7 +54,7 @@ struct ContinueWatchingView: View {
         #if os(iOS)
         [GridItem(.flexible())]
         #else
-        [GridItem(.adaptive(minimum: 280), spacing: 12)]
+        [GridItem(.adaptive(minimum: 250), spacing: 12)]
         #endif
     }
     
@@ -62,6 +63,14 @@ struct ContinueWatchingView: View {
         40
         #else
         12
+        #endif
+    }
+
+    private var cardWidth: CGFloat {
+        #if os(tvOS)
+        480
+        #else
+        315
         #endif
     }
 }
