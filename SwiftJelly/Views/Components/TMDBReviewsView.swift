@@ -39,7 +39,9 @@ struct TMDBReviewsView: View {
             .sheet(item: $selectedReview) { review in
                 ScrollView {
                     Text(review.content)
+                    #if !os(tvOS)
                         .textSelection(.enabled)
+                    #endif
                         .scenePadding()
                 }
                 .frame(maxWidth: 500, maxHeight: 500)

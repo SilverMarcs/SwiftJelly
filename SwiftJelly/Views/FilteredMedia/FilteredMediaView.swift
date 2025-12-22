@@ -23,6 +23,9 @@ struct FilteredMediaView: View {
                 await viewModel.loadNextPage()
             }
         }
+        #if os(tvOS)
+        .focusSection()
+        #endif
         .navigationTitle(filter.navigationTitle)
         .toolbarTitleDisplayMode(.inline)
         .task {
