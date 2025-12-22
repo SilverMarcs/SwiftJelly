@@ -16,7 +16,7 @@ struct MovieDetailView: View {
             
             TMDBReviewsView(item: movie)
         } heroView: {
-            MovieHeroView(movie: movie)
+            MovieHeroView(movie: $movie)
         }
         .navigationTitle("")
         .refreshToolbar {

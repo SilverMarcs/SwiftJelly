@@ -2,10 +2,12 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowHeroActions: View {
+    @Binding private var show: BaseItemDto
     @State private var vm: ShowDetailViewModel
     
-    init(show: BaseItemDto) {
-        _vm = State(initialValue: ShowDetailViewModel(item: show))
+    init(show: Binding<BaseItemDto>) {
+        self._show = show
+        _vm = State(initialValue: ShowDetailViewModel(item: show.wrappedValue))
     }
     
     var body: some View {
@@ -18,9 +20,12 @@ struct ShowHeroActions: View {
             
             FavoriteButton(item: vm.show)
         }
-        .environment(\.refresh, vm.refreshAll)
+        .environment(\.refresh, refreshAllAndSync)
         .task {
-            await vm.refreshAll()
+            await refreshAllAndSync()
+        }
+        .onChange(of: show.id) { _, _ in
+            vm = ShowDetailViewModel(item: show)
         }
     }
     
@@ -50,5 +55,10 @@ struct ShowHeroActions: View {
         #else
         4
         #endif
+    }
+    
+    private func refreshAllAndSync() async {
+        await vm.refreshAll()
+        show = vm.show
     }
 }

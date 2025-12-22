@@ -22,10 +22,10 @@ struct TrendingInLibraryView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 0) {
-                ForEach(matchedItems, id: \.id) { item in
+                ForEach($matchedItems, id: \.id) { item in
                     Group {
                     #if !os(tvOS)
-                    MediaNavigationLink(item: item) {
+                    MediaNavigationLink(item: item.wrappedValue) {
                         hero(item: item)
                     }
                     #else
@@ -33,7 +33,7 @@ struct TrendingInLibraryView: View {
                     .frame(height: 1080 * 0.75)
                     .padding(40)
                     .background {
-                        if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
+                        if let url = ImageURLProvider.imageURL(for: item.wrappedValue, type: .backdrop) {
                             CachedAsyncImage(url: url, targetSize: 2000)
                                 .scaledToFill()
                                 .overlay {
@@ -54,7 +54,7 @@ struct TrendingInLibraryView: View {
                     }
                     #endif
                     }
-                    .id(item.id)
+                    .id(item.wrappedValue.id)
                     .containerRelativeFrame(.horizontal)
                 }
             }
@@ -115,8 +115,8 @@ struct TrendingInLibraryView: View {
     }
     
     @ViewBuilder
-    private func hero(item: BaseItemDto) -> some View {
-        switch item.type {
+    private func hero(item: Binding<BaseItemDto>) -> some View {
+        switch item.wrappedValue.type {
         case .movie:
             MovieHeroView(movie: item)
         case .series:
