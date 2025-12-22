@@ -79,4 +79,12 @@ struct HomeView: View {
             print("Error loading Home items: \(error)")
         }
     }
+    
+    private var spacing: CGFloat {
+        #if os(macOS)
+        20
+        #else
+        30
+        #endif
+    }
 }

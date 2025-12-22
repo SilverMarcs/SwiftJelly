@@ -12,35 +12,26 @@ struct GenreCardView: View {
 
     var body: some View {
         let baseColor = color(for: name)
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .fill(baseColor.gradient)
-            .brightness(-0.25)
-            .overlay {
-                Text(name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.secondary)
-                    .foregroundStyle(baseColor)
-                    .brightness(1.25)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .padding(12)
+        
+        Text(name)
+            .font(.headline)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
+            .foregroundStyle(baseColor)
+            .brightness(1.25)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(baseColor.gradient)
+                    .brightness(-0.25)
+                    #if os(tvOS)
+                    .hoverEffect(.highlight)
+                    #endif
             }
-            .frame(width: itemWidth, height: itemWidth * 0.35)
             .cardBorder()
-            #if os(tvOS)
-            .hoverEffect(.highlight)
-            #endif
-    }
-    
-    private var itemWidth: CGFloat {
-        #if os(tvOS)
-        250
-        #elseif os(iOS)
-        125
-        #else
-        150
-        #endif
     }
 
     private func color(for name: String) -> Color {
