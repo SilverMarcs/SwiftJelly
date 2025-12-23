@@ -29,6 +29,15 @@ extension BaseItemDto {
             metadata.append(subtitleItem)
         }
         
+        // Description
+        if let description = overview {
+            let descriptionItem = AVMutableMetadataItem()
+            descriptionItem.identifier = .commonIdentifierDescription
+            descriptionItem.value = description as NSString
+            descriptionItem.extendedLanguageTag = "und"
+            metadata.append(descriptionItem)
+        }
+        
         // Artwork
         if let artworkData = await loadArtwork() {
             let artworkItem = AVMutableMetadataItem()
@@ -55,7 +64,7 @@ extension BaseItemDto {
         
         // For TV shows, show season and episode
         if let season = parentIndexNumber, let episode = indexNumber {
-            return "S\(season), E\(episode)"
+            return "\(name ?? "") • S\(season), E\(episode)"
         }
         
         return nil

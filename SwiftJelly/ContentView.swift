@@ -22,9 +22,7 @@ struct ContentView: View {
                 } description: {
                     Text("Please connect to a Jellyfin server to continue.")
                 } actions: {
-                    NavigationLink {
-                        AddServerView()
-                    } label: {
+                    NavigationLink(value: ServerListNavigationItem()) {
                         Text("Add Server")
                     }
                     #if os(tvOS)
@@ -33,6 +31,7 @@ struct ContentView: View {
                     .buttonStyle(.borderedProminent)
                     #endif
                 }
+                .addNavigationTargets(animation: animation)
             }
         } else {
             TabView(selection: $selectedTab) {
@@ -51,10 +50,7 @@ struct ContentView: View {
                                     tab.tabView
                                 }
                             }
-                            .addNavigationDestionationsForDetailView(animation: animation)
-                            .navigationDestination(for: BaseItemPerson.self) { person in
-                                PersonMediaView(person: person)
-                            }
+                            .addNavigationTargets(animation: animation)
                         }
                         .environment(\.zoomNamespace, animation)
                     }

@@ -16,8 +16,7 @@ struct FavoriteButton: View {
         }
         #if os(tvOS)
         .buttonStyle(.glass)
-        .controlSize(.extraLarge)
-//        .buttonStyle(.bordered)
+        .controlSize(.regular)
         .buttonBorderShape(.circle)
         #endif
         #if os(macOS)
@@ -25,7 +24,7 @@ struct FavoriteButton: View {
         #elseif !os(tvOS)
         .controlSize(.large)
         #endif
-        .tint((item.userData?.isFavorite == true) ? .yellow : .secondary)
+        .tint((item.userData?.isFavorite == true) ? .yellow : .primary)
     }
     
     private func toggleFavoriteStatus() async {

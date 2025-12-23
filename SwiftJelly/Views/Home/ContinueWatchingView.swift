@@ -28,7 +28,7 @@ struct ContinueWatchingView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: spacing) {
                         ForEach(items, id: \.id) { item in
-                            PlayableCard(item: item, showTitle: false)
+                            PlayableCard(item: item)
                         }
                     }
                 }

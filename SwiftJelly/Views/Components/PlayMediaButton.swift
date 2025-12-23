@@ -7,10 +7,12 @@ struct PlayMediaButton<Label: View>: View {
     
     let item: BaseItemDto
     let label: Label
+
     #if os(macOS)
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     #endif
+    
     @State private var showPlayer = false
     
     init(item: BaseItemDto, @ViewBuilder label: () -> Label) {
@@ -20,6 +22,10 @@ struct PlayMediaButton<Label: View>: View {
 
     var body: some View {
         Button {
+            if item.id == nil {
+                return
+            }
+
             // Provide a refresh closure for existing player cleanup paths
             RefreshHandlerContainer.shared.refresh = {
                 await refresh()
@@ -33,12 +39,14 @@ struct PlayMediaButton<Label: View>: View {
         } label: {
             label
         }
+        .optionalMatchedTransitionSource(id: "player-view", in: transition)
+        
         #if !os(macOS)
-        .matchedTransitionSource(id: "player-view", in: transition)
-
         .fullScreenCover(isPresented: $showPlayer) {
             AVMediaPlayerViewIOS(item: item)
+            #if os(iOS)
                 .navigationTransition(.zoom(sourceID: "player-view", in: transition))
+            #endif
         }
         #endif
     }

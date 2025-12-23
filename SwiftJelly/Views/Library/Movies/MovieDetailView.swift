@@ -16,7 +16,7 @@ struct MovieDetailView: View {
     }
     
     var body: some View {
-        DetailView(item: movie, action: {}) {
+        DetailView(item: movie, action: fetchMovie) {
             VStack {
                 if let people = movie.people {
                     PeopleScrollView(people: people)

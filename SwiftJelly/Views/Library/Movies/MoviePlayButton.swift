@@ -45,7 +45,7 @@ struct MoviePlayButton: View {
         .animation(.default, value: item.userData?.isPlayed)
         #if os(tvOS)
         .tint(Color(.accent).secondary)
-        .controlSize(.extraLarge)
+        .controlSize(.regular)
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
         #else

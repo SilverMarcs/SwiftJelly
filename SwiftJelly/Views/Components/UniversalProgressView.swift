@@ -10,12 +10,12 @@ import SwiftUI
 struct UniversalProgressView: View {
 #if os(tvOS)
     var body: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 10) {
             ProgressView()
-                .controlSize(.large)
             
             Text("Loading")
                 .opacity(0.5)
+                .padding(.trailing, 5)
         }
         .padding()
         .glassEffect(in: .capsule)

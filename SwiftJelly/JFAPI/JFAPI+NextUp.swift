@@ -2,7 +2,7 @@
 //  JFAPI+NextUp.swift
 //  SwiftJelly
 //
-//  Created by Copilot on 01/07/2025.
+//  Created by Julian Baumann on 07.12.2025.
 //
 
 import Foundation
@@ -76,29 +76,44 @@ extension JFAPI {
     
     /// Loads Next Up items for the current server (episodes to continue watching)
     /// - Returns: Array of BaseItemDto representing next up items without watch progress
-    static func loadNextUpItems(limit: Int = 10) async throws -> [BaseItemDto] {
+    static func loadNextUpItems(limit: Int = 10, seriesID: String? = nil) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetNextUpParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.limit = limit
+        parameters.seriesID = seriesID
         let request = Paths.getNextUp(parameters: parameters)
         let items = try await send(request).items ?? []
         
         return items
     }
     
-    static func loadResumeItems(limit: Int = 10) async throws -> [BaseItemDto] {
+    static func loadResumeItems(limit: Int = 10, parentID: String? = nil) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetResumeItemsParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.limit = limit
+        parameters.parentID = parentID
         let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
         return items
+    }
+    
+    static func loadSmartNextUp(for seriesID: String) async throws -> BaseItemDto? {
+        async let resumeItemsRaw = loadResumeItems(limit: 10, parentID: seriesID)
+        async let nextUpItemsRaw = loadNextUpItems(limit: 1, seriesID: seriesID)
+        
+        let resumeItems = try await resumeItemsRaw
+        let nextUpItems = try await nextUpItemsRaw
+        
+        let latestResume = latestResumeEpisode(from: resumeItems)
+        let nextUp = nextUpItems.first
+        
+        return chooseEpisode(latestResume: latestResume, nextUp: nextUp)
     }
     
     private static func latestResumeEpisode(from episodes: [BaseItemDto]) -> BaseItemDto? {

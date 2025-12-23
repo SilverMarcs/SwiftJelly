@@ -16,7 +16,7 @@ struct ShowDetailView: View {
     }
     
     var body: some View {
-        DetailView(item: vm.show, action: {}) {
+        DetailView(item: vm.show, action: vm.reloadSeasonsAndEpisodes) {
             VStack {
                 ShowSeasonsView(vm: vm)
                     #if os(tvOS)

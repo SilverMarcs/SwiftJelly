@@ -29,15 +29,7 @@ extension DeviceProfile {
     // MARK: - Direct Play Profiles
     
     private static var nativeDirectPlayProfiles: [DirectPlayProfile] {
-        [
-            // MP4 container with H264 and AAC - most compatible with AVPlayer
-            DirectPlayProfile(
-                audioCodec: "aac",
-                container: "mp4",
-                type: .video,
-                videoCodec: "h264"
-            )
-        ]
+        []
     }
     
     // MARK: - Transcoding Profiles
@@ -90,15 +82,12 @@ extension DeviceProfile {
     
     private static var nativeSubtitleProfiles: [SubtitleProfile] {
         [
-            // HLS-compatible subtitles
+            // HLS-compatible subtitles (VTT is standard for HLS)
+            // We strictly request VTT here so the server forces transcoding of 
+            // other text formats (SRT, ASS, etc.) to VTT, which AVPlayer supports.
             SubtitleProfile(
                 format: "vtt",
                 method: .hls
-            ),
-            // External text subtitles
-            SubtitleProfile(
-                format: "srt",
-                method: .external
             ),
             // Embedded subtitles in MP4
             SubtitleProfile(

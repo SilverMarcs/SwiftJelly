@@ -39,6 +39,8 @@ struct PeopleScrollView: View {
                     ForEach(people, id: \.self) { person in
                         PersonView(person: person)
                     }
+
+                    ListStartItemSpacer()
                 }
             }
             #if os(tvOS)

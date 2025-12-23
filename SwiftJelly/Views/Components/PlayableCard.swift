@@ -13,121 +13,130 @@ struct PlayableCard: View {
     
     let item: BaseItemDto
     var showRealname: Bool = false
-    var showTitle: Bool = true
     var showDescription: Bool = false
     @State private var showPlayer = false
 
     #if os(tvOS)
-    private let cardWidth: CGFloat = 456
-    private let cardHeight: CGFloat = 257
-    private let cornerRadius: CGFloat = 12
+    private let cardWidth: CGFloat = 540
+    private let cardHeight: CGFloat = 336
+    private let cornerRadius: CGFloat = 30
+    private let reflectionHeight: CGFloat = 150
+    private let overlayPadding: CGFloat = 30
     #else
     private let cardWidth: CGFloat = 270
     private let cardHeight: CGFloat = 168
-    private let cornerRadius: CGFloat = 10
+    private let cornerRadius: CGFloat = 13
+    private let reflectionHeight: CGFloat = 50
+    private let overlayPadding: CGFloat = 15
     #endif
+    
+    let largeGradient = LinearGradient(
+            gradient: Gradient(stops: [
+                .init(color: .white, location: 0),
+                .init(color: .white, location: 0.2),
+                .init(color: .white.opacity(0.9), location: 0.4),
+                .init(color: .white.opacity(0), location: 0.7),
+                .init(color: .white.opacity(0), location: 1.0)
+            ]),
+            startPoint: .bottom,
+            endPoint: .top
+        )
     
     let gradient = LinearGradient(
             gradient: Gradient(stops: [
                 .init(color: .white, location: 0),
-                .init(color: .white, location: 0.6),
-                .init(color: .white.opacity(0.1), location: 1.0)
+                .init(color: .white.opacity(0.7), location: 0.2),
+                .init(color: .white.opacity(0), location: 0.4)
             ]),
-            startPoint: .top,
-            endPoint: .bottom
+            startPoint: .bottom,
+            endPoint: .top
         )
 
     var body: some View {
-        VStack {
-            PlayMediaButton(item: item) {
-                VStack(alignment: .leading) {
-                    LandscapeImageView(item: item)
-                        .mask {
-                            Rectangle()
-                                .fill(.regularMaterial)
-                                .mask {
+        PlayMediaButton(item: item) {
+            VStack(alignment: .leading) {
+                ExpandedImage(image: LandscapeImageView(item: item), imageHeight: cardHeight, reflectionHeight: showDescription ? reflectionHeight : 0)
+                    .overlay {
+                        Rectangle()
+                            .fill(showDescription ? .regularMaterial : .ultraThickMaterial)
+                            .mask {
+                                if showDescription {
+                                    largeGradient
+                                } else {
                                     gradient
                                 }
-                        }
-                        .frame(width: cardWidth, height: cardHeight)
-                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-                        .overlay(alignment: .bottom) {
+                            }
+                    }
+                    .overlay(alignment: .bottomLeading) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
+                                .foregroundStyle(.white)
+                                .fontWeight(.bold)
+                                .opacity(0.7)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .multilineTextAlignment(.leading)
+
+                            if showDescription {
+                                Text(item.overview ?? "")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .font(.caption2)
+                                    .opacity(0.5)
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(3, reservesSpace: false)
+                            }
+                            
                             ProgressBarOverlay(item: item)
-                                .padding(.horizontal, 10)
-                                .padding(.bottom, 8)
                         }
-                        .background {
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .fill(.black)
-                        }
-
-                        #if !os(macOS)
-                        .hoverEffect(.highlight)
-                        #endif
-                        
-                        #if !os(tvOS)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .strokeBorder(.background.quinary, lineWidth: 1)
-                        }
-                        #endif
-
-                    if showTitle {
-                        Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .multilineTextAlignment(.leading)
-                            .padding(.horizontal, 4)
+                        .padding(overlayPadding)
                     }
-                }
-                .frame(maxWidth: cardWidth)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .strokeBorder(.gray.opacity(0.5), lineWidth: 1)
+                    }
+                    .frame(width: cardWidth)
+                    .background {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .fill(.black)
+                    }
+                    .environment(\.colorScheme, .dark)
+                    
+                    #if !os(macOS)
+                    .hoverEffect(.highlight)
+                    #endif
             }
-            .foregroundStyle(.primary)
-            .buttonStyle(.borderless)
-            .contextMenu {
-                if item.type == .movie {
-                    Section {
-                        NavigationLink {
-                            MovieDetailView(item: item)
-                        } label: {
-                            PlayableItemTypeLabel(item: item)
-                        }
+            .frame(maxWidth: cardWidth)
+        }
+        .foregroundStyle(.primary)
+        .contextMenu {
+            if item.type == .movie {
+                Section {
+                    NavigationLink(value: item) {
+                        PlayableItemTypeLabel(item: item)
                     }
-                }
-                
-                if item.type == .episode {
-                    Section {
-                        NavigationLink {
-                            ShowDetailLoader(episode: item)
-                        } label: {
-                            PlayableItemTypeLabel(item: item)
-                        }
-                    }
-                }
-                
-                Button {
-                    Task {
-                        try? await JFAPI.toggleItemPlayedStatus(item: item)
-                        await refresh()
-                    }
-                } label: {
-                    Label(item.userData?.isPlayed == true ? "Mark as Unwatched" : "Mark as Watched",
-                          systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye")
                 }
             }
-
-            if showDescription {
-                Text(item.overview ?? "")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .font(.caption2)
-                    .opacity(0.7)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(5, reservesSpace: true)
-                    .padding(.horizontal, 4)
+            
+            if item.type == .episode {
+                Section {
+                    NavigationLink(value: ShowDetailLoaderNavigationItem(episode: item)) {
+                        PlayableItemTypeLabel(item: item)
+                    }
+                }
+            }
+            
+            Button {
+                Task {
+                    try? await JFAPI.toggleItemPlayedStatus(item: item)
+                    await refresh()
+                }
+            } label: {
+                Label(item.userData?.isPlayed == true ? "Mark as Unwatched" : "Mark as Watched",
+                      systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye")
             }
         }
-        .frame(maxWidth: cardWidth)
+        .buttonStyle(.borderless)
+        .buttonBorderShape(.roundedRectangle(radius: cornerRadius))
     }
 }

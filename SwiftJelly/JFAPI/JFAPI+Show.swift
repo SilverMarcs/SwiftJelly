@@ -18,6 +18,7 @@ extension JFAPI {
         var parameters = Paths.GetEpisodesParameters()
         parameters.userID = context.userID
         parameters.seasonID = season.id
+        parameters.limit = 2000
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)
@@ -28,6 +29,7 @@ extension JFAPI {
         let context = try getAPIContext()
         var parameters = Paths.GetEpisodesParameters()
         parameters.userID = context.userID
+        parameters.limit = 2000
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)

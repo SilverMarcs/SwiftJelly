@@ -30,6 +30,10 @@ struct PersonView: View {
                                 .frame(width: imageSize, height: imageSize)
                         }
                     }
+                    .overlay {
+                        Circle()
+                            .strokeBorder(.gray.opacity(0.5), lineWidth: 1)
+                    }
                     #if !os(macOS)
                     .hoverEffect(.highlight)
                     #endif

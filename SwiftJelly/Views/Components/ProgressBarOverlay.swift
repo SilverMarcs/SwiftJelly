@@ -16,6 +16,7 @@ struct ProgressBarOverlay: View {
             ProgressIcon(isPlayed: item.userData?.isPlayed ?? false)
             
             ProgressGauge(progress: item.playbackProgress)
+                .environment(\.colorScheme, .dark)
                 .offset(y: 1)
             
             Text(item.totalDurationString ?? "--")
@@ -54,7 +55,6 @@ struct ProgressGauge: View {
         if let progress, progress > 0, progress < 1 {
             #if os(tvOS)
             ProgressView(value: progress)
-                .tint(.primary)
                 .frame(width: 100)
             #else
             Gauge(value: progress) {

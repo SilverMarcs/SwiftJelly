@@ -41,8 +41,9 @@ struct ShowSeasonsView: View {
                             PlayableCard(item: episode, showRealname: true, showDescription: true)
                                 .id(episode.id)
                         }
+
+                        ListStartItemSpacer()
                     }
-                    .scrollTargetLayout()
                 }
                 .scrollPosition($episodeScrollPosition)
                 #if os(tvOS)
@@ -78,7 +79,7 @@ struct ShowSeasonsView: View {
         }
         if targetEpisode == nil { targetEpisode = sortedEpisodes.first }
         if let episode = targetEpisode, let episodeId = episode.id {
-            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .leading) }
+            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .leading ) }
         }
     }
 }

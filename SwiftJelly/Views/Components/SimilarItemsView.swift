@@ -43,6 +43,8 @@ struct SimilarItemsView: View {
                             MediaNavigationLink(item: item)
                                 .frame(width: itemWidth)
                         }
+
+                        ListStartItemSpacer()
                     }
                 }
                 #if os(tvOS)

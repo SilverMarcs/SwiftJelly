@@ -6,7 +6,7 @@ struct RecentlyAddedView: View {
     var header: String
     
     #if os(tvOS)
-    private let itemWidth: CGFloat = 220
+    private let itemWidth: CGFloat = 300
     private let spacing: CGFloat = 40
     private let headerSpacing: CGFloat = 16
     #else

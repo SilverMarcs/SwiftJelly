@@ -23,53 +23,22 @@ struct MediaNavigationLink: View {
                     MediaCard(item: item)
                 }
                 #if os(tvOS)
-                .buttonStyle(.card)
+                .buttonStyle(.borderless)
                 #else
-                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
                 .buttonStyle(.plain)
                 #endif
+                .optionalMatchedTransitionSource(id: item.id, in: animationID)
             } else {
                 NavigationLink(value: item) {
                     MediaCard(item: item)
                 }
+                .optionalMatchedTransitionSource(id: item.id, in: animationID)
                 #if os(tvOS)
-                .buttonStyle(.card)
+                .buttonStyle(.borderless)
                 #else
-                .matchedTransitionSource(id: item.id, in: animationID ?? Namespace().wrappedValue)
                 .buttonStyle(.plain)
                 #endif
             }
         }
-    }
-}
-
-struct MediaNavigationDestinationModifier: ViewModifier {
-    let animation: Namespace.ID
-    
-    func body(content: Content) -> some View {
-        content
-            .navigationDestination(for: BaseItemDto.self) { item in
-                if item.type == .movie {
-                    MovieDetailView(item: item)
-#if !os(macOS)
-                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-                } else if item.type == .series {
-                    ShowDetailView(item: item)
-#if !os(macOS)
-                        .navigationTransition(.zoom(sourceID: item.id, in: animation))
-#endif
-                }
-            }
-        
-            .navigationDestination(for: FilteredMediaViewNavItem.self) { item in
-                FilteredMediaView(filter: .library(item.item))
-            }
-    }
-}
-
-extension View {
-    public func addNavigationDestionationsForDetailView(animation: Namespace.ID) -> some View {
-        modifier(MediaNavigationDestinationModifier(animation: animation))
     }
 }

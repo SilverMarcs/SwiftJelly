@@ -18,7 +18,11 @@ struct MarkPlayedButton: View {
         .tint((item.userData?.isPlayed == true) ? Color.green : Color.primary)
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
+        #if os(tvOS)
+        .controlSize(.regular)
+        #else
         .controlSize(.extraLarge)
+        #endif
     }
     
     private func togglePlayedStatus() async {

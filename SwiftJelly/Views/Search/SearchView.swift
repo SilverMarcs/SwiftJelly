@@ -10,7 +10,6 @@ struct SearchView: View {
     var body: some View {
         Group {
             MediaGrid(items: filteredResults, isLoading: isLoading)
-                .contentMargins(.vertical, 10)
                 #if !os(tvOS)
                 .navigationTitle("Search")
                 .toolbarTitleDisplayMode(.inlineLarge)
@@ -19,6 +18,8 @@ struct SearchView: View {
                         Text(scope.rawValue).tag(scope)
                     }
                 }
+                #else
+                .scenePadding()
                 #endif
                 #if !os(macOS)
                 .searchable(text: $searchText, prompt: "Search movies or shows")

@@ -1,5 +1,5 @@
 {
-  "originHash" : "dddfad266ac86e2a86250b587d7645a0d6c488ae637686baed76662ac941ece7",
+  "originHash" : "56942b31f97e03bb97cdf91ee4a98bce2c6f0864e69dffd5648ab3afa444177c",
   "pins" : [
     {
       "identity" : "get",
@@ -16,13 +16,13 @@
       "location" : "https://github.com/SilverMarcs/jellyfin-sdk-swift",
       "state" : {
         "branch" : "main",
-        "revision" : "602f8d33167302f6b3c9f00cf08b70aa72c3a1df"
+        "revision" : "44bef6f0f796c84537d9f53952e60185ff1b3d17"
       }
     },
     {
       "identity" : "swiftmediaviewer",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/julian-baumann/SwiftMediaViewer",
+      "location" : "https://github.com/SilverMarcs/SwiftMediaViewer",
       "state" : {
         "branch" : "main",
         "revision" : "1588e9ca847595b7157085809883bf90c6e074d6"
