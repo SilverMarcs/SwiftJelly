@@ -13,7 +13,7 @@ struct FavoritesView: View {
     @State var favorites: [BaseItemDto] = []
     
     var body: some View {
-        NavigationStack {
+        Group {
             MediaGrid(items: favorites, isLoading: isLoading)
                 .task {
                     if favorites.isEmpty {
@@ -30,6 +30,9 @@ struct FavoritesView: View {
                         UniversalProgressView()
                     }
                 }
+                #if os(tvOS)
+                .toolbar(.hidden, for: .navigationBar)
+                #else
                 .navigationTitle("Favorites")
                 .toolbarTitleDisplayMode(.inlineLarge)
                 .toolbar {
@@ -44,6 +47,7 @@ struct FavoritesView: View {
                     SettingsToolbar()
                     #endif
                 }
+                #endif
         }
     }
     

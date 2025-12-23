@@ -17,8 +17,9 @@ extension Int {
 
 // MARK: - Double Extensions for Slider Values
 extension Double {
-    /// Converts slider value to position ticks
+    /// Converts slider value to position ticks, guarding against NaN/inf
     var toPositionTicks: Int64 {
+        guard isFinite else { return 0 }
         return Int64(self) * 10_000_000
     }
 }

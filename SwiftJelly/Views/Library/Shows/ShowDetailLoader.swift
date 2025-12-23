@@ -9,7 +9,8 @@ struct ShowDetailLoader: View {
         if let show = show {
             ShowDetailView(item: show)
         } else {
-            UniversalProgressView()
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .task {
                     if let seriesId = episode.seriesID {
                         show = try? await JFAPI.loadItem(by: seriesId)

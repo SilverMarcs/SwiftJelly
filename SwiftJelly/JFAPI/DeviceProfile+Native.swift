@@ -13,12 +13,12 @@ extension DeviceProfile {
     static func buildNativeProfile(maxBitrate: Int = 15_000_000) -> DeviceProfile {
         var profile = DeviceProfile()
         
+        profile.name = "SwiftJelly Native"
         profile.maxStreamingBitrate = maxBitrate
         profile.maxStaticBitrate = maxBitrate
         profile.musicStreamingTranscodingBitrate = maxBitrate
         
-//        profile.directPlayProfiles = nativeDirectPlayProfiles
-        profile.directPlayProfiles = []
+        profile.directPlayProfiles = nativeDirectPlayProfiles
         profile.transcodingProfiles = nativeTranscodingProfiles
         profile.subtitleProfiles = nativeSubtitleProfiles
         profile.codecProfiles = nativeCodecProfiles
@@ -29,23 +29,16 @@ extension DeviceProfile {
     // MARK: - Direct Play Profiles
     
     private static var nativeDirectPlayProfiles: [DirectPlayProfile] {
-        [
-            // MP4 container with H264 and AAC - most compatible with AVPlayer
-            DirectPlayProfile(
-                audioCodec: "aac",
-                container: "mp4",
-                type: .video,
-                videoCodec: "h264"
-            )
-        ]
+        []
     }
     
     // MARK: - Transcoding Profiles
     
     private static var nativeTranscodingProfiles: [TranscodingProfile] {
         [
+            // Primary video+audio stream
             TranscodingProfile(
-                audioCodec: "aac,ac3,eac3,alac,flac",
+                audioCodec: "aac,ac3,eac3,alac,flac,dts,opus",
                 isBreakOnNonKeyFrames: true,
                 conditions: [
                     ProfileCondition(
@@ -63,17 +56,24 @@ extension DeviceProfile {
                 ],
                 container: "m3u8",
                 context: .streaming,
-                // Copy timestamps from source where possible to preserve PTS/DTS
                 isCopyTimestamps: true,
-                enableSubtitlesInManifest: true,  // CRITICAL: Enable subtitles in HLS manifest
-                // Prefer stereo audio unless multichannel is required. This
-                // reduces transcoding choices that might introduce timing
-                // issues on some encoders/clients.
-                maxAudioChannels: "2",
+                enableSubtitlesInManifest: true,
+                maxAudioChannels: nil,
                 minSegments: 2,
                 protocol: .hls,
                 type: .video,
-                videoCodec: "h264,hevc,mpeg4"
+                videoCodec: "h264"
+            ),
+            // Dedicated audio renditions so the manifest can expose named tracks
+            TranscodingProfile(
+                audioCodec: "aac,ac3,eac3,alac,flac,dts,opus",
+                container: "aac",
+                context: .streaming,
+                isCopyTimestamps: true,
+                maxAudioChannels: nil,
+                minSegments: 2,
+                protocol: .hls,
+                type: .audio
             )
         ]
     }
@@ -82,15 +82,12 @@ extension DeviceProfile {
     
     private static var nativeSubtitleProfiles: [SubtitleProfile] {
         [
-            // HLS-compatible subtitles
+            // HLS-compatible subtitles (VTT is standard for HLS)
+            // We strictly request VTT here so the server forces transcoding of 
+            // other text formats (SRT, ASS, etc.) to VTT, which AVPlayer supports.
             SubtitleProfile(
                 format: "vtt",
                 method: .hls
-            ),
-            // External text subtitles
-            SubtitleProfile(
-                format: "srt",
-                method: .external
             ),
             // Embedded subtitles in MP4
             SubtitleProfile(

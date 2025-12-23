@@ -12,16 +12,16 @@ struct MarkPlayedButton: View {
             }
         } label: {
             Image(systemName: "checkmark")
-                .foregroundStyle((item.userData?.isPlayed == true) ? .accent : .secondary)
                 .fontWeight(.semibold)
                 .animation(.snappy, value: item.userData?.isPlayed)
         }
+        .tint((item.userData?.isPlayed == true) ? Color.green : Color.primary)
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
-        #if os(macOS)
-        .controlSize(.extraLarge)
+        #if os(tvOS)
+        .controlSize(.regular)
         #else
-        .controlSize(.large)
+        .controlSize(.extraLarge)
         #endif
     }
     

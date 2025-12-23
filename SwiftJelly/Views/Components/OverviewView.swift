@@ -19,11 +19,6 @@ struct OverviewView: View {
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.leading)
             }
-            
-            if let overview = item.overview {
-                Text(overview)
-                    .foregroundStyle(.secondary)
-            }
         }
         .scenePadding(.horizontal)
     }

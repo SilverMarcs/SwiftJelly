@@ -8,24 +8,37 @@
 import SwiftUI
 import JellyfinAPI
 
+struct FilteredMediaViewNavItem: Hashable {
+    let item: BaseItemDto
+}
+
 struct MediaNavigationLink: View {
     let item: BaseItemDto
+    @Environment(\.zoomNamespace) private var animationID
     
     var body: some View {
-        NavigationLink {
-            switch item.type {
-            case .movie:
-                MovieDetailView(item: item)
-            case .series:
-                ShowDetailView(item: item)
-            case .boxSet:
-                FilteredMediaView(filter: .library(item))
-            default:
-                Text("Unsupported item type")
+        Group {
+            if item.type == .boxSet {
+                NavigationLink(value: FilteredMediaViewNavItem(item: item)) {
+                    MediaCard(item: item)
+                }
+                #if os(tvOS)
+                .buttonStyle(.borderless)
+                #else
+                .buttonStyle(.plain)
+                #endif
+                .optionalMatchedTransitionSource(id: item.id, in: animationID)
+            } else {
+                NavigationLink(value: item) {
+                    MediaCard(item: item)
+                }
+                .optionalMatchedTransitionSource(id: item.id, in: animationID)
+                #if os(tvOS)
+                .buttonStyle(.borderless)
+                #else
+                .buttonStyle(.plain)
+                #endif
             }
-        } label: {
-            MediaCard(item: item)
         }
-        .buttonStyle(.plain)
     }
 }

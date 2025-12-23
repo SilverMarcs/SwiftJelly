@@ -10,55 +10,103 @@ import JellyfinAPI
 
 struct HomeView: View {
     @Environment(\.scenePhase) var scenePhase
+    @State private var dataManager = DataManager.shared
     
+    @Namespace private var animation
     @State private var continueWatchingItems: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
     @State private var isLoading = false
 
+    #if os(tvOS)
+    private let verticalSpacing: CGFloat = 48
+    private let horizontalMargin: CGFloat = 48
+    #else
+    private let verticalSpacing: CGFloat = 24
+    private let horizontalMargin: CGFloat = 15
+    #endif
+
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 24) {
-                    ContinueWatchingView(items: continueWatchingItems)
-                        .environment(\.refresh, refreshContinueWatching)
-                    
-                    RecentlyAddedView(items: latestMovies, header: "Recently Added Movies")
-                    
-                    RecentlyAddedView(items: latestShows, header: "Recently Added Shows")
-                }
-                .scenePadding(.bottom)
-                .contentMargins(.horizontal, 15)
-            }
-            .refreshable {
-                await loadAll()
-            }
-            .overlay {
-                if isLoading {
-                    UniversalProgressView()
-                }
-            }
-            .navigationTitle("Home")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .toolbar {
-                #if os(macOS)
-                ToolbarItem {
-                    Button {
-                        Task {
-                            await loadAll()
-                        }
+        Group {
+            if dataManager.servers.isEmpty {
+                ContentUnavailableView {
+                    Label("No Server Found", systemImage: "server.rack")
+                } description: {
+                    Text("Please connect to a Jellyfin server to continue.")
+                } actions: {
+                    NavigationLink {
+                        AddServerView()
                     } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
+                        Text("Add Server")
                     }
-                    .keyboardShortcut("r")
+                    #if os(tvOS)
+                    .buttonStyle(.borderedProminent)
+                    #else
+                    .buttonStyle(.borderedProminent)
+                    #endif
                 }
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: verticalSpacing) {
+                        ContinueWatchingView(items: continueWatchingItems)
+                            .environment(\.refresh, refreshContinueWatching)
+                        
+                        RecentlyAddedView(items: latestMovies, header: "Recently Added Movies")
+
+                        RecentlyAddedView(items: latestShows, header: "Recently Added Shows")
+                    }
+                    .scenePadding(.bottom)
+                    .contentMargins(.horizontal, horizontalMargin)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                #if os(tvOS)
+                .overlay {
+                    if isLoading {
+                        UniversalProgressView()
+                    }
+                }
+                .toolbar(.hidden, for: .navigationBar)
                 #else
-                SettingsToolbar()
+                .refreshable {
+                    await loadAll()
+                }
+                .navigationTitle("Continue Watching")
+                .toolbar {
+                    if isLoading {
+                        ToolbarItem {
+                            ProgressView()
+                            #if os(macOS)
+                                .controlSize(.small)
+                                .padding(10)
+                            #endif
+                        }
+                    }
+                    #if os(macOS)
+                    ToolbarItem {
+                        Button {
+                            Task {
+                                await loadAll()
+                            }
+                        } label: {
+                            Label("Refresh", systemImage: "arrow.clockwise")
+                        }
+                        .keyboardShortcut("r")
+                    }
+                    #else
+                    SettingsToolbar()
+                    #endif
+                }
                 #endif
             }
         }
         .task(id: scenePhase) {
-            if scenePhase == .active {
+            if scenePhase == .active && !dataManager.servers.isEmpty {
+                await loadAll()
+            }
+        }
+        .task(id: dataManager.servers.count) {
+            if !dataManager.servers.isEmpty {
                 await loadAll()
             }
         }
@@ -69,12 +117,12 @@ struct HomeView: View {
         defer { isLoading = false}
         do {
             async let continueWatching = JFAPI.loadContinueWatchingSmart()
-            async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 10)
-            
+            async let movies = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.movie])
+            async let shows = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.series])
+
             continueWatchingItems = try await continueWatching
-            let items = try await allItems
-            latestMovies = Array(items.filter { $0.type == .movie })
-            latestShows = Array(items.filter { $0.type == .series })
+            latestMovies = try await movies
+            latestShows = try await shows
         } catch {
             print("Error loading Home items: \(error)")
         }

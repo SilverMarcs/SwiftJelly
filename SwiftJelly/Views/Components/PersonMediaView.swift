@@ -24,9 +24,11 @@ struct PersonMediaView: View {
                     isLoading = false
                 }
             }
+            #if !os(tvOS)
             .refreshable {
                 await loadItems()
             }
+            #endif
     }
 
     private func loadItems() async {
