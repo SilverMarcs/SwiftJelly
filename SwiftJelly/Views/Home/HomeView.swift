@@ -64,15 +64,18 @@ struct HomeView: View {
 
     private func loadAll() async {
         do {
-            async let allItems = JFAPI.loadLatestMediaInLibrary(limit: 15)
             async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
             
-            let items = try await allItems
+            async let movies = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.movie])
+            async let shows = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.series])
+            
+            let loadedMovies = try await movies
+            let loadedShows = try await shows
             let loadedFavs = try await loadedFavorites
 
             withAnimation {
-                latestMovies = Array(items.filter { $0.type == .movie })
-                latestShows = Array(items.filter { $0.type == .series })
+                latestMovies = loadedMovies
+                latestShows = loadedShows
                 favorites = loadedFavs
             }
         } catch {
