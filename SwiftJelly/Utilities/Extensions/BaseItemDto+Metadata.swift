@@ -21,12 +21,21 @@ extension BaseItemDto {
         metadata.append(titleItem)
         
         // Subtitle (for TV shows only)
-        if let subtitle = seasonEpisodeString {
+        if let subtitle = metadataSubtitle {
             let subtitleItem = AVMutableMetadataItem()
             subtitleItem.identifier = .iTunesMetadataTrackSubTitle
             subtitleItem.value = subtitle as NSString
             subtitleItem.extendedLanguageTag = "und"
             metadata.append(subtitleItem)
+        }
+        
+        // Description
+        if let description = overview {
+            let descriptionItem = AVMutableMetadataItem()
+            descriptionItem.identifier = .commonIdentifierDescription
+            descriptionItem.value = description as NSString
+            descriptionItem.extendedLanguageTag = "und"
+            metadata.append(descriptionItem)
         }
         
         // Artwork
@@ -47,6 +56,18 @@ extension BaseItemDto {
         } else {
             return seriesName ?? name ?? "Unknown"
         }
+    }
+    
+    private var metadataSubtitle: String? {
+        // No subtitle for movies
+        guard type != .movie else { return nil }
+        
+        // For TV shows, show season and episode
+        if let seasonEpisodeString {
+            return "\(name ?? "") • \(seasonEpisodeString)"
+        }
+        
+        return nil
     }
     
     private func loadArtwork() async -> Data? {
