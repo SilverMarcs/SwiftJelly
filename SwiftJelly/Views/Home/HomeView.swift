@@ -84,7 +84,7 @@ struct HomeView: View {
         #if os(macOS)
         20
         #else
-        30
+        40
         #endif
     }
 }
