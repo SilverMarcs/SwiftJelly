@@ -54,6 +54,6 @@ struct ShowPlayButton: View {
         .controlSize(.extraLarge)
         .buttonStyle(.glassProminent)
         .environment(\.refresh, vm.refreshAll)
-        .disabled(vm.playButtonDisabled)
+        .disabled(vm.isLoading) // TODO: check this
     }
 }

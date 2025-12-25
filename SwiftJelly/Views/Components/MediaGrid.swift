@@ -30,11 +30,7 @@ struct MediaGrid: View {
                     }
                 }
             }
-            .scenePadding(.horizontal)
-            .scenePadding(.bottom)
-            #if os(tvOS)
-            .padding(.top, 20)
-            #endif
+            .scenePadding()
             
             if isLoading && !items.isEmpty {
                 UniversalProgressView()

@@ -11,6 +11,8 @@ import JellyfinAPI
 struct HomeView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     
+    @State private var dataManager = DataManager.shared
+
     @State private var favorites: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
     @State private var latestShows: [BaseItemDto] = []
@@ -48,7 +50,7 @@ struct HomeView: View {
                 UniversalProgressView()
             }
         }
-        .task {
+        .task(id: dataManager.servers.count) {
             if latestMovies.isEmpty {
                 isLoading = true
                 await loadAll()

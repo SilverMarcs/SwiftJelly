@@ -9,7 +9,6 @@ struct SearchView: View {
     
     var body: some View {
         MediaGrid(items: filteredMediaResults, isLoading: isLoading)
-            .contentMargins(.vertical, 10)
             .navigationTitle("Search")
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
             .searchPresentationToolbarBehavior(.avoidHidingContent)
