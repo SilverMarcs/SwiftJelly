@@ -19,17 +19,6 @@ struct PeopleScrollView: View {
                         PersonView(person: Person(from: person))
                     }
                 }
-            } destination: {
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
-                        ForEach(people, id: \.id) { person in
-                            PersonView(person: Person(from: person))
-                        }
-                    }
-                    .scenePadding()
-                }
-                .navigationTitle("Cast & Crew")
-                .toolbarTitleDisplayMode(.inline)
             }
             #if os(tvOS)
             .frame(maxWidth: .infinity, alignment: .leading)

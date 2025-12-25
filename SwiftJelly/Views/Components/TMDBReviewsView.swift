@@ -22,19 +22,6 @@ struct TMDBReviewsView: View {
                 if isLoading {
                     UniversalProgressView()
                 }                
-            } destination: {
-                ScrollView {
-                    LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 320), spacing: 12, alignment: .top)],
-                        alignment: .leading,
-                        spacing: 12
-                    ) {
-                        ForEach(reviews) { review in
-                            cardButton(review: review)
-                        }
-                    }
-                    .scenePadding()
-                }
             }
             .sheet(item: $selectedReview) { review in
                 ScrollView {

@@ -19,17 +19,6 @@ struct ContinueWatchingView: View {
                         .frame(width: cardWidth)
                 }
             }
-        } destination: {
-            ScrollView {
-                LazyVGrid(columns: gridColumns, spacing: 16) {
-                    ForEach(items, id: \.id) { item in
-                        PlayableCard(item: item)
-                    }
-                }
-                .scenePadding()
-            }
-            .navigationTitle("Continue Watching")
-            .toolbarTitleDisplayMode(.inline)
         }
         .task {
             if items.isEmpty {
