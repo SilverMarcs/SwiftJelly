@@ -12,6 +12,10 @@ struct PersonView: View {
                     CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
                         .aspectRatio(contentMode: .fill)
                         .frame(width: imageSize, height: imageSize)
+                        .overlay {
+                            Circle()
+                                .strokeBorder(.tertiary, lineWidth: 1)
+                        }
                         #if !os(macOS)
                         .hoverEffect(.highlight)
                         #endif
@@ -19,10 +23,6 @@ struct PersonView: View {
                         .clipShape(.circle)
                         .clipped()
                         #endif
-                        .overlay {
-                            Circle()
-                                .strokeBorder(.tertiary, lineWidth: 1)
-                        }
                 }
                 
                 Text(person.name)
