@@ -14,23 +14,23 @@ struct GenreCardView: View {
         let baseColor = color(for: name)
         
         Text(name)
-            .font(.headline)
+            .font(.subheadline)
             .fontWeight(.semibold)
             .foregroundStyle(.secondary)
             .foregroundStyle(baseColor)
             .brightness(1.25)
             .multilineTextAlignment(.center)
             .lineLimit(2)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, padding)
+            .padding(.vertical, padding - 2)
             .background {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(baseColor.gradient)
                     .brightness(-0.25)
-                    #if os(tvOS)
-                    .hoverEffect(.highlight)
-                    #endif
             }
+            #if os(tvOS)
+            .hoverEffect(.highlight)
+            #endif
             .cardBorder()
     }
 
@@ -38,6 +38,22 @@ struct GenreCardView: View {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let raw = stableHash64(normalizedName)
         return Self.systemPalette[Int(raw % UInt64(Self.systemPalette.count))]
+    }
+    
+    private var font: Font {
+        #if os(tvOS)
+        .subheadline
+        #else
+        .headline
+        #endif
+    }
+    
+    private var padding: CGFloat {
+        #if os(tvOS)
+        18
+        #else
+        12
+        #endif
     }
 
     private static let systemPalette: [Color] = [

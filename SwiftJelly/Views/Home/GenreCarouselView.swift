@@ -24,36 +24,15 @@ struct GenreCarouselView: View {
                 }
             }
         }
-//        destination: {
-//            ScrollView {
-//                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
-//                    ForEach(genres) { genre in
-//                        NavigationLink {
-//                            FilteredMediaView(filter: .genre(genre.name ?? "Genre"))
-//                        } label: {
-//                            GenreCardView(name: genre.name ?? "Genre")
-//                        }
-//                        .adaptiveButtonStyle()
-//                    }
-//                }
-//                .scenePadding()
-//            }
-//            .navigationTitle("Genres")
-//            .toolbarTitleDisplayMode(.inline)
-//        }
         .task {
-            if genres.isEmpty {
-                await loadGenres()
-            }
+            if genres.isEmpty { await loadGenres() }
         }
     }
     
     private func loadGenres() async {
         do {
             let genres = try await JFAPI.loadGenres(limit: 20)
-            withAnimation {
-                self.genres = genres
-            }
+            withAnimation { self.genres = genres }
         } catch {
             print("Error loading genres: \(error)")
         }
@@ -61,7 +40,7 @@ struct GenreCarouselView: View {
 
     private var spacing: CGFloat {
         #if os(tvOS)
-        40
+        30
         #else
         10
         #endif
