@@ -35,6 +35,33 @@ import SwiftUI
         }
     }
     
+    // Quick load just the next episode for hero/play button (no seasons/episodes)
+    func loadQuickNextEpisode() async {
+        do {
+            let seriesID = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
+            guard !seriesID.isEmpty else { return }
+            
+            // Try NextUp API first (fast)
+            if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
+                withAnimation {
+                    nextEpisode = nextUp
+                }
+                return
+            }
+            
+            // Fallback: try resume items
+            if let resumed = try await JFAPI.loadResumeItems(limit: 10, parentID: seriesID)
+                .sorted(by: { activityDate(for: $0) > activityDate(for: $1) })
+                .first(where: { $0.type == .episode }) {
+                withAnimation {
+                    nextEpisode = resumed
+                }
+            }
+        } catch {
+            print("Quick next episode load failed: \(error)")
+        }
+    }
+    
     func updateEpisodesForSelectedSeason() async {
         guard let selectedSeason else { episodes = []; return }
         let sid = selectedSeason.id ?? ""
@@ -152,5 +179,15 @@ import SwiftUI
                 await updateEpisodesForSelectedSeason()
             }
         }
+    }
+    
+    private func activityDate(for item: BaseItemDto) -> Date {
+        if let played = item.userData?.lastPlayedDate {
+            return played
+        }
+        if let ticks = item.userData?.playbackPositionTicks, ticks > 0 {
+            return Date()
+        }
+        return item.premiereDate ?? item.dateCreated ?? .distantPast
     }
 }

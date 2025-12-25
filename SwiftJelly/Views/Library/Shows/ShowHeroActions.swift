@@ -22,10 +22,11 @@ struct ShowHeroActions: View {
         }
         .environment(\.refresh, refreshAllAndSync)
         .task {
-            await refreshAllAndSync()
+            await vm.loadQuickNextEpisode()
         }
         .onChange(of: show.id) { _, _ in
             vm = ShowDetailViewModel(item: show)
+            Task { await vm.loadQuickNextEpisode() }
         }
     }
     

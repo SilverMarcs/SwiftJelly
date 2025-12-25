@@ -75,27 +75,37 @@ extension JFAPI {
     }
     
     /// Loads Next Up items for the current server (episodes to continue watching)
-    /// - Returns: Array of BaseItemDto representing next up items without watch progress
-    static func loadNextUpItems(limit: Int = 10) async throws -> [BaseItemDto] {
+    /// - Parameters:
+    ///   - limit: Maximum number of items to return
+    ///   - seriesID: Optional series ID to filter results
+    /// - Returns: Array of BaseItemDto representing next up items
+    static func loadNextUpItems(limit: Int = 10, seriesID: String? = nil) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetNextUpParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.limit = limit
+        parameters.seriesID = seriesID
         let request = Paths.getNextUp(parameters: parameters)
         let items = try await send(request).items ?? []
         
         return items
     }
     
-    static func loadResumeItems(limit: Int = 10) async throws -> [BaseItemDto] {
+    /// Loads resume items (in-progress content)
+    /// - Parameters:
+    ///   - limit: Maximum number of items to return
+    ///   - parentID: Optional parent ID to filter results (e.g., series ID for episodes)
+    /// - Returns: Array of BaseItemDto representing resume items
+    static func loadResumeItems(limit: Int = 10, parentID: String? = nil) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetResumeItemsParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
         parameters.limit = limit
+        parameters.parentID = parentID
         let items = try await send(Paths.getResumeItems(parameters: parameters)).items ?? []
 
         return items
