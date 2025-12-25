@@ -53,13 +53,13 @@ struct MediaCard: View {
                 .hoverEffect(.highlight)
                 #endif
             
-            Text(item.name ?? "Unknown")
-                .font(.caption)
-                .fontWeight(.medium)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .multilineTextAlignment(.leading)
-                .padding(.leading, 1)
+//            Text(item.name ?? "Unknown")
+//                .font(.caption)
+//                .fontWeight(.medium)
+//                .lineLimit(1)
+//                .truncationMode(.middle)
+//                .multilineTextAlignment(.leading)
+//                .padding(.leading, 1)
         }
     }
 }

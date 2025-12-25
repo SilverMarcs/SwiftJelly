@@ -26,19 +26,19 @@ struct MediaShelf: View {
         #if os(tvOS)
         250
         #elseif os(iOS)
-        125
-        #else
-        150
+        110
+        #elseif os(macOS)
+        160
         #endif
     }
     
     private var spacing: CGFloat {
         #if os(tvOS)
         40
+        #elseif os(iOS)
+        12
         #elseif os(macOS)
-        12
-        #else
-        12
+        16
         #endif
     }
 }

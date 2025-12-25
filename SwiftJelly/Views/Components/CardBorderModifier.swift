@@ -18,14 +18,15 @@ private struct CardBorderModifier: ViewModifier {
             .clipShape(.rect(cornerRadius: cornerRadius))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(.background.quinary, lineWidth: 1)
+                    .strokeBorder(.tertiary, lineWidth: 1)
             }
 #endif
     }
 }
 
 extension View {
-    func cardBorder(cornerRadius: CGFloat = 10) -> some View {
+    // TODO: switch to 10 if blurry border
+    func cardBorder(cornerRadius: CGFloat = 12) -> some View {
         modifier(CardBorderModifier(cornerRadius: cornerRadius))
     }
 }

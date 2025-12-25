@@ -63,17 +63,7 @@ struct GenreCarouselView: View {
         #if os(tvOS)
         40
         #else
-        7
-        #endif
-    }
-
-    private var cardWidth: CGFloat {
-        #if os(tvOS)
-        250
-        #elseif os(iOS)
-        125
-        #else
-        150
+        10
         #endif
     }
 }

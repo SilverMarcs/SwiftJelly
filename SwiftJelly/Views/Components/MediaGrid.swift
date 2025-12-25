@@ -13,7 +13,7 @@ struct MediaGrid: View {
     }
     
     private var columns: [GridItem] {
-        [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: columnSpacing)]
+        [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: gridVerticalSpacing)]
     }
     
     var body: some View {
@@ -60,21 +60,13 @@ struct MediaGrid: View {
         #endif
     }
 
-    private var columnSpacing: CGFloat {
-        #if os(tvOS)
-        48
-        #elseif os(macOS)
-        18
-        #else
-        12
-        #endif
-    }
-
     private var gridVerticalSpacing: CGFloat {
         #if os(tvOS)
         48
-        #else
-        16
+        #elseif os(iOS)
+        15
+        #elseif os(macOS)
+        18
         #endif
     }
 }

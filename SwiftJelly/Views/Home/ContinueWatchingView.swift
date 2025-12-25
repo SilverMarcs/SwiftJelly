@@ -70,7 +70,7 @@ struct ContinueWatchingView: View {
         #if os(tvOS)
         480
         #else
-        315
+        300
         #endif
     }
 }
