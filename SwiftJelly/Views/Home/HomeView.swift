@@ -21,7 +21,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: spacing) {
                 if !tmdbAPIKey.isEmpty {
                     TrendingInLibraryView()
                         .onScrollVisibilityChange { isVisible in
@@ -86,10 +86,10 @@ struct HomeView: View {
     }
     
     private var spacing: CGFloat {
-        #if os(macOS)
-        20
-        #else
+        #if os(tvOS)
         40
+        #else
+        20
         #endif
     }
 }
