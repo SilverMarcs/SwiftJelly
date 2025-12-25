@@ -3,6 +3,7 @@ import JellyfinAPI
 
 struct PlayMediaButton<Label: View>: View {
     @Environment(\.refresh) var refresh
+    
     #if os(macOS)
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
@@ -13,10 +14,12 @@ struct PlayMediaButton<Label: View>: View {
     
     @State private var showPlayer = false
     
-    @Namespace var transition
-
     var body: some View {
         Button {
+            if item.id == nil {
+               return
+            }
+            
             RefreshHandlerContainer.shared.refresh = {
                 await refresh()
             }

@@ -19,6 +19,10 @@ struct PersonView: View {
                         .clipShape(.circle)
                         .clipped()
                         #endif
+                        .overlay {
+                            Circle()
+                                .strokeBorder(.tertiary, lineWidth: 1)
+                        }
                 }
                 
                 Text(person.name)
