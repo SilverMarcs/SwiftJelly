@@ -64,7 +64,7 @@ struct TrendingInLibraryView: View {
         .scrollTargetBehavior(.viewAligned)
         #if os(tvOS)
         .ignoresSafeArea()
-        .contentMargins(.horizontal, 1, for: .scrollContent) // peek tiny bit of next card for scroll to workj
+        .contentMargins(.horizontal, 1, for: .scrollContent) // peek tiny bit of next card for scroll to work
         #endif
         .task(id: tmdbAPIKey) {
             if matchedItems.isEmpty {
@@ -156,11 +156,11 @@ struct TrendingInLibraryView: View {
             if !result.contains(where: { $0.id == item.id }) { result.append(item) }
         }
         
-        var shuffled = unique.shuffled()
+        let shuffled = unique.shuffled()
         // Ensure first item is not a series - swap with second if needed
-        if shuffled.count >= 2 && shuffled[0].type == .series {
-            shuffled.swapAt(0, 1)
-        }
+//        if shuffled.count >= 2 && shuffled[0].type == .series {
+//            shuffled.swapAt(0, 1)
+//        }
         
         withAnimation {
             matchedItems = shuffled
