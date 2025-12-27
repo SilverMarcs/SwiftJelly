@@ -45,6 +45,7 @@ import SwiftUI
             if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
                 withAnimation {
                     nextEpisode = nextUp
+                    isLoading = false
                 }
                 return
             }
@@ -55,6 +56,7 @@ import SwiftUI
                 .first(where: { $0.type == .episode }) {
                 withAnimation {
                     nextEpisode = resumed
+                    isLoading = false
                 }
             }
         } catch {
@@ -168,6 +170,7 @@ import SwiftUI
         // Single animated assignment
         withAnimation {
             nextEpisode = computed
+            isLoading = false
         }
         
         // Auto-select season if different
