@@ -13,12 +13,14 @@ struct PeopleScrollView: View {
     
     var body: some View {
         if let people = people {
-            SectionContainer("Cast & Crew") {
+            SectionContainer {
                 HorizontalShelf(spacing: spacing) {
                     ForEach(people, id: \.id) { person in
                         PersonView(person: Person(from: person))
                     }
                 }
+            } header: {
+                Text("Cast & Crew")
             }
             #if os(tvOS)
             .frame(maxWidth: .infinity, alignment: .leading)

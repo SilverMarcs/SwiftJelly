@@ -16,52 +16,76 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
 // TODO: Re-enable tvOS support with unified hero view
 #if os(tvOS)
     @State private var belowFold = false
-    private let showcaseHeight = 1080 * 0.85
     
     private var layout: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 30) {
-                heroView
-                .scenePadding()
-                .frame(height: showcaseHeight)
-                .focusSection()
-                .onScrollVisibilityChange { isVisible in
-                    withAnimation {
-                        belowFold = !isVisible
-                    }
-                }
+        GeometryReader { geo in
+            let showcaseHeight = geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom
 
-                content
-            }
-            .scrollTargetLayout()
-        }
-        .background {
-            if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
-                CachedAsyncImage(url: url, targetSize: 1000)
-                    .scaledToFill()
-                    .overlay {
-                        Rectangle()
-                            .fill(.regularMaterial)
-                            .mask {
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .white, location: 0),
-                                        .init(color: .white.opacity(belowFold ? 1 : 0.7), location: 0.5),
-                                        .init(color: .white.opacity(belowFold ? 1 : 0), location: 1)
-                                    ],
-                                    startPoint: .bottomLeading, endPoint: .topTrailing
-                                )
+            ScrollView {
+                VStack(alignment: .leading, spacing: 80) {
+                    heroView
+                    .padding(60)
+                    .frame(height: showcaseHeight)
+                    .focusSection()
+                    .overlay(alignment: .bottom) {
+                        VStack(alignment: .center) {
+                            if !belowFold {
+                                Text("More Details")
+                                    .font(.caption2)
+                                Image(systemName: "chevron.compact.down")
+                                    .font(.caption2)
                             }
+                        }
+                        .foregroundStyle(.secondary)
+                        .padding(.bottom)
                     }
-                    .ignoresSafeArea()
+                    .onScrollVisibilityChange { isVisible in
+                        withAnimation {
+                            belowFold = !isVisible
+                        }
+                    }
+
+                    content
+                        .padding(40)
+                }
+                .scrollTargetLayout()
             }
+            .background {
+                if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
+                    CachedAsyncImage(url: url, targetSize: 1000)
+                        .scaledToFill()
+                        .mask {
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: .black, location: 0),
+                                    .init(color: .black, location: 0.4),
+                                    .init(color: .black.opacity(0.05), location: 1.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        }
+                        .background {
+                            Rectangle()
+                                .fill(.black)
+                        }
+                        .overlay {
+                            if belowFold {
+                                Rectangle()
+                                    .fill(.thinMaterial)
+                            }
+                        }
+                        .ignoresSafeArea()
+                }
+            }
+            .ignoresSafeArea()
+            .scrollTargetBehavior(
+                FoldSnappingScrollTargetBehavior(
+                    aboveFold: !belowFold, showcaseHeight: showcaseHeight)
+            )
+            .scrollClipDisabled()
+            .toolbar(.hidden, for: .navigationBar)
         }
-        .scrollTargetBehavior(
-            FoldSnappingScrollTargetBehavior(
-                aboveFold: !belowFold, showcaseHeight: showcaseHeight)
-        )
-        .scrollClipDisabled()
-        .toolbar(.hidden, for: .navigationBar)
     }
 #else
     @State var showScrollEffect = false

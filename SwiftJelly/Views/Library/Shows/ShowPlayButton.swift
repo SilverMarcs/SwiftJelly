@@ -51,13 +51,17 @@ struct ShowPlayButton: View {
         }
         .tint(Color(.accent).secondary)
         .buttonBorderShape(.capsule)
+        #if os(tvOS)
+        .controlSize(.regular)
+        #else
         .controlSize(.extraLarge)
+        #endif
         .buttonStyle(.glassProminent)
         .environment(\.refresh, vm.refreshAll)
         #if !os(tvOS)
-        .disabled(vm.isLoading)
+        .disabled(vm.playButtonDisabled)
         #else
-        .opacity(vm.isLoading ? 0.5 : 1)
+        .opacity(vm.playButtonDisabled ? 0.5 : 1)
         #endif
     }
 }

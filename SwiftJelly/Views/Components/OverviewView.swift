@@ -15,10 +15,15 @@ struct OverviewView: View {
         VStack(alignment: .leading, spacing: 12) {
             if let overview = item.overview ??  item.taglines?.first {
                 Text(overview)
+                    #if os(tvOS)
+                    .font(.caption)
+                    #else
                     .font(.callout)
+                    #endif
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(2, reservesSpace: true)
+                    .lineLimit(3, reservesSpace: false)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }

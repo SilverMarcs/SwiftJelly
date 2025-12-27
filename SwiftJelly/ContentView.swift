@@ -12,6 +12,7 @@ struct ContentView: View {
     @Binding var selectedTab: TabSelection
     
     @State private var dataManager = DataManager.shared
+    @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
 
     var body: some View {
         if dataManager.servers.isEmpty {
@@ -36,7 +37,7 @@ struct ContentView: View {
                 }
             }
             #if os(tvOS)
-            .tabViewStyle(.tabBarOnly)
+            .tvNavigationStyle(navigationStyle)
             #else
             .tabViewStyle(.sidebarAdaptable)
             .tabViewSearchActivation(.searchTabSelection)
