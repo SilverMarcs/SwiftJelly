@@ -19,46 +19,97 @@ struct PlayableCard: View {
     
     @State private var showPlayer = false
     
+    #if os(tvOS)
+    private let cardHeight: CGFloat = 336
+    private let cornerRadius: CGFloat = 30
+    private let reflectionHeight: CGFloat = 150
+    private let overlayPadding: CGFloat = 30
+    #else
+    private let cardHeight: CGFloat = 200
+    private let cornerRadius: CGFloat = 13
+    private let reflectionHeight: CGFloat = 50
+    private let overlayPadding: CGFloat = 15
+    #endif
+
+    let largeGradient = LinearGradient(
+        gradient: Gradient(stops: [
+            .init(color: .white, location: 0),
+            .init(color: .white, location: 0.2),
+            .init(color: .white.opacity(0.9), location: 0.4),
+            .init(color: .white.opacity(0), location: 0.7),
+            .init(color: .white.opacity(0), location: 1.0)
+        ]),
+        startPoint: .bottom,
+        endPoint: .top
+    )
+
+    let gradient = LinearGradient(
+        gradient: Gradient(stops: [
+            .init(color: .white, location: 0),
+            .init(color: .white.opacity(0.7), location: 0.2),
+            .init(color: .white.opacity(0), location: 0.4)
+        ]),
+        startPoint: .bottom,
+        endPoint: .top
+    )
+    
     var body: some View {
         PlayMediaButton(item: item) {
             LabelStack(alignment: .leading) {
-                LandscapeImageView(item: item)
-                    .aspectRatio(16/9, contentMode: .fit)
-                    .blurredBottomOverlay()
-                    .overlay(alignment: .bottom) {
-                        ProgressBarOverlay(item: item)
-                            .padding(.horizontal, 10)
-                            .padding(.bottom, 8)
-                        #if os(tvOS)
-                            .padding(7)
-                        #endif
+                ExpandedImage(image: LandscapeImageView(item: item), imageHeight: cardHeight, reflectionHeight: showDescription ? reflectionHeight : 0)
+                    .overlay {
+                        Rectangle()
+                            .fill(showDescription ? .regularMaterial : .ultraThickMaterial)
+                            .mask {
+                                if showDescription {
+                                    largeGradient
+                                } else {
+                                    gradient
+                                }
+                            }
                     }
-                    .cardBorder()
-                    #if os(tvOS)
+                    .overlay(alignment: .bottomLeading) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
+                                .foregroundStyle(.white)
+                                .fontWeight(.bold)
+                                .opacity(0.7)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .multilineTextAlignment(.leading)
+
+                            if showDescription {
+                                Text(item.overview ?? "")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .font(.caption2)
+                                    .opacity(0.5)
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(3, reservesSpace: false)
+                            }
+                            
+                            ProgressBarOverlay(item: item)
+                        }
+                        .padding(overlayPadding)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .strokeBorder(.gray.opacity(0.5), lineWidth: 1)
+                    }
+                    .background {
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .fill(.black)
+                    }
+                    .environment(\.colorScheme, .dark)
+                    
+                    #if !os(macOS)
                     .hoverEffect(.highlight)
                     #endif
-
-                if showTitle {
-                    Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .multilineTextAlignment(.leading)
-                        .padding(.horizontal, 4)
-                }
-                
-                if showDescription {
-                    Text(item.overview ?? "")
-                        .font(.caption2)
-                        .opacity(0.7)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(3, reservesSpace: true)
-                        .padding(.horizontal, 4)
-                }
             }
         }
         .foregroundStyle(.primary)
+        
+        .buttonBorderShape(.roundedRectangle(radius: cornerRadius))
         .adaptiveButtonStyle()
         .contextMenu {
             if !isInSeasonView {
