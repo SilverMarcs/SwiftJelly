@@ -9,19 +9,21 @@ import SwiftUI
 import AVKit
 
 struct AVPlayerIos: UIViewControllerRepresentable {
-    let player: AVPlayer
+    let player: AVPlayer?
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
         controller.player = player
-        controller.entersFullScreenWhenPlaybackBegins = true
-        controller.exitsFullScreenWhenPlaybackEnds = true
         controller.allowsPictureInPicturePlayback = true
+        #if os(tvOS)
+        controller.transportBarIncludesTitleView = true
+        #else
+        controller.entersFullScreenWhenPlaybackBegins = true
+        controller.exitsFullScreenWhenPlaybackEnds = false
+        #endif
         
         return controller
     }
     
-    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-//        uiViewController.player = player
-    }
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {}
 }

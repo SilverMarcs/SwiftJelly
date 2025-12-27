@@ -17,9 +17,11 @@ struct SwiftJellyApp: App {
         WindowGroup {
             ContentView(selectedTab: $selectedTab)
         }
+        #if !os(tvOS)
         .commands {
             AppCommands(selectedTab: $selectedTab)
         }
+        #endif
         
         #if os(macOS)
         WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in

@@ -10,38 +10,42 @@ import SwiftMediaViewer
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Server") {
-                    NavigationLink {
-                        ServerList()
-                    } label: {
-                        Label("Servers", systemImage: "server.rack")
-                    }
+        Form {
+            Section("Server") {
+                NavigationLink {
+                    ServerList()
+                } label: {
+                    Label("Servers", systemImage: "server.rack")
                 }
+            }
 
-                Section("Images") {
-                    CacheManagerView()
-                }
+            Section("Images") {
+                CacheManagerView()
             }
-            .scrollDisabled(true)
-            .formStyle(.grouped)
-            .navigationTitle("Settings")
-            .toolbarTitleDisplayMode(.inline)
-            #if !os(macOS)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            
-                    }
-                }
+            
+            Section {
+                SecureField("Bearer Token", text: $tmdbAPIKey, prompt: Text("ey..."))
+            } header: {
+                Text("TMDB API")
+            } footer: {
+                Text("Enter your TMDB API Bearer token to show trending content from your library.")
             }
-            #endif
         }
+        .formStyle(.grouped)
+        .navigationTitle("Settings")
+        .toolbarTitleDisplayMode(.inline)
+        #if os(tvOS)
+        .toolbar(.hidden, for: .navigationBar)
+        #endif
+        #if os(iOS)
+        .toolbar {
+            Button("Close", systemImage: "xmark", role: .close) {
+                dismiss()
+            }
+        }
+        #endif
     }
 }

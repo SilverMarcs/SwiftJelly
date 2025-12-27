@@ -6,34 +6,44 @@
 //
 
 import SwiftUI
+import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
-    @State private var searchText: String = ""
     
+    @State private var dataManager = DataManager.shared
+
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(TabSelection.allCases, id: \.self) { tab in
-                Tab(tab.title,
-                    systemImage: tab.systemImage,
-                    value: tab,
-                    role: tab == .search ? .search : .none
-                ) {
-                    switch tab {
-                    case .search:
-                        SearchView(searchText: $searchText)
-                    default:
-                        tab.tabView
+        if dataManager.servers.isEmpty {
+            NoServerView()
+        } else {
+            TabView(selection: $selectedTab) {
+                ForEach(TabSelection.allCases, id: \.self) { tab in
+                    Tab(tab.title,
+                        systemImage: tab.systemImage,
+                        value: tab,
+                        role: tab == .search ? .search : .none
+                    ) {
+                        NavigationStack {
+                            tab.tabView
+                                .navigationDestinations()
+                                .settingsSheet()
+                            #if os(macOS)
+                                .frame(minWidth: 800)
+                            #endif
+                        }
                     }
                 }
             }
+            #if os(tvOS)
+            .tabViewStyle(.tabBarOnly)
+            #else
+            .tabViewStyle(.sidebarAdaptable)
+            .tabViewSearchActivation(.searchTabSelection)
+            #endif
+            #if os(iOS)
+            .tabBarMinimizeBehavior(.onScrollDown)
+            #endif
         }
-        .tabViewStyle(.sidebarAdaptable)
-        .tabViewSearchActivation(.searchTabSelection)
-        #if os(macOS)
-        .searchable(text: $searchText, placement: .toolbarPrincipal, prompt: "Search movies or shows")
-        #else
-        .tabBarMinimizeBehavior(.onScrollDown)
-        #endif
     }
 }

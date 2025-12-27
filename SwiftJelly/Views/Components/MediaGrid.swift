@@ -12,39 +12,61 @@ struct MediaGrid: View {
         self.onLoadMore = onLoadMore
     }
     
-    private static var defaultSize: CGFloat {
-        #if os(macOS)
+    private var columns: [GridItem] {
+        [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: gridVerticalSpacing)]
+    }
+    
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: gridVerticalSpacing) {
+                ForEach(items) { item in
+                    MediaNavigationLink(item: item) {
+                        MediaCard(item: item)
+                    }
+                    .onAppear {
+                        if item == items.last, let onLoadMore {
+                            onLoadMore()
+                        }
+                    }
+                }
+            }
+            .scenePadding()
+            
+            if isLoading && !items.isEmpty {
+                UniversalProgressView()
+                    .padding(.vertical, 24)
+            }
+        }
+        .overlay {
+            if isLoading && items.isEmpty {
+                UniversalProgressView()
+            } else if !isLoading && items.isEmpty {
+                ContentUnavailableView(
+                    "No Media",
+                    systemImage: "play.tv",
+                    description: Text("Refine search or explore other sections")
+                )
+            }
+        }
+    }
+    
+    private var columnMinimumWidth: CGFloat {
+        #if os(tvOS)
+        220
+        #elseif os(macOS)
         140
         #else
         105
         #endif
     }
-    
-    private let columns = [
-        GridItem(.adaptive(minimum: defaultSize), spacing: 12)
-    ]
-    
-    var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(items) { item in
-                    MediaNavigationLink(item: item)
-                        .onAppear {
-                            if item == items.last, let onLoadMore {
-                                onLoadMore()
-                            }
-                        }
-                }
-            }
-            .scenePadding(.horizontal)
-            .scenePadding(.bottom)
-        }
-        .overlay {
-            if isLoading {
-                UniversalProgressView()
-            } else if items.isEmpty {
-                ContentUnavailableView.search
-            }
-        }
+
+    private var gridVerticalSpacing: CGFloat {
+        #if os(tvOS)
+        48
+        #elseif os(iOS)
+        15
+        #elseif os(macOS)
+        18
+        #endif
     }
 }

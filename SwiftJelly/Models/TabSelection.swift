@@ -15,7 +15,7 @@ enum TabSelection: String, CaseIterable {
     case settings = "settings"
     case search = "search"
     
-    #if os(macOS)
+    #if os(macOS) || os(tvOS)
     static let allCases: [TabSelection] = [.home, .favorites, .libraries, .settings, .search]
     #else
     static let allCases: [TabSelection] = [.home, .favorites, .libraries, .search]
@@ -55,10 +55,10 @@ enum TabSelection: String, CaseIterable {
     var tabView: some View {
         switch self {
         case .home: HomeView()
-        case .favorites: FavoritesView()
+        case .favorites: FilteredMediaView(filter: .favorites)
         case .libraries: LibraryView()
         case .settings: SettingsView()
-        case .search: EmptyView()
+        case .search: SearchView()
         }
     }
 }

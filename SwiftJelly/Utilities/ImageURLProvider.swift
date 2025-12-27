@@ -23,6 +23,14 @@ enum ImageURLProvider {
         // Episodes always use primary
         let imageType = (item.type == .episode || item.collectionType != nil) ? .primary : type
         
+        if let tags = item.backdropImageTags, type == .backdrop, !tags.isEmpty {
+            return url(forItemID: id, imageType: imageType)
+        }
+        
+        if let tags = item.parentLogoImageTag, type == .backdrop, !tags.isEmpty {
+            return url(forItemID: id, imageType: imageType)
+        }
+
         // Check if the item has the required image tag
         if let tag = item.imageTags?[imageType.rawValue], !tag.isEmpty {
             return url(forItemID: id, imageType: imageType)
@@ -34,10 +42,18 @@ enum ImageURLProvider {
     /// - Parameters:
     ///   - person: The BaseItemPerson to get image for
     /// - Returns: URL for the person's image or nil if not available
-    static func personImageURL(for person: BaseItemPerson) -> URL? {
-        guard let id = person.id else { return nil }
+    static func personImageURL(for personId: String?) -> URL? {
+        guard let id = personId else { return nil }
 
         return url(forItemID: id, imageType: .primary)
+    }
+
+    static func genreImageURL(forGenreName name: String) -> URL? {
+        guard let client = try? JFAPI.getClient() else { return nil }
+        guard let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return nil }
+
+        let request = Paths.getGenreImage(name: encodedName, imageType: ImageType.primary.rawValue)
+        return client.fullURL(with: request, queryAPIKey: true)
     }
 }
 

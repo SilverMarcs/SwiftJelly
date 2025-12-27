@@ -12,25 +12,7 @@ struct UniversalProgressView: View {
         ProgressView()
             .controlSize(.large)
             .padding()
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-//            .glassEffect(in: RoundedRectangle(cornerRadius: 14))
+//            .glassEffect(in: .circle)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-
-//struct UniversalProgressView: View {
-//    var body: some View {
-//        ZStack {
-//            // Semi-transparent dark background
-//            Rectangle()
-//                .fill(.background)
-//                .frame(maxWidth: .infinity, maxHeight: .infinity)
-//            
-//            // Progress indicator
-//            ProgressView()
-//                .controlSize(.large)        }
-//        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//        .listRowSeparator(.hidden)
-//    }
-//}
-//

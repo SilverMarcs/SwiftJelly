@@ -1,24 +1,25 @@
 import Foundation
 import JellyfinAPI
 import SwiftUI
-import Combine
 
 @Observable class ShowDetailViewModel {
     // Input
     private(set) var show: BaseItemDto
     
     // Seasons / Episodes
-     private(set) var seasons: [BaseItemDto] = []
-     var selectedSeason: BaseItemDto? = nil
-     private(set) var episodes: [BaseItemDto] = []
-     private var allEpisodes: [String: [BaseItemDto]] = [:]
+    private(set) var seasons: [BaseItemDto] = []
+    var selectedSeason: BaseItemDto? = nil
+    private(set) var episodes: [BaseItemDto] = []
+    private var allEpisodes: [String: [BaseItemDto]] = [:]
      
     // Next Episode / play button
-     private(set) var nextEpisode: BaseItemDto? = nil
+    private(set) var nextEpisode: BaseItemDto? = nil
     
-     // Loadimg states
-     var isLoading: Bool = false
-     var isLoadingEpisodes: Bool = false
+    // Loading states
+    var isLoading: Bool = false
+    var isLoadingEpisodes: Bool = false
+    
+    var playButtonDisabled: Bool { nextEpisode == nil || isLoading }
     
     init(item: BaseItemDto) {
         self.show = item
@@ -29,8 +30,37 @@ import Combine
         isLoading = true
         defer { isLoading = false }
         await withTaskGroup(of: Void.self) { group in
-            group.addTask { await self.reloadShow() }
-            group.addTask { await self.reloadSeasonsAndEpisodes() }
+            group.addTask { await self.loadShowDetail() }
+            group.addTask { await self.loadSeasonsAndEpisodes() }
+        }
+    }
+    
+    // Quick load just the next episode for hero/play button (no seasons/episodes)
+    func loadQuickNextEpisode() async {
+        do {
+            let seriesID = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
+            guard !seriesID.isEmpty else { return }
+            
+            // Try NextUp API first (fast)
+            if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
+                withAnimation {
+                    nextEpisode = nextUp
+                    isLoading = false
+                }
+                return
+            }
+            
+            // Fallback: try resume items
+            if let resumed = try await JFAPI.loadResumeItems(limit: 10, parentID: seriesID)
+                .sorted(by: { activityDate(for: $0) > activityDate(for: $1) })
+                .first(where: { $0.type == .episode }) {
+                withAnimation {
+                    nextEpisode = resumed
+                    isLoading = false
+                }
+            }
+        } catch {
+            print("Quick next episode load failed: \(error)")
         }
     }
     
@@ -43,14 +73,14 @@ import Combine
     func markEpisodePlayed(_ episode: BaseItemDto) async {
         do {
             try await JFAPI.toggleItemPlayedStatus(item: episode)
-            await reloadSeasonsAndEpisodes()
+            await loadSeasonsAndEpisodes()
         } catch { 
             print("Toggle played failed: \(error)") 
         }
     }
     
     // loads show metadata like genre studios etc
-    func reloadShow() async {
+    func loadShowDetail() async {
         do {
             let itemId = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !itemId.isEmpty else { return }
@@ -61,7 +91,7 @@ import Combine
     }
     
     // loads all seasons and episodes, inferring seasons if needed
-    func reloadSeasonsAndEpisodes() async {
+    func loadSeasonsAndEpisodes() async {
         isLoadingEpisodes = true
         defer { isLoadingEpisodes = false }
         do {
@@ -104,7 +134,9 @@ import Combine
     }
     
     private func computeNextEpisode() async {
-        let sortedSeasons = seasons // already sorted in reloadSeasonsAndEpisodes
+        var computed: BaseItemDto? = nil
+        
+        let sortedSeasons = seasons
         for season in sortedSeasons {
             let sid = season.id ?? ""
             let sortedEpisodes = allEpisodes[sid] ?? []
@@ -115,7 +147,7 @@ import Combine
                 let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return hasProgress && !isFullyWatched
             }) {
-                nextEpisode = inProgress
+                computed = inProgress
                 break
             }
             
@@ -124,26 +156,41 @@ import Combine
                 let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
                 return !isWatched
             }) {
-                nextEpisode = firstUnwatched
+                computed = firstUnwatched
                 break
             }
-            
-            // else: this season finished, continue
         }
         
         // All watched: choose last episode of last season
-        if nextEpisode == nil, let lastSeason = sortedSeasons.last {
+        if computed == nil, let lastSeason = sortedSeasons.last {
             let sid = lastSeason.id ?? ""
-            let sortedEpisodes = allEpisodes[sid] ?? []
-            nextEpisode = sortedEpisodes.last
+            computed = allEpisodes[sid]?.last
         }
         
-        // Try to auto-select the season of next episode if different
-        if let ne = nextEpisode, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
-            if selectedSeason?.id != targetSeason.id { 
-                selectedSeason = targetSeason
+        // Single animated assignment
+        withAnimation {
+            nextEpisode = computed
+            isLoading = false
+        }
+        
+        // Auto-select season if different
+        if let ne = computed, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
+            if selectedSeason?.id != targetSeason.id {
+                withAnimation {
+                    selectedSeason = targetSeason
+                }
                 await updateEpisodesForSelectedSeason()
             }
         }
+    }
+    
+    private func activityDate(for item: BaseItemDto) -> Date {
+        if let played = item.userData?.lastPlayedDate {
+            return played
+        }
+        if let ticks = item.userData?.playbackPositionTicks, ticks > 0 {
+            return Date()
+        }
+        return item.premiereDate ?? item.dateCreated ?? .distantPast
     }
 }

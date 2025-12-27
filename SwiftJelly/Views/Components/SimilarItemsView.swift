@@ -14,28 +14,13 @@ struct SimilarItemsView: View {
     @State private var similarItems: [BaseItemDto] = []
     
     var body: some View {
-        VStack(alignment: .leading) {
-            if !similarItems.isEmpty {
-                Text("Recommended")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal)
-            
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(similarItems) { item in
-                            MediaNavigationLink(item: item)
-                                .frame(width: 120)
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .overlay {
+        VStack(alignment: .leading, spacing: 16) {
             if isLoading {
-                ProgressView()
-                    .padding()
+                UniversalProgressView()
+            }
+            
+            if !similarItems.isEmpty {
+                MediaShelf(items: similarItems, header: "Recommended")
             }
         }
         .task {

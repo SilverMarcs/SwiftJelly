@@ -6,37 +6,56 @@ struct ShowSeasonsView: View {
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if !vm.seasons.isEmpty {
-                Picker("Season", selection: $vm.selectedSeason) {
-                    ForEach(vm.seasons) { season in
-                        Text(season.name ?? "Season").tag(season as BaseItemDto?)
-                    }
-                }
-                .scenePadding(.horizontal)
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .menuStyle(.button)
-                .buttonStyle(.glass)
-                .task(id: vm.selectedSeason) { 
-                    await vm.updateEpisodesForSelectedSeason()
-                    scrollToLatestEpisode()
-                }
+        VStack(alignment: .leading, spacing: 15) {
+            if vm.isLoadingEpisodes && vm.seasons.isEmpty {
+                UniversalProgressView()
             }
             
-            if !vm.episodes.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 15) {
-                        ForEach(vm.episodes) { episode in
-                            PlayableCard(item: episode, showRealname: true)
-                                .id(episode.id)
-                        }
-                    }
-                    .scrollTargetLayout()
-                }
-                .scrollPosition($episodeScrollPosition)
-            }
+            seasonPicker
+            
+            scroller
         }
+        .task(id: vm.selectedSeason) {
+            await vm.updateEpisodesForSelectedSeason()
+            scrollToLatestEpisode()
+        }
+    }
+    
+    @ViewBuilder
+    private var seasonPicker: some View {
+        if !vm.seasons.isEmpty {
+            Picker("Season", selection: $vm.selectedSeason) {
+                ForEach(vm.seasons) { season in
+                    Text(season.name ?? "Season").tag(season as BaseItemDto?)
+                }
+            }
+            .scenePadding(.horizontal)
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .menuStyle(.button)
+            .buttonStyle(.glass)
+            .foregroundStyle(.primary)
+            #if os(tvOS)
+            .focusSection()
+            #endif
+        }
+    }
+
+    private var scroller: some View {
+        SectionContainer("Seasons", showHeader: false) {
+            HorizontalShelf(spacing: episodeSpacing) {
+                ForEach(vm.episodes) { episode in
+                    PlayableCard(item: episode, showRealname: true, showDescription: true)
+                        .frame(width: cardWidth)
+                        .id(episode.id)
+                }
+            }
+            .scrollPosition($episodeScrollPosition)
+        }
+        .environment(\.isInSeasonView, true)
+        #if os(tvOS)
+        .focusSection()
+        #endif
     }
     
     private func scrollToLatestEpisode() {
@@ -54,9 +73,27 @@ struct ShowSeasonsView: View {
                 return !isWatched
             }
         }
-        if targetEpisode == nil { targetEpisode = sortedEpisodes.last }
+        if targetEpisode == nil { targetEpisode = sortedEpisodes.first } // why .last vs .first?
         if let episode = targetEpisode, let episodeId = episode.id {
-            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing) }
+            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing) } // trailing so it doesnt getcut off for smaller window sizes
         }
+    }
+
+    private var episodeSpacing: CGFloat {
+        #if os(tvOS)
+        32
+        #else
+        8
+        #endif
+    }
+
+    private var cardWidth: CGFloat {
+        #if os(tvOS)
+        480
+        #elseif os(macOS)
+        300
+        #else
+        280
+        #endif
     }
 }

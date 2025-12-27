@@ -7,6 +7,6 @@ struct PortraitImageView: View {
     
     var body: some View {
         CachedAsyncImage(url: ImageURLProvider.imageURL(for: item, type: .primary), targetSize: 500)
-            .aspectRatio(2/3, contentMode: .fill)
+            .aspectRatio(1/1.5, contentMode: .fill)
     }
 }

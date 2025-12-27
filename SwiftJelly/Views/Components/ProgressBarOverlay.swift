@@ -9,6 +9,8 @@ import SwiftUI
 import JellyfinAPI
 
 struct ProgressBarOverlay: View {
+    @Environment(\.isInSeasonView) private var isInSeasonView
+    
     let item: BaseItemDto
 
     var body: some View {
@@ -23,8 +25,8 @@ struct ProgressBarOverlay: View {
             
             Spacer()
             
-            if let seasonEpisode = item.seasonEpisodeString {
-                Text(seasonEpisode)
+            if let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
+                Text(episodeText)
                     .font(.subheadline)
             }
         }
@@ -32,10 +34,10 @@ struct ProgressBarOverlay: View {
     }
 }
 
-private struct ProgressIcon: View {
+struct ProgressIcon: View {
     let isPlayed: Bool
+    
     var body: some View {
-        // TODO: use glass button here
         if isPlayed {
             Image(systemName: "checkmark.circle.fill")
                 .font(.subheadline)
@@ -48,22 +50,18 @@ private struct ProgressIcon: View {
     }
 }
 
-private struct ProgressGauge: View {
+struct ProgressGauge: View {
     let progress: Double?
     var body: some View {
         if let progress, progress > 0, progress < 1 {
-            Gauge(value: progress) {
-                EmptyView()
-            } currentValueLabel: {
-                EmptyView()
-            } minimumValueLabel: {
-                EmptyView()
-            } maximumValueLabel: {
-                EmptyView()
-            }
-            .controlSize(.mini)
-            .gaugeStyle(.accessoryLinearCapacity)
-            .frame(width: 60)
+            ProgressView(value: progress)
+                #if os(tvOS)
+//                .tint(.primary)
+                .frame(width: 100)
+                #else
+                .controlSize(.mini)
+                .frame(width: 60)
+                #endif
         }
     }
 }

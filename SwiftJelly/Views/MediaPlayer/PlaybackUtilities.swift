@@ -1,20 +1,37 @@
 import AVKit
 import JellyfinAPI
 
+struct PlaybackLoadResult {
+    let player: AVPlayer
+    let info: PlaybackInfoResponse
+    let item: BaseItemDto
+}
+
 struct PlaybackUtilities {
-    
     /// Loads playback information and creates an AVPlayer
-    static func loadPlaybackInfo(for item: BaseItemDto) async throws -> AVPlayer {
+    static func loadPlaybackInfo(
+        for item: BaseItemDto,
+        into existingPlayer: AVPlayer? = nil,
+        audioStreamIndex: Int? = nil,
+        resumeSeconds: Double? = nil
+    ) async throws -> PlaybackLoadResult {
         let subtitleStreamIndex = item.mediaSources?
             .first?
             .mediaStreams?
             .first(where: { $0.type == .subtitle })?
             .index
 
-        // Start fetching playback info and fresh item concurrently
+        // Start fetching playback info and a fresh item concurrently
+        let resumeTicks: Int64? = {
+            guard let resumeSeconds else { return nil }
+            return Int64(resumeSeconds * 10_000_000)
+        }()
+        
         async let infoTask = JFAPI.getPlaybackInfo(
             for: item,
-            subtitleStreamIndex: subtitleStreamIndex
+            subtitleStreamIndex: subtitleStreamIndex,
+            audioStreamIndex: audioStreamIndex,
+            startPositionTicks: resumeTicks
         )
         async let freshItemTask: BaseItemDto? = {
             guard let id = item.id else { return nil }
@@ -22,65 +39,57 @@ struct PlaybackUtilities {
         }()
 
         let info = try await infoTask
+        
+        guard item.id != nil else {
+            throw PlaybackError.missingItemID
+        }
+
+        let latestItem = await freshItemTask ?? item
 
         let playerItem = AVPlayerItem(url: info.playbackURL)
         
         #if !os(macOS)
-        let metadata = await item.createMetadataItems()
+        let metadata = await latestItem.createMetadataItems()
         playerItem.externalMetadata = metadata
         #endif
         
-        let player = AVPlayer(playerItem: playerItem)
+        let player = existingPlayer ?? AVPlayer()
+        player.pause()
+        player.replaceCurrentItem(with: playerItem)
         
         #if os(macOS)
         player.preventsDisplaySleepDuringVideoPlayback = true
         #endif
         
         // Prefer start time from freshly fetched item (to avoid stale progress)
-        let latestItem = await freshItemTask
-        let startSeconds = latestItem?.startTimeSeconds ?? item.startTimeSeconds
-        let time = CMTime(seconds: Double(startSeconds), preferredTimescale: 1)
+        let fallbackStartSeconds = Double(latestItem.startTimeSeconds)
+        let targetStartSeconds = resumeSeconds ?? fallbackStartSeconds
+        let time = CMTime(seconds: targetStartSeconds, preferredTimescale: 1)
         await player.seek(to: time)
         
         #if !os(macOS)
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
-        
+
         player.play()
-        
-        return player
+
+        return PlaybackLoadResult(player: player, info: info, item: latestItem)
     }
     
     /// Reports current playback progress to Jellyfin server
     static func reportPlaybackProgress(
         player: AVPlayer,
-        item: BaseItemDto
+        item: BaseItemDto,
+        isPaused: Bool
     ) async {
-        let currentTime = player.currentTime()
-        let seconds = Int(currentTime.seconds)
-        
-        try? await JFAPI.reportPlaybackProgress(
-            for: item,
-            positionTicks: seconds.toPositionTicks
+        guard let itemID = item.id else { return }
+        let ticks = player.currentTime().seconds.toPositionTicks
+        await JFAPI.reportPlaybackProgress(
+            itemID: itemID,
+            mediaSourceID: item.mediaSources?.first?.id ?? itemID,
+            positionTicks: ticks,
+            isPaused: isPaused
         )
-    }
-    
-    /// Reports final playback progress and cleans up resources
-    static func reportPlaybackAndCleanup(
-        player: AVPlayer,
-        item: BaseItemDto
-    ) async {
-        player.pause()
-        
-        await reportPlaybackProgress(player: player, item: item)
-        
-        player.replaceCurrentItem(with: nil)
-        
-        try? await Task.sleep(nanoseconds: 100_000_000)
-        if let handler = RefreshHandlerContainer.shared.refresh {
-            await handler()
-            RefreshHandlerContainer.shared.refresh = nil
-        }
     }
     
     /// Gets video dimensions for window sizing

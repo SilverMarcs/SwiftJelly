@@ -10,7 +10,6 @@ import SwiftUI
 struct ServerList: View {
     private var dataManager = DataManager.shared
     @State private var showAddSheet = false
-    @Namespace private var transition
     
     var body: some View {
         Form {
@@ -25,9 +24,11 @@ struct ServerList: View {
                         Image(systemName: server.id == dataManager.activeServerID ? "checkmark.circle.fill" : "server.rack")
                             .foregroundStyle(server.id == dataManager.activeServerID ? .green : .accent)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
+                .buttonSizing(.flexible) // not doign anything yet so need to kee maxwidth above
                 .contextMenu {
                     Button(role: .destructive) {
                         dataManager.deleteServer(server)
@@ -40,23 +41,14 @@ struct ServerList: View {
         .formStyle(.grouped)
         .navigationTitle("Servers")
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showAddSheet = true
-                } label: {
-                    Image(systemName: "plus")
-                }
+            Button {
+                showAddSheet = true
+            } label: {
+                Image(systemName: "plus")
             }
-            #if !os(macOS)
-            .matchedTransitionSource(id: "add-server-button", in: transition)
-            #endif
         }
         .sheet(isPresented: $showAddSheet) {
             AddServerView()
-                #if !os(macOS)
-                .navigationTransition(.zoom(sourceID: "add-server-button", in: transition))
-                #endif
-                .presentationDetents([.medium])
         }
     }
 }

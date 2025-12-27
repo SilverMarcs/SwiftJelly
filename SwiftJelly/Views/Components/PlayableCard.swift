@@ -10,63 +10,108 @@ import JellyfinAPI
 
 struct PlayableCard: View {
     @Environment(\.refresh) var refresh
+    @Environment(\.isInSeasonView) private var isInSeasonView
     
     let item: BaseItemDto
     var showRealname: Bool = false
+    var showTitle: Bool = true
+    var showDescription: Bool = false
+    
     @State private var showPlayer = false
+    
+    #if os(tvOS)
+    private let cardHeight: CGFloat = 336
+    private let cornerRadius: CGFloat = 30
+    private let reflectionHeight: CGFloat = 150
+    private let overlayPadding: CGFloat = 30
+    #else
+    private let cardHeight: CGFloat = 200
+    private let cornerRadius: CGFloat = 13
+    private let reflectionHeight: CGFloat = 50
+    private let overlayPadding: CGFloat = 15
+    #endif
 
+    let largeGradient = LinearGradient(
+        gradient: Gradient(stops: [
+            .init(color: .white, location: 0),
+            .init(color: .white, location: 0.2),
+            .init(color: .white.opacity(0.9), location: 0.3),
+            .init(color: .white.opacity(0), location: 0.5),
+            .init(color: .white.opacity(0), location: 1.0)
+        ]),
+        startPoint: .bottom,
+        endPoint: .top
+    )
+
+    let gradient = LinearGradient(
+        gradient: Gradient(stops: [
+            .init(color: .white, location: 0),
+            .init(color: .white.opacity(0.7), location: 0.15),
+            .init(color: .white.opacity(0), location: 0.25)
+        ]),
+        startPoint: .bottom,
+        endPoint: .top
+    )
+
+    private var totalHeight: CGFloat {
+        cardHeight + (showDescription ? reflectionHeight : 0)
+    }
+    
     var body: some View {
         PlayMediaButton(item: item) {
-            VStack(alignment: .leading) {
+            GeometryReader { geo in
                 LandscapeImageView(item: item)
-                    .frame(width: 270, height: 168)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay(alignment: .bottom) {
-                        ZStack(alignment: .bottom) {
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.black.opacity(0.9), Color.clear]),
-                                startPoint: .bottom,
-                                endPoint: .top
-                            )
-                            .frame(height: 80)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: totalHeight, alignment: .top)
+                    .clipped()
+                    .overlay {
+                        Rectangle()
+                            .fill(showDescription ? .regularMaterial : .ultraThickMaterial)
+                            .mask {
+                                if showDescription {
+                                    largeGradient
+                                } else {
+                                    gradient
+                                }
+                            }
+                    }
+                    .overlay(alignment: .bottomLeading) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
+                                .foregroundStyle(.white)
+                                .fontWeight(.bold)
+                                .opacity(0.7)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .multilineTextAlignment(.leading)
+
+                            if showDescription {
+                                Text(item.overview ?? "")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .font(.caption2)
+                                    .opacity(0.5)
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(3, reservesSpace: false)
+                            }
                             
                             ProgressBarOverlay(item: item)
-                                .padding(.horizontal, 10)
-                                .padding(.bottom, 8)
                         }
+                        .padding(overlayPadding)
                     }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(.background.quinary, lineWidth: 1)
-                    }
-                
-                Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .multilineTextAlignment(.leading)
-                    .padding(.leading, 4)
+                    .environment(\.colorScheme, .dark)
+                    #if !os(macOS)
+                    .hoverEffect(.highlight)
+                    #endif
             }
+            .frame(height: totalHeight)
         }
-        .buttonStyle(.plain)
+        .foregroundStyle(.primary)
+        .cardBorder()
+        .adaptiveButtonStyle()
         .contextMenu {
-            if item.type == .movie {
+            if !isInSeasonView {
                 Section {
-                    NavigationLink {
-                        MovieDetailView(item: item)
-                    } label: {
-                        PlayableItemTypeLabel(item: item)
-                    }
-                }
-            }
-            
-            if item.type == .episode {
-                Section {
-                    NavigationLink {
-                        ShowDetailLoader(episode: item)
-                    } label: {
+                    MediaNavigationLink(item: item) {
                         PlayableItemTypeLabel(item: item)
                     }
                 }

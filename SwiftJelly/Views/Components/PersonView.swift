@@ -1,65 +1,57 @@
-//
-//  PersonView.swift
-//  SwiftJelly
-//
-//  Created by Zabir Raihan on 14/07/2025.
-//
-
 import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
 struct PersonView: View {
-    let person: BaseItemPerson
+    let person: Person
     
     var body: some View {
-        NavigationLink {
-            PersonMediaView(person: person)
-        } label: {
-            personContent
-        }
-        .buttonStyle(.plain)
-    }
-    
-    private var personContent: some View {
-        VStack(alignment: .center, spacing: 10) {
-            Group {
-                if let url = ImageURLProvider.personImageURL(for: person) {
-                    CachedAsyncImage(url: url, targetSize: 200)
-                } else {
-                    Rectangle()
-                        .foregroundStyle(.quaternary)
+        NavigationLink(value: person) {
+            LabelStack {
+                if let url = ImageURLProvider.personImageURL(for: person.id) {
+                    CachedAsyncImage(url: url, targetSize: Int(imageSize * 2))
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: imageSize, height: imageSize)
                         .overlay {
-                            Image(systemName: "person.fill")
-                                .font(.title)
-                                .foregroundStyle(.secondary)
+                            Circle()
+                                .strokeBorder(.tertiary, lineWidth: 1)
                         }
-                }
-            }
-            .aspectRatio(3/4, contentMode: .fill) 
-            .clipShape(.rect(cornerRadius: 6))
-            .overlay {
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(.background.quinary, lineWidth: 1)
-            }
-            
-            VStack(alignment: .leading, spacing: 1) {
-                if let name = person.name {
-                    Text(name)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(1)
+                        #if !os(macOS)
+                        .hoverEffect(.highlight)
+                        #endif
+                        #if !os(tvOS)
+                        .clipShape(.circle)
+                        .clipped()
+                        #endif
                 }
                 
-                if let role = person.role, !role.isEmpty {
-                    Text(role)
+                Text(person.name)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                
+                if let subtitle = person.subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
+                        .truncationMode(.tail)
+     
                 }
             }
         }
+        .frame(maxWidth: imageSize)
+        .buttonBorderShape(.circle)
+        .adaptiveButtonStyle()
+    }
+    
+    private var imageSize: CGFloat {
+        #if os(tvOS)
+        175
+        #else
+        100
+        #endif
     }
 }

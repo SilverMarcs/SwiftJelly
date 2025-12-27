@@ -3,69 +3,98 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewMac: View {
-    let item: BaseItemDto
-    @State private var player: AVPlayer?
-    @State private var isLoading = true
+    @State private var model: MediaPlaybackViewModel
     @State private var showInfoSheet = false
+    @State private var didConfigureWindow = false
+
+    init(item: BaseItemDto) {
+        _model = State(initialValue: MediaPlaybackViewModel(item: item))
+    }
 
     var body: some View {
         Group {
-            if let player = player {
-                AVPlayerMac(player: player)
-                    .task(id: player.timeControlStatus) {
-                        await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
-                    }
-            } else if isLoading {
+            if let player = model.player {
+                AVPlayerMac(player: player) {
+                    MediaPlayerOverlayControls(model: model)
+                }
+                .task(id: player.timeControlStatus) {
+                    await PlaybackUtilities.reportPlaybackProgress(
+                        player: player,
+                        item: model.item,
+    //                    isPaused: player.timeControlStatus != .playing
+                        isPaused: true
+                    )
+                }
+            } else if model.isLoading {
                 ProgressView()
                     .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black, ignoresSafeAreaEdges: .all)
+                    .task(id: model.playbackToken) {
+                        await model.load()
+                    }
             }
         }
         .ignoresSafeArea()
-        .navigationTitle(item.seriesName ?? item.name ?? "Media Player")
-        .navigationSubtitle(item.seasonEpisodeString ?? "")
+        .navigationTitle(model.item.seriesName ?? model.item.name ?? "Media Player")
+        .navigationSubtitle(model.item.seasonEpisodeString ?? "")
         .windowFullScreenBehavior(.disabled)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .gesture(WindowDragGesture())
-        .toolbar {
-            Button {
-                showInfoSheet = true
-            } label: {
-                Image(systemName: "info")
-            }
-        }
-        .task {
-            configureWindow()
-            await loadPlaybackInfo()
-        }
-        .onDisappear {
-            Task {
-                await cleanup()
-            }
-        }
-        .sheet(isPresented: $showInfoSheet) {
+        .inspector(isPresented: $showInfoSheet) {
             Form {
                 Section {
-                    Text(item.name ?? "Unknown")
+                    Text(model.item.name ?? "Unknown")
                 }
 
-                if let overview = item.overview, !overview.isEmpty {
+                if let overview = model.item.overview, !overview.isEmpty {
                     Section("Overview") { Text(overview) }
                 }
 
-                if let year = item.productionYear {
+                if let year = model.item.productionYear {
                     Section("Year") { Text(String(year)) }
                 }
             }
             .formStyle(.grouped)
-            .frame(maxWidth: 400)
+        }
+        .toolbar {
+            Button {
+                showInfoSheet.toggle()
+            } label: {
+                Image(systemName: "info")
+            }
+
+            if model.audioTracks.count > 1 {
+                Menu {
+                    ForEach(model.audioTracks) { track in
+                        Button(track.displayName) {
+                            Task { await model.switchAudioTrack(to: track) }
+                        }
+                        .disabled(model.isSwitchingAudio || track == model.selectedAudioTrack)
+                    }
+                } label: {
+                    Label("Audio", systemImage: "speaker.wave.2.fill")
+                }
+                .menuIndicator(.hidden)
+            }
+        }
+        .onAppear {
+            if !didConfigureWindow {
+                configureWindow()
+                didConfigureWindow = true
+            }
+        }
+        .task(id: model.item.id) {
+            configureWindow()
+        }
+        .onDisappear {
+            Task { await model.cleanup() }
         }
     }
 
     private func configureWindow() {
         if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
-            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: item)
+            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: model.item)
             
             window.aspectRatio = NSSize(width: videoWidth, height: videoHeight)
             
@@ -81,21 +110,5 @@ struct AVMediaPlayerViewMac: View {
             
             window.setContentSize(NSSize(width: scaledWidth, height: scaledHeight))
         }
-    }
-
-    private func loadPlaybackInfo() async {
-        do {
-            let player = try await PlaybackUtilities.loadPlaybackInfo(for: item)
-            self.player = player
-            self.isLoading = false
-        } catch {
-            self.isLoading = false
-        }
-    }
-
-    private func cleanup() async {
-        guard let player = player else { return }
-        await PlaybackUtilities.reportPlaybackAndCleanup(player: player, item: item)
-        self.player = nil
     }
 }

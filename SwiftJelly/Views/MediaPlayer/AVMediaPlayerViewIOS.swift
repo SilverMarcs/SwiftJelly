@@ -3,48 +3,38 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewIOS: View {
-    let item: BaseItemDto
-    @State private var player: AVPlayer?
-    @State private var isLoading = true
+    @State private var model: MediaPlaybackViewModel
+    
+    init(item: BaseItemDto) {
+        _model = State(initialValue: MediaPlaybackViewModel(item: item))
+    }
 
     var body: some View {
-        Group {
-            if let player = player {
-                AVPlayerIos(player: player)
-                    .task(id: player.timeControlStatus) {
-                        await PlaybackUtilities.reportPlaybackProgress(player: player, item: item)
-                    }
-            } else if isLoading {
-                ProgressView()
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.black, ignoresSafeAreaEdges: .all)
-                    .task {
-                        await loadPlaybackInfo()
-                    }
+        if let player = model.player {
+            AVPlayerIos(player: player)
+            .allowsTightening(!model.isAutoLoadingNext)
+            .overlay {
+                MediaPlayerOverlayControls(model: model)
             }
-        }
-        .ignoresSafeArea()
-        .onDisappear {
-            Task {
-                await cleanup()
+            .task(id: player.timeControlStatus) {
+                await PlaybackUtilities.reportPlaybackProgress(
+                    player: player,
+                    item: model.item,
+//                    isPaused: player.timeControlStatus != .playing
+                    isPaused: true
+                )
             }
+            .onDisappear {
+                Task { await model.cleanup() }
+            }
+        } else if model.isLoading {
+            ProgressView()
+                .controlSize(.large)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.black, ignoresSafeAreaEdges: .all)
+                .task(id: model.playbackToken) {
+                    await model.load()
+                }
         }
-    }
-
-    private func loadPlaybackInfo() async {
-        do {
-            let player = try await PlaybackUtilities.loadPlaybackInfo(for: item)
-            self.player = player
-            self.isLoading = false
-        } catch {
-            self.isLoading = false
-        }
-    }
-
-    private func cleanup() async {
-        guard let player = player else { return }
-        await PlaybackUtilities.reportPlaybackAndCleanup(player: player, item: item)
-        self.player = nil
     }
 }

@@ -11,4 +11,6 @@ extension EnvironmentValues {
     @Entry var refresh: (() async -> Void) = {
         print("No refresh passed")
     }
+    
+    @Entry var isInSeasonView: Bool = false
 }

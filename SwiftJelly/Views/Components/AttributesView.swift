@@ -37,15 +37,16 @@ struct AttributesView: View {
             
             // Year
             if let year = item.productionYear {
-                AttributeBadge(text: String(year))
+                AttributeBadge(text: String(year), systemImage: "calendar")
             }
             
-            // Runtime
-            if let runTimeTicks = item.runTimeTicks {
+            // Runtime (dont show for shows
+            if let runTimeTicks = item.runTimeTicks, item.type != .series {
                 let minutes = runTimeTicks / 10_000_000 / 60
-                AttributeBadge(text: "\(minutes)m")
+                AttributeBadge(text: "\(minutes)m", systemImage: "clock")
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -61,12 +62,17 @@ struct AttributeBadge: View {
     var body: some View {
         Label {
             Text(text)
+                .lineLimit(1)
         } icon: {
             if let systemImage = systemImage {
                 Image(systemName: systemImage)
             }
         }
+        #if os(iOS)
+        .font(.caption)
+        #else
         .font(.subheadline)
+        #endif
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
         .glassEffect(in: .rect(cornerRadius: 6))

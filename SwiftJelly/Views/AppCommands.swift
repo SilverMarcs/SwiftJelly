@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#if !os(tvOS)
 struct AppCommands: Commands {
     @Binding var selectedTab: TabSelection
     
@@ -26,3 +27,4 @@ struct AppCommands: Commands {
         }
     }
 }
+#endif
