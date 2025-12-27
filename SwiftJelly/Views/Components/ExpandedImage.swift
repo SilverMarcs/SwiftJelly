@@ -12,18 +12,15 @@ struct ExpandedImage<Image: View>: View {
     let image: Image
     let imageHeight: CGFloat
     let reflectionHeight: CGFloat
-    let stretchy: Bool
 
     init(
         image: Image,
         imageHeight: CGFloat = 300,
         reflectionHeight: CGFloat = 200,
-        stretchy: Bool = false
     ) {
         self.image = image
         self.imageHeight = imageHeight
         self.reflectionHeight = reflectionHeight
-        self.stretchy = stretchy
     }
 
     var body: some View {
@@ -47,9 +44,6 @@ struct ExpandedImage<Image: View>: View {
             }
             #if !os(tvOS)
             .backgroundExtensionEffect()
-//            .if(stretchy) { view in
-//                view.stretchy()
-//            }
             #endif
         }
         .frame(height: imageHeight + reflectionHeight)

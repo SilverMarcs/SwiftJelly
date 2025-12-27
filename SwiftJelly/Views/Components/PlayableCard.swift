@@ -91,25 +91,14 @@ struct PlayableCard: View {
                         }
                         .padding(overlayPadding)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .strokeBorder(.gray.opacity(0.5), lineWidth: 1)
-                    }
-                    .background {
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .fill(.black)
-                    }
                     .environment(\.colorScheme, .dark)
-                    
                     #if !os(macOS)
                     .hoverEffect(.highlight)
                     #endif
             }
         }
         .foregroundStyle(.primary)
-        
-        .buttonBorderShape(.roundedRectangle(radius: cornerRadius))
+        .cardBorder()
         .adaptiveButtonStyle()
         .contextMenu {
             if !isInSeasonView {
