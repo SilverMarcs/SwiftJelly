@@ -9,6 +9,9 @@ struct SearchView: View {
     
     var body: some View {
         MediaGrid(items: filteredMediaResults, isLoading: isLoading)
+            #if os(tvOS)
+            .focusSection()
+            #endif
             .navigationTitle("Search")
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
             .searchPresentationToolbarBehavior(.avoidHidingContent)
@@ -20,6 +23,15 @@ struct SearchView: View {
             .onSubmit(of: .search) {
                 Task {
                     await performSearch()
+                }
+            }
+            .onChange(of: searchText) { _, newValue in
+                Task {
+                    await performSearch()
+                    try? await Task.sleep(for: .seconds(0.5))
+                    if !newValue.isEmpty && newValue == searchText {
+                        await performSearch()
+                    }
                 }
             }
             .platformNavigationToolbar()

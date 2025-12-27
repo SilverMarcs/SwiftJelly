@@ -70,11 +70,14 @@ struct AttributeBadge: View {
         }
         #if os(iOS)
         .font(.caption)
+        #elseif os(tvOS)
+        .font(.caption2)
         #else
         .font(.subheadline)
         #endif
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .glassEffect(in: .rect(cornerRadius: 6))
+        .labelIconToTitleSpacing(systemImage == nil ? 0 : 5)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .glassEffect(in: .rect(cornerRadius: 20))
     }
 }

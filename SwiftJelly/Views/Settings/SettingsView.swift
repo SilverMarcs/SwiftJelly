@@ -26,6 +26,11 @@ struct SettingsView: View {
                 CacheManagerView()
             }
             
+            Section("View Options") {
+                ViewOptions()
+                    .foregroundStyle(.primary)
+            }
+            
             Section {
                 SecureField("Bearer Token", text: $tmdbAPIKey, prompt: Text("ey..."))
             } header: {

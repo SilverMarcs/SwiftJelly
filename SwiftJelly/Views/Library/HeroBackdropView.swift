@@ -9,7 +9,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     var body: some View {
         #if os(tvOS)
         // On tvOS, DetailView provides the backdrop as a background with blur effects
-        overlayContent
+        tvOverlayContent
             .environment(\.colorScheme, .dark)
         #else
         backdropImage
@@ -60,16 +60,14 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     // MARK: - Overlay Content
     
-    private var overlayContent: some View {
-        VStack(alignment: logoAlignment, spacing: 20) {
-            Spacer()
-
+    private var logo: some View {
+        Group {
             if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
                 CachedAsyncImage(url: url, targetSize: 450) {
                     Color.clear
                 }
                 .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: logoWidth, maxHeight: logoHeight)
+                .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
                 .fixedSize(horizontal: false, vertical: true)
             } else {
                 Text(item.name ?? "Unknown")
@@ -78,17 +76,47 @@ struct HeroBackdropView<HeroActions: View>: View {
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.5), radius: 4)
             }
-            
+        }
+    }
+    
+    private var overlayContent: some View {
+        VStack(alignment: contentAlignment, spacing: 20) {
+            Spacer()
+
+            logo
+
             heroActions
 
             OverviewView(item: item)
-            
+
             AttributesView(item: item)
+        }
+        .frame(maxWidth: .infinity, alignment: overallAlignment)
+    }
+    
+    private var tvOverlayContent: some View {
+        VStack(alignment: contentAlignment, spacing: 20) {
+            Spacer()
+
+            logo
+            
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 30) {
+                    OverviewView(item: item)
+                        .frame(maxWidth: 700)
+
+                    heroActions
+                }
+
+                Spacer()
+
+                AttributesView(item: item)
+            }
         }
         .scenePadding(.horizontal)
         .frame(maxWidth: .infinity, alignment: overallAlignment)
     }
-    
+
     private var overallAlignment: Alignment {
     #if os(tvOS)
         .leading
@@ -97,9 +125,17 @@ struct HeroBackdropView<HeroActions: View>: View {
     #endif
     }
     
-    private var logoAlignment: HorizontalAlignment {
+    private var contentAlignment: HorizontalAlignment {
     #if os(tvOS)
         .leading
+    #else
+        .center
+    #endif
+    }
+    
+    private var logoAlignment: Alignment {
+    #if os(tvOS)
+        .bottomLeading
     #else
         .center
     #endif
@@ -115,7 +151,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
     private var logoHeight: CGFloat {
     #if os(tvOS)
-        300
+        150
     #else
         100
     #endif

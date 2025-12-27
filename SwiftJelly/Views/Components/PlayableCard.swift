@@ -46,8 +46,8 @@ struct PlayableCard: View {
     let gradient = LinearGradient(
         gradient: Gradient(stops: [
             .init(color: .white, location: 0),
-            .init(color: .white.opacity(0.7), location: 0.15),
-            .init(color: .white.opacity(0), location: 0.25)
+            .init(color: .white.opacity(0.7), location: 0.2),
+            .init(color: .white.opacity(0), location: 0.4)
         ]),
         startPoint: .bottom,
         endPoint: .top
@@ -91,7 +91,7 @@ struct PlayableCard: View {
                                     .font(.caption2)
                                     .opacity(0.5)
                                     .multilineTextAlignment(.leading)
-                                    .lineLimit(3, reservesSpace: false)
+                                    .lineLimit(3)
                             }
                             
                             ProgressBarOverlay(item: item)

@@ -16,7 +16,16 @@ extension BaseItemDto {
               let episode = indexNumber else {
             return nil
         }
-        return "S\(season)E\(episode)"
+
+        let rawValue = UserDefaults.standard.string(forKey: "episodeNamingStyle") ?? ""
+        let style = EpisodeNamingStyle(rawValue: rawValue) ?? .compact
+
+        switch style {
+        case .compact:
+           return "S\(season)E\(episode)"
+        case .detailed:
+           return "S\(season), E\(episode)"
+        }
     }
     
     var episodeOnlyString: String? {
@@ -52,3 +61,4 @@ extension BaseItemDto {
         return series
     }
 }
+

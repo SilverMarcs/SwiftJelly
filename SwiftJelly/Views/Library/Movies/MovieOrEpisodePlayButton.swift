@@ -33,8 +33,12 @@ struct MoviePlayButton: View {
         }
         .animation(.default, value: item.userData?.isPlayed)
         .tint(Color(.accent).secondary)
-        .controlSize(.extraLarge)
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.capsule)
+        #if os(tvOS)
+        .controlSize(.regular)
+        #else
+        .controlSize(.extraLarge)
+        #endif
     }
 }

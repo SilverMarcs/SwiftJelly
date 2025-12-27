@@ -16,7 +16,7 @@ enum TabSelection: String, CaseIterable {
     case search = "search"
     
     #if os(macOS) || os(tvOS)
-    static let allCases: [TabSelection] = [.home, .favorites, .libraries, .settings, .search]
+    static let allCases: [TabSelection] = [.search, .home, .favorites, .libraries, .settings]
     #else
     static let allCases: [TabSelection] = [.home, .favorites, .libraries, .search]
     #endif
