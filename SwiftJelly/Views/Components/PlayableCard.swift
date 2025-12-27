@@ -35,8 +35,8 @@ struct PlayableCard: View {
         gradient: Gradient(stops: [
             .init(color: .white, location: 0),
             .init(color: .white, location: 0.2),
-            .init(color: .white.opacity(0.9), location: 0.4),
-            .init(color: .white.opacity(0), location: 0.7),
+            .init(color: .white.opacity(0.9), location: 0.3),
+            .init(color: .white.opacity(0), location: 0.5),
             .init(color: .white.opacity(0), location: 1.0)
         ]),
         startPoint: .bottom,
@@ -46,17 +46,24 @@ struct PlayableCard: View {
     let gradient = LinearGradient(
         gradient: Gradient(stops: [
             .init(color: .white, location: 0),
-            .init(color: .white.opacity(0.7), location: 0.2),
-            .init(color: .white.opacity(0), location: 0.4)
+            .init(color: .white.opacity(0.7), location: 0.15),
+            .init(color: .white.opacity(0), location: 0.25)
         ]),
         startPoint: .bottom,
         endPoint: .top
     )
+
+    private var totalHeight: CGFloat {
+        cardHeight + (showDescription ? reflectionHeight : 0)
+    }
     
     var body: some View {
         PlayMediaButton(item: item) {
-            LabelStack(alignment: .leading) {
-                ExpandedImage(image: LandscapeImageView(item: item), imageHeight: cardHeight, reflectionHeight: showDescription ? reflectionHeight : 0)
+            GeometryReader { geo in
+                LandscapeImageView(item: item)
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: totalHeight, alignment: .top)
+                    .clipped()
                     .overlay {
                         Rectangle()
                             .fill(showDescription ? .regularMaterial : .ultraThickMaterial)
@@ -96,6 +103,7 @@ struct PlayableCard: View {
                     .hoverEffect(.highlight)
                     #endif
             }
+            .frame(height: totalHeight)
         }
         .foregroundStyle(.primary)
         .cardBorder()
