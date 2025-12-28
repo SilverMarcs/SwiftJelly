@@ -20,13 +20,13 @@ struct PlayableCard: View {
     @State private var showPlayer = false
     
     #if os(tvOS)
+    private let cardWidth: CGFloat = 420
     private let cardHeight: CGFloat = 336
-    private let cornerRadius: CGFloat = 30
     private let reflectionHeight: CGFloat = 150
     private let overlayPadding: CGFloat = 30
     #else
+    private let cardWidth: CGFloat = 300
     private let cardHeight: CGFloat = 200
-    private let cornerRadius: CGFloat = 13
     private let reflectionHeight: CGFloat = 50
     private let overlayPadding: CGFloat = 15
     #endif
@@ -59,51 +59,49 @@ struct PlayableCard: View {
     
     var body: some View {
         PlayMediaButton(item: item) {
-            GeometryReader { geo in
-                LandscapeImageView(item: item)
-                    .scaledToFill()
-                    .frame(width: geo.size.width, height: totalHeight, alignment: .top)
-                    .clipped()
-                    .overlay {
-                        Rectangle()
-                            .fill(showDescription ? .regularMaterial : .ultraThickMaterial)
-                            .mask {
-                                if showDescription {
-                                    largeGradient
-                                } else {
-                                    gradient
-                                }
-                            }
-                    }
-                    .overlay(alignment: .bottomLeading) {
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
-                                .foregroundStyle(.white)
-                                .fontWeight(.bold)
-                                .opacity(0.7)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .multilineTextAlignment(.leading)
-
+            LandscapeImageView(item: item)
+                .scaledToFill()
+                .frame(width: cardWidth, height: totalHeight, alignment: .top)
+                .clipped()
+                .overlay {
+                    Rectangle()
+                        .fill(showDescription ? .regularMaterial : .ultraThickMaterial)
+                        .mask {
                             if showDescription {
-                                Text(item.overview ?? "")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .font(.caption2)
-                                    .opacity(0.5)
-                                    .multilineTextAlignment(.leading)
-                                    .lineLimit(3, reservesSpace: false)
+                                largeGradient
+                            } else {
+                                gradient
                             }
-                            
-                            ProgressBarOverlay(item: item)
                         }
-                        .padding(overlayPadding)
+                }
+                .overlay(alignment: .bottomLeading) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text((showRealname ? item.name : (item.seriesName ?? item.name)) ?? "Unknown")
+                            .foregroundStyle(.white)
+                            .fontWeight(.bold)
+                            .opacity(0.7)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .multilineTextAlignment(.leading)
+
+                        if showDescription {
+                            Text(item.overview ?? "")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .font(.caption2)
+                                .opacity(0.5)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(3, reservesSpace: false)
+                        }
+                        
+                        ProgressBarOverlay(item: item)
                     }
-                    .environment(\.colorScheme, .dark)
-                    #if !os(macOS)
-                    .hoverEffect(.highlight)
-                    #endif
-            }
-            .frame(height: totalHeight)
+                    .padding(.horizontal, overlayPadding)
+                    .padding(.vertical, overlayPadding - 2)
+                }
+                .environment(\.colorScheme, .dark)
+                #if !os(macOS)
+                .hoverEffect(.highlight)
+                #endif
         }
         .foregroundStyle(.primary)
         .cardBorder()
