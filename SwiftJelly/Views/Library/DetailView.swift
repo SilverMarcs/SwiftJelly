@@ -20,8 +20,9 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     
     private var layout: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 30) {
+            VStack(alignment: .leading, spacing: 40) {
                 heroView
+                    .padding(.bottom, 130)
                 .scenePadding()
                 .frame(height: showcaseHeight)
                 .focusSection()
