@@ -20,8 +20,8 @@ struct PlayableCard: View {
     @State private var showPlayer = false
     
     #if os(tvOS)
-    private let cardWidth: CGFloat = 420
-    private let cardHeight: CGFloat = 336
+    private let cardWidth: CGFloat = 550
+    private let cardHeight: CGFloat = 333
     private let reflectionHeight: CGFloat = 150
     private let overlayPadding: CGFloat = 30
     #else
