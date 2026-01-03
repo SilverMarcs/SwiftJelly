@@ -52,8 +52,8 @@ struct HomeView: View {
             }
         }
         .task(id: dataManager.servers.count) {
-            Task {
-                if latestMovies.isEmpty {
+            if latestMovies.isEmpty, !isLoading {
+                Task {
                     isLoading = true
                     await loadAll()
                     isLoading = false
@@ -70,15 +70,17 @@ struct HomeView: View {
     private func loadAll() async {
         do {
             async let trendingLoad: () = trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
+            
             async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
             
             async let movies = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.movie])
             async let shows = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.series])
             
+            await trendingLoad
+            
             let loadedMovies = try await movies
             let loadedShows = try await shows
             let loadedFavs = try await loadedFavorites
-            await trendingLoad
 
             withAnimation {
                 latestMovies = loadedMovies

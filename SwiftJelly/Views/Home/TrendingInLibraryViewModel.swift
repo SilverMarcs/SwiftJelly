@@ -30,33 +30,19 @@ final class TrendingInLibraryViewModel {
     }
 
     func loadTrendingIfNeeded(apiKey: String) async {
-        guard !apiKey.isEmpty else {
-            print("Trending: skipped (empty API key)")
-            return
-        }
-        guard items.isEmpty else {
-            print("Trending: skipped (items already loaded)")
-            return
-        }
+        guard !apiKey.isEmpty else { return }
+        guard items.isEmpty else { return }
         await loadTrending(apiKey: apiKey)
     }
 
     func loadTrending(apiKey: String) async {
-        guard !apiKey.isEmpty else {
-            print("Trending: skipped load (empty API key)")
-            return
-        }
-        guard !isLoading else {
-            print("Trending: skipped load (already loading)")
-            return
-        }
+        guard !apiKey.isEmpty else { return }
+        guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
 
         do {
-            print("Trending: fetching from TMDB")
             let trendingItems = try await TMDBAPI.fetchTrending(apiKey: apiKey)
-            print("Trending: fetched \(trendingItems.count) TMDB items")
 
             var matched: [(Int, BaseItemDto)] = []
 
@@ -76,7 +62,6 @@ final class TrendingInLibraryViewModel {
             }
 
             let shuffled = unique.shuffled()
-            print("Trending: matched \(unique.count) library items")
 
             withAnimation {
                 items = shuffled
