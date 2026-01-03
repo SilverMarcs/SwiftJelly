@@ -89,7 +89,7 @@ struct HomeView: View {
         #if os(tvOS)
         40
         #else
-        20
+        25
         #endif
     }
 }
