@@ -12,6 +12,7 @@ struct HomeView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     
     @State private var dataManager = DataManager.shared
+    @State private var trendingViewModel = TrendingInLibraryViewModel()
 
     @State private var favorites: [BaseItemDto] = []
     @State private var latestMovies: [BaseItemDto] = []
@@ -22,8 +23,8 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: spacing) {
-                if !tmdbAPIKey.isEmpty {
-                    TrendingInLibraryView()
+                if !trendingViewModel.items.isEmpty {
+                    TrendingInLibraryView(viewModel: trendingViewModel)
                         .onScrollVisibilityChange { isVisible in
                             showScrollEffect = isVisible
                         }
@@ -44,17 +45,19 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
-        .ignoresSafeArea(edges: tmdbAPIKey.isEmpty ? [] : .top) // TODO: ideally this should instead check if trendign items is empty or not and adjust safe area accoridngly
+        .ignoresSafeArea(edges: trendingViewModel.items.isEmpty ? [] : .top)
         .overlay {
             if isLoading {
                 UniversalProgressView()
             }
         }
         .task(id: dataManager.servers.count) {
-            if latestMovies.isEmpty {
-                isLoading = true
-                await loadAll()
-                isLoading = false
+            Task {
+                if latestMovies.isEmpty {
+                    isLoading = true
+                    await loadAll()
+                    isLoading = false
+                }
             }
         }
         .navigationTitle("Home")
@@ -66,6 +69,7 @@ struct HomeView: View {
 
     private func loadAll() async {
         do {
+            async let trendingLoad: () = trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
             async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
             
             async let movies = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.movie])
@@ -74,6 +78,7 @@ struct HomeView: View {
             let loadedMovies = try await movies
             let loadedShows = try await shows
             let loadedFavs = try await loadedFavorites
+            await trendingLoad
 
             withAnimation {
                 latestMovies = loadedMovies
