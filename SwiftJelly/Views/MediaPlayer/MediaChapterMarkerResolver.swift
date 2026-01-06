@@ -34,9 +34,14 @@ enum MediaChapterMarkerResolver {
             return start..<end
         }()
 
+        let introEndSeconds = introRangeSeconds?.upperBound ?? 0
         let creditsStartSeconds: Double? = {
-            guard let creditsIndex = firstIndex(matchingAnyOf: creditsKeywords, in: normalized) else { return nil }
-            return normalized[creditsIndex].startSeconds
+            let creditsIndex = normalized.lastIndex { chapter in
+                guard chapter.startSeconds >= introEndSeconds else { return false }
+                return matchesAny(of: creditsKeywords, in: chapter.name)
+                    && !matchesAny(of: introKeywords, in: chapter.name)
+            }
+            return creditsIndex.map { normalized[$0].startSeconds }
         }()
 
         return .init(introRangeSeconds: introRangeSeconds, creditsStartSeconds: creditsStartSeconds)
@@ -47,9 +52,11 @@ enum MediaChapterMarkerResolver {
         in chapters: [(name: String, startSeconds: Double)]
     ) -> Int? {
         chapters.firstIndex { chapter in
-            let name = chapter.name
-            return keywords.contains { name.localizedStandardContains($0) }
+            matchesAny(of: keywords, in: chapter.name)
         }
     }
-}
 
+    private static func matchesAny(of keywords: [String], in text: String) -> Bool {
+        keywords.contains { text.localizedStandardContains($0) }
+    }
+}
