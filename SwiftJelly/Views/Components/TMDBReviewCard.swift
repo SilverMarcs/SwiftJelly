@@ -11,6 +11,7 @@ struct TMDBReviewCard: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(review.author)
+                        .lineLimit(1)
                         .bold()
 
                     if let createdAt = review.createdAt {
@@ -44,20 +45,21 @@ struct TMDBReviewCard: View {
 
     @ViewBuilder
     private var avatar: some View {
-        if let url = avatarURL {
-            CachedAsyncImage(url: url, targetSize: 100) {
+        Group {
+            if let url = avatarURL {
+                CachedAsyncImage(url: url, targetSize: 100) {
+                    Circle()
+                        .fill(.tertiary)
+                }
+                .scaledToFill()
+                .clipShape(.circle)
+                .clipped()
+            } else {
                 Circle()
-                    .fill(.tertiary)
+                    .fill(.background.secondary)
             }
-            .scaledToFill()
-            .frame(width: 30, height: 30)
-            .clipShape(.circle)
-            .clipped()
-        } else {
-            Circle()
-                .fill(.background.secondary)
-                .frame(width: 30, height: 30)
         }
+        .frame(width: 35, height: 35)
     }
 
     private var avatarURL: URL? {
