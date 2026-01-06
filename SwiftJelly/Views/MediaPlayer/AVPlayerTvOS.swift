@@ -1,9 +1,11 @@
 import SwiftUI
 import AVKit
 import UIKit
+import JellyfinAPI
 
 struct AVPlayerTvOS: UIViewControllerRepresentable {
     let player: AVPlayer?
+    let item: BaseItemDto
     let isTransitioning: Bool
     let showSkipIntro: Bool
     let showNextEpisode: Bool
@@ -15,12 +17,15 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         var lastShowNextEpisode = false
         var lastIsTransitioning = false
         var activityIndicator: UIActivityIndicatorView?
+        var relatedContentController: UIViewController?
+        var relatedContentToken: String?
     }
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
         controller.player = player
         controller.transportBarIncludesTitleView = true
+        updateInfoTabs(for: controller, coordinator: context.coordinator)
         updateContextualActions(for: controller, coordinator: context.coordinator)
         updateTransitionOverlay(for: controller, coordinator: context.coordinator)
         return controller
@@ -30,6 +35,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         if uiViewController.player !== player {
             uiViewController.player = player
         }
+        updateInfoTabs(for: uiViewController, coordinator: context.coordinator)
         updateContextualActions(for: uiViewController, coordinator: context.coordinator)
         updateTransitionOverlay(for: uiViewController, coordinator: context.coordinator)
     }
@@ -61,6 +67,21 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         controller.contextualActions = actions
         coordinator.lastShowSkipIntro = showSkipIntro
         coordinator.lastShowNextEpisode = showNextEpisode
+    }
+
+    private func updateInfoTabs(for controller: AVPlayerViewController, coordinator: Coordinator) {
+        let token = String(describing: item.id)
+        guard coordinator.relatedContentToken != token else {
+            if let related = coordinator.relatedContentController {
+                controller.customInfoViewControllers = [related]
+            }
+            return
+        }
+
+        let related = RelatedContentViewController(item: item)
+        coordinator.relatedContentController = related
+        coordinator.relatedContentToken = token
+        controller.customInfoViewControllers = [related]
     }
 
     private func updateTransitionOverlay(for controller: AVPlayerViewController, coordinator: Coordinator) {

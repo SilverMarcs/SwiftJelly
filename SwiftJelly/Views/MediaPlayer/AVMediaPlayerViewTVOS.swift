@@ -13,6 +13,7 @@ struct AVMediaPlayerViewTVOS: View {
         if let player = model.player {
             AVPlayerTvOS(
                 player: player,
+                item: model.item,
                 isTransitioning: model.isAutoLoadingNext,
                 showSkipIntro: model.shouldShowSkipIntro,
                 showNextEpisode: model.shouldShowNextEpisode,
