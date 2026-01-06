@@ -47,6 +47,22 @@ extension BaseItemDto {
             metadata.append(artworkItem)
         }
         
+        if let genre = genres?.first {
+            let genreItem = AVMutableMetadataItem()
+            genreItem.identifier = .quickTimeMetadataGenre
+            genreItem.value = genre as NSString
+            genreItem.extendedLanguageTag = "und"
+            metadata.append(genreItem)
+        }
+        
+        if let rating = communityRating {
+            let ratingItem = AVMutableMetadataItem()
+            ratingItem.identifier = .iTunesMetadataContentRating
+            ratingItem.value = unsafe String(format: "%.1f", rating) as NSString  // e.g., "4.5"
+            ratingItem.extendedLanguageTag = "und"
+            metadata.append(ratingItem)
+        }
+        
         return metadata
     }
     

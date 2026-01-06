@@ -2,7 +2,7 @@ import SwiftUI
 import AVKit
 import JellyfinAPI
 
-struct AVMediaPlayerViewIOS: View {
+struct AVMediaPlayerViewTVOS: View {
     @State private var model: MediaPlaybackViewModel
 
     init(item: BaseItemDto) {
@@ -11,16 +11,19 @@ struct AVMediaPlayerViewIOS: View {
 
     var body: some View {
         if let player = model.player {
-            AVPlayerIos(player: player)
+            AVPlayerTvOS(
+                player: player,
+                isTransitioning: model.isAutoLoadingNext,
+                showSkipIntro: model.shouldShowSkipIntro,
+                showNextEpisode: model.shouldShowNextEpisode,
+                onSkipIntro: { Task { await model.skipIntro() } },
+                onNextEpisode: { Task { await model.transitionToNextEpisode() } }
+            )
                 .allowsTightening(!model.isAutoLoadingNext)
-                .overlay {
-                    MediaPlayerOverlayControls(model: model)
-                }
                 .task(id: player.timeControlStatus) {
                     await PlaybackUtilities.reportPlaybackProgress(
                         player: player,
                         item: model.item,
-                        // isPaused: player.timeControlStatus != .playing
                         isPaused: true
                     )
                 }

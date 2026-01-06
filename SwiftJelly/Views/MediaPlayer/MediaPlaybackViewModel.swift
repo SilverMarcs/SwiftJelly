@@ -119,7 +119,8 @@ import Observation
 
     func transitionToNextEpisode() async {
         guard item.type == .episode, !isAutoLoadingNext else { return }
-
+        player?.pause()
+        
         isAutoLoadingNext = true
         defer { isAutoLoadingNext = false }
 

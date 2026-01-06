@@ -26,10 +26,12 @@
 				Info.plist,
 			);
 			platformFiltersByRelativePath = {
-				Views/MediaPlayer/AVMediaPlayerViewIOS.swift = (ios, tvos, xros, );
+				Views/MediaPlayer/AVMediaPlayerViewIOS.swift = (ios, xros, );
 				Views/MediaPlayer/AVMediaPlayerViewMac.swift = (macos, );
-				Views/MediaPlayer/AVPlayerIos.swift = (ios, tvos, xros, );
+				Views/MediaPlayer/AVMediaPlayerViewTVOS.swift = (tvos, );
+				Views/MediaPlayer/AVPlayerIos.swift = (ios, xros, );
 				Views/MediaPlayer/AVPlayerMac.swift = (macos, );
+				Views/MediaPlayer/AVPlayerTvOS.swift = (tvos, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
 		};

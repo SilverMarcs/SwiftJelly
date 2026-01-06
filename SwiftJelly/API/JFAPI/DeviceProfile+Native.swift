@@ -89,6 +89,10 @@ extension DeviceProfile {
                 format: "vtt",
                 method: .hls
             ),
+//            SubtitleProfile(
+//                format: "srt",
+//                method: .external
+//            ),
             // Embedded subtitles in MP4
             SubtitleProfile(
                 format: "ttml",
