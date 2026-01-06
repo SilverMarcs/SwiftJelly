@@ -47,6 +47,25 @@ struct PlaybackUtilities {
         let latestItem = await freshItemTask ?? item
 
         let playerItem = AVPlayerItem(url: info.playbackURL)
+
+        #if os(tvOS)
+        let durationSeconds: Double? = {
+            if let ticks = info.mediaSource.runTimeTicks, ticks > 0 {
+                return Double(ticks) / 10_000_000
+            }
+            if let ticks = latestItem.runTimeTicks, ticks > 0 {
+                return Double(ticks) / 10_000_000
+            }
+            return nil
+        }()
+        let navigationMarkers = MediaNavigationMarkerBuilder.makeNavigationMarkerGroups(
+            from: latestItem.chapters,
+            durationSeconds: durationSeconds
+        )
+        if !navigationMarkers.isEmpty {
+            playerItem.navigationMarkerGroups = navigationMarkers
+        }
+        #endif
         
         #if !os(macOS)
         let metadata = await latestItem.createMetadataItems()

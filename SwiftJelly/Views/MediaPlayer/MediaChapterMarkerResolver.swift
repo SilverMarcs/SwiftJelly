@@ -21,7 +21,7 @@ enum MediaChapterMarkerResolver {
             }
             .sorted(by: { $0.startSeconds < $1.startSeconds })
 
-        let introKeywords = ["intro", "introduction", "opening"]
+        let introKeywords = ["intro", "introduction", "opening", "opening credits"]
         let creditsKeywords = ["credits", "end credits", "ending credits"]
 
         let introIndex = firstIndex(matchingAnyOf: introKeywords, in: normalized)

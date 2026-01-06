@@ -32,6 +32,7 @@
 				Views/MediaPlayer/AVPlayerIos.swift = (ios, xros, );
 				Views/MediaPlayer/AVPlayerMac.swift = (macos, );
 				Views/MediaPlayer/AVPlayerTvOS.swift = (tvos, );
+				Views/MediaPlayer/MediaNavigationMarkerBuilder.swift = (tvos, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
 		};
