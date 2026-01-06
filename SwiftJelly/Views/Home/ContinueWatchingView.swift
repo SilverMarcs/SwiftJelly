@@ -12,12 +12,14 @@ struct ContinueWatchingView: View {
     @State private var items: [BaseItemDto] = []
 
     var body: some View {
-        SectionContainer("Continue Watching", showHeader: !items.isEmpty) {
+        SectionContainer(showHeader: !items.isEmpty) {
             HorizontalShelf(spacing: spacing) {
                 ForEach(items, id: \.id) { item in
                     PlayableCard(item: item)
                 }
             }
+        } header: {
+            Text("Continue Watching")
         }
         .task {
             if items.isEmpty {

@@ -27,6 +27,7 @@ struct FilteredMediaView: View {
         .focusSection()
         #endif
         .navigationTitle(filter.navigationTitle)
+        .platformNavigationToolbar()
         .toolbarTitleDisplayMode(.inline)
         .task {
             if viewModel.items.isEmpty {

@@ -12,7 +12,7 @@ struct GenreCarouselView: View {
     @State private var genres: [BaseItemDto] = []
 
     var body: some View {
-        SectionContainer("Genres", showHeader: !genres.isEmpty) {
+        SectionContainer(showHeader: !genres.isEmpty) {
             HorizontalShelf(spacing: spacing) {
                 ForEach(genres.shuffled()) { genre in
                     NavigationLink {
@@ -23,6 +23,8 @@ struct GenreCarouselView: View {
                     .adaptiveButtonStyle()
                 }
             }
+        } header: {
+            Text("Genres")
         }
         .task {
             if genres.isEmpty { await loadGenres() }

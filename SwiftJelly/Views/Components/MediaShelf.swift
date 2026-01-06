@@ -6,7 +6,7 @@ struct MediaShelf: View {
     var header: String
     
     var body: some View {
-        SectionContainer(header, showHeader: !items.isEmpty) {
+        SectionContainer(showHeader: !items.isEmpty) {
             HorizontalShelf(spacing: spacing) {
                 ForEach(items, id: \.id) { item in
                     MediaNavigationLink(item: item) {
@@ -15,6 +15,8 @@ struct MediaShelf: View {
                     .frame(width: itemWidth)
                 }
             }
+        } header: {
+            Text(header)
         }
     }
     

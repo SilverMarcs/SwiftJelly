@@ -10,9 +10,7 @@ struct ShowSeasonsView: View {
             if vm.isLoadingEpisodes && vm.seasons.isEmpty {
                 UniversalProgressView()
             }
-            
-            seasonPicker
-            
+
             scroller
         }
         .task(id: vm.selectedSeason) {
@@ -36,13 +34,14 @@ struct ShowSeasonsView: View {
             .buttonStyle(.glass)
             .foregroundStyle(.primary)
             #if os(tvOS)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .focusSection()
             #endif
         }
     }
 
     private var scroller: some View {
-        SectionContainer("Seasons", showHeader: false) {
+        SectionContainer {
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
                     PlayableCard(item: episode, showRealname: true, showDescription: true)
@@ -50,6 +49,8 @@ struct ShowSeasonsView: View {
                 }
             }
             .scrollPosition($episodeScrollPosition)
+        } header: {
+            seasonPicker
         }
         .environment(\.isInSeasonView, true)
         #if os(tvOS)

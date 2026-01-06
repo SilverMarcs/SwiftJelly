@@ -10,15 +10,16 @@ import SwiftUI
 /// A section wrapper with a consistent header treatment across platforms.
 /// - tvOS: wraps the content in a `Section` (optional header).
 /// - other platforms: uses a `VStack` with a bold `title3` header and horizontal scene padding.
-struct SectionContainer<RowContent: View>: View {
-    let header: String
+struct SectionContainer<RowContent: View, HeaderContent: View>: View {
+    @ViewBuilder let header: () -> HeaderContent
+
     let showHeader: Bool
     @ViewBuilder let content: () -> RowContent
     
     init(
-        _ header: String,
         showHeader: Bool = true,
-        @ViewBuilder content: @escaping () -> RowContent
+        @ViewBuilder content: @escaping () -> RowContent,
+        @ViewBuilder header: @escaping () -> HeaderContent
     ) {
         self.header = header
         self.showHeader = showHeader
@@ -29,7 +30,11 @@ struct SectionContainer<RowContent: View>: View {
 #if os(tvOS)
         Group {
             if showHeader {
-                Section(header) { content() }
+                Section {
+                    content()
+                } header: {
+                    header()
+                }
             } else {
                 content()
             }
@@ -39,7 +44,7 @@ struct SectionContainer<RowContent: View>: View {
 #else
         VStack(alignment: .leading) {
             if showHeader {
-                Text(header)
+                header()
                     .font(.title3.bold())
                     .scenePadding(.horizontal)
             }
@@ -49,3 +54,4 @@ struct SectionContainer<RowContent: View>: View {
 #endif
     }
 }
+

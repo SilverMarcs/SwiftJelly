@@ -12,7 +12,7 @@ struct TMDBReviewsView: View {
 
     var body: some View {
         if !tmdbAPIKey.isEmpty {
-            SectionContainer("Reviews", showHeader: !reviews.isEmpty) {
+            SectionContainer(showHeader: !reviews.isEmpty) {
                 HorizontalShelf(spacing: 12) {
                     ForEach(reviews) { review in
                         cardButton(review: review)
@@ -22,6 +22,8 @@ struct TMDBReviewsView: View {
                 if isLoading {
                     UniversalProgressView()
                 }                
+            } header: {
+                Text("Reviews")
             }
             .sheet(item: $selectedReview) { review in
                 ScrollView {

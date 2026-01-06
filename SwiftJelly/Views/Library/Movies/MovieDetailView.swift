@@ -10,11 +10,13 @@ struct MovieDetailView: View {
     
     var body: some View {
         DetailView(item: movie) {
-            PeopleScrollView(people: movie.people)
-            
-            SimilarItemsView(item: movie)
-            
-            TMDBReviewsView(item: movie)
+            VStack(spacing: spacing) {
+                PeopleScrollView(people: movie.people)
+                
+                SimilarItemsView(item: movie)
+                
+                TMDBReviewsView(item: movie)
+            }
         } heroView: {
             MovieHeroView(movie: $movie)
         }
@@ -31,5 +33,13 @@ struct MovieDetailView: View {
         } catch {
             print("Error loading Movie Detail: \(error.localizedDescription)")
         }
+    }
+    
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        100
+        #else
+        30
+        #endif
     }
 }
