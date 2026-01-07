@@ -17,7 +17,7 @@ class FilteredMediaViewModel {
     var sortOption: MediaSortOption = .none
     
     @ObservationIgnored private let filter: MediaFilter
-    @ObservationIgnored private let pageSize = 20
+    @ObservationIgnored private let pageSize = 18
     @ObservationIgnored private var currentPage = 0
     
     init(filter: MediaFilter) {

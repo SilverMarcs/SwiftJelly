@@ -26,7 +26,7 @@ extension JFAPI {
         let context = try getAPIContext()
         var parameters = Paths.GetPersonsParameters()
         parameters.searchTerm = query
-        parameters.limit = 30
+        parameters.limit = 10
         parameters.enableImages = true
         parameters.userID = context.userID
         let request = Paths.getPersons(parameters: parameters)

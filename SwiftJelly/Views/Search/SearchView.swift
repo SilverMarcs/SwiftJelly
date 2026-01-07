@@ -24,7 +24,7 @@ struct SearchView: View {
             .onChange(of: searchText) { _, newValue in
                 searchTask?.cancel()
                 searchTask = Task {
-                    try? await Task.sleep(for: .milliseconds(350))
+                    try? await Task.sleep(for: .milliseconds(800))
                     guard !Task.isCancelled else { return }
                     await performSearch(for: newValue)
                 }
