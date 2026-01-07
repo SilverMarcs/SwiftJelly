@@ -11,8 +11,7 @@ import SwiftMediaViewer
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
-    @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
-
+    
     var body: some View {
         Form {
             Section("Server") {
@@ -27,12 +26,10 @@ struct SettingsView: View {
                 CacheManagerView()
             }
             
-            Section("View Options") {
-                Toggle("Show trending on top", isOn: $showTrendingOnTop)
-                
+            Section("View Options") {                
                 ViewOptions()
+                    .foregroundStyle(.primary)
             }
-            .foregroundStyle(.primary)
             
             Section {
                 SecureField("Bearer Token", text: $tmdbAPIKey, prompt: Text("ey..."))
