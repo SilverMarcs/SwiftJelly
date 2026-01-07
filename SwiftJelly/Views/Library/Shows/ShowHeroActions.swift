@@ -24,10 +24,6 @@ struct ShowHeroActions: View {
         .task {
             await vm.loadQuickNextEpisode()
         }
-        .onChange(of: show.id) { _, _ in
-            vm = ShowDetailViewModel(item: show)
-            Task { await vm.loadQuickNextEpisode() }
-        }
     }
     
     private var loadingButton: some View {

@@ -108,6 +108,9 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             }
             .scenePadding(.bottom)
         }
+        #if !os(macOS)
+        .navigationTitle(showScrollEffect ? "" : (item.name ?? "Unknown"))
+        #endif
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)

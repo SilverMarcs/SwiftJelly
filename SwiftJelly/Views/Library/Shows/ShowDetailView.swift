@@ -22,7 +22,6 @@ struct ShowDetailView: View {
         } heroView: {
             ShowHeroDetailView(vm: vm)
         }
-        .navigationTitle("")
         .environment(\.refresh, vm.refreshAll)
         .task {
             await vm.refreshAll()

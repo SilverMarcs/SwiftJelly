@@ -20,7 +20,6 @@ struct MovieDetailView: View {
         } heroView: {
             MovieHeroView(movie: $movie)
         }
-        .navigationTitle("")
         .refreshToolbar {
             await fetchMovie()
         }
