@@ -51,9 +51,6 @@ struct ContinueWatchingCard: View {
                         .padding(.vertical, overlayPadding - 3)
                 }
                 .environment(\.colorScheme, .dark)
-                #if !os(macOS)
-                .hoverEffect(.highlight)
-                #endif
         }
         .foregroundStyle(.primary)
         .cardBorder()
