@@ -72,7 +72,7 @@ final class TrendingInLibraryViewModel {
     }
 
     private static func findMatch(for trending: TrendingItem) async -> BaseItemDto? {
-        guard let results = try? await JFAPI.searchMedia(query: trending.displayTitle) else { return nil }
+        guard let results = try? await JFAPI.searchMedia(query: trending.displayTitle, includeProviderId: true) else { return nil }
         let expectedType: BaseItemKind = trending.isMovie ? .movie : .series
         let tmdbID = String(trending.id)
 

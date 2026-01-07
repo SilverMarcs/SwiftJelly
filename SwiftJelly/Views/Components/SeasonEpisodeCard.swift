@@ -9,6 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct SeasonEpisodeCard: View {
+    @Environment(\.refresh) var refresh
     let item: BaseItemDto
 
     #if os(tvOS)
@@ -82,5 +83,18 @@ struct SeasonEpisodeCard: View {
         .foregroundStyle(.primary)
         .cardBorder()
         .adaptiveButtonStyle()
+        .contextMenu {
+            Button {
+                Task {
+                    try? await JFAPI.toggleItemPlayedStatus(item: item)
+                    await refresh()
+                }
+            } label: {
+                Label(
+                    item.userData?.isPlayed == true ? "Mark as Unwatched" : "Mark as Watched",
+                    systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye"
+                )
+            }
+        }
     }
 }

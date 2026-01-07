@@ -6,11 +6,14 @@ extension JFAPI {
     /// Search for media (movies and shows) with a query string
     /// - Parameter query: The search string
     /// - Returns: Array of BaseItemDto matching the query (movies and shows only)
-    static func searchMedia(query: String) async throws -> [BaseItemDto] {
+    static func searchMedia(query: String, includeProviderId: Bool = false) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.enableUserData = true
         parameters.fields = .MinimumFields
+        if includeProviderId {
+            parameters.fields?.append(.providerIDs)
+        }
         parameters.includeItemTypes = [.movie, .series]
         parameters.isRecursive = true
         parameters.limit = 15
