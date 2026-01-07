@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftMediaViewer
 
 struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     
     var body: some View {
@@ -44,13 +43,6 @@ struct SettingsView: View {
         .toolbarTitleDisplayMode(.inline)
         #if os(tvOS)
         .toolbar(.hidden, for: .navigationBar)
-        #endif
-        #if os(iOS)
-        .toolbar {
-            Button("Close", systemImage: "xmark", role: .close) {
-                dismiss()
-            }
-        }
         #endif
     }
 }

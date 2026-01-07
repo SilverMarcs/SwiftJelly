@@ -15,12 +15,13 @@ struct ContinueWatchingCard: View {
     let item: BaseItemDto
     let imageURLOverride: URL?
 
-    private let overlayHeight: CGFloat = 140
     #if os(tvOS)
     private let cardWidth: CGFloat = 500
+    private let overlayHeight: CGFloat = 160
     private let overlayPadding: CGFloat = 25
     #else
     private let cardWidth: CGFloat = 300
+    private let overlayHeight: CGFloat = 160
     private let overlayPadding: CGFloat = 15
     #endif
 
@@ -40,7 +41,7 @@ struct ContinueWatchingCard: View {
                 .frame(width: cardWidth, alignment: .top)
                 .overlay(alignment: .bottom) {
                     Rectangle()
-                        .fill(.regularMaterial)
+                        .fill(.ultraThickMaterial)
                         .frame(height: overlayHeight)
                         .mask(gradient)
                 }
