@@ -8,8 +8,8 @@
 import SwiftUI
 import JellyfinAPI
 
-@MainActor
-@Observable class FilteredMediaViewModel {
+@Observable
+class FilteredMediaViewModel {
     var items: [BaseItemDto] = []
     var isLoading = false
     var isSorting = false
@@ -17,7 +17,7 @@ import JellyfinAPI
     var sortOption: MediaSortOption = .none
     
     @ObservationIgnored private let filter: MediaFilter
-    @ObservationIgnored private let pageSize = 50
+    @ObservationIgnored private let pageSize = 20
     @ObservationIgnored private var currentPage = 0
     
     init(filter: MediaFilter) {

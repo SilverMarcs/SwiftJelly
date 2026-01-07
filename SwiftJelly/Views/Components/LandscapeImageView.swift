@@ -13,7 +13,15 @@ struct LandscapeImageView: View {
     let item: BaseItemDto
     
     var body: some View {
-        CachedAsyncImage(url: ImageURLProvider.imageURL(for: item, type: .thumb), targetSize: 1500)
-            .aspectRatio(16/9, contentMode: .fill)
+        if let url = imageURL {
+            CachedAsyncImage(url: url, targetSize: 1500)
+                .aspectRatio(16/9, contentMode: .fill)
+        }
+    }
+
+    private var imageURL: URL? {
+        ImageURLProvider.imageURL(for: item, type: .thumb)
+            ?? ImageURLProvider.imageURL(for: item, type: .backdrop)
+            ?? ImageURLProvider.imageURL(for: item, type: .primary)
     }
 }
