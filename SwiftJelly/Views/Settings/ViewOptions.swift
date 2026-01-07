@@ -13,12 +13,8 @@ struct ViewOptions: View {
     #endif
 
     @AppStorage("episodeNamingStyle") private var episodeNamingStyle: EpisodeNamingStyle = .compact
-    
-    @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
 
     var body: some View {
-        Toggle("Show trending on top", isOn: $showTrendingOnTop)
-        
         #if os(tvOS)
         Button {
             navigationStyle = navigationStyle.next()

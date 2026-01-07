@@ -10,7 +10,10 @@ import JellyfinAPI
 import SwiftMediaViewer
 
 struct TrendingInLibraryView: View {
-    @Bindable var viewModel: TrendingInLibraryViewModel
+    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
+    @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
+
+    @State private var viewModel = TrendingInLibraryViewModel()
     
     var body: some View {
         ScrollView(.horizontal) {
@@ -53,20 +56,18 @@ struct TrendingInLibraryView: View {
             }
             .scrollTargetLayout()
         }
+        .stretchy()
+        .padding(.top, showTrendingOnTop && viewModel.items.isEmpty ? 100 : 0)
         .scrollPosition(id: $viewModel.scrolledID, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
+        .task {
+            await viewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
+        }
         #if os(tvOS)
         .ignoresSafeArea()
         .contentMargins(.horizontal, 1, for: .scrollContent) // peek tiny bit of next card for scroll to work
-        #endif
-        .onChange(of: viewModel.items) { _, newItems in
-            // Start at 2nd element (index 1) when items load
-            if newItems.count >= 2 {
-                viewModel.scrolledID = newItems[1].id
-            }
-        }
-        #if !os(tvOS)
+        #else
         .overlay {
             // Navigation chevrons
             if viewModel.items.count > 1 {

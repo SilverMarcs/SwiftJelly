@@ -9,18 +9,15 @@ import SwiftUI
 import JellyfinAPI
 
 struct HomeView: View {
-    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     
-    @State private var dataManager = DataManager.shared
-    @State private var trendingViewModel = TrendingInLibraryViewModel()
     @State private var showScrollEffect = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: spacing) {
-                if shouldShowTrending {
-                    TrendingInLibraryView(viewModel: trendingViewModel)
+                if showTrendingOnTop {
+                    TrendingInLibraryView()
                         .onScrollVisibilityChange { isVisible in
                             showScrollEffect = isVisible
                         }
@@ -45,12 +42,7 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
-        .ignoresSafeArea(edges: shouldShowTrending ? .top : [])
-        .task(id: dataManager.servers.count) {
-            if showTrendingOnTop {
-                await trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
-            }
-        }
+        .ignoresSafeArea(edges: showTrendingOnTop ? .top : [])
         .navigationTitle("Home")
         .platformNavigationToolbar()
     }
@@ -61,9 +53,5 @@ struct HomeView: View {
         #else
         25
         #endif
-    }
-
-    private var shouldShowTrending: Bool {
-        showTrendingOnTop && !trendingViewModel.items.isEmpty
     }
 }

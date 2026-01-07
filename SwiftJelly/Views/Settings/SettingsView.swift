@@ -10,6 +10,7 @@ import SwiftMediaViewer
 
 struct SettingsView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
+    @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     
     var body: some View {
         Form {
@@ -32,6 +33,14 @@ struct SettingsView: View {
             
             Section {
                 SecureField("Bearer Token", text: $tmdbAPIKey, prompt: Text("ey..."))
+                    .onChange(of: tmdbAPIKey) { _, newValue in
+                        if newValue.isEmpty {
+                            showTrendingOnTop = false
+                        }
+                    }
+                if !tmdbAPIKey.isEmpty {
+                    Toggle("Show trending on top", isOn: $showTrendingOnTop)
+                }
             } header: {
                 Text("TMDB API")
             } footer: {
