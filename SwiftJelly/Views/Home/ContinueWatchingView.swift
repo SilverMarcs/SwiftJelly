@@ -38,6 +38,7 @@ struct ContinueWatchingView: View {
             withAnimation {
                 items = continueItems
             }
+            TopShelfCache.save(items: continueItems)
         } catch {
             print("Error loading Home items: \(error)")
         }

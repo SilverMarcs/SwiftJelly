@@ -9,14 +9,42 @@
 /* Begin PBXBuildFile section */
 		082A202D2E82178600F1626F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 082A202C2E82178600F1626F /* JellyfinAPI */; };
 		08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08493C5B2E292DBC007F0D75 /* JellyfinAPI */; };
+		085B2EE42F0E1D6D0096E06D /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 085B2EE32F0E1D6D0096E06D /* TVServices.framework */; };
+		085B2EEB2F0E1D6D0096E06D /* TopShelf.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 085B2EE12F0E1D6D0096E06D /* TopShelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		087DF2022EEB34FF009B147B /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 087DF2012EEB34FF009B147B /* JellyfinAPI */; };
 		08E374E42EEC3D3000137A0F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08E374E32EEC3D3000137A0F /* JellyfinAPI */; };
 		0A8D19792EE1EF42009AB4F4 /* SwiftMediaViewer in Frameworks */ = {isa = PBXBuildFile; productRef = 0A8D19782EE1EF42009AB4F4 /* SwiftMediaViewer */; };
 		0AECE0662EDD450B009FBA1D /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 0AECE0652EDD450B009FBA1D /* JellyfinAPI */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		085B2EE92F0E1D6D0096E06D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 083128A12E0EE1F70096527C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 085B2EE02F0E1D6D0096E06D;
+			remoteInfo = TopShelf;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		085B2EEC2F0E1D6D0096E06D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				085B2EEB2F0E1D6D0096E06D /* TopShelf.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		083128A92E0EE1F70096527C /* SwiftJelly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftJelly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		085B2EE12F0E1D6D0096E06D /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		085B2EE32F0E1D6D0096E06D /* TVServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TVServices.framework; path = Library/Frameworks/TVServices.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -34,6 +62,13 @@
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
 		};
+		085B2EF02F0E1D6D0096E06D /* Exceptions for "TopShelf" folder in "TopShelf" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 085B2EE02F0E1D6D0096E06D /* TopShelf */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +78,14 @@
 				084962382E1FBBA700CA183B /* Exceptions for "SwiftJelly" folder in "SwiftJelly" target */,
 			);
 			path = SwiftJelly;
+			sourceTree = "<group>";
+		};
+		085B2EE52F0E1D6D0096E06D /* TopShelf */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				085B2EF02F0E1D6D0096E06D /* Exceptions for "TopShelf" folder in "TopShelf" target */,
+			);
+			path = TopShelf;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -61,6 +104,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		085B2EDE2F0E1D6D0096E06D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				085B2EE42F0E1D6D0096E06D /* TVServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -68,6 +119,8 @@
 			isa = PBXGroup;
 			children = (
 				083128AB2E0EE1F70096527C /* SwiftJelly */,
+				085B2EE52F0E1D6D0096E06D /* TopShelf */,
+				085B2EE22F0E1D6D0096E06D /* Frameworks */,
 				083128AA2E0EE1F70096527C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -76,8 +129,17 @@
 			isa = PBXGroup;
 			children = (
 				083128A92E0EE1F70096527C /* SwiftJelly.app */,
+				085B2EE12F0E1D6D0096E06D /* TopShelf.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		085B2EE22F0E1D6D0096E06D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				085B2EE32F0E1D6D0096E06D /* TVServices.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -90,10 +152,12 @@
 				083128A52E0EE1F70096527C /* Sources */,
 				083128A62E0EE1F70096527C /* Frameworks */,
 				083128A72E0EE1F70096527C /* Resources */,
+				085B2EEC2F0E1D6D0096E06D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				085B2EEA2F0E1D6D0096E06D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				083128AB2E0EE1F70096527C /* SwiftJelly */,
@@ -111,6 +175,28 @@
 			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
 			productType = "com.apple.product-type.application";
 		};
+		085B2EE02F0E1D6D0096E06D /* TopShelf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 085B2EEF2F0E1D6D0096E06D /* Build configuration list for PBXNativeTarget "TopShelf" */;
+			buildPhases = (
+				085B2EDD2F0E1D6D0096E06D /* Sources */,
+				085B2EDE2F0E1D6D0096E06D /* Frameworks */,
+				085B2EDF2F0E1D6D0096E06D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				085B2EE52F0E1D6D0096E06D /* TopShelf */,
+			);
+			name = TopShelf;
+			packageProductDependencies = (
+			);
+			productName = TopShelf;
+			productReference = 085B2EE12F0E1D6D0096E06D /* TopShelf.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -118,11 +204,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					083128A82E0EE1F70096527C = {
 						CreatedOnToolsVersion = 26.0;
+					};
+					085B2EE02F0E1D6D0096E06D = {
+						CreatedOnToolsVersion = 26.2;
 					};
 				};
 			};
@@ -145,12 +234,20 @@
 			projectRoot = "";
 			targets = (
 				083128A82E0EE1F70096527C /* SwiftJelly */,
+				085B2EE02F0E1D6D0096E06D /* TopShelf */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		083128A72E0EE1F70096527C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		085B2EDF2F0E1D6D0096E06D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -167,7 +264,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		085B2EDD2F0E1D6D0096E06D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		085B2EEA2F0E1D6D0096E06D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 085B2EE02F0E1D6D0096E06D /* TopShelf */;
+			targetProxy = 085B2EE92F0E1D6D0096E06D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		083128B22E0EE1F90096527C /* Debug */ = {
@@ -312,6 +424,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = SwiftJelly/SwiftJelly.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -374,6 +487,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = SwiftJelly/SwiftJelly.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -430,6 +544,69 @@
 			};
 			name = Release;
 		};
+		085B2EED2F0E1D6D0096E06D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TopShelf/TopShelf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2L782RMCG7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TopShelf/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TopShelf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mush.SwiftJelly.TopShelf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		085B2EEE2F0E1D6D0096E06D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TopShelf/TopShelf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2L782RMCG7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TopShelf/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TopShelf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mush.SwiftJelly.TopShelf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 26.2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -447,6 +624,15 @@
 			buildConfigurations = (
 				083128B52E0EE1F90096527C /* Debug */,
 				083128B62E0EE1F90096527C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		085B2EEF2F0E1D6D0096E06D /* Build configuration list for PBXNativeTarget "TopShelf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				085B2EED2F0E1D6D0096E06D /* Debug */,
+				085B2EEE2F0E1D6D0096E06D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
