@@ -10,7 +10,7 @@
 		082A202D2E82178600F1626F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 082A202C2E82178600F1626F /* JellyfinAPI */; };
 		08493C5C2E292DBC007F0D75 /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08493C5B2E292DBC007F0D75 /* JellyfinAPI */; };
 		085B2EE42F0E1D6D0096E06D /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 085B2EE32F0E1D6D0096E06D /* TVServices.framework */; };
-		085B2EEB2F0E1D6D0096E06D /* TopShelf.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 085B2EE12F0E1D6D0096E06D /* TopShelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		085B2EEB2F0E1D6D0096E06D /* TopShelf.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 085B2EE12F0E1D6D0096E06D /* TopShelf.appex */; platformFilters = (tvos, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		087DF2022EEB34FF009B147B /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 087DF2012EEB34FF009B147B /* JellyfinAPI */; };
 		08E374E42EEC3D3000137A0F /* JellyfinAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 08E374E32EEC3D3000137A0F /* JellyfinAPI */; };
 		0A8D19792EE1EF42009AB4F4 /* SwiftMediaViewer in Frameworks */ = {isa = PBXBuildFile; productRef = 0A8D19782EE1EF42009AB4F4 /* SwiftMediaViewer */; };
@@ -58,6 +58,8 @@
 				Views/MediaPlayer/iOS/AVPlayerIos.swift = (ios, );
 				Views/MediaPlayer/macOS/AVMediaPlayerViewMac.swift = (macos, );
 				Views/MediaPlayer/macOS/AVPlayerMac.swift = (macos, );
+				Views/MediaPlayer/tvOS/AVMediaPlayerViewTVOS.swift = (tvos, );
+				Views/MediaPlayer/tvOS/AVPlayerTvOS.swift = (tvos, );
 				Views/MediaPlayer/tvOS/MediaNavigationMarkerBuilder.swift = (tvos, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
@@ -276,6 +278,9 @@
 /* Begin PBXTargetDependency section */
 		085B2EEA2F0E1D6D0096E06D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				tvos,
+			);
 			target = 085B2EE02F0E1D6D0096E06D /* TopShelf */;
 			targetProxy = 085B2EE92F0E1D6D0096E06D /* PBXContainerItemProxy */;
 		};

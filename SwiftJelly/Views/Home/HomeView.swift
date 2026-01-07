@@ -35,9 +35,7 @@ struct HomeView: View {
 
                 MediaShelf(items: favorites, header: "Favorites")
                 
-                if !isLoading {
-                    GenreCarouselView()
-                }
+                GenreCarouselView()
                 
                 MediaShelf(items: latestMovies, header: "Recently Added Movies")
 

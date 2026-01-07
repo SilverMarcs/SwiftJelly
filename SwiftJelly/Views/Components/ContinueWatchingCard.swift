@@ -15,13 +15,12 @@ struct ContinueWatchingCard: View {
     let item: BaseItemDto
     let imageURLOverride: URL?
 
+    private let overlayHeight: CGFloat = 140
     #if os(tvOS)
-    private let cardWidth: CGFloat = 550
-    private let cardHeight: CGFloat = 333
-    private let overlayPadding: CGFloat = 30
+    private let cardWidth: CGFloat = 500
+    private let overlayPadding: CGFloat = 25
     #else
     private let cardWidth: CGFloat = 300
-    private let cardHeight: CGFloat = 200
     private let overlayPadding: CGFloat = 15
     #endif
 
@@ -38,18 +37,17 @@ struct ContinueWatchingCard: View {
     var body: some View {
         PlayMediaButton(item: item) {
             LandscapeImageView(item: item, imageURLOverride: imageURLOverride)
-                .scaledToFill()
-                .frame(width: cardWidth, height: cardHeight, alignment: .top)
-                .clipped()
-                .overlay {
+                .frame(width: cardWidth, alignment: .top)
+                .overlay(alignment: .bottom) {
                     Rectangle()
-                        .fill(.ultraThickMaterial)
+                        .fill(.regularMaterial)
+                        .frame(height: overlayHeight)
                         .mask(gradient)
                 }
                 .overlay(alignment: .bottomLeading) {
                     ProgressBarOverlay(item: item)
                         .padding(.horizontal, overlayPadding)
-                        .padding(.vertical, overlayPadding - 2)
+                        .padding(.vertical, overlayPadding - 3)
                 }
                 .environment(\.colorScheme, .dark)
                 #if !os(macOS)

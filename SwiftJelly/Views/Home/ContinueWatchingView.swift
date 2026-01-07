@@ -54,7 +54,7 @@ struct ContinueWatchingView: View {
     
     private var spacing: CGFloat {
         #if os(tvOS)
-        40
+        35
         #else
         12
         #endif
