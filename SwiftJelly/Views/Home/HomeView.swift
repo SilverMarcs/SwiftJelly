@@ -10,6 +10,7 @@ import JellyfinAPI
 
 struct HomeView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
+    @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     
     @State private var dataManager = DataManager.shared
     @State private var trendingViewModel = TrendingInLibraryViewModel()
@@ -23,7 +24,7 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: spacing) {
-                if !trendingViewModel.items.isEmpty {
+                if shouldShowTrending {
                     TrendingInLibraryView(viewModel: trendingViewModel)
                         .onScrollVisibilityChange { isVisible in
                             showScrollEffect = isVisible
@@ -45,7 +46,7 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
-        .ignoresSafeArea(edges: trendingViewModel.items.isEmpty ? [] : .top)
+        .ignoresSafeArea(edges: shouldShowTrending ? .top : [])
         .overlay {
             if isLoading {
                 UniversalProgressView()
@@ -69,15 +70,16 @@ struct HomeView: View {
 
     private func loadAll() async {
         do {
-            async let trendingLoad: () = trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
+            if showTrendingOnTop {
+                async let trendingLoad: () = trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
+                await trendingLoad
+            }
             
             async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
             
             async let movies = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.movie])
             async let shows = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.series])
-            
-            await trendingLoad
-            
+
             let loadedMovies = try await movies
             let loadedShows = try await shows
             let loadedFavs = try await loadedFavorites
@@ -98,5 +100,9 @@ struct HomeView: View {
         #else
         25
         #endif
+    }
+
+    private var shouldShowTrending: Bool {
+        showTrendingOnTop && !trendingViewModel.items.isEmpty
     }
 }
