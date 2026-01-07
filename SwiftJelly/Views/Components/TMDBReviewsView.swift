@@ -13,7 +13,7 @@ struct TMDBReviewsView: View {
     var body: some View {
         if !tmdbAPIKey.isEmpty {
             SectionContainer(showHeader: !reviews.isEmpty) {
-                HorizontalShelf(spacing: 12) {
+                HorizontalShelf(spacing: spacing) {
                     ForEach(reviews) { review in
                         cardButton(review: review)
                     }
@@ -28,13 +28,15 @@ struct TMDBReviewsView: View {
             .sheet(item: $selectedReview) { review in
                 ScrollView {
                     Text(review.content)
+                        .scenePadding()
                     #if !os(tvOS)
                         .textSelection(.enabled)
                     #endif
-                        .scenePadding()
                 }
+                #if !os(tvOS)
                 .frame(maxWidth: 500, maxHeight: 500)
                 .presentationDetents([.medium, .large])
+                #endif
             }
             .task {
                 await load()
@@ -75,5 +77,13 @@ struct TMDBReviewsView: View {
         } catch {
             print("Error loading Reviews: \(error.localizedDescription)")
         }
+    }
+    
+    private var spacing: CGFloat {
+        #if os(tvOS)
+        30
+        #else
+        12
+        #endif
     }
 }

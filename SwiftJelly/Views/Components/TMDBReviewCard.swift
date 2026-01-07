@@ -36,7 +36,7 @@ struct TMDBReviewCard: View {
                 .lineLimit(3, reservesSpace: true)
         }
         .padding()
-        .frame(width: 320, alignment: .leading)
+        .frame(width: width, alignment: .leading)
         .background(.background.secondary)
         #if !os(tvOS)
         .clipShape(.rect(cornerRadius: 16))
@@ -79,5 +79,13 @@ struct TMDBReviewCard: View {
         }
 
         return nil
+    }
+    
+    private var width: CGFloat {
+        #if os(tvOS)
+        640
+        #else
+        320
+        #endif
     }
 }
