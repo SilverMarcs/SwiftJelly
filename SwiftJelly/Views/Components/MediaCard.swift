@@ -26,6 +26,9 @@ struct MediaCard: View {
                             .padding(12)
                     }
                 }
+                #if os(tvOS)
+                .hoverEffect(.highlight)
+                #endif
         }
     }
 }

@@ -13,7 +13,6 @@ private struct CardBorderModifier: ViewModifier {
     func body(content: Content) -> some View {
 #if os(tvOS)
         content
-            .hoverEffect(.highlight)
 #else
         content
             .clipShape(.rect(cornerRadius: cornerRadius))

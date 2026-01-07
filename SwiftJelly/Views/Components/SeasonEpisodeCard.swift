@@ -75,6 +75,9 @@ struct SeasonEpisodeCard: View {
                     .padding(.vertical, overlayPadding - 2)
                 }
                 .environment(\.colorScheme, .dark)
+                #if !os(macOS)
+                .hoverEffect(.highlight)
+                #endif
         }
         .foregroundStyle(.primary)
         .cardBorder()

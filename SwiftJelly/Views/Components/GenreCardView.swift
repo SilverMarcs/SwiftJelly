@@ -28,6 +28,9 @@ struct GenreCardView: View {
                     .fill(baseColor.gradient)
                     .brightness(-0.25)
             }
+            #if os(tvOS)
+            .hoverEffect(.highlight)
+            #endif
             .cardBorder()
     }
 

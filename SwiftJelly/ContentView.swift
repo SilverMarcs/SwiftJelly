@@ -33,6 +33,7 @@ struct ContentView: View {
                             NavigationStack {
                                 tab.tabView
                                     .navigationDestinations()
+                                    .settingsSheet()
                                 #if os(macOS)
                                     .frame(minWidth: 800)
                                 #endif
