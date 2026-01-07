@@ -28,7 +28,7 @@ extension JFAPI {
     }
     
     /// Loads favorite movie & series items (minimal implementation)
-    static func loadFavoriteItems(limit: Int = 50) async throws -> [BaseItemDto] {
+    static func loadFavoriteItems(limit: Int = 18) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetItemsByUserIDParameters()
         parameters.includeItemTypes = [.movie, .series, .boxSet]

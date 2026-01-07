@@ -35,31 +35,11 @@ struct MediaNavigationDestinationModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationDestination(for: BaseItemDto.self) { item in
-                destinationView(for: item)
+                MediaDestinationView(item: item)
             }
             .navigationDestination(for: Person.self) { person in
                 FilteredMediaView(filter: .person(id: person.id, name: person.name))
             }
-    }
-    
-    @ViewBuilder
-    private func destinationView(for item: BaseItemDto) -> some View {
-        switch item.type {
-        case .movie:
-            MovieDetailView(item: item)
-        case .series:
-            ShowDetailView(item: item)
-        case .episode:
-            ShowDetailView(item: BaseItemDto(id: item.seriesID))
-        case .collectionFolder, .boxSet:
-            FilteredMediaView(filter: .library(item))
-        default:
-            ContentUnavailableView(
-                "Unsupported Media Type",
-                systemImage: "questionmark.circle",
-                description: Text("Cannot display \(item.type?.rawValue.capitalized ?? "unknown") items")
-            )
-        }
     }
 }
 

@@ -12,9 +12,10 @@ struct ContentView: View {
     @Binding var selectedTab: TabSelection
     
     @State private var dataManager = DataManager.shared
-    @State private var libraryNavigationPath = NavigationPath()
     @State private var isTopShelfPlayerPresented = false
     @State private var topShelfPlayerItem: BaseItemDto?
+    @State private var isTopShelfNavigationActive = false
+    @State private var topShelfNavigationItem: BaseItemDto?
     @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
 
     var body: some View {
@@ -29,24 +30,25 @@ struct ContentView: View {
                             value: tab,
                             role: tab == .search ? .search : .none
                         ) {
-                            if tab == .libraries {
-                                NavigationStack(path: $libraryNavigationPath) {
-                                    tab.tabView
-                                        .navigationDestinations()
-                                        .settingsSheet()
-                                    #if os(macOS)
-                                        .frame(minWidth: 800)
-                                    #endif
-                                }
-                            } else {
-                                NavigationStack {
-                                    tab.tabView
-                                        .navigationDestinations()
-                                        .settingsSheet()
-                                    #if os(macOS)
-                                        .frame(minWidth: 800)
-                                    #endif
-                                }
+                            NavigationStack {
+                                tab.tabView
+                                    .navigationDestinations()
+                                    .settingsSheet()
+                                #if os(macOS)
+                                    .frame(minWidth: 800)
+                                #endif
+                                    .navigationDestination(isPresented: $isTopShelfNavigationActive) {
+                                        if let item = topShelfNavigationItem {
+                                            MediaDestinationView(item: item)
+                                        } else {
+                                            ContentUnavailableView("Missing Item", systemImage: "questionmark.circle")
+                                        }
+                                    }
+                                    .onChange(of: isTopShelfNavigationActive) { _, isPresented in
+                                        if !isPresented {
+                                            topShelfNavigationItem = nil
+                                        }
+                                    }
                             }
                         }
                     }
@@ -54,6 +56,10 @@ struct ContentView: View {
                 #if os(tvOS)
                 .onOpenURL { url in
                     handleTopShelfURL(url)
+                }
+                .onChange(of: selectedTab) { _, _ in
+                    isTopShelfNavigationActive = false
+                    topShelfNavigationItem = nil
                 }
                 .tvNavigationStyle(navigationStyle)
                 .fullScreenCover(isPresented: $isTopShelfPlayerPresented) {
@@ -92,9 +98,8 @@ struct ContentView: View {
                         topShelfPlayerItem = item
                         isTopShelfPlayerPresented = true
                     case .open:
-                        selectedTab = .libraries
-                        libraryNavigationPath = NavigationPath()
-                        libraryNavigationPath.append(item)
+                        topShelfNavigationItem = item
+                        isTopShelfNavigationActive = true
                     }
                 }
             } catch {
