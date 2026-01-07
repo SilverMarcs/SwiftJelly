@@ -52,7 +52,21 @@ struct ContentView: View {
                     }
                 }
                 #if os(tvOS)
+                .onOpenURL { url in
+                    handleTopShelfURL(url)
+                }
                 .tvNavigationStyle(navigationStyle)
+                .fullScreenCover(isPresented: $isTopShelfPlayerPresented) {
+                    if let item = topShelfPlayerItem {
+                        AVMediaPlayerViewTVOS(item: item)
+                            .ignoresSafeArea()
+                    }
+                }
+                .onChange(of: isTopShelfPlayerPresented) { _, isPresented in
+                    if !isPresented {
+                        topShelfPlayerItem = nil
+                    }
+                }
                 #else
                 .tabViewStyle(.sidebarAdaptable)
                 .tabViewSearchActivation(.searchTabSelection)
@@ -62,26 +76,10 @@ struct ContentView: View {
                 #endif
             }
         }
-        .onOpenURL { url in
-            handleTopShelfURL(url)
-        }
-        #if os(tvOS)
-        .fullScreenCover(isPresented: $isTopShelfPlayerPresented) {
-            if let item = topShelfPlayerItem {
-                AVMediaPlayerViewTVOS(item: item)
-                    .ignoresSafeArea()
-            }
-        }
-        .onChange(of: isTopShelfPlayerPresented) { _, isPresented in
-            if !isPresented {
-                topShelfPlayerItem = nil
-            }
-        }
-        #endif
-    }
 
+    }
+    #if os(tvOS)
     private func handleTopShelfURL(_ url: URL) {
-        #if os(tvOS)
         guard let deepLink = TopShelfDeepLink.parse(url) else { return }
         
         Task {
@@ -103,6 +101,6 @@ struct ContentView: View {
                 print("Error handling Top Shelf deep link: \(error)")
             }
         }
-        #endif
     }
+    #endif
 }
