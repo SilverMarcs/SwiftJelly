@@ -13,7 +13,7 @@ extension JFAPI {
         parameters.fields = .MinimumFields
         parameters.includeItemTypes = [.movie, .series]
         parameters.isRecursive = true
-        parameters.limit = 40
+        parameters.limit = 10
         parameters.searchTerm = query
         let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
         return try await send(request).items ?? []

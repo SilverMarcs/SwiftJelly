@@ -10,10 +10,8 @@ struct SearchView: View {
     
     var body: some View {
         MediaGrid(items: filteredMediaResults, isLoading: isLoading)
-            #if os(tvOS)
-            .focusSection()
-            #endif
             .navigationTitle("Search")
+            .platformNavigationToolbar()
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
             .searchPresentationToolbarBehavior(.avoidHidingContent)
             .searchScopes($searchScope) {
@@ -21,7 +19,8 @@ struct SearchView: View {
                     Text(scope.rawValue).tag(scope)
                 }
             }
-#if os(tvOS)
+            #if os(tvOS)
+            .focusSection()
             .onChange(of: searchText) { _, newValue in
                 searchTask?.cancel()
                 searchTask = Task {
@@ -33,14 +32,13 @@ struct SearchView: View {
             .onDisappear {
                 searchTask?.cancel()
             }
-#else
+            #else
             .onSubmit(of: .search) {
                 Task {
                     await performSearch(for: searchText)
                 }
             }
-#endif
-            .platformNavigationToolbar()
+            #endif
     }
     private var filteredMediaResults: [BaseItemDto] {
         switch searchScope {
