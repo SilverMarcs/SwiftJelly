@@ -14,7 +14,7 @@ extension JFAPI {
         var parameters = Paths.GetGenresParameters()
         parameters.startIndex = 0
         parameters.limit = limit
-        parameters.enableImages = true
+        parameters.enableImages = false
         parameters.enableTotalRecordCount = false
         parameters.sortBy = [.sortName]
         parameters.sortOrder = [.ascending]

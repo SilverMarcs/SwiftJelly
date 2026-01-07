@@ -24,27 +24,33 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 80) {
                     heroView
-                    .padding(60)
-                    .frame(height: showcaseHeight)
-                    .focusSection()
-                    .overlay(alignment: .bottom) {
-                        VStack(alignment: .center) {
+                        .padding(60)
+                        .frame(height: showcaseHeight)
+                        .focusSection()
+                        .overlay(alignment: .bottom) {
                             if !belowFold {
-                                Text("More Details")
-                                    .font(.caption2)
-                                Image(systemName: "chevron.compact.down")
-                                    .font(.caption2)
+                                VStack(alignment: .center) {
+                                    Text("More Details")
+                                    Image(systemName: "chevron.compact.down")
+                                }
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .padding(.bottom)
                             }
                         }
-                        .foregroundStyle(.secondary)
-                        .padding(.bottom)
-                    }
-                    .onScrollVisibilityChange { isVisible in
-                        withAnimation {
-                            belowFold = !isVisible
+                        .onScrollVisibilityChange { isVisible in
+                            withAnimation {
+                                belowFold = !isVisible
+                            }
                         }
+                    
+                    // TODO: must have a cleaner way to do this
+                    if belowFold {
+                        DetailLogoOverlayView(item: item)
+                            .padding(.bottom, -100)
+                            .padding(.top, -60)
                     }
-
+                    
                     content
                         .padding(40)
                 }
