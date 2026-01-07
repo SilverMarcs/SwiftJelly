@@ -60,22 +60,21 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     // MARK: - Overlay Content
     
+    @ViewBuilder
     private var logo: some View {
-        Group {
-            if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
-                CachedAsyncImage(url: url, targetSize: 450) {
-                    Color.clear
-                }
-                .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
-                .fixedSize(horizontal: false, vertical: true)
-            } else {
-                Text(item.name ?? "Unknown")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.5), radius: 4)
+        if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
+            CachedAsyncImage(url: url, targetSize: 450) {
+                Color.clear
             }
+            .aspectRatio(contentMode: .fit)
+            .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
+            .fixedSize(horizontal: false, vertical: true)
+        } else {
+            Text(item.name ?? "Unknown")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.5), radius: 4)
         }
     }
     

@@ -15,7 +15,10 @@ struct ContinueWatchingView: View {
         SectionContainer(showHeader: !items.isEmpty) {
             HorizontalShelf(spacing: spacing) {
                 ForEach(items, id: \.id) { item in
-                    PlayableCard(item: item)
+                    ContinueWatchingCard(
+                        item: item,
+                        imageURLOverride: ImageURLProvider.seriesImageURL(for: item)
+                    )
                 }
             }
         } header: {

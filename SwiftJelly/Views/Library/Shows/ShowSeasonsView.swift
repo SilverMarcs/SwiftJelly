@@ -44,7 +44,7 @@ struct ShowSeasonsView: View {
         SectionContainer {
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
-                    PlayableCard(item: episode, showRealname: true, showDescription: true)
+                    SeasonEpisodeCard(item: episode)
                         .id(episode.id)
                 }
             }

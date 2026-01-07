@@ -11,9 +11,10 @@ import SwiftMediaViewer
 
 struct LandscapeImageView: View {
     let item: BaseItemDto
+    var imageURLOverride: URL? = nil
     
     var body: some View {
-        if let url = imageURL {
+        if let url = imageURLOverride ?? imageURL {
             CachedAsyncImage(url: url, targetSize: 1500)
                 .aspectRatio(16/9, contentMode: .fill)
         }

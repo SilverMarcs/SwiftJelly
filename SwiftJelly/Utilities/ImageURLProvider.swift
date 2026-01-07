@@ -48,6 +48,17 @@ enum ImageURLProvider {
         return url(forItemID: id, imageType: .primary)
     }
 
+    /// Builds a series image URL for episode items when available.
+    static func seriesImageURL(for item: BaseItemDto) -> URL? {
+        if let tag = item.parentThumbImageTag,
+           let parentID = item.parentThumbItemID,
+           !tag.isEmpty {
+            return url(forItemID: parentID, imageType: .thumb)
+        }
+
+        return nil
+    }
+
     static func genreImageURL(forGenreName name: String) -> URL? {
         guard let client = try? JFAPI.getClient() else { return nil }
         guard let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return nil }
