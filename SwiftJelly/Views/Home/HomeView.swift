@@ -14,12 +14,7 @@ struct HomeView: View {
     
     @State private var dataManager = DataManager.shared
     @State private var trendingViewModel = TrendingInLibraryViewModel()
-
-    @State private var favorites: [BaseItemDto] = []
-    @State private var latestMovies: [BaseItemDto] = []
-    @State private var latestShows: [BaseItemDto] = []
-    @State private var isLoading = false
-    @State var showScrollEffect = false
+    @State private var showScrollEffect = false
 
     var body: some View {
         ScrollView {
@@ -33,63 +28,31 @@ struct HomeView: View {
                 
                 ContinueWatchingView()
 
-                MediaShelf(items: favorites, header: "Favorites")
+                MediaShelf(header: "Favorites") {
+                    try await JFAPI.loadFavoriteItems(limit: 15)
+                }
                 
                 GenreCarouselView()
                 
-                MediaShelf(items: latestMovies, header: "Recently Added Movies")
+                MediaShelf(header: "Recently Added Movies") {
+                    try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.movie])
+                }
 
-                MediaShelf(items: latestShows, header: "Recently Added Shows")
+                MediaShelf(header: "Recently Added Shows") {
+                    try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.series])
+                }
             }
             .scenePadding(.bottom)
         }
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
         .ignoresSafeArea(edges: shouldShowTrending ? .top : [])
-        .overlay {
-            if isLoading {
-                UniversalProgressView()
-            }
-        }
         .task(id: dataManager.servers.count) {
-            if latestMovies.isEmpty, !isLoading {
-                Task {
-                    isLoading = true
-                    await loadAll()
-                    isLoading = false
-                }
+            if showTrendingOnTop {
+                await trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
             }
         }
         .navigationTitle("Home")
-        .refreshToolbar {
-            await loadAll()
-        }
         .platformNavigationToolbar()
-    }
-
-    private func loadAll() async {
-        do {
-            if showTrendingOnTop {
-                async let trendingLoad: () = trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
-                await trendingLoad
-            }
-            
-            async let loadedFavorites = JFAPI.loadFavoriteItems(limit: 15)
-            
-            async let movies = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.movie])
-            async let shows = JFAPI.loadLatestMediaInLibrary(limit: 20, itemTypes: [.series])
-
-            let loadedMovies = try await movies
-            let loadedShows = try await shows
-            let loadedFavs = try await loadedFavorites
-
-            withAnimation {
-                latestMovies = loadedMovies
-                latestShows = loadedShows
-                favorites = loadedFavs
-            }
-        } catch {
-            print("Error loading Home items: \(error)")
-        }
     }
     
     private var spacing: CGFloat {

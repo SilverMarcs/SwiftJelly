@@ -10,33 +10,10 @@ import JellyfinAPI
 
 struct SimilarItemsView: View {
     let item: BaseItemDto
-    @State private var isLoading: Bool = false
-    @State private var similarItems: [BaseItemDto] = []
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            if isLoading {
-                UniversalProgressView()
-            }
-            
-            if !similarItems.isEmpty {
-                MediaShelf(items: similarItems, header: "Recommended")
-            }
-        }
-        .task {
-            if similarItems.isEmpty {
-                await fetchSimilarItems()
-            }
-        }
-    }
-    
-    private func fetchSimilarItems() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            similarItems = try await JFAPI.loadSimilarItems(for: item)
-        } catch {
-            print("Error loading Similar Items: \(error.localizedDescription)")
+        MediaShelf(header: "Similar") {
+            try await JFAPI.loadSimilarItems(for: item)
         }
     }
 }

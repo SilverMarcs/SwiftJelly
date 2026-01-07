@@ -10,29 +10,38 @@ import JellyfinAPI
 
 struct ContinueWatchingView: View {
     @State private var items: [BaseItemDto] = []
+    @State private var isLoading = false
 
     var body: some View {
-        SectionContainer(showHeader: !items.isEmpty) {
-            HorizontalShelf(spacing: spacing) {
-                ForEach(items, id: \.id) { item in
-                    ContinueWatchingCard(
-                        item: item,
-                        imageURLOverride: ImageURLProvider.seriesImageURL(for: item)
-                    )
+        SectionContainer(showHeader: !items.isEmpty || isLoading) {
+            if !items.isEmpty {
+                HorizontalShelf(spacing: spacing) {
+                    ForEach(items, id: \.id) { item in
+                        ContinueWatchingCard(
+                            item: item,
+                            imageURLOverride: ImageURLProvider.seriesImageURL(for: item)
+                        )
+                    }
                 }
+            }
+
+            if isLoading {
+                UniversalProgressView()
             }
         } header: {
             Text("Continue Watching")
         }
         .task {
-            if items.isEmpty {
-                await loadContinueWatching()
-            }
+            await loadContinueWatching()
         }
         .environment(\.refresh, loadContinueWatching)
     }
     
     private func loadContinueWatching() async {
+        if !items.isEmpty { return }
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
         do {
             let continueItems = try await JFAPI.loadContinueWatchingSmart()
             withAnimation {

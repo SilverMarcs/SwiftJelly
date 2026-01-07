@@ -20,7 +20,7 @@ struct ContinueWatchingCard: View {
     private let overlayHeight: CGFloat = 160
     private let overlayPadding: CGFloat = 25
     #else
-    private let cardWidth: CGFloat = 300
+    private let cardWidth: CGFloat = 290
     private let overlayHeight: CGFloat = 160
     private let overlayPadding: CGFloat = 15
     #endif

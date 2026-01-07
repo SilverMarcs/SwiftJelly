@@ -19,70 +19,66 @@ struct ContentView: View {
     @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
 
     var body: some View {
-        Group {
-            if dataManager.servers.isEmpty {
-                NoServerView()
-            } else {
-                TabView(selection: $selectedTab) {
-                    ForEach(TabSelection.allCases, id: \.self) { tab in
-                        Tab(tab.title,
-                            systemImage: tab.systemImage,
-                            value: tab,
-                            role: tab == .search ? .search : .none
-                        ) {
-                            NavigationStack {
-                                tab.tabView
-                                    .navigationDestinations()
-                                    .settingsSheet()
-                                #if os(macOS)
-                                    .frame(minWidth: 800)
-                                #endif
-                                    .navigationDestination(isPresented: $isTopShelfNavigationActive) {
-                                        if let item = topShelfNavigationItem {
-                                            MediaDestinationView(item: item)
-                                        } else {
-                                            ContentUnavailableView("Missing Item", systemImage: "questionmark.circle")
-                                        }
+        if dataManager.servers.isEmpty {
+            NoServerView()
+        } else {
+            TabView(selection: $selectedTab) {
+                ForEach(TabSelection.allCases, id: \.self) { tab in
+                    Tab(tab.title,
+                        systemImage: tab.systemImage,
+                        value: tab,
+                        role: tab == .search ? .search : .none
+                    ) {
+                        NavigationStack {
+                            tab.tabView
+                                .navigationDestinations()
+                            #if os(macOS)
+                                .frame(minWidth: 800)
+                            #endif
+                                .navigationDestination(isPresented: $isTopShelfNavigationActive) {
+                                    if let item = topShelfNavigationItem {
+                                        MediaDestinationView(item: item)
+                                    } else {
+                                        ContentUnavailableView("Missing Item", systemImage: "questionmark.circle")
                                     }
-                                    .onChange(of: isTopShelfNavigationActive) { _, isPresented in
-                                        if !isPresented {
-                                            topShelfNavigationItem = nil
-                                        }
+                                }
+                                .onChange(of: isTopShelfNavigationActive) { _, isPresented in
+                                    if !isPresented {
+                                        topShelfNavigationItem = nil
                                     }
-                            }
+                                }
                         }
                     }
                 }
-                #if os(tvOS)
-                .onOpenURL { url in
-                    handleTopShelfURL(url)
-                }
-                .onChange(of: selectedTab) { _, _ in
-                    isTopShelfNavigationActive = false
-                    topShelfNavigationItem = nil
-                }
-                .tvNavigationStyle(navigationStyle)
-                .fullScreenCover(isPresented: $isTopShelfPlayerPresented) {
-                    if let item = topShelfPlayerItem {
-                        AVMediaPlayerViewTVOS(item: item)
-                            .ignoresSafeArea()
-                    }
-                }
-                .onChange(of: isTopShelfPlayerPresented) { _, isPresented in
-                    if !isPresented {
-                        topShelfPlayerItem = nil
-                    }
-                }
-                #else
-                .tabViewStyle(.sidebarAdaptable)
-                .tabViewSearchActivation(.searchTabSelection)
-                #endif
-                #if os(iOS)
-                .tabBarMinimizeBehavior(.onScrollDown)
-                #endif
             }
+            #if os(tvOS)
+            .onOpenURL { url in
+                handleTopShelfURL(url)
+            }
+            .onChange(of: selectedTab) { _, _ in
+                isTopShelfNavigationActive = false
+                topShelfNavigationItem = nil
+            }
+            .tvNavigationStyle(navigationStyle)
+            .fullScreenCover(isPresented: $isTopShelfPlayerPresented) {
+                if let item = topShelfPlayerItem {
+                    AVMediaPlayerViewTVOS(item: item)
+                        .ignoresSafeArea()
+                }
+            }
+            .onChange(of: isTopShelfPlayerPresented) { _, isPresented in
+                if !isPresented {
+                    topShelfPlayerItem = nil
+                }
+            }
+            #else
+            .tabViewStyle(.sidebarAdaptable)
+            .tabViewSearchActivation(.searchTabSelection)
+            #endif
+            #if os(iOS)
+            .tabBarMinimizeBehavior(.onScrollDown)
+            #endif
         }
-
     }
     #if os(tvOS)
     private func handleTopShelfURL(_ url: URL) {
