@@ -6,6 +6,7 @@ struct SearchView: View {
     @State private var searchScope: SearchScope = .all
     @State private var mediaResults: [BaseItemDto] = []
     @State private var isLoading = false
+    @State private var searchTask: Task<Void, Never>?
     
     var body: some View {
         MediaGrid(items: filteredMediaResults, isLoading: isLoading)
@@ -20,20 +21,25 @@ struct SearchView: View {
                     Text(scope.rawValue).tag(scope)
                 }
             }
+#if os(tvOS)
+            .onChange(of: searchText) { _, newValue in
+                searchTask?.cancel()
+                searchTask = Task {
+                    try? await Task.sleep(for: .milliseconds(350))
+                    guard !Task.isCancelled else { return }
+                    await performSearch(for: newValue)
+                }
+            }
+            .onDisappear {
+                searchTask?.cancel()
+            }
+#else
             .onSubmit(of: .search) {
                 Task {
-                    await performSearch()
+                    await performSearch(for: searchText)
                 }
             }
-            .onChange(of: searchText) { _, newValue in
-                Task {
-                    await performSearch()
-                    try? await Task.sleep(for: .seconds(0.5))
-                    if !newValue.isEmpty && newValue == searchText {
-                        await performSearch()
-                    }
-                }
-            }
+#endif
             .platformNavigationToolbar()
     }
     private var filteredMediaResults: [BaseItemDto] {
@@ -49,16 +55,22 @@ struct SearchView: View {
         }
     }
     
-    private func performSearch() async {
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+    private func performSearch(for query: String) async {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else {
+            mediaResults = []
+            isLoading = false
+            return
+        }
         isLoading = true
         defer { isLoading = false }
         
         do {
-            async let content = JFAPI.searchMedia(query: searchText)
-            async let persons = JFAPI.searchPersons(query: searchText)
+            async let content = JFAPI.searchMedia(query: trimmedQuery)
+            async let persons = JFAPI.searchPersons(query: trimmedQuery)
             
             let (contentResults, personResults) = try await (content, persons)
+            guard !Task.isCancelled else { return }
             mediaResults = contentResults + personResults
         } catch {
             print("Error Searching: \(error.localizedDescription)")
