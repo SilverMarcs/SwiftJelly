@@ -23,12 +23,11 @@ final class RelatedContentCollectionViewCell: UICollectionViewCell {
 
     func configure(with item: BaseItemDto) {
         contentConfiguration = UIHostingConfiguration {
-            RelatedContentImageView(item: item)
+            LandscapeImageView(item: item)
         }
         .margins(.all, 0)
     }
 
-    #if os(tvOS)
     override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
         super.didUpdateFocus(in: context, with: coordinator)
         let focused = context.nextFocusedView === self
@@ -36,5 +35,4 @@ final class RelatedContentCollectionViewCell: UICollectionViewCell {
             self?.transform = focused ? CGAffineTransform(scaleX: 1.08, y: 1.08) : .identity
         }
     }
-    #endif
 }

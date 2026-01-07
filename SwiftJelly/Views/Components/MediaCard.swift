@@ -26,40 +26,9 @@ struct MediaCard: View {
                             .padding(12)
                     }
                 }
-            // since can understand contextually anyway
-//                .overlay(alignment: .bottomLeading) {
-//                    if item.userData?.isFavorite == true {
-//                        Image(systemName: "star.fill")
-//                            .font(.subheadline)
-//                            .foregroundStyle(.yellow)
-//                            .shadow(radius: 4)
-//                            .padding(12)
-//                    }
-//                }
-                .contextMenu {
-//                    if item.type == .movie || item.type == .series {
-//                        Button {
-//                            Task {
-//                                try? await JFAPI.toggleItemFavoriteStatus(item: item)
-//                                await refresh()
-//                            }
-//                        } label: {
-//                            Label(item.userData?.isFavorite == true ? "Remove Favorite" : "Add to Favorites",
-//                                  systemImage: item.userData?.isFavorite == true ? "star.slash" : "star")
-//                        }
-//                    }
-                }
                 #if os(tvOS)
                 .hoverEffect(.highlight)
                 #endif
-            
-//            Text(item.name ?? "Unknown")
-//                .font(.caption)
-//                .fontWeight(.medium)
-//                .lineLimit(1)
-//                .truncationMode(.middle)
-//                .multilineTextAlignment(.leading)
-//                .padding(.leading, 1)
         }
     }
 }

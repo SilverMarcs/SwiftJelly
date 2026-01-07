@@ -61,6 +61,8 @@
 				Views/MediaPlayer/tvOS/AVMediaPlayerViewTVOS.swift = (tvos, );
 				Views/MediaPlayer/tvOS/AVPlayerTvOS.swift = (tvos, );
 				Views/MediaPlayer/tvOS/MediaNavigationMarkerBuilder.swift = (tvos, );
+				Views/MediaPlayer/tvOS/RelatedContentCollectionViewCell.swift = (tvos, );
+				Views/MediaPlayer/tvOS/RelatedContentViewController.swift = (tvos, );
 			};
 			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
 		};
