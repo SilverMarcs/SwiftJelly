@@ -73,7 +73,7 @@ struct SeasonEpisodeCard: View {
                         ProgressBarOverlay(item: item)
                     }
                     .padding(.horizontal, overlayPadding)
-                    .padding(.vertical, overlayPadding - 2)
+                    .padding(.vertical, overlayPadding - 5)
                 }
                 .environment(\.colorScheme, .dark)
                 #if !os(macOS)

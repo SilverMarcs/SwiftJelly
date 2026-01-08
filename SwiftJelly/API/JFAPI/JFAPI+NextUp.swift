@@ -18,7 +18,7 @@ extension JFAPI {
     static func loadContinueWatchingSmart() async throws -> [BaseItemDto] {
         // Ask Jellyfin for a generous window so newly-started episodes
         // aren’t trimmed server-side (we will trim to 20 after ranking).
-        let fetchLimit = 50
+        let fetchLimit = 30
         async let resumeItemsRaw = loadResumeItems(limit: fetchLimit)
         async let nextUpItemsRaw = loadNextUpItems(limit: fetchLimit)
         let resumeItems = try await resumeItemsRaw

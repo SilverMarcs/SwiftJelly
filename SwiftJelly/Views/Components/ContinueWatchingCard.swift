@@ -48,7 +48,7 @@ struct ContinueWatchingCard: View {
                 .overlay(alignment: .bottomLeading) {
                     ProgressBarOverlay(item: item)
                         .padding(.horizontal, overlayPadding)
-                        .padding(.vertical, overlayPadding - 3)
+                        .padding(.vertical, overlayPadding - 5)
                 }
                 .environment(\.colorScheme, .dark)
                 #if !os(macOS)
