@@ -40,7 +40,6 @@ struct PlayMediaButton<Label: View>: View {
             #else
             AVMediaPlayerViewIOS(item: item)
                 .ignoresSafeArea()
-                .tint(.primary)
             #endif
         }
         #endif

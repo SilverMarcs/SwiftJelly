@@ -13,7 +13,7 @@ struct MoviePlayButton: View {
                     Text("Play Again")
                 } else if let progress = item.playbackProgress, progress > 0, progress < 1 {
                     ProgressView(value: progress)
-                        .tint(.primary)
+                        .tint(.white)
                         #if os(tvOS)
                         .frame(width: 60)
                         #else

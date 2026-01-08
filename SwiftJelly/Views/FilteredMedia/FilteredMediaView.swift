@@ -34,11 +34,11 @@ struct FilteredMediaView: View {
                 await viewModel.loadInitialItems()
             }
         }
-        .refreshToolbar {
-            await viewModel.loadInitialItems()
-        }
         .toolbar {
             MediaSortToolbar(viewModel: viewModel)
+        }
+        .refreshToolbar {
+            await viewModel.loadInitialItems()
         }
     }
 }

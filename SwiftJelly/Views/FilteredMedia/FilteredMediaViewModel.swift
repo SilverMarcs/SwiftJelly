@@ -34,7 +34,6 @@ class FilteredMediaViewModel {
     
     func loadInitialItems() async {
         guard !isLoading else { return }
-        
         isLoading = true
         
         do {
