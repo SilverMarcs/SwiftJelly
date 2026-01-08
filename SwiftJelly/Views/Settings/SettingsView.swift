@@ -13,6 +13,24 @@ struct SettingsView: View {
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     
     var body: some View {
+        #if os(tvOS)
+        HStack(spacing: 0) {
+            VStack {
+                Image("AppLogo")
+                    .resizable()
+                    .frame(width: 450, height: 450)
+                    .shadow(radius: 12)
+            }
+            .frame(width: UIScreen.main.bounds.width * 0.5)
+            
+            form
+        }
+        #else
+        form
+        #endif
+    }
+    
+    var form: some View {
         Form {
             Section("Server") {
                 NavigationLink {
@@ -20,10 +38,6 @@ struct SettingsView: View {
                 } label: {
                     Label("Servers", systemImage: "server.rack")
                 }
-            }
-
-            Section("Images") {
-                CacheManagerView()
             }
             
             Section("View Options") {                
@@ -47,12 +61,13 @@ struct SettingsView: View {
             } footer: {
                 Text("Enter your TMDB API Bearer token to show trending content from your library.")
             }
+            
+            Section("Images") {
+                CacheManagerView()
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
-        .toolbarTitleDisplayMode(.inline)
-        #if os(tvOS)
-        .toolbar(.hidden, for: .navigationBar)
-        #endif
+        .platformNavigationToolbar()
     }
 }
