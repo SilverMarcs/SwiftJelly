@@ -8,8 +8,8 @@ extension ItemFields {
         .genres,
 //        .parentID,
 //        .taglines,
-        .people
-//        .chapters
+        .people,
+        .chapters
     ]
 }
 

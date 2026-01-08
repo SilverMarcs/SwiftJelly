@@ -1,23 +1,26 @@
 import AVFoundation
-import JellyfinAPI
 import AVKit
+import CoreMedia
+import Foundation
+import JellyfinAPI
 
 enum MediaNavigationMarkerBuilder {
     static func makeNavigationMarkerGroups(
-        from chapters: [ChapterInfo]?,
+        for item: BaseItemDto,
+        chapters: [ChapterInfo]?,
         durationSeconds: Double?
-    ) -> [AVNavigationMarkersGroup] {
+    ) async -> [AVNavigationMarkersGroup] {
         guard let chapters, !chapters.isEmpty else {
             return []
         }
 
         let normalized = chapters.enumerated()
-            .compactMap { index, chapter -> (index: Int, title: String, startSeconds: Double)? in
+            .compactMap { index, chapter -> (index: Int, title: String, startSeconds: Double, imageTag: String?)? in
                 guard let ticks = chapter.startPositionTicks else { return nil }
                 let startSeconds = Double(ticks) / 10_000_000
                 guard startSeconds.isFinite, startSeconds >= 0 else { return nil }
                 let title = chapter.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                return (index: index, title: title, startSeconds: startSeconds)
+                return (index: index, title: title, startSeconds: startSeconds, imageTag: chapter.imageTag)
             }
             .sorted { $0.startSeconds < $1.startSeconds }
 
@@ -37,6 +40,8 @@ enum MediaNavigationMarkerBuilder {
         var timedGroups: [AVTimedMetadataGroup] = []
         timedGroups.reserveCapacity(normalized.count)
 
+        let artworkDataByIndex = await loadChapterArtworkData(for: item, chapters: normalized)
+
         for (offset, chapter) in normalized.enumerated() {
             let title = chapter.title.isEmpty ? "Chapter \(offset + 1)" : chapter.title
             let start = chapter.startSeconds
@@ -51,7 +56,10 @@ enum MediaNavigationMarkerBuilder {
             }()
             let safeEnd = end > start ? end : start + 1
 
-            let metadata = [makeMetadataItem(.commonIdentifierTitle, value: title)]
+            var metadata = [makeMetadataItem(.commonIdentifierTitle, value: title)]
+            if let artworkData = artworkDataByIndex[chapter.index] {
+                metadata.append(makeArtworkMetadataItem(artworkData))
+            }
             let timeRange = CMTimeRangeFromTimeToTime(
                 start: CMTime(seconds: start, preferredTimescale: 600),
                 end: CMTime(seconds: safeEnd, preferredTimescale: 600)
@@ -69,5 +77,63 @@ enum MediaNavigationMarkerBuilder {
         item.value = value as NSString
         item.extendedLanguageTag = "und"
         return item.copy() as? AVMetadataItem ?? item
+    }
+
+    private static func makeArtworkMetadataItem(_ data: Data) -> AVMetadataItem {
+        let item = AVMutableMetadataItem()
+        item.identifier = .commonIdentifierArtwork
+        item.value = data as NSData
+        item.dataType = kCMMetadataBaseDataType_JPEG as String
+        return item.copy() as? AVMetadataItem ?? item
+    }
+
+    private static func loadChapterArtworkData(
+        for item: BaseItemDto,
+        chapters: [(index: Int, title: String, startSeconds: Double, imageTag: String?)]
+    ) async -> [Int: Data] {
+        await withTaskGroup(of: (Int, Data?).self, returning: [Int: Data].self) { group in
+            for chapter in chapters {
+                group.addTask {
+                    let data = await fetchChapterArtworkData(
+                        for: item,
+                        chapterIndex: chapter.index,
+                        imageTag: chapter.imageTag
+                    )
+                    return (chapter.index, data)
+                }
+            }
+
+            var results: [Int: Data] = [:]
+            for await (index, data) in group {
+                if let data {
+                    results[index] = data
+                }
+            }
+            return results
+        }
+    }
+
+    private static func fetchChapterArtworkData(
+        for item: BaseItemDto,
+        chapterIndex: Int,
+        imageTag: String?
+    ) async -> Data? {
+        guard let url = ImageURLProvider.chapterImageURL(
+            for: item,
+            chapterIndex: chapterIndex,
+            imageTag: imageTag
+        ) else {
+            return nil
+        }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                return nil
+            }
+            return data
+        } catch {
+            return nil
+        }
     }
 }

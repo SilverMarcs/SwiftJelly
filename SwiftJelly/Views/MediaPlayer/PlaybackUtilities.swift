@@ -112,8 +112,9 @@ struct PlaybackUtilities {
             }
             return nil
         }()
-        let navigationMarkers = MediaNavigationMarkerBuilder.makeNavigationMarkerGroups(
-            from: latestItem.chapters,
+        let navigationMarkers = await MediaNavigationMarkerBuilder.makeNavigationMarkerGroups(
+            for: latestItem,
+            chapters: latestItem.chapters,
             durationSeconds: durationSeconds
         )
         if !navigationMarkers.isEmpty {

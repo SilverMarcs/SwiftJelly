@@ -62,6 +62,7 @@ enum JFAPI {
 enum JFAPIError: LocalizedError {
     case setupFailed
     case loginFailed
+    case itemNotFound
     
     var errorDescription: String? {
         switch self {
@@ -69,6 +70,8 @@ enum JFAPIError: LocalizedError {
             return "Failed to setup API context - missing server or authentication"
         case .loginFailed:
             return "Login failed - invalid username or password"
+        case .itemNotFound:
+            return "The requested item could not be found"
         }
     }
 }

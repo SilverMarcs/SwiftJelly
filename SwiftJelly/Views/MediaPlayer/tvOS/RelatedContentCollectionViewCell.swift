@@ -7,7 +7,9 @@ final class RelatedContentCollectionViewCell: UICollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.clipsToBounds = false
+        contentView.clipsToBounds = true
+        contentView.layer.cornerRadius = 16
+        contentView.layer.cornerCurve = .continuous
     }
 
     @available(*, unavailable)
@@ -23,7 +25,7 @@ final class RelatedContentCollectionViewCell: UICollectionViewCell {
 
     func configure(with item: BaseItemDto) {
         contentConfiguration = UIHostingConfiguration {
-            LandscapeImageView(item: item)
+            RelatedContentCardView(item: item)
         }
         .margins(.all, 0)
     }

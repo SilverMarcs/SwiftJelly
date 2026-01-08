@@ -66,6 +66,24 @@ enum ImageURLProvider {
         let request = Paths.getGenreImage(name: encodedName, imageType: ImageType.primary.rawValue)
         return client.fullURL(with: request, queryAPIKey: true)
     }
+
+    static func chapterImageURL(
+        for item: BaseItemDto,
+        chapterIndex: Int,
+        imageTag: String?
+    ) -> URL? {
+        guard let id = item.id else { return nil }
+        guard let client = try? JFAPI.getClient() else { return nil }
+
+        var parameters = Paths.GetItemImageParameters()
+        parameters.tag = imageTag
+        parameters.imageIndex = chapterIndex
+        parameters.maxWidth = 800
+        parameters.format = .jpg
+
+        let request = Paths.getItemImage(itemID: id, imageType: ImageType.chapter.rawValue, parameters: parameters)
+        return client.fullURL(with: request)
+    }
 }
 
 private extension ImageURLProvider {
