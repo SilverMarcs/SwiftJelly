@@ -18,6 +18,9 @@ struct ContentView: View {
     @State private var topShelfNavigationItem: BaseItemDto?
     @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
 
+    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
+    @State private var trendingViewModel = TrendingInLibraryViewModel()
+
     var body: some View {
         if dataManager.servers.isEmpty {
             NoServerView()
@@ -78,6 +81,10 @@ struct ContentView: View {
             #if os(iOS)
             .tabBarMinimizeBehavior(.onScrollDown)
             #endif
+            .task(id: tmdbAPIKey) {
+                await trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
+            }
+            .environment(trendingViewModel)
         }
     }
     #if os(tvOS)

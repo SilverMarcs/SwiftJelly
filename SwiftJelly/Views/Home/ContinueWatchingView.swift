@@ -47,18 +47,9 @@ struct ContinueWatchingView: View {
             withAnimation {
                 items = continueItems
             }
-            TopShelfCache.save(items: continueItems)
         } catch {
             print("Error loading Home items: \(error)")
         }
-    }
-    
-    private var gridColumns: [GridItem] {
-        #if os(iOS)
-        [GridItem(.flexible())]
-        #else
-        [GridItem(.adaptive(minimum: 250), spacing: 12)]
-        #endif
     }
     
     private var spacing: CGFloat {

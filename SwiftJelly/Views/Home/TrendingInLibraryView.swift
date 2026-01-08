@@ -10,12 +10,13 @@ import JellyfinAPI
 import SwiftMediaViewer
 
 struct TrendingInLibraryView: View {
-    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
 
-    @State private var viewModel = TrendingInLibraryViewModel()
+    @Environment(TrendingInLibraryViewModel.self) private var viewModel
     
     var body: some View {
+        @Bindable var viewModel = viewModel
+        
         ScrollView(.horizontal) {
             LazyHStack(spacing: 0) {
                 ForEach($viewModel.items, id: \.id) { item in
@@ -61,9 +62,6 @@ struct TrendingInLibraryView: View {
         .scrollPosition(id: $viewModel.scrolledID, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
         .scrollIndicators(.hidden)
-        .task {
-            await viewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
-        }
         #if os(tvOS)
         .ignoresSafeArea()
         .contentMargins(.horizontal, 1, for: .scrollContent) // peek tiny bit of next card for scroll to work

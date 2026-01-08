@@ -10,7 +10,6 @@ import JellyfinAPI
 
 struct HomeView: View {
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
-    
     @State private var showScrollEffect = false
 
     var body: some View {

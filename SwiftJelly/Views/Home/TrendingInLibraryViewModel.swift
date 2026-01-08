@@ -66,6 +66,10 @@ final class TrendingInLibraryViewModel {
             withAnimation {
                 items = shuffled
             }
+
+            if !items.isEmpty {
+                TopShelfCache.save(items: items)
+            }
         } catch {
             print("Error loading trending items: \(error)")
         }
