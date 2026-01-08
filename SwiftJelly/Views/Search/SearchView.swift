@@ -20,6 +20,7 @@ struct SearchView: View {
                 }
             }
             #if os(tvOS)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .focusSection()
             .onChange(of: searchText) { _, newValue in
                 searchTask?.cancel()

@@ -89,6 +89,11 @@ extension DeviceProfile {
                 format: "vtt",
                 method: .hls
             ),
+            // Allow sidecar WebVTT when HLS-in-manifest is unavailable.
+            SubtitleProfile(
+                format: "vtt",
+                method: .external
+            ),
 //            SubtitleProfile(
 //                format: "srt",
 //                method: .external

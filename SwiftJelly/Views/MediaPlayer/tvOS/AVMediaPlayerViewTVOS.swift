@@ -33,7 +33,8 @@ struct AVMediaPlayerViewTVOS: View {
                 }
         } else if model.isLoading {
             ProgressView()
-                .controlSize(.large)
+                .tint(.white)
+                .controlSize(.extraLarge)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.black, ignoresSafeAreaEdges: .all)
                 .task(id: model.playbackToken) {

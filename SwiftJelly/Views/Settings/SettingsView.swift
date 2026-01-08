@@ -40,6 +40,7 @@ struct SettingsView: View {
                     }
                 if !tmdbAPIKey.isEmpty {
                     Toggle("Show trending on top", isOn: $showTrendingOnTop)
+                        .foregroundStyle(.primary)
                 }
             } header: {
                 Text("TMDB API")

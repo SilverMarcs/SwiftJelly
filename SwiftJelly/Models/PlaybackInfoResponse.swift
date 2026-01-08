@@ -67,7 +67,7 @@ extension PlaybackInfoResponse {
             playbackURL = fullURL
             playMethod = .directPlay
         }
-        
+
         return PlaybackInfoResponse(
             playbackURL: playbackURL,
             mediaSource: mediaSource,

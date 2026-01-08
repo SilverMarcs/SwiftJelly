@@ -25,9 +25,9 @@ struct FilteredMediaView: View {
         }
         #if os(tvOS)
         .focusSection()
+        .toolbar(.hidden, for: .navigationBar)
         #endif
         .navigationTitle(filter.navigationTitle)
-        .platformNavigationToolbar()
         .toolbarTitleDisplayMode(.inline)
         .task {
             if viewModel.items.isEmpty {

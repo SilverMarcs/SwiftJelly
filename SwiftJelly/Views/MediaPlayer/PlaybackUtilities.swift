@@ -15,30 +15,84 @@ struct PlaybackUtilities {
         audioStreamIndex: Int? = nil,
         resumeSeconds: Double? = nil
     ) async throws -> PlaybackLoadResult {
-        let subtitleStreamIndex = item.mediaSources?
+        let hasSubtitleStreams = item.mediaSources?
             .first?
             .mediaStreams?
-            .first(where: { $0.type == .subtitle })?
-            .index
+            .contains(where: { $0.type == .subtitle }) ?? false
+        let itemForPlayback: BaseItemDto
+        let didFetchItem: Bool
+        if hasSubtitleStreams {
+            itemForPlayback = item
+            didFetchItem = false
+        } else if let id = item.id, let freshItem = try? await JFAPI.loadItem(by: id) {
+            itemForPlayback = freshItem
+            didFetchItem = true
+        } else {
+            itemForPlayback = item
+            didFetchItem = false
+        }
 
-        // Start fetching playback info and a fresh item concurrently
+        let preferredSubtitleCodecs: Set<String> = [
+            "ass",
+            "mov_text",
+            "srt",
+            "ssa",
+            "subrip",
+            "text",
+            "ttml",
+            "vtt",
+            "webvtt"
+        ]
+        func selectSubtitleStreamIndex(from streams: [MediaStream]) -> Int? {
+            streams
+                .first(where: { stream in
+                    guard let codec = stream.codec?.lowercased() else { return false }
+                    return preferredSubtitleCodecs.contains(codec)
+                })?
+                .index ?? streams.first?.index
+        }
+        let subtitleStreams = itemForPlayback.mediaSources?
+            .first?
+            .mediaStreams?
+            .filter { $0.type == .subtitle } ?? []
+        let subtitleStreamIndex = selectSubtitleStreamIndex(from: subtitleStreams)
+        // Start fetching playback info, then refresh the item in the background
         let resumeTicks: Int64? = {
             guard let resumeSeconds else { return nil }
             return Int64(resumeSeconds * 10_000_000)
         }()
         
-        async let infoTask = JFAPI.getPlaybackInfo(
-            for: item,
+        let initialInfo = try await JFAPI.getPlaybackInfo(
+            for: itemForPlayback,
             subtitleStreamIndex: subtitleStreamIndex,
             audioStreamIndex: audioStreamIndex,
             startPositionTicks: resumeTicks
         )
         async let freshItemTask: BaseItemDto? = {
-            guard let id = item.id else { return nil }
+            guard let id = item.id else { return itemForPlayback }
+            if didFetchItem {
+                return itemForPlayback
+            }
             return try? await JFAPI.loadItem(by: id)
         }()
 
-        let info = try await infoTask
+        let info: PlaybackInfoResponse
+        if subtitleStreamIndex == nil {
+            let infoSubtitleStreams = initialInfo.mediaSource.mediaStreams?
+                .filter { $0.type == .subtitle } ?? []
+            if let streamIndex = selectSubtitleStreamIndex(from: infoSubtitleStreams) {
+                info = try await JFAPI.getPlaybackInfo(
+                    for: itemForPlayback,
+                    subtitleStreamIndex: streamIndex,
+                    audioStreamIndex: audioStreamIndex,
+                    startPositionTicks: resumeTicks
+                )
+            } else {
+                info = initialInfo
+            }
+        } else {
+            info = initialInfo
+        }
         
         guard item.id != nil else {
             throw PlaybackError.missingItemID

@@ -29,6 +29,7 @@ struct AVMediaPlayerViewIOS: View {
                 }
         } else if model.isLoading {
             ProgressView()
+                .tint(.white)
                 .controlSize(.large)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.black, ignoresSafeAreaEdges: .all)
