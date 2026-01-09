@@ -22,7 +22,8 @@ extension JFAPI {
         for item: BaseItemDto,
         subtitleStreamIndex: Int? = nil,
         audioStreamIndex: Int? = nil,
-        startPositionTicks: Int64? = nil
+        startPositionTicks: Int64? = nil,
+        mediaSourceID: String? = nil
     ) async throws -> PlaybackInfoResponse {
         guard let itemID = item.id else {
             throw PlaybackError.missingItemID
@@ -40,7 +41,7 @@ extension JFAPI {
             enableDirectPlay: true,
             enableDirectStream: true,
             enableTranscoding: true,
-            mediaSourceID: item.mediaSources?.first?.id,
+            mediaSourceID: mediaSourceID ?? item.mediaSources?.first?.id,
             startTimeTicks: startPositionTicks.map { Int($0) },
             subtitleStreamIndex: subtitleStreamIndex,
             userID: context.userID
@@ -51,7 +52,7 @@ extension JFAPI {
             startTimeTicks: startPositionTicks.map { Int($0) },
             audioStreamIndex: audioStreamIndex,
             subtitleStreamIndex: subtitleStreamIndex,
-            mediaSourceID: item.mediaSources?.first?.id,
+            mediaSourceID: mediaSourceID ?? item.mediaSources?.first?.id,
             enableDirectPlay: true,
             enableDirectStream: true,
             enableTranscoding: true,

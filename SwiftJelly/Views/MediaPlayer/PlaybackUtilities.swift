@@ -56,6 +56,24 @@ struct PlaybackUtilities {
             .mediaStreams?
             .filter { $0.type == .subtitle } ?? []
         let subtitleStreamIndex = selectSubtitleStreamIndex(from: subtitleStreams)
+        #if DEBUG
+        if !subtitleStreams.isEmpty {
+            let streamDescriptions = subtitleStreams.map { stream in
+                let index = stream.index.map(String.init) ?? "nil"
+                let codec = stream.codec ?? "nil"
+                let language = stream.language ?? "nil"
+                let title = stream.displayTitle ?? "nil"
+                return "index=\(index) codec=\(codec) lang=\(language) title=\(title)"
+            }
+            print(
+                "Playback subtitle streams for item \(itemForPlayback.id ?? "unknown"): \(streamDescriptions.joined(separator: " | "))"
+            )
+        } else {
+            print("Playback subtitle streams for item \(itemForPlayback.id ?? "unknown"): none")
+        }
+        print("Selected subtitle stream index: \(subtitleStreamIndex.map(String.init) ?? "nil")")
+        #endif
+
         // Start fetching playback info, then refresh the item in the background
         let resumeTicks: Int64? = {
             guard let resumeSeconds else { return nil }
@@ -81,11 +99,15 @@ struct PlaybackUtilities {
             let infoSubtitleStreams = initialInfo.mediaSource.mediaStreams?
                 .filter { $0.type == .subtitle } ?? []
             if let streamIndex = selectSubtitleStreamIndex(from: infoSubtitleStreams) {
+                #if DEBUG
+                print("Retrying playback info with subtitle stream index: \(streamIndex)")
+                #endif
                 info = try await JFAPI.getPlaybackInfo(
                     for: itemForPlayback,
                     subtitleStreamIndex: streamIndex,
                     audioStreamIndex: audioStreamIndex,
-                    startPositionTicks: resumeTicks
+                    startPositionTicks: resumeTicks,
+                    mediaSourceID: initialInfo.mediaSource.id
                 )
             } else {
                 info = initialInfo

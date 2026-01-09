@@ -68,6 +68,26 @@ extension PlaybackInfoResponse {
             playMethod = .directPlay
         }
 
+        #if DEBUG
+        let subtitleStreams = mediaSource.mediaStreams?
+            .filter { $0.type == .subtitle } ?? []
+        if !subtitleStreams.isEmpty {
+            let streamDescriptions = subtitleStreams.map { stream in
+                let index = stream.index.map(String.init) ?? "nil"
+                let codec = stream.codec ?? "nil"
+                let language = stream.language ?? "nil"
+                let title = stream.displayTitle ?? "nil"
+                return "index=\(index) codec=\(codec) lang=\(language) title=\(title)"
+            }
+            print(
+                "Playback info subtitle streams: \(streamDescriptions.joined(separator: " | "))"
+            )
+        } else {
+            print("Playback info subtitle streams: none")
+        }
+        print("Playback method: \(playMethod == .transcode ? "transcode" : "direct")")
+        #endif
+
         return PlaybackInfoResponse(
             playbackURL: playbackURL,
             mediaSource: mediaSource,
