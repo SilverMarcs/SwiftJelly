@@ -60,6 +60,7 @@
 				Views/MediaPlayer/macOS/AVPlayerMac.swift = (macos, );
 				Views/MediaPlayer/tvOS/AVMediaPlayerViewTVOS.swift = (tvos, );
 				Views/MediaPlayer/tvOS/AVPlayerTvOS.swift = (tvos, );
+				Views/MediaPlayer/tvOS/MediaNavigationDestinationBuilder.swift = (ios, tvos, xros, );
 				Views/MediaPlayer/tvOS/MediaNavigationMarkerBuilder.swift = (tvos, );
 				Views/MediaPlayer/tvOS/RelatedContentCollectionViewCell.swift = (tvos, );
 				Views/MediaPlayer/tvOS/RelatedContentViewController.swift = (tvos, );

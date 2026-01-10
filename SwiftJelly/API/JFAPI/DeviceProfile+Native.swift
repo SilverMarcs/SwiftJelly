@@ -38,7 +38,7 @@ extension DeviceProfile {
         [
             // Primary video+audio stream
             TranscodingProfile(
-                audioCodec: "aac,ac3,eac3,alac,flac,dts,opus",
+                audioCodec: nativeVideoAudioCodecList,
                 isBreakOnNonKeyFrames: true,
                 conditions: [
                     ProfileCondition(
@@ -66,7 +66,7 @@ extension DeviceProfile {
             ),
             // Dedicated audio renditions so the manifest can expose named tracks
             TranscodingProfile(
-                audioCodec: "aac,ac3,eac3,alac,flac,dts,opus",
+                audioCodec: nativeAudioOnlyCodecList,
                 container: "aac",
                 context: .streaming,
                 isCopyTimestamps: true,
@@ -76,6 +76,22 @@ extension DeviceProfile {
                 type: .audio
             )
         ]
+    }
+
+    private static var nativeVideoAudioCodecList: String {
+#if os(iOS)
+        "aac,alac"
+#else
+        "aac,ac3,eac3,alac,flac,dts,opus"
+#endif
+    }
+
+    private static var nativeAudioOnlyCodecList: String {
+#if os(iOS)
+        "aac,alac"
+#else
+        "aac,ac3,eac3,alac,flac,dts,opus"
+#endif
     }
     
     // MARK: - Subtitle Profiles
