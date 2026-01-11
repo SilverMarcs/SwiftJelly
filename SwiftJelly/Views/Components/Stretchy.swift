@@ -13,12 +13,18 @@ extension View {
             let currentHeight = geometry.size.height
             let scrollOffset = geometry.frame(in: .scrollView).minY
             let positiveOffset = max(0, scrollOffset)
-            
-            let newHeight = currentHeight + positiveOffset
-            let scaleFactor = newHeight / currentHeight
-            
+
+            let scaleFactor: CGFloat
+            if currentHeight > .leastNonzeroMagnitude {
+                scaleFactor = (currentHeight + positiveOffset) / currentHeight
+            } else {
+                scaleFactor = 1
+            }
+
+            let safeScale = scaleFactor.isFinite ? scaleFactor : 1
+
             return effect.scaleEffect(
-                x: scaleFactor, y: scaleFactor,
+                x: safeScale, y: safeScale,
                 anchor: .bottom
             )
         }
