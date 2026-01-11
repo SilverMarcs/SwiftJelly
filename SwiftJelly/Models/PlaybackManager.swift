@@ -7,6 +7,7 @@
 
 import Foundation
 import JellyfinAPI
+import AVFoundation
 
 @MainActor
 @Observable final class PlaybackManager {
@@ -37,17 +38,39 @@ import JellyfinAPI
     ///   - item: The item to play.
     ///   - refresh: An optional closure to call when playback ends.
     func startPlayback(for item: BaseItemDto, refresh: (() async -> Void)? = nil) {
+        // If the same item is already loaded, just resume playback
+        if let currentViewModel = viewModel, currentViewModel.item.id == item.id {
+            currentViewModel.player?.play()
+            isPlayerPresented = true
+            return
+        }
+        
+        // Different item - clean up old playback silently and start new
+        viewModel?.cleanupForSwitch()
         refreshHandler = refresh
         viewModel = MediaPlaybackViewModel(item: item)
         isPlayerPresented = true
     }
+    
+    /// Pauses the currently playing item if any.
+    func pausePlayback() {
+        viewModel?.player?.pause()
+    }
+    
+    /// Resumes the currently playing item if any.
+    func resumePlayback() {
+        viewModel?.player?.play()
+    }
 
     /// Called when playback ends to clean up and trigger the refresh handler.
     func endPlayback() async {
+        await viewModel?.cleanup()
+        viewModel = nil
+        
         if let handler = refreshHandler {
+            try? await Task.sleep(for: .milliseconds(100))
             await handler()
             refreshHandler = nil
         }
-        viewModel = nil
     }
 }

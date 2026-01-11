@@ -79,9 +79,19 @@ import Observation
         player.pause()
         player.replaceCurrentItem(with: nil)
 
-        try? await Task.sleep(for: .milliseconds(100))
-        await PlaybackManager.shared.endPlayback()
         self.player = nil
+    }
+    
+    /// Internal cleanup for switching items without triggering endPlayback.
+    func cleanupForSwitch() {
+        stopObservingTime()
+        prefetchedNextEpisode = nil
+        isFetchingNextEpisode = false
+        
+        if let player {
+            player.pause()
+            player.replaceCurrentItem(with: nil)
+        }
     }
 
     var skipIntroTargetSeconds: Double? {

@@ -25,7 +25,7 @@ struct AVMediaPlayerViewTVOS: View {
                     )
                 }
                 .onDisappear {
-                    Task { await model.cleanup() }
+                    Task { await PlaybackManager.shared.endPlayback() }
                 }
         } else if let model = playbackManager.viewModel, model.isLoading {
             ProgressView()

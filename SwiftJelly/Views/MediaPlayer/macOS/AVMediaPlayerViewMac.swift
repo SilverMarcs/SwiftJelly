@@ -17,7 +17,6 @@ struct AVMediaPlayerViewMac: View {
                     await PlaybackUtilities.reportPlaybackProgress(
                         player: player,
                         item: model.item,
-    //                    isPaused: player.timeControlStatus != .playing
                         isPaused: true
                     )
                 }
@@ -84,7 +83,7 @@ struct AVMediaPlayerViewMac: View {
             configureWindow()
         }
         .onDisappear {
-            Task { await playbackManager.viewModel?.cleanup() }
+            Task { await playbackManager.endPlayback() }
         }
     }
 

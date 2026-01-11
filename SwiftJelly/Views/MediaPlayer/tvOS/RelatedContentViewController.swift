@@ -91,6 +91,9 @@ final class RelatedContentViewController: UIViewController {
     }
 
     private func showDetails(for item: BaseItemDto) {
+        // Pause current playback when navigating to related content
+        PlaybackManager.shared.pausePlayback()
+        
         let destination = MediaNavigationDestinationBuilder.viewController(for: item)
         destination.modalPresentationStyle = .fullScreen
         present(destination, animated: true)
