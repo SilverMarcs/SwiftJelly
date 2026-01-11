@@ -24,10 +24,8 @@ struct SwiftJellyApp: App {
         #endif
         
         #if os(macOS)
-        WindowGroup("Media Player", id: "media-player", for: BaseItemDto.self) { $item in
-            if let item = item {
-                AVMediaPlayerViewMac(item: item)
-            }
+        Window("Media Player", id: "media-player") {
+            AVMediaPlayerViewMac()
         }
         .defaultSize(width: 1024, height: 576)
         .restorationBehavior(.disabled)

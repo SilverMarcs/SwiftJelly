@@ -3,14 +3,10 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewTVOS: View {
-    @State private var model: MediaPlaybackViewModel
-
-    init(item: BaseItemDto) {
-        _model = State(initialValue: MediaPlaybackViewModel(item: item))
-    }
+    @State private var playbackManager = PlaybackManager.shared
 
     var body: some View {
-        if let player = model.player {
+        if let model = playbackManager.viewModel, let player = model.player {
             AVPlayerTvOS(
                 player: player,
                 item: model.item,
@@ -31,10 +27,11 @@ struct AVMediaPlayerViewTVOS: View {
                 .onDisappear {
                     Task { await model.cleanup() }
                 }
-        } else if model.isLoading {
+        } else if let model = playbackManager.viewModel, model.isLoading {
             ProgressView()
                 .tint(.white)
                 .controlSize(.extraLarge)
+                .scaleEffect(1.5)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.black, ignoresSafeAreaEdges: .all)
                 .task(id: model.playbackToken) {

@@ -3,17 +3,13 @@ import AVKit
 import JellyfinAPI
 
 struct AVMediaPlayerViewMac: View {
-    @State private var model: MediaPlaybackViewModel
+    @State private var playbackManager = PlaybackManager.shared
     @State private var showInfoSheet = false
     @State private var didConfigureWindow = false
 
-    init(item: BaseItemDto) {
-        _model = State(initialValue: MediaPlaybackViewModel(item: item))
-    }
-
     var body: some View {
         Group {
-            if let player = model.player {
+            if let model = playbackManager.viewModel, let player = model.player {
                 AVPlayerMac(player: player) {
                     MediaPlayerOverlayControls(model: model)
                 }
@@ -25,7 +21,7 @@ struct AVMediaPlayerViewMac: View {
                         isPaused: true
                     )
                 }
-            } else if model.isLoading {
+            } else if let model = playbackManager.viewModel, model.isLoading {
                 ProgressView()
                     .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -36,22 +32,22 @@ struct AVMediaPlayerViewMac: View {
             }
         }
         .ignoresSafeArea()
-        .navigationTitle(model.item.seriesName ?? model.item.name ?? "Media Player")
-        .navigationSubtitle(model.item.seasonEpisodeString ?? "")
+        .navigationTitle(playbackManager.viewModel?.item.seriesName ?? playbackManager.viewModel?.item.name ?? "Media Player")
+        .navigationSubtitle(playbackManager.viewModel?.item.seasonEpisodeString ?? "")
         .windowFullScreenBehavior(.disabled)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .gesture(WindowDragGesture())
         .inspector(isPresented: $showInfoSheet) {
             Form {
                 Section {
-                    Text(model.item.name ?? "Unknown")
+                    Text(playbackManager.viewModel?.item.name ?? "Unknown")
                 }
 
-                if let overview = model.item.overview, !overview.isEmpty {
+                if let overview = playbackManager.viewModel?.item.overview, !overview.isEmpty {
                     Section("Overview") { Text(overview) }
                 }
 
-                if let year = model.item.productionYear {
+                if let year = playbackManager.viewModel?.item.productionYear {
                     Section("Year") { Text(String(year)) }
                 }
             }
@@ -64,7 +60,7 @@ struct AVMediaPlayerViewMac: View {
                 Image(systemName: "info")
             }
 
-            if model.audioTracks.count > 1 {
+            if let model = playbackManager.viewModel, model.audioTracks.count > 1 {
                 Menu {
                     ForEach(model.audioTracks) { track in
                         Button(track.displayName) {
@@ -84,15 +80,16 @@ struct AVMediaPlayerViewMac: View {
                 didConfigureWindow = true
             }
         }
-        .task(id: model.item.id) {
+        .task(id: playbackManager.viewModel?.item.id) {
             configureWindow()
         }
         .onDisappear {
-            Task { await model.cleanup() }
+            Task { await playbackManager.viewModel?.cleanup() }
         }
     }
 
     private func configureWindow() {
+        guard let model = playbackManager.viewModel else { return }
         if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
             let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: model.item)
             

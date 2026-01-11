@@ -12,11 +12,13 @@ struct ContentView: View {
     @Binding var selectedTab: TabSelection
     
     @State private var dataManager = DataManager.shared
-    @State private var isTopShelfPlayerPresented = false
-    @State private var topShelfPlayerItem: BaseItemDto?
+    @State private var playbackManager = PlaybackManager.shared
+    
+    #if os(tvOS)
     @State private var isTopShelfNavigationActive = false
     @State private var topShelfNavigationItem: BaseItemDto?
     @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
+    #endif
 
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @State private var trendingViewModel = TrendingInLibraryViewModel()
@@ -38,6 +40,7 @@ struct ContentView: View {
                             #if os(macOS)
                                 .frame(minWidth: 800)
                             #endif
+                            #if os(tvOS)
                                 .navigationDestination(isPresented: $isTopShelfNavigationActive) {
                                     if let item = topShelfNavigationItem {
                                         MediaDestinationView(item: item)
@@ -50,6 +53,7 @@ struct ContentView: View {
                                         topShelfNavigationItem = nil
                                     }
                                 }
+                            #endif
                         }
                     }
                 }
@@ -63,23 +67,23 @@ struct ContentView: View {
                 topShelfNavigationItem = nil
             }
             .tvNavigationStyle(navigationStyle)
-            .fullScreenCover(isPresented: $isTopShelfPlayerPresented) {
-                if let item = topShelfPlayerItem {
-                    AVMediaPlayerViewTVOS(item: item)
-                        .ignoresSafeArea()
-                }
-            }
-            .onChange(of: isTopShelfPlayerPresented) { _, isPresented in
-                if !isPresented {
-                    topShelfPlayerItem = nil
-                }
-            }
             #else
             .tabViewStyle(.sidebarAdaptable)
             .tabViewSearchActivation(.searchTabSelection)
             #endif
             #if os(iOS)
             .tabBarMinimizeBehavior(.onScrollDown)
+            #endif
+            #if !os(macOS)
+            .fullScreenCover(isPresented: $playbackManager.isPlayerPresented) {
+                #if os(tvOS)
+                AVMediaPlayerViewTVOS()
+                    .ignoresSafeArea()
+                #else
+                AVMediaPlayerViewIOS()
+                    .ignoresSafeArea()
+                #endif
+            }
             #endif
             .task(id: tmdbAPIKey) {
                 await trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
@@ -97,9 +101,7 @@ struct ContentView: View {
                 await MainActor.run {
                     switch deepLink.action {
                     case .play:
-                        RefreshHandlerContainer.shared.refresh = nil
-                        topShelfPlayerItem = item
-                        isTopShelfPlayerPresented = true
+                        PlaybackManager.shared.startPlayback(for: item, refresh: nil)
                     case .open:
                         topShelfNavigationItem = item
                         isTopShelfNavigationActive = true

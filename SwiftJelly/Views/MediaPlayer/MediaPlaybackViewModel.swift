@@ -80,10 +80,7 @@ import Observation
         player.replaceCurrentItem(with: nil)
 
         try? await Task.sleep(for: .milliseconds(100))
-        if let handler = RefreshHandlerContainer.shared.refresh {
-            await handler()
-            RefreshHandlerContainer.shared.refresh = nil
-        }
+        await PlaybackManager.shared.endPlayback()
         self.player = nil
     }
 

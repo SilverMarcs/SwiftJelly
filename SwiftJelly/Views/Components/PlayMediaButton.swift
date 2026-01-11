@@ -12,36 +12,20 @@ struct PlayMediaButton<Label: View>: View {
     let item: BaseItemDto
     @ViewBuilder let label: Label
     
-    @State private var showPlayer = false
-    
     var body: some View {
         Button {
-            if item.id == nil {
-               return
-            }
+            guard item.id != nil else { return }
             
-            RefreshHandlerContainer.shared.refresh = {
-                await refresh()
-            }
             #if os(macOS)
             dismissWindow(id: "media-player")
-            openWindow(id: "media-player", value: item)
-            #else
-            showPlayer = true
+            openWindow(id: "media-player")
             #endif
+
+            PlaybackManager.shared.startPlayback(for: item) {
+                await refresh()
+            }
         } label: {
             label
         }
-        #if !os(macOS)
-        .fullScreenCover(isPresented: $showPlayer) {
-            #if os(tvOS)
-            AVMediaPlayerViewTVOS(item: item)
-                .ignoresSafeArea()
-            #else
-            AVMediaPlayerViewIOS(item: item)
-                .ignoresSafeArea()
-            #endif
-        }
-        #endif
     }
 }

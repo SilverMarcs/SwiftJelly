@@ -57,7 +57,9 @@ struct TrendingInLibraryView: View {
             }
             .scrollTargetLayout()
         }
+        #if os(iOS)
         .stretchy()
+        #endif
         .padding(.top, showTrendingOnTop && viewModel.items.isEmpty ? 100 : 0)
         .scrollPosition(id: $viewModel.scrolledID, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
