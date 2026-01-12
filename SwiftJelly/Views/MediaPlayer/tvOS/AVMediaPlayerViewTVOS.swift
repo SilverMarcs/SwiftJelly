@@ -12,10 +12,18 @@ struct AVMediaPlayerViewTVOS: View {
                 item: model.item,
                 isTransitioning: model.isAutoLoadingNext,
                 showSkipIntro: model.shouldShowSkipIntro,
-                showNextEpisode: model.shouldShowNextEpisode,
+                nextEpisode: model.nextEpisode,
+                creditsStartSeconds: model.creditsStartSeconds,
                 onSkipIntro: { Task { await model.skipIntro() } },
-                onNextEpisode: { Task { await model.transitionToNextEpisode() } }
+                onNextEpisode: { Task { await model.transitionToNextEpisode() } },
+                onDismiss: {
+                    Task {
+                        playbackManager.isPlayerPresented = false
+                        await playbackManager.endPlayback()
+                    }
+                }
             )
+                .id("\(model.item.id ?? "")_\(model.nextEpisode?.id ?? "none")")
                 .allowsTightening(!model.isAutoLoadingNext)
                 .task(id: player.timeControlStatus) {
                     await PlaybackUtilities.reportPlaybackProgress(

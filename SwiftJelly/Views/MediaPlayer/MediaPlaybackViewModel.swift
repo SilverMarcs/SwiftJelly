@@ -23,8 +23,15 @@ import Observation
 
     var isFetchingNextEpisode = false
 
+    /// The prefetched next episode, if available.
+    private(set) var nextEpisode: BaseItemDto?
+    
+    /// The time in seconds when credits start for the current item.
+    var creditsStartSeconds: Double? {
+        markers.creditsStartSeconds
+    }
+
     @ObservationIgnored private var markers = MediaChapterMarkers(introRangeSeconds: nil, creditsStartSeconds: nil)
-    @ObservationIgnored private var prefetchedNextEpisode: BaseItemDto?
     @ObservationIgnored private var timeObserverToken: Any?
     @ObservationIgnored private var requestedAudioStreamIndex: Int?
     @ObservationIgnored private var isLoadingTaskActive = false
@@ -72,7 +79,7 @@ import Observation
 
     func cleanup() async {
         stopObservingTime()
-        prefetchedNextEpisode = nil
+        nextEpisode = nil
         isFetchingNextEpisode = false
 
         guard let player else { return }
@@ -85,7 +92,7 @@ import Observation
     /// Internal cleanup for switching items without triggering endPlayback.
     func cleanupForSwitch() {
         stopObservingTime()
-        prefetchedNextEpisode = nil
+        nextEpisode = nil
         isFetchingNextEpisode = false
         
         if let player {
@@ -135,17 +142,17 @@ import Observation
 
         let finishedItem = item
 
-        let nextEpisode: BaseItemDto?
-        if let cachedNextEpisode = prefetchedNextEpisode {
-            nextEpisode = cachedNextEpisode
+        let episodeToPlay: BaseItemDto?
+        if let cachedNextEpisode = nextEpisode {
+            episodeToPlay = cachedNextEpisode
         } else {
-            nextEpisode = try? await JFAPI.loadNextEpisode(after: finishedItem)
+            episodeToPlay = try? await JFAPI.loadNextEpisode(after: finishedItem)
         }
 
-        guard let nextEpisode, nextEpisode.id != finishedItem.id else { return }
+        guard let episodeToPlay, episodeToPlay.id != finishedItem.id else { return }
 
-        prefetchedNextEpisode = nil
-        item = nextEpisode
+        nextEpisode = nil
+        item = episodeToPlay
         await load(audioIndex: requestedAudioStreamIndex, resumeSeconds: nil)
     }
 
@@ -200,7 +207,7 @@ import Observation
 
     private func prefetchNextEpisodeIfNeeded() async {
         guard item.type == .episode else { return }
-        guard prefetchedNextEpisode == nil, !isFetchingNextEpisode else { return }
+        guard nextEpisode == nil, !isFetchingNextEpisode else { return }
 
         let duration = durationSeconds
         guard duration > 0 else { return }
@@ -208,9 +215,11 @@ import Observation
         let remainingSeconds = duration - currentSeconds
         guard remainingSeconds <= 120 else { return }
 
+        print("[NextEpisode] Prefetching next episode - remaining: \(remainingSeconds)s")
         isFetchingNextEpisode = true
         defer { isFetchingNextEpisode = false }
-        prefetchedNextEpisode = try? await JFAPI.loadNextEpisode(after: item)
+        nextEpisode = try? await JFAPI.loadNextEpisode(after: item)
+        print("[NextEpisode] Prefetch complete - nextEpisode: \(nextEpisode?.name ?? "nil")")
     }
 
     private func resolveSelectedTrack(preferredIndex: Int?) -> PlaybackAudioTrack? {
