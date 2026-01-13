@@ -14,11 +14,6 @@ struct SearchView: View {
             .platformNavigationToolbar()
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
             .searchPresentationToolbarBehavior(.avoidHidingContent)
-            .searchScopes($searchScope) {
-                ForEach(SearchScope.allCases) { scope in
-                    Text(scope.rawValue).tag(scope)
-                }
-            }
             #if os(tvOS)
             .frame(maxWidth: .infinity, alignment: .leading)
             .focusSection()
@@ -34,6 +29,11 @@ struct SearchView: View {
                 searchTask?.cancel()
             }
             #else
+            .searchScopes($searchScope) {
+                ForEach(SearchScope.allCases) { scope in
+                    Text(scope.rawValue).tag(scope)
+                }
+            }
             .onSubmit(of: .search) {
                 Task {
                     await performSearch(for: searchText)
