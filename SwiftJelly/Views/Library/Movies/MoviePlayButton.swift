@@ -21,8 +21,6 @@ struct MoviePlayButton: View {
                         .frame(width: 40)
                         #endif
                     
-                    ProgressGauge(progress: progress)
-                    
                     if let remaining = item.timeRemainingString {
                         Text(remaining)
                     }
