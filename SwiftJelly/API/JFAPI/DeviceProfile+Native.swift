@@ -29,8 +29,7 @@ extension DeviceProfile {
     // MARK: - Direct Play Profiles
     
     private static var nativeDirectPlayProfiles: [DirectPlayProfile] {
-        [
-        ]
+        []
     }
     
     // MARK: - Transcoding Profiles
@@ -147,14 +146,6 @@ extension DeviceProfile {
                 ],
                 type: .video
             )
-//            CodecProfile(
-//                applyConditions: [],
-//                codec: "h264",
-//                conditions: [
-//                    ProfileCondition(condition: .lessThanEqual, isRequired: false, property: .videoLevel, value: "51")
-//                ],
-//                type: .video
-//            )
         ]
     }
 }

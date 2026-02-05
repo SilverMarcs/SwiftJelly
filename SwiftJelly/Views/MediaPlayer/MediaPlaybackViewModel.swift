@@ -35,6 +35,10 @@ import Observation
     @ObservationIgnored private var timeObserverToken: Any?
     @ObservationIgnored private var requestedAudioStreamIndex: Int?
     @ObservationIgnored private var isLoadingTaskActive = false
+    @ObservationIgnored private var playbackEndObserver: NSObjectProtocol?
+    @ObservationIgnored private var hasReportedPlaybackStart = false
+    @ObservationIgnored private var lastProgressReportTime: Date?
+    @ObservationIgnored private var progressReportInterval: TimeInterval = 10
 
     init(item: BaseItemDto) {
         self.item = item
@@ -51,6 +55,10 @@ import Observation
 
         isLoading = true
         requestedAudioStreamIndex = audioIndex ?? requestedAudioStreamIndex
+
+        hasReportedPlaybackStart = false
+        lastProgressReportTime = nil
+        
         stopObservingTime()
 
         do {
@@ -81,6 +89,8 @@ import Observation
         stopObservingTime()
         nextEpisode = nil
         isFetchingNextEpisode = false
+
+        await reportPlaybackStopped()
 
         guard let player else { return }
         player.pause()
@@ -137,7 +147,8 @@ import Observation
         
         isAutoLoadingNext = true
         defer { isAutoLoadingNext = false }
-
+        
+        await reportPlaybackStopped()
         stopObservingTime()
 
         let finishedItem = item
@@ -176,6 +187,14 @@ import Observation
                 self.currentSeconds = time.seconds.isFinite ? max(0, time.seconds) : 0
                 self.durationSeconds = self.resolvedDurationSeconds(for: player)
                 await self.prefetchNextEpisodeIfNeeded()
+                
+                // Report playback start once when playback begins
+                if !self.hasReportedPlaybackStart {
+                    await self.reportPlaybackStart()
+                }
+                
+                // Report progress periodically
+                await self.reportProgressIfNeeded(player: player)
 
                 guard self.item.type == .episode,
                       !self.isAutoLoadingNext,
@@ -187,10 +206,20 @@ import Observation
     }
 
     private func stopObservingTime() {
-        guard let token = timeObserverToken else { return }
-        player?.removeTimeObserver(token)
-        timeObserverToken = nil
+        if let token = timeObserverToken {
+            player?.removeTimeObserver(token)
+            timeObserverToken = nil
+        }
+
+        stopObservingPlaybackEnd()
     }
+    
+    private func stopObservingPlaybackEnd() {
+       if let observer = playbackEndObserver {
+           NotificationCenter.default.removeObserver(observer)
+           playbackEndObserver = nil
+       }
+   }
 
     private func resolvedDurationSeconds(for player: AVPlayer) -> Double {
         if let duration = player.currentItem?.duration.seconds, duration.isFinite, duration > 0 {
@@ -243,4 +272,67 @@ import Observation
         preferredAudioLanguage = audioTracks.first?.languageCode ?? preferredAudioLanguage
         return audioTracks.first
     }
+    
+    
+     // MARK: - Playback Progress Reporting
+     
+     private func reportPlaybackStart() async {
+         guard let itemID = item.id else { return }
+         hasReportedPlaybackStart = true
+         lastProgressReportTime = Date()
+         
+         let positionTicks = Int64(currentSeconds * 10_000_000)
+         
+         await JFAPI.reportPlaybackStart(
+             itemID: itemID,
+             mediaSourceID: playbackInfo?.mediaSource.id,
+             playSessionID: playbackInfo?.playSessionId,
+             playMethod: .transcode,
+             audioStreamIndex: selectedAudioTrack?.index,
+             subtitleStreamIndex: -1,
+             canSeek: true,
+             positionTicks: positionTicks
+         )
+     }
+     
+     private func reportProgressIfNeeded(player: AVPlayer) async {
+         guard hasReportedPlaybackStart else { return }
+         guard let itemID = item.id else { return }
+         
+         let now = Date()
+         let shouldReport: Bool
+         if let lastReport = lastProgressReportTime {
+             shouldReport = now.timeIntervalSince(lastReport) >= progressReportInterval
+         } else {
+             shouldReport = true
+         }
+         
+         guard shouldReport else { return }
+         lastProgressReportTime = now
+         
+         let isPaused = player.timeControlStatus != .playing
+         let positionTicks = Int64(currentSeconds * 10_000_000)
+         
+         await JFAPI.reportPlaybackProgress(
+             itemID: itemID,
+             mediaSourceID: playbackInfo?.mediaSource.id ?? itemID,
+             positionTicks: positionTicks,
+             isPaused: isPaused
+         )
+     }
+     
+     func reportPlaybackStopped() async {
+         guard hasReportedPlaybackStart, let itemID = item.id else { return }
+         
+         let positionTicks = Int64(currentSeconds * 10_000_000)
+         await JFAPI.reportPlaybackStopped(
+             itemID: itemID,
+             mediaSourceID: playbackInfo?.mediaSource.id,
+             playSessionID: playbackInfo?.playSessionId,
+             positionTicks: positionTicks
+         )
+         
+         hasReportedPlaybackStart = false
+         lastProgressReportTime = nil
+     }
 }

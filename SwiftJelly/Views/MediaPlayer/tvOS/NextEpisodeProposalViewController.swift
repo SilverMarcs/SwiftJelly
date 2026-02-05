@@ -55,7 +55,7 @@ final class NextEpisodeProposalViewController: AVContentProposalViewController {
         let label = UILabel()
         label.font = .systemFont(ofSize: 29, weight: .regular)
         label.textColor = .white.withAlphaComponent(0.85)
-        label.numberOfLines = 4
+        label.numberOfLines = 2
         return label
     }()
     
