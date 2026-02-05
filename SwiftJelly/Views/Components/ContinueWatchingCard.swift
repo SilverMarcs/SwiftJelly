@@ -28,8 +28,8 @@ struct ContinueWatchingCard: View {
     private let gradient = LinearGradient(
         gradient: Gradient(stops: [
             .init(color: .white, location: 0),
-            .init(color: .white.opacity(0.7), location: 0.15),
-            .init(color: .white.opacity(0), location: 0.25)
+            .init(color: .white.opacity(0.7), location: 0.30),
+            .init(color: .white.opacity(0), location: 0.40)
         ]),
         startPoint: .bottom,
         endPoint: .top

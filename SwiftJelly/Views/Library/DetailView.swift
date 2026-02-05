@@ -49,6 +49,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                         DetailLogoOverlayView(item: item)
                             .padding(.bottom, -100)
                             .padding(.top, -60)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                     
                     content
@@ -58,7 +59,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             }
             .background {
                 if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
-                    CachedAsyncImage(url: url, targetSize: 1000)
+                    CachedAsyncImage(url: url, targetSize: 2000)
                         .scaledToFill()
                         .mask {
                             LinearGradient(

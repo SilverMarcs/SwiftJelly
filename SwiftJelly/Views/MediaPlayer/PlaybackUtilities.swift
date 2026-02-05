@@ -152,6 +152,9 @@ struct PlaybackUtilities {
         let player = existingPlayer ?? AVPlayer()
         player.pause()
         player.replaceCurrentItem(with: playerItem)
+
+        player.automaticallyWaitsToMinimizeStalling = true
+        playerItem.preferredForwardBufferDuration = 30
         
         #if os(macOS)
         player.preventsDisplaySleepDuringVideoPlayback = true

@@ -4,13 +4,10 @@ import JellyfinAPI
 struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
+    @State private var alreadyAutoSelectedSeason = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            if vm.isLoadingEpisodes && vm.seasons.isEmpty {
-                UniversalProgressView()
-            }
-
             scroller
         }
         .task(id: vm.selectedSeason) {
@@ -21,7 +18,7 @@ struct ShowSeasonsView: View {
     
     @ViewBuilder
     private var seasonPicker: some View {
-        if !vm.seasons.isEmpty {
+        if !vm.seasons.isEmpty && vm.selectedSeason != nil {
             Picker("Season", selection: $vm.selectedSeason) {
                 ForEach(vm.seasons) { season in
                     Text(season.name ?? "Season").tag(season as BaseItemDto?)
@@ -42,6 +39,12 @@ struct ShowSeasonsView: View {
 
     private var scroller: some View {
         SectionContainer {
+            if vm.isLoadingEpisodes && vm.seasons.isEmpty {
+                UniversalProgressView()
+                    .frame(height: 483)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
                     SeasonEpisodeCard(item: episode)
@@ -60,7 +63,7 @@ struct ShowSeasonsView: View {
     
     private func scrollToLatestEpisode() {
         let episodes = vm.episodes
-        guard !episodes.isEmpty else { return }
+        guard !episodes.isEmpty, !alreadyAutoSelectedSeason else { return }
         let sortedEpisodes = episodes.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
         var targetEpisode: BaseItemDto? = sortedEpisodes.first { ep in
             let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
@@ -75,7 +78,8 @@ struct ShowSeasonsView: View {
         }
         if targetEpisode == nil { targetEpisode = sortedEpisodes.first } // why .last vs .first?
         if let episode = targetEpisode, let episodeId = episode.id {
-            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .trailing) } // trailing so it doesnt getcut off for smaller window sizes
+            alreadyAutoSelectedSeason = true
+            withAnimation { episodeScrollPosition.scrollTo(id: episodeId, anchor: .leading) } // trailing so it doesnt getcut off for smaller window sizes
         }
     }
 

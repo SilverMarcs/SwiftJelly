@@ -21,9 +21,6 @@ struct ShowHeroActions: View {
             FavoriteButton(item: vm.show)
         }
         .environment(\.refresh, refreshAllAndSync)
-        .task {
-            await vm.loadQuickNextEpisode()
-        }
     }
     
     private var loadingButton: some View {

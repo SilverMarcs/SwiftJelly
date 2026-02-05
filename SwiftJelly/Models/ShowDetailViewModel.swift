@@ -32,6 +32,7 @@ class ShowDetailViewModel {
         defer { isLoading = false }
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadShowDetail() }
+            group.addTask { await self.loadQuickNextEpisode() }
             group.addTask { await self.loadSeasonsAndEpisodes() }
         }
     }
@@ -39,22 +40,28 @@ class ShowDetailViewModel {
     // Quick load just the next episode for hero/play button (no seasons/episodes)
     func loadQuickNextEpisode() async {
         isLoading = true
-        defer { isLoading = false }
         do {
             let seriesID = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !seriesID.isEmpty else { return }
-            
-            // Try NextUp API first (fast)
-            if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
-                withAnimation { nextEpisode = nextUp }
-                return
-            }
-            
-            // Fallback: try resume items
+
             if let resumed = try await JFAPI.loadResumeItems(limit: 10, parentID: seriesID)
                 .sorted(by: { activityDate(for: $0) > activityDate(for: $1) })
                 .first(where: { $0.type == .episode }) {
-                withAnimation { nextEpisode = resumed }
+                withAnimation {
+                    nextEpisode = resumed
+                    isLoading = false
+                }
+
+                return
+            }
+            
+            // Try NextUp API as backup
+            if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
+                withAnimation {
+                    nextEpisode = nextUp
+                    isLoading = false
+                }
+                return
             }
         } catch {
             print("Quick next episode load failed: \(error)")
@@ -125,57 +132,16 @@ class ShowDetailViewModel {
             episodes = []
             allEpisodes = [:]
         }
-        
-        await computeNextEpisode()
+
         await updateEpisodesForSelectedSeason()
-    }
-    
-    private func computeNextEpisode() async {
-        var computed: BaseItemDto? = nil
-        
-        let sortedSeasons = seasons
-        for season in sortedSeasons {
-            let sid = season.id ?? ""
-            let sortedEpisodes = allEpisodes[sid] ?? []
-            
-            // Prefer in-progress but not finished
-            if let inProgress = sortedEpisodes.first(where: { ep in
-                let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
-                let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
-                return hasProgress && !isFullyWatched
-            }) {
-                computed = inProgress
-                break
-            }
-            
-            // First fully-unwatched
-            if let firstUnwatched = sortedEpisodes.first(where: { ep in
-                let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
-                return !isWatched
-            }) {
-                computed = firstUnwatched
-                break
-            }
-        }
-        
-        // All watched: choose last episode of last season
-        if computed == nil, let lastSeason = sortedSeasons.last {
-            let sid = lastSeason.id ?? ""
-            computed = allEpisodes[sid]?.last
-        }
-        
-        // Single animated assignment
-        withAnimation {
-            nextEpisode = computed
-            isLoading = false
-        }
         
         // Auto-select season if different
-        if let ne = computed, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
+        if let ne = nextEpisode, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
             if selectedSeason?.id != targetSeason.id {
                 withAnimation {
                     selectedSeason = targetSeason
                 }
+
                 await updateEpisodesForSelectedSeason()
             }
         }

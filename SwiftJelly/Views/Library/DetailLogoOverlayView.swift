@@ -11,6 +11,7 @@ struct DetailLogoOverlayView: View {
             CachedAsyncImage(url: url, targetSize: 450)
                 .scaledToFit()
                 .frame(maxHeight: 120)
+                .frame(maxWidth: 400)
                 .transition(.opacity)
                 .allowsHitTesting(false)
         }

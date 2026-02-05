@@ -71,7 +71,8 @@ extension JFAPI {
         return try PlaybackInfoResponse.from(
             response: response.value,
             item: item,
-            client: context.client
+            client: context.client,
+            audioStreamIndex: audioStreamIndex
         )
     }
 

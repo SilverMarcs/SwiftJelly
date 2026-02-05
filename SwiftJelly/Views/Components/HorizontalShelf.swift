@@ -6,7 +6,7 @@ struct HorizontalShelf<Content: View>: View {
 
     var body: some View {
         ScrollView(.horizontal) {
-            HStack(spacing: spacing) {
+            LazyHStack(spacing: spacing) {
                 content()
             }
             .scenePadding(.horizontal)

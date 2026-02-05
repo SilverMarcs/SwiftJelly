@@ -23,7 +23,7 @@ struct ShowPlayButton: View {
                 } else if let nextEpisode = vm.nextEpisode {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")
-                        
+
                         if let seasonEpisodeString = nextEpisode.seasonEpisodeString {
                             Text(seasonEpisodeString)
                         }
@@ -37,10 +37,10 @@ struct ShowPlayButton: View {
                             .controlSize(.mini)
                             .frame(width: 40)
                             #endif
-                        }
-                        
-                        if let remaining = nextEpisode.timeRemainingString {
-                            Text(remaining)
+                            
+                            if let remaining = nextEpisode.timeRemainingString {
+                                Text(remaining)
+                            }
                         }
                     }
                     .transition(.opacity)
