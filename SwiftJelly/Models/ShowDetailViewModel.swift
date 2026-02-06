@@ -54,7 +54,7 @@ class ShowDetailViewModel {
 
                 return
             }
-            
+
             // Try NextUp API as backup
             if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
                 withAnimation {
@@ -63,8 +63,22 @@ class ShowDetailViewModel {
                 }
                 return
             }
+
+            if allEpisodes.count > 0 {
+                await computeNextEpisode()
+            }
         } catch {
             print("Quick next episode load failed: \(error)")
+        }
+    }
+    
+    func autoSelectSeasonAndEpisode() async {
+        if let ne = nextEpisode, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
+            if selectedSeason?.id != targetSeason.id {
+                selectedSeason = targetSeason
+
+                await updateEpisodesForSelectedSeason()
+            }
         }
     }
     
@@ -72,6 +86,7 @@ class ShowDetailViewModel {
         guard let selectedSeason else { episodes = []; return }
         let sid = selectedSeason.id ?? ""
         episodes = allEpisodes[sid] ?? []
+        isLoadingEpisodes = false
     }
     
     func markEpisodePlayed(_ episode: BaseItemDto) async {
@@ -132,19 +147,56 @@ class ShowDetailViewModel {
             episodes = []
             allEpisodes = [:]
         }
-
-        await updateEpisodesForSelectedSeason()
+        
+        if nextEpisode == nil {
+            await computeNextEpisode()
+        }
         
         // Auto-select season if different
-        if let ne = nextEpisode, let sid = ne.seasonID, let targetSeason = seasons.first(where: { $0.id == sid }) {
-            if selectedSeason?.id != targetSeason.id {
-                withAnimation {
-                    selectedSeason = targetSeason
-                }
-
-                await updateEpisodesForSelectedSeason()
+        await autoSelectSeasonAndEpisode()
+    }
+    
+    private func computeNextEpisode() async {
+        var computed: BaseItemDto? = nil
+        
+        let sortedSeasons = seasons
+        for season in sortedSeasons {
+            let sid = season.id ?? ""
+            let sortedEpisodes = allEpisodes[sid] ?? []
+            
+            // Prefer in-progress but not finished
+            if let inProgress = sortedEpisodes.first(where: { ep in
+                let hasProgress = (ep.userData?.playbackPositionTicks ?? 0) > 0
+                let isFullyWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
+                return hasProgress && !isFullyWatched
+            }) {
+                computed = inProgress
+                break
+            }
+            
+            // First fully-unwatched
+            if let firstUnwatched = sortedEpisodes.first(where: { ep in
+                let isWatched = ep.userData?.isPlayed == true || (ep.playbackProgress ?? 0) >= 0.95
+                return !isWatched
+            }) {
+                computed = firstUnwatched
+                break
             }
         }
+        
+        // All watched: choose last episode of last season
+        if computed == nil, let lastSeason = sortedSeasons.last {
+            let sid = lastSeason.id ?? ""
+            computed = allEpisodes[sid]?.last
+        }
+        
+        // Single animated assignment
+        withAnimation {
+            nextEpisode = computed
+            isLoading = false
+        }
+
+        await autoSelectSeasonAndEpisode()
     }
     
     private func activityDate(for item: BaseItemDto) -> Date {
