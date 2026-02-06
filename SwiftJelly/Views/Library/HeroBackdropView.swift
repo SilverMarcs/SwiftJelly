@@ -23,32 +23,55 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     // MARK: - Backdrop
     
+    @ViewBuilder
     private var backdropImage: some View {
-        CachedAsyncImage(
+        let reflectionHeight: CGFloat = 200
+        let backdrop = CachedAsyncImage(
             url: ImageURLProvider.imageURL(for: item, type: .backdrop),
             targetSize: 2000
         )
-        .scaledToFill()
-        #if os(iOS)
-        .containerRelativeFrame(.horizontal)
-        #endif
-        .frame(height: height)
-        .clipped()
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(.regularMaterial)
-                .mask {
-                    LinearGradient(
-                        colors: [.white, .white.opacity(0.95), .clear],
-                        startPoint: .bottom,
-                        endPoint: .top
+        
+        GeometryReader { geo in
+            VStack(spacing: 0) {
+                backdrop
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
+                    .clipped()
+
+                backdrop
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
+                    .scaleEffect(x: 1, y: -1, anchor: .center)
+                    .frame(
+                        width: geo.size.width,
+                        height: reflectionHeight,
+                        alignment: .top
                     )
-                }
-                .frame(height: 300)
+                    .clipped()
+            }
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(.regularMaterial)
+                    .mask {
+                        bottomGradient
+                    }
+                    .frame(height: reflectionHeight + 150)
+            }
+            .backgroundExtensionEffect()
+            .stretchy()
         }
-        .backgroundExtensionEffect()
-        .stretchy()
+        .frame(height: backdropHeight + reflectionHeight)
     }
+    
+    let bottomGradient = LinearGradient(
+        gradient: Gradient(stops: [
+            .init(color: .white, location: 0),
+            .init(color: .white.opacity(1), location: 0.6),
+            .init(color: .white.opacity(0), location: 1.0)
+        ]),
+        startPoint: .bottom,
+        endPoint: .top
+    )
     
     private var height: CGFloat {
         #if os(macOS)
@@ -144,7 +167,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     #if os(tvOS)
         450
     #else
-        450
+        250
     #endif
     }
 
@@ -152,7 +175,18 @@ struct HeroBackdropView<HeroActions: View>: View {
     #if os(tvOS)
         300
     #else
-        100
+        140
     #endif
     }
+    
+    private var backdropTargetSize: CGFloat {
+    #if os(tvOS)
+        2000
+    #else
+        1080
+    #endif
+    }
+    
+    private var backdropHeight: CGFloat { 400 }
 }
+
