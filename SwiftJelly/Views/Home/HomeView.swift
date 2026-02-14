@@ -14,7 +14,9 @@ enum FocusField {
 
 struct HomeView: View {
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
-    @State private var showScrollEffect = false
+    @AppStorage("continueWatchingStyle") private var continueWatchingStyle: ContinueWatchingStyle = .combined
+
+    @State private var showScrollEffect = false    
 
 #if os(tvOS)
     @State private var belowFold = false
@@ -39,12 +41,18 @@ struct HomeView: View {
                 }
                 #endif
                 
-                ContinueWatchingView(header: "Continue Watching") {
-                    try await JFAPI.loadResumeItems(limit: 20)
-                }
-                
-                ContinueWatchingView(header: "Next Up") {
-                    try await JFAPI.loadNextUpItems(limit: 20)
+                if continueWatchingStyle == .combined {
+                    ContinueWatchingView(header: "Continue Watching") {
+                        try await JFAPI.loadContinueWatchingSmart()
+                    }
+                } else {
+                    ContinueWatchingView(header: "Continue Watching") {
+                        try await JFAPI.loadResumeItems(limit: 20)
+                    }
+                    
+                    ContinueWatchingView(header: "Next Up") {
+                        try await JFAPI.loadNextUpItems(limit: 20)
+                    }
                 }
 
                 MediaShelf(header: "Favorites") {

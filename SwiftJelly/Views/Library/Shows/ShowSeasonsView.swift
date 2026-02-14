@@ -4,7 +4,7 @@ import JellyfinAPI
 struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
-    @FocusState private var focusedEpisodeID: UUID?
+    @FocusState private var focusedEpisodeID: String?
     @State private var alreadyAutoSelectedSeason = false
     
     var body: some View {
@@ -35,11 +35,13 @@ struct ShowSeasonsView: View {
     @ViewBuilder
     private var seasonPicker: some View {
         Picker("Season", selection: $vm.selectedSeason) {
-            if vm.seasons.isEmpty {
+            if vm.selectedSeason == nil {
                 Text("Seasons").tag(nil as BaseItemDto?)
-            } else {
+            }
+            
+            if !vm.seasons.isEmpty {
                 ForEach(vm.seasons) { season in
-                    Text(season.name ?? "Season").tag(season as BaseItemDto?)
+                    Text(season.name ?? "Season").tag(season as BaseItemDto)
                 }
             }
         }

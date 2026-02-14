@@ -9,7 +9,7 @@ import JellyfinAPI
 import Foundation
 
 public struct ViewListItem<T: Equatable>: Identifiable, Equatable {
-    public var id: UUID
+    public var id: String
     public var base: T?
     
     public static func == (lhs: ViewListItem<T>, rhs: ViewListItem<T>) -> Bool {
@@ -31,12 +31,12 @@ extension Array {
                 self[index].base = dto
             } else {
                 // Add new items if the new list is longer
-                self.append(ViewListItem(id: UUID(), base: dto))
+                self.append(ViewListItem(id: UUID().uuidString, base: dto))
             }
         }
     }
 }
 
 public func withPlaceholderItems<T: Equatable>(size: Int) -> [ViewListItem<T>] {
-    (0..<size).map { _ in ViewListItem<T>(id: UUID(), base: nil)}
+    (0..<size).map { _ in ViewListItem<T>(id: UUID().uuidString, base: nil)}
 }

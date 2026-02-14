@@ -137,7 +137,7 @@ struct SeasonEpisodeCard: View {
 }
 
 #Preview {
-    SeasonEpisodeCard(item: ViewListItem(id: UUID(), base: BaseItemDto(indexNumber: 12, parentIndexNumber: 5, runTimeTicks: 30000, userData: UserItemDataDto(playbackPositionTicks: 1300, isPlayed: true))))
+    SeasonEpisodeCard(item: ViewListItem(id: "test", base: BaseItemDto(indexNumber: 12, parentIndexNumber: 5, runTimeTicks: 30000, userData: UserItemDataDto(playbackPositionTicks: 1300, isPlayed: true))))
 }
 
 #endif
