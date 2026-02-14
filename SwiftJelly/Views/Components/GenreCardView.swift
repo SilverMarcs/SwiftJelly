@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GenreCardView: View {
-    let name: String
+    @State var name: String
 
     var body: some View {
         let baseColor = color(for: name)
@@ -23,6 +23,7 @@ struct GenreCardView: View {
             .lineLimit(2)
             .padding(.horizontal, padding)
             .padding(.vertical, padding - 2)
+            .frame(minWidth: minWidth)
             .background {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(baseColor.gradient)
@@ -53,6 +54,14 @@ struct GenreCardView: View {
         18
         #else
         12
+        #endif
+    }
+    
+    private var minWidth: CGFloat {
+        #if os(tvOS)
+        200
+        #else
+        100
         #endif
     }
 

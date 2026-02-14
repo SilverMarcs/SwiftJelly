@@ -9,28 +9,19 @@ import SwiftUI
 import JellyfinAPI
 
 struct GenreCarouselView: View {
-    @State private var genres: [BaseItemDto] = []
-    @State private var isLoading = false
+    @State private var genres: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 10)
+    @State private var isLoaded = false
 
     var body: some View {
-        SectionContainer(showHeader: !genres.isEmpty || isLoading) {
-            if !genres.isEmpty {
-                HorizontalShelf(spacing: spacing) {
-                    ForEach(genres.shuffled()) { genre in
-                        NavigationLink {
-                            FilteredMediaView(filter: .genre(genre.name ?? "Genre"))
-                        } label: {
-                            GenreCardView(name: genre.name ?? "Genre")
-                        }
-                        .adaptiveButtonStyle()
+        SectionContainer {
+            HorizontalShelf(spacing: spacing) {
+                ForEach(genres.shuffled()) { genre in
+                    NavigationLink(value: genre.base) {
+                        GenreCardView(name: genre.base?.name ?? " ")
                     }
+                    .id("\(genre.id)-\(genre.base?.name ?? "")")
+                    .adaptiveButtonStyle()
                 }
-            }
-
-            if isLoading {
-                UniversalProgressView()
-                    .frame(maxWidth: .infinity)
-                    .scenePadding(.horizontal)
             }
         } header: {
             Text("Genres")
@@ -41,13 +32,15 @@ struct GenreCarouselView: View {
     }
     
     private func loadGenres() async {
-        if !genres.isEmpty { return }
-        guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
+        if isLoaded { return }
+        
         do {
             let genres = try await JFAPI.loadGenres(limit: 20)
-            withAnimation { self.genres = genres }
+            isLoaded = true
+            
+            await MainActor.run {
+                self.genres.update(with: genres)
+            }
         } catch {
             print("Error loading genres: \(error)")
         }
@@ -60,4 +53,9 @@ struct GenreCarouselView: View {
         10
         #endif
     }
+}
+
+
+#Preview {
+    GenreCarouselView()
 }

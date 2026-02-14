@@ -23,39 +23,34 @@ struct ContentView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @State private var trendingViewModel = TrendingInLibraryViewModel()
 
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    private var isCompactSize: Bool {
+        horizontalSizeClass == .compact
+    }
+    #else
+    private var isCompactSize: Bool { false }
+    #endif
+
     var body: some View {
         if dataManager.servers.isEmpty {
             NoServerView()
         } else {
             TabView(selection: $selectedTab) {
-                ForEach(TabSelection.allCases, id: \.self) { tab in
+                ForEach(primaryTabs, id: \.self) { tab in
                     Tab(tab.title,
                         systemImage: tab.systemImage,
                         value: tab,
                         role: tab == .search ? .search : .none
                     ) {
                         NavigationStack {
-                            tab.tabView
-                                .navigationDestinations()
-                            #if os(macOS)
-                                .frame(minWidth: 800)
-                            #endif
-                            #if os(tvOS)
-                                .navigationDestination(isPresented: $isTopShelfNavigationActive) {
-                                    if let item = topShelfNavigationItem {
-                                        MediaDestinationView(item: item)
-                                    } else {
-                                        ContentUnavailableView("Missing Item", systemImage: "questionmark.circle")
-                                    }
-                                }
-                                .onChange(of: isTopShelfNavigationActive) { _, isPresented in
-                                    if !isPresented {
-                                        topShelfNavigationItem = nil
-                                    }
-                                }
-                            #endif
+                            tabWithNavigationDestinations(tab: tab)
                         }
                     }
+                }
+
+                if !isCompactSize {
+                    libraryTabs()
                 }
             }
             #if os(tvOS)
@@ -91,6 +86,56 @@ struct ContentView: View {
             .environment(trendingViewModel)
         }
     }
+    
+    private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
+        tab.tabView
+            .navigationDestinations()
+        #if os(macOS)
+            .frame(minWidth: 800)
+        #endif
+        #if os(tvOS)
+            .navigationDestination(isPresented: $isTopShelfNavigationActive) {
+                if let item = topShelfNavigationItem {
+                    MediaDestinationView(item: item)
+                } else {
+                    ContentUnavailableView("Missing Item", systemImage: "questionmark.circle")
+                        .focusable(true)
+                }
+            }
+            .onChange(of: isTopShelfNavigationActive) { _, isPresented in
+                if !isPresented {
+                    topShelfNavigationItem = nil
+                }
+            }
+        #endif
+    }
+    
+    @TabContentBuilder<TabSelection>
+    private func libraryTabs() -> some TabContent<TabSelection> {
+        TabSection {
+            ForEach(TabSelection.extendedlibraryTabs, id: \.self) { libraryTab in
+                Tab(libraryTab.title,
+                    systemImage: libraryTab.systemImage,
+                    value: libraryTab
+                ) {
+                    NavigationStack {
+                        tabWithNavigationDestinations(tab: libraryTab)
+                    }
+                }
+            }
+        } header: {
+            Text("Media")
+        }
+    }
+
+    private var primaryTabs: [TabSelection] {
+        if isCompactSize {
+            return TabSelection.compactTabs
+        } else {
+            return TabSelection.extendedTabs
+        }
+    }
+    
     #if os(tvOS)
     private func handleTopShelfURL(_ url: URL) {
         guard let deepLink = TopShelfDeepLink.parse(url) else { return }

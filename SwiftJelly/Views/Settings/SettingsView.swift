@@ -8,39 +8,43 @@
 import SwiftUI
 import SwiftMediaViewer
 
+enum Route: Hashable {
+    case serverList
+    case addServer
+}
+
 struct SettingsView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     
     var body: some View {
-        #if os(tvOS)
-        HStack(spacing: 0) {
-            VStack {
-                Image("AppLogo")
-                    .resizable()
-                    .frame(width: 450, height: 450)
-                    .shadow(radius: 12)
+        SettingsSplitView {
+            NavigationStack {
+                form
+                    .navigationDestination(for: Route.self) { route in
+                        switch route {
+                        case .serverList:
+                            ServerList()
+                        case .addServer:
+                            AddServerView()
+                        }
+                    }
             }
-            .frame(width: UIScreen.main.bounds.width * 0.5)
-            
-            form
+        } infoPanel: {
+            Image("AppLogo")
+                .resizable()
+                .frame(width: 450, height: 450)
+                .shadow(radius: 12)
         }
-        #else
-        form
-        #endif
     }
     
     var form: some View {
         Form {
-            Section("Server") {
-                NavigationLink {
-                    ServerList()
-                } label: {
-                    Label("Servers", systemImage: "server.rack")
-                }
+            NavigationLink(value: Route.serverList){
+                Label("Servers", systemImage: "server.rack")
             }
             
-            Section("View Options") {                
+            Section("View Options") {
                 ViewOptions()
                     .foregroundStyle(.primary)
             }
@@ -66,8 +70,14 @@ struct SettingsView: View {
                 CacheManagerView()
             }
         }
+        .safeAreaPadding(.leading)
         .formStyle(.grouped)
         .navigationTitle("Settings")
         .platformNavigationToolbar()
     }
+}
+
+
+#Preview {
+    SettingsView()
 }

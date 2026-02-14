@@ -33,6 +33,12 @@ extension BaseItemDto {
         guard let episode = indexNumber else { return nil }
         return "E\(episode)"
     }
+    
+    var longEpisodeOnlyString: String? {
+        guard type != .movie else { return nil }
+        guard let episode = indexNumber else { return nil }
+        return "Episode \(episode)"
+    }
 }
 
 extension BaseItemDto {
@@ -59,6 +65,10 @@ extension BaseItemDto {
         series.studios = studios
         
         return series
+    }
+    
+    public var viewId: String {
+        UUID().uuidString
     }
 }
 

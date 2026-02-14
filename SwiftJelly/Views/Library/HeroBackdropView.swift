@@ -3,22 +3,49 @@ import JellyfinAPI
 import SwiftMediaViewer
 
 struct HeroBackdropView<HeroActions: View>: View {
-    let item: BaseItemDto
     @ViewBuilder let heroActions: HeroActions
     
+    let item: BaseItemDto
+    let badge: String?
+    
+    init(item: BaseItemDto, @ViewBuilder heroActions: () -> HeroActions) {
+        self.item = item
+        self.badge = nil
+        self.heroActions = heroActions()
+    }
+    
+    init(item: BaseItemDto, badge: String, @ViewBuilder heroActions: () -> HeroActions) {
+        self.item = item
+        self.badge = badge
+        self.heroActions = heroActions()
+    }
+
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    private var isCompactSize: Bool {
+        horizontalSizeClass == .compact
+    }
+    #else
+    private var isCompactSize: Bool { false }
+    #endif
+    
     var body: some View {
-        #if os(tvOS)
-        // On tvOS, DetailView provides the backdrop as a background with blur effects
-        tvOverlayContent
+    #if os(tvOS)
+        largeScreenContent
             .environment(\.colorScheme, .dark)
-        #else
+    #else
         backdropImage
             .overlay(alignment: .bottomLeading) {
-                overlayContent
-                    .padding()
+                if isCompactSize {
+                    overlayContent
+                        .padding()
+                } else {
+                    largeScreenContent
+                        .padding()
+                }
             }
             .environment(\.colorScheme, .dark)
-        #endif
+    #endif
     }
     
     // MARK: - Backdrop
@@ -38,36 +65,55 @@ struct HeroBackdropView<HeroActions: View>: View {
                     .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
                     .clipped()
 
-                backdrop
-                    .scaledToFill()
-                    .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
-                    .scaleEffect(x: 1, y: -1, anchor: .center)
-                    .frame(
-                        width: geo.size.width,
-                        height: reflectionHeight,
-                        alignment: .top
-                    )
-                    .clipped()
+                if isCompactSize {
+                    backdrop
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
+                        .scaleEffect(x: 1, y: -1, anchor: .center)
+                        .frame(
+                            width: geo.size.width,
+                            height: reflectionHeight,
+                            alignment: .top
+                        )
+                        .clipped()
+                }
             }
+            .scrollTransition(axis: .vertical) { content, phase in
+                 content
+                    .offset(y: phase.isIdentity ? 0 : phase.value * -200)
+             }
             .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(.regularMaterial)
-                    .mask {
-                        bottomGradient
-                    }
-                    .frame(height: reflectionHeight + 150)
+                if isCompactSize {
+                    Rectangle()
+                        .fill(.regularMaterial)
+                        .mask {
+                            bottomGradient
+                        }
+                        .frame(height: reflectionHeight + 150)
+                } else {
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: .black, location: 0),
+                            .init(color: .black.opacity(0.5), location: 0.4),
+                            .init(color: .black.opacity(0), location: 1.0)
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                        .frame(height: 300)
+                }
             }
             .backgroundExtensionEffect()
             .stretchy()
         }
-        .frame(height: backdropHeight + reflectionHeight)
+        .frame(height: isCompactSize ? backdropHeight + reflectionHeight : backdropHeight)
     }
     
     let bottomGradient = LinearGradient(
         gradient: Gradient(stops: [
-            .init(color: .white, location: 0),
-            .init(color: .white.opacity(1), location: 0.6),
-            .init(color: .white.opacity(0), location: 1.0)
+            .init(color: .black, location: 0),
+            .init(color: .black.opacity(1), location: 0.6),
+            .init(color: .black.opacity(0), location: 1.0)
         ]),
         startPoint: .bottom,
         endPoint: .top
@@ -85,19 +131,33 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     @ViewBuilder
     private var logo: some View {
-        if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
-            CachedAsyncImage(url: url, targetSize: 450) {
-                Color.clear
+        
+        VStack(alignment: .center) {
+            if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
+                if let badge = badge {
+                    Text(badge)
+                        .font(.subheadline)
+                        .bold()
+                        .opacity(0.7)
+                        .padding(.horizontal, 15)
+                        .padding(.vertical, 8)
+                        .glassEffect(in: .capsule)
+                        .scaleEffect(0.8)
+                }
+                
+                CachedAsyncImage(url: url, targetSize: 450) {
+                    Color.clear
+                }
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
+                .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text(item.name ?? "")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.5), radius: 4)
             }
-            .aspectRatio(contentMode: .fit)
-            .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
-            .fixedSize(horizontal: false, vertical: true)
-        } else {
-            Text(item.name ?? "Unknown")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.5), radius: 4)
         }
     }
     
@@ -116,7 +176,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         .frame(maxWidth: .infinity, alignment: overallAlignment)
     }
     
-    private var tvOverlayContent: some View {
+    private var largeScreenContent: some View {
         VStack(alignment: contentAlignment, spacing: 20) {
             Spacer()
 
@@ -125,7 +185,7 @@ struct HeroBackdropView<HeroActions: View>: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 30) {
                     OverviewView(item: item)
-                        .frame(maxWidth: 700)
+                        .frame(maxWidth: descriptionMaxWidth)
 
                     heroActions
                 }
@@ -137,6 +197,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         }
         .scenePadding(.horizontal)
         .frame(maxWidth: .infinity, alignment: overallAlignment)
+        .frame(maxHeight: .infinity, alignment: .bottom)
     }
 
     private var overallAlignment: Alignment {
@@ -151,7 +212,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     #if os(tvOS)
         .leading
     #else
-        .center
+        isCompactSize ? .center : .leading
     #endif
     }
     
@@ -163,6 +224,14 @@ struct HeroBackdropView<HeroActions: View>: View {
     #endif
     }
 
+    private var descriptionMaxWidth: CGFloat {
+    #if os(tvOS)
+        700
+    #else
+        400
+    #endif
+    }
+    
     private var logoWidth: CGFloat {
     #if os(tvOS)
         450
@@ -173,7 +242,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
     private var logoHeight: CGFloat {
     #if os(tvOS)
-        300
+        250
     #else
         140
     #endif
@@ -187,6 +256,8 @@ struct HeroBackdropView<HeroActions: View>: View {
     #endif
     }
     
-    private var backdropHeight: CGFloat { 400 }
+    private var backdropHeight: CGFloat {
+        isCompactSize ? 380 : 500
+    }
 }
 

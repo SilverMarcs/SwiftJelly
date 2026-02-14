@@ -22,44 +22,49 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
             let showcaseHeight = geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 80) {
+                VStack(alignment: .leading, spacing: 60) {
                     heroView
                         .padding(60)
                         .frame(height: showcaseHeight)
                         .focusSection()
                         .overlay(alignment: .bottom) {
-                            if !belowFold {
-                                VStack(alignment: .center) {
-                                    Text("More Details")
-                                    Image(systemName: "chevron.compact.down")
-                                }
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .padding(.bottom)
+                            VStack(alignment: .center) {
+                                Text("More Details")
+                                Image(systemName: "chevron.compact.down")
                             }
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .padding(.bottom)
                         }
                         .onScrollVisibilityChange { isVisible in
-                            withAnimation {
-                                belowFold = !isVisible
-                            }
+                            belowFold = !isVisible
                         }
-                    
-                    // TODO: must have a cleaner way to do this
-                    if belowFold {
-                        DetailLogoOverlayView(item: item)
-                            .padding(.bottom, -100)
-                            .padding(.top, -60)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                    
+                        .visualEffect { content, geometry in
+                            content
+                                .opacity((geometry.frame(in: .global).minY / 600) + 1.0)
+                        }
+
+                    DetailLogoOverlayView(item: item)
+                        .padding(.bottom, -100)
+                        .padding(.top, -60)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .focusable(false)
+                        .visualEffect { content, geometry in
+                            content
+                                .opacity(1.0 - (geometry.frame(in: .global).minY / 1000))
+                                .offset(y: geometry.frame(in: .global).minY * 0.4)
+                        }
+
                     content
-                        .padding(40)
+                        .padding(70)
+                    
+                    
+                    MediaInfoCardsView(item: item)
                 }
-                .scrollTargetLayout()
             }
             .background {
                 if let url = ImageURLProvider.imageURL(for: item, type: .backdrop) {
-                    CachedAsyncImage(url: url, targetSize: 2000)
+                    CachedAsyncImage(url: url, targetSize: 1920)
                         .scaledToFill()
                         .mask {
                             LinearGradient(
@@ -72,15 +77,12 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                                 endPoint: .bottom
                             )
                         }
-                        .background {
-                            Rectangle()
-                                .fill(.black)
-                        }
+                        .background(.black)
                         .overlay {
-                            if belowFold {
-                                Rectangle()
-                                    .fill(.thinMaterial)
-                            }
+                            Rectangle()
+                                .fill(.thinMaterial)
+                                .opacity(belowFold ? 1 : 0)
+                                .animation(.easeInOut(duration: 0.3), value: belowFold)
                         }
                         .ignoresSafeArea()
                 }
@@ -106,6 +108,9 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                     }
                 
                 content
+                
+                
+                MediaInfoCardsView(item: item)
             }
             .scenePadding(.bottom)
         }

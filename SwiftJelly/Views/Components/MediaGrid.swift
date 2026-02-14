@@ -13,16 +13,18 @@ struct MediaGrid: View {
     }
     
     private var columns: [GridItem] {
-        [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: gridVerticalSpacing)]
+        [GridItem(.adaptive(minimum: posterWidth), spacing: gridVerticalSpacing)]
     }
-    
+
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: gridVerticalSpacing) {
                 ForEach(items) { item in
                     MediaNavigationLink(item: item) {
                         MediaCard(item: item)
+
                     }
+                    .frame(width: posterWidth, height: posterHeight)
                     .onAppear {
                         if item == items.last, let onLoadMore {
                             onLoadMore()
@@ -40,33 +42,45 @@ struct MediaGrid: View {
         .overlay {
             if isLoading && items.isEmpty {
                 UniversalProgressView()
+                    .focusable(true)
             } else if !isLoading && items.isEmpty {
                 ContentUnavailableView(
                     "No Media",
                     systemImage: "play.tv",
                     description: Text("Refine search or explore other sections")
                 )
+                .focusable(true)
             }
         }
-    }
-    
-    private var columnMinimumWidth: CGFloat {
-        #if os(tvOS)
-        220
-        #elseif os(macOS)
-        140
-        #else
-        105
-        #endif
     }
 
     private var gridVerticalSpacing: CGFloat {
         #if os(tvOS)
-        48
+        30
         #elseif os(iOS)
-        15
+        5
         #elseif os(macOS)
-        18
+        10
         #endif
     }
+}
+
+
+#Preview {
+    MediaGrid(items: [
+        BaseItemDto(id: "1"),
+        BaseItemDto(id: "2"),
+        BaseItemDto(id: "3"),
+        BaseItemDto(id: "4"),
+        BaseItemDto(id: "5"),
+        BaseItemDto(id: "6"),
+        BaseItemDto(id: "7"),
+        BaseItemDto(id: "8"),
+        BaseItemDto(id: "9"),
+        BaseItemDto(id: "10"),
+        BaseItemDto(id: "11"),
+        BaseItemDto(id: "12"),
+        BaseItemDto(id: "13"),
+        BaseItemDto(id: "14")
+    ], isLoading: true)
 }

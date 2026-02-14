@@ -84,6 +84,7 @@ extension JFAPI {
         var parameters = Paths.GetNextUpParameters()
         parameters.userID = context.userID
         parameters.enableUserData = true
+        parameters.enableResumable = false
         parameters.fields = .MinimumFields
         parameters.limit = limit
         parameters.seriesID = seriesID

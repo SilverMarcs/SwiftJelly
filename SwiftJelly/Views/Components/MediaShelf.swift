@@ -5,30 +5,27 @@ struct MediaShelf: View {
     let header: String
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
 
-    @State private var items: [BaseItemDto] = []
-    @State private var isLoading = false
+    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 10)
+    @State private var dataLoaded = false
     
     var body: some View {
-        SectionContainer(showHeader: !items.isEmpty || isLoading) {
-            if !items.isEmpty {
-                HorizontalShelf(spacing: spacing) {
-                    ForEach(items, id: \.id) { item in
-                        MediaNavigationLink(item: item) {
-                            MediaCard(item: item)
-                        }
-                        .frame(width: itemWidth)
+        SectionContainer(showHeader: !items.isEmpty) {
+            HorizontalShelf(spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    MediaNavigationLink(item: item.base) {
+                        MediaCard(item: item.base)
                     }
+                    .frame(width: itemWidth, height: itemHeight)
+                    .id(item.id)
                 }
-            }
-            
-            if isLoading {
-                UniversalProgressView()
             }
         } header: {
             Text(header)
         }
-        .task {
-            await loadItems()
+        .onAppear {
+            Task {
+                await loadItems()
+            }
         }
     }
     
@@ -42,6 +39,10 @@ struct MediaShelf: View {
         #endif
     }
     
+    private var itemHeight: CGFloat {
+        itemWidth * 1.5
+    }
+    
     private var spacing: CGFloat {
         #if os(tvOS)
         40
@@ -53,15 +54,14 @@ struct MediaShelf: View {
     }
 
     private func loadItems() async {
-        if !items.isEmpty { return }
-        guard !isLoading else { return }
-        isLoading = true
-        defer { isLoading = false }
+        if dataLoaded { return }
 
         do {
             let loadedItems = try await loadItemsAction()
+            dataLoaded = true
+
             withAnimation {
-                items = loadedItems
+                items.update(with: loadedItems)
             }
         } catch {
             print("Error loading MediaShelf items: \(error)")

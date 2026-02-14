@@ -9,25 +9,40 @@ import SwiftUI
 import JellyfinAPI
 
 struct MediaNavigationLink<Label: View>: View {
-    let item: BaseItemDto
+    let item: BaseItemDto?
     @ViewBuilder let label: () -> Label
     
     var body: some View {
         let navigationItem: any Hashable = {
-            switch item.type {
-            case .person:
-                return Person(from: item)
-            case .episode:
-                return item.toSeries() ?? item
-            default:
-                return item
+            if let item = item {
+                switch item.type {
+                case .person:
+                    return Person(from: item)
+                case .episode:
+                    return item.toSeries() ?? item
+                default:
+                    return item
+                }
+            }
+            else {
+                return BaseItemDto()
             }
         }()
-        
-        NavigationLink(value: navigationItem) {
-            label()
+
+        if item != nil {
+            NavigationLink(value: navigationItem) {
+                label()
+            }
+            .adaptiveCardButtonStyle()
+        } else {
+            Button(action: { }) {
+                label()
+            }
+            .adaptiveCardButtonStyle()
+            #if !os(tvOS)
+            .disabled(true)
+            #endif
         }
-        .adaptiveButtonStyle()
     }
 }
 

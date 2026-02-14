@@ -21,8 +21,15 @@ struct NoServerView: View {
             }
             .buttonStyle(.borderedProminent)
         }
+        .focusable(true)
+        #if os(tvOS)
+        .fullScreenCover(isPresented: $showAddServerSheet) {
+            AddServerView()
+        }
+        #else
         .sheet(isPresented: $showAddServerSheet) {
             AddServerView()
         }
+        #endif
     }
 }

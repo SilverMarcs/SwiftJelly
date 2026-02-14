@@ -12,6 +12,7 @@ struct ProgressBarOverlay: View {
     @Environment(\.isInSeasonView) private var isInSeasonView
     
     let item: BaseItemDto
+    var showEpisodeInformation: Bool = true
 
     var body: some View {
         HStack(spacing: 12) {
@@ -21,13 +22,13 @@ struct ProgressBarOverlay: View {
                 .offset(y: 1)
             
             Text(item.totalDurationString ?? "--")
-                .font(.subheadline)
+                .font(.caption2)
             
             Spacer()
             
-            if let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
+            if showEpisodeInformation, let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
                 Text(episodeText)
-                    .font(.subheadline)
+                    .font(.caption2)
             }
         }
         .foregroundStyle(.white)
@@ -40,11 +41,11 @@ struct ProgressIcon: View {
     var body: some View {
         if isPlayed {
             Image(systemName: "checkmark.circle.fill")
-                .font(.subheadline)
+                .font(.caption2)
                 .foregroundStyle(.white, .accent)
         } else {
             Image(systemName: "play.fill")
-                .font(.subheadline)
+                .font(.caption2)
                 .foregroundStyle(.white)
         }
     }
@@ -56,7 +57,7 @@ struct ProgressGauge: View {
         if let progress, progress > 0, progress < 1 {
             ProgressView(value: progress)
                 #if os(tvOS)
-                .tint(.primary)
+//                .tint(.primary)
                 .frame(width: 100)
                 #else
                 .controlSize(.mini)
@@ -64,4 +65,9 @@ struct ProgressGauge: View {
                 #endif
         }
     }
+}
+
+
+#Preview {
+    ProgressBarOverlay(item: BaseItemDto(indexNumber: 12, parentIndexNumber: 5, runTimeTicks: 30000, userData: UserItemDataDto(playbackPositionTicks: 1300, isPlayed: true)))
 }

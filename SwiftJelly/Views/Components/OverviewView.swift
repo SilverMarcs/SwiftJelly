@@ -22,7 +22,7 @@ struct OverviewView: View {
                     #endif
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(3, reservesSpace: false)
+                    .lineLimit(2, reservesSpace: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }

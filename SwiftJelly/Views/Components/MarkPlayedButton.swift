@@ -2,8 +2,12 @@ import SwiftUI
 import JellyfinAPI
 
 struct MarkPlayedButton: View {
-    let item: BaseItemDto
+    var item: BaseItemDto?
     @Environment(\.refresh) private var refresh
+    
+    var isPlayed: Bool {
+        item?.userData?.isPlayed ?? false
+    }
     
     var body: some View {
         Button {
@@ -13,22 +17,24 @@ struct MarkPlayedButton: View {
         } label: {
             Image(systemName: "checkmark")
                 .fontWeight(.medium)
-                .animation(.snappy, value: item.userData?.isPlayed)
+                .animation(.snappy, value: isPlayed)
         }
-        .tint((item.userData?.isPlayed == true) ? Color.green : Color.primary)
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
+        .tint((isPlayed == true) ? Color.green : Color.primary)
         #if os(tvOS)
         .controlSize(.regular)
         #else
         .controlSize(.extraLarge)
         #endif
+        .buttonBorderShape(.circle)
+        .buttonStyle(.glass)
     }
     
     private func togglePlayedStatus() async {
         do {
-            try await JFAPI.toggleItemPlayedStatus(item: item)
-            await refresh()
+            if let item = item {
+                try await JFAPI.toggleItemPlayedStatus(item: item)
+                await refresh()
+            }
         } catch {
             print("Error toggling played status: \(error)")
         }

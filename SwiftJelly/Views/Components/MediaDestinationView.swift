@@ -28,7 +28,7 @@ struct MediaDestinationView: View {
                 "Unsupported Media Type",
                 systemImage: "questionmark.circle",
                 description: Text("Cannot display \(item.type?.rawValue.capitalized ?? "unknown") items")
-            )
+            ).focusable(true)
         }
     }
 }

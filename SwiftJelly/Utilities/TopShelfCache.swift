@@ -24,7 +24,7 @@ struct TopShelfItemSnapshot: Codable, Hashable {
 }
 
 enum TopShelfCache {
-    private static let appGroupID = "group.com.mush.SwiftJelly"
+    private static let appGroupID = "group.com.julian-baumann.SwiftJelly"
     private static let itemsKey = "TopShelfContinueWatchingItems"
     private static let maxItems = 10
 

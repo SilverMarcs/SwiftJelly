@@ -9,30 +9,24 @@ import SwiftUI
 import JellyfinAPI
 
 struct ContinueWatchingView: View {
-    @State private var items: [BaseItemDto] = []
+    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 10)
     @State private var isLoading = false
+    
+    let header: String
+    let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
 
     var body: some View {
-        SectionContainer(showHeader: !items.isEmpty || isLoading) {
-            if !items.isEmpty {
-                HorizontalShelf(spacing: spacing) {
-                    ForEach(items, id: \.id) { item in
-                        ContinueWatchingCard(
-                            item: item,
-                            imageURLOverride: ImageURLProvider.seriesImageURL(for: item)
-                        )
-                    }
+        SectionContainer {
+            HorizontalShelf(spacing: spacing) {
+                ForEach(items, id: \.id) { item in
+                    ContinueWatchingCard(
+                        item: item.base,
+                        imageURLOverride: item.base != nil ? ImageURLProvider.seriesImageURL(for: item.base!) : nil
+                    )
                 }
             }
-
-            if isLoading && items.isEmpty {
-                UniversalProgressView()
-            }
         } header: {
-            Text("Continue Watching")
-        }
-        .task {
-            await fetchContinueWatching()
+            Text(header)
         }
         .onAppear {
             Task {
@@ -47,9 +41,9 @@ struct ContinueWatchingView: View {
         isLoading = true
 
         do {
-            let continueItems = try await JFAPI.loadContinueWatchingSmart()
+            let loadedItems = try await loadItemsAction()
             withAnimation {
-                items = continueItems
+                items.update(with: loadedItems)
                 isLoading = false
             }
         } catch {

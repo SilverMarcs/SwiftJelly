@@ -2,16 +2,15 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowHeroDetailView: View {
-    let vm: ShowDetailViewModel
+    @State var vm: ShowDetailViewModel
 
     var body: some View {
         HeroBackdropView(item: vm.show) {
             HStack(spacing: spacing) {
                 ShowPlayButton(vm: vm)
 
-                if let season = vm.selectedSeason {
-                    MarkPlayedButton(item: season)
-                }
+                MarkPlayedButton(item: vm.selectedSeason)
+                    .adaptiveDisabled(vm.playButtonDisabled)
 
                 FavoriteButton(item: vm.show)
             }
@@ -25,7 +24,7 @@ struct ShowHeroDetailView: View {
         #elseif os(macOS)
         8
         #else
-        4
+        0
         #endif
     }
 }

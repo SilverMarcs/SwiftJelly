@@ -6,24 +6,34 @@
 //
 
 import SwiftUI
+import JellyfinAPI
 
 // Enum for tab cases
 enum TabSelection: String, CaseIterable {
     case home = "home"
     case favorites = "favourites"
+    case movies = "movies"
+    case shows = "shows"
     case libraries = "libraries"
     case settings = "settings"
     case search = "search"
+    case serverSwitcher = "serverSwitcher"
     
-    static let allCases: [TabSelection] = [.search, .home, .favorites, .libraries, .settings]
+    static let compactTabs: [TabSelection] = [.search, .home, .favorites, .movies, .shows]
+    
+    static let extendedTabs: [TabSelection] = [.search, .home, .favorites, .settings]
+    static let extendedlibraryTabs: [TabSelection] = [.movies, .shows, .libraries]
 
     var title: String {
         switch self {
         case .home: return "Home"
         case .favorites: return "Favorites"
-        case .libraries: return "Libraries"
         case .settings: return "Settings"
         case .search: return "Search"
+        case .shows: return "Shows"
+        case .movies: return "Movies"
+        case .libraries: return "Libraries"
+        case .serverSwitcher: return "Servers"
         }
     }
     
@@ -31,9 +41,12 @@ enum TabSelection: String, CaseIterable {
         switch self {
         case .home: return "house"
         case .favorites: return "star"
-        case .libraries: return "film"
         case .settings: return "gear"
         case .search: return "magnifyingglass"
+        case .shows: return "tv"
+        case .movies: return "movieclapper.fill"
+        case .libraries: return "building.columns"
+        case .serverSwitcher: return "server.rack"
         }
     }
     
@@ -41,9 +54,12 @@ enum TabSelection: String, CaseIterable {
         switch self {
         case .home: return "1"
         case .favorites: return "2"
-        case .libraries: return "3"
         case .settings: return ","
         case .search: return "f"
+        case .shows: return "s"
+        case .movies: return "m"
+        case .libraries: return "3"
+        case .serverSwitcher: return "4"
         }
     }
     
@@ -52,9 +68,12 @@ enum TabSelection: String, CaseIterable {
         switch self {
         case .home: HomeView()
         case .favorites: FilteredMediaView(filter: .favorites)
+        case .shows: FilteredMediaView(filter: .library(BaseItemDto(collectionType: .tvshows, name: "TV Shows")))
+        case .movies: FilteredMediaView(filter: .library(BaseItemDto(collectionType: .movies, name: "Movies")))
         case .libraries: LibraryView()
         case .settings: SettingsView()
         case .search: SearchView()
+        case .serverSwitcher: HomeView()
         }
     }
 }
