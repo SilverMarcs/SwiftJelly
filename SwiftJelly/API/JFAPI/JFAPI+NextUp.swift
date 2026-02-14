@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import JellyfinAPI
+@preconcurrency import JellyfinAPI
 import Get
 
 extension JFAPI {
@@ -136,12 +136,12 @@ extension JFAPI {
                 guard let nextUpID = nextUpItem.id else { continue }
                 group.addTask {
                     do {
-                        let context = try getAPIContext()
+                        let context = try await getAPIContext()
                         var parameters = Paths.GetEpisodesParameters()
-                        parameters.userID = context.userID
+                        parameters.userID = await context.userID
                         parameters.adjacentTo = nextUpID
                         parameters.enableUserData = true
-                        parameters.fields = .MinimumFields
+                        parameters.fields = await .MinimumFields
                         let request = Paths.getEpisodes(seriesID: seriesID, parameters: parameters)
                         let episodes = try await send(request).items ?? []
 
