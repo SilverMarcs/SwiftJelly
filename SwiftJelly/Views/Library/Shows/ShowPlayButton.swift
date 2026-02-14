@@ -58,6 +58,10 @@ struct ShowPlayButton: View {
         #endif
         .buttonStyle(.glassProminent)
         .environment(\.refresh, vm.refreshAll)
-        .adaptiveDisabled(vm.playButtonDisabled)
+        #if !os(tvOS)
+        .disabled(vm.playButtonDisabled)
+        #else
+        .opacity(vm.playButtonDisabled ? 0.5 : 1)
+        #endif
     }
 }
