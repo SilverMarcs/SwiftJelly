@@ -55,7 +55,6 @@ class ShowDetailViewModel {
             if let resumed = try await JFAPI.loadResumeItems(limit: 10, parentID: seriesID)
                 .sorted(by: { activityDate(for: $0) > activityDate(for: $1) })
                 .first(where: { $0.type == .episode }) {
-                print("Loaded from resume")
                 withAnimation {
                     nextEpisode = resumed
                     isLoading = false
@@ -66,7 +65,6 @@ class ShowDetailViewModel {
 
             // Try NextUp API as backup
             if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
-                print("Loaded from nextUp")
                 withAnimation {
                     nextEpisode = nextUp
                     isLoading = false
@@ -202,7 +200,6 @@ class ShowDetailViewModel {
         }
         
         // Single animated assignment
-        print("Loaded from computed")
         withAnimation {
             nextEpisode = computed
             isLoading = false
