@@ -24,7 +24,8 @@ extension PlaybackInfoResponse {
     static func from(
         response: PlaybackInfoResponse_JellyfinAPI,
         item: BaseItemDto,
-        client: JellyfinClient
+        client: JellyfinClient,
+        audioStreamIndex: Int? = nil
     ) throws -> PlaybackInfoResponse {
         
         guard let mediaSources = response.mediaSources,
@@ -52,7 +53,8 @@ extension PlaybackInfoResponse {
                 isStatic: true,
                 tag: item.etag,
                 playSessionID: nil,
-                mediaSourceID: mediaSource.id
+                mediaSourceID: mediaSource.id,
+                audioStreamIndex: audioStreamIndex
             )
             
             let streamRequest = Paths.getVideoStream(

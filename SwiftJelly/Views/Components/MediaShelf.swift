@@ -56,12 +56,12 @@ struct MediaShelf: View {
         if !items.isEmpty { return }
         guard !isLoading else { return }
         isLoading = true
-        defer { isLoading = false }
 
         do {
             let loadedItems = try await loadItemsAction()
             withAnimation {
                 items = loadedItems
+                isLoading = false
             }
         } catch {
             print("Error loading MediaShelf items: \(error)")

@@ -23,24 +23,24 @@ struct ShowPlayButton: View {
                 } else if let nextEpisode = vm.nextEpisode {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")
-                        
+
                         if let seasonEpisodeString = nextEpisode.seasonEpisodeString {
                             Text(seasonEpisodeString)
                         }
                         
                         if let progress = nextEpisode.playbackProgress, progress > 0, progress < 0.95 {
                             ProgressView(value: progress)
-                                .tint(.primary)
+                            .tint(.primary)
                             #if os(tvOS)
                             .frame(width: 60)
                             #else
                             .controlSize(.mini)
                             .frame(width: 40)
                             #endif
-                        }
-                        
-                        if let remaining = nextEpisode.timeRemainingString {
-                            Text(remaining)
+                            
+                            if let remaining = nextEpisode.timeRemainingString {
+                                Text(remaining)
+                            }
                         }
                     }
                     .transition(.opacity)

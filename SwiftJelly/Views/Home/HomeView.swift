@@ -14,7 +14,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: spacing) {
+            LazyVStack(alignment: .leading, spacing: spacing) {
                 if showTrendingOnTop {
                     TrendingInLibraryView()
                         .onScrollVisibilityChange { isVisible in

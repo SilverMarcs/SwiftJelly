@@ -29,6 +29,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
             shouldPresent proposal: AVContentProposal
         ) -> Bool {
             let proposalVC = NextEpisodeProposalViewController()
+            proposalVC.dateOfAutomaticAcceptance = Date().addingTimeInterval(30)
             playerViewController.contentProposalViewController = proposalVC
             return true
         }
@@ -53,6 +54,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         controller.player = player
         controller.delegate = context.coordinator
         controller.transportBarIncludesTitleView = true
+        controller.allowsPictureInPicturePlayback = false
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: controller, coordinator: context.coordinator)
@@ -97,12 +99,8 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
 
     private func updateContentProposal(for controller: AVPlayerViewController, coordinator: Coordinator) {
         let newNextEpisodeID = nextEpisode?.id
-        print("[ContentProposal] updateContentProposal called - nextEpisode: \(newNextEpisodeID ?? "nil"), lastID: \(coordinator.lastNextEpisodeID ?? "nil")")
         
-        guard coordinator.lastNextEpisodeID != newNextEpisodeID else {
-            print("[ContentProposal] Skipping - same episode ID")
-            return
-        }
+        guard coordinator.lastNextEpisodeID != newNextEpisodeID else { return }
         coordinator.lastNextEpisodeID = newNextEpisodeID
 
         guard let nextEpisode,
@@ -111,7 +109,6 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
               duration.isValid,
               duration.seconds.isFinite,
               duration.seconds > 0 else {
-            print("[ContentProposal] Clearing proposal - missing requirements")
             player?.currentItem?.nextContentProposal = nil
             return
         }
@@ -124,65 +121,73 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
             proposalTimeSeconds = max(0, duration.seconds - 60)
         }
         let proposalTime = CMTime(seconds: proposalTimeSeconds, preferredTimescale: 1)
-        print("[ContentProposal] Creating proposal for \(nextEpisode.name ?? "unknown") at \(proposalTime.seconds)s (duration: \(duration.seconds)s, creditsDetected: \(creditsStartSeconds != nil))")
 
         let title = buildProposalTitle(for: nextEpisode)
-        var previewImage: UIImage?
 
-        // Attempt to load the preview image synchronously from cache or use a placeholder
-        if let imageURL = ImageURLProvider.imageURL(for: nextEpisode, type: .primary) {
-            // Try to get from URLCache
-            let request = URLRequest(url: imageURL)
-            if let cachedResponse = URLCache.shared.cachedResponse(for: request),
-               let image = UIImage(data: cachedResponse.data) {
-                previewImage = image
-            }
-        }
+        // Load image and create proposal asynchronously
+        Task {
+            let previewImage = await loadPreviewImage(for: nextEpisode)
+            
+            await MainActor.run {
+                let proposal = AVContentProposal(
+                    contentTimeForTransition: proposalTime,
+                    title: title,
+                    previewImage: previewImage
+                )
 
-        let proposal = AVContentProposal(
-            contentTimeForTransition: proposalTime,
-            title: title,
-            previewImage: previewImage
-        )
+                var metadata: [AVMetadataItem] = []
 
-        // Build metadata
-        var metadata: [AVMetadataItem] = []
-
-        if let overview = nextEpisode.overview {
-            metadata.append(makeMetadataItem(.commonIdentifierDescription, value: overview))
-        }
-
-        if let rating = nextEpisode.officialRating {
-            metadata.append(makeMetadataItem(.iTunesMetadataContentRating, value: rating))
-        }
-
-        proposal.metadata = metadata
-
-        // Auto-accept 4 seconds after playback ends
-        proposal.automaticAcceptanceInterval = 0
-
-        playerItem.nextContentProposal = proposal
-        print("[ContentProposal] Proposal set on player item successfully")
-
-        // Prefetch the image in background if not cached
-        if previewImage == nil, let imageURL = ImageURLProvider.imageURL(for: nextEpisode, type: .primary) {
-            Task.detached {
-                if let (data, response) = try? await URLSession.shared.data(from: imageURL),
-                   let httpResponse = response as? HTTPURLResponse,
-                   httpResponse.statusCode == 200 {
-                    let cachedResponse = CachedURLResponse(response: response, data: data)
-                    URLCache.shared.storeCachedResponse(cachedResponse, for: URLRequest(url: imageURL))
+                if let overview = nextEpisode.overview {
+                    metadata.append(makeMetadataItem(.commonIdentifierDescription, value: overview))
                 }
+
+                if let rating = nextEpisode.officialRating {
+                    metadata.append(makeMetadataItem(.iTunesMetadataContentRating, value: rating))
+                }
+
+                proposal.metadata = metadata
+                proposal.automaticAcceptanceInterval = 0
+                playerItem.nextContentProposal = proposal
             }
+        }
+    }
+    
+    private func loadPreviewImage(for episode: BaseItemDto) async -> UIImage? {
+        guard let imageURL = ImageURLProvider.imageURL(for: episode, type: .primary) else {
+            return nil
+        }
+        
+        // Check cache first
+        let request = URLRequest(url: imageURL)
+        if let cachedResponse = URLCache.shared.cachedResponse(for: request),
+           let image = UIImage(data: cachedResponse.data) {
+            return image
+        }
+        
+        // Fetch from network
+        do {
+            let (data, response) = try await URLSession.shared.data(from: imageURL)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200,
+                  let image = UIImage(data: data) else {
+                return nil
+            }
+            
+            // Cache for future use
+            let cachedResponse = CachedURLResponse(response: response, data: data)
+            URLCache.shared.storeCachedResponse(cachedResponse, for: request)
+            
+            return image
+        } catch {
+            return nil
         }
     }
 
     private func buildProposalTitle(for episode: BaseItemDto) -> String {
         var components: [String] = []
 
-        if let seasonNumber = episode.parentIndexNumber,
-           let episodeNumber = episode.indexNumber {
-            components.append("S\(seasonNumber)E\(episodeNumber)")
+        if let seasonEpisodeString = episode.seasonEpisodeString {
+            components.append(seasonEpisodeString)
         }
 
         if let name = episode.name {

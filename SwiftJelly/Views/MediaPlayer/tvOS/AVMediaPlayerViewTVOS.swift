@@ -23,7 +23,8 @@ struct AVMediaPlayerViewTVOS: View {
                     }
                 }
             )
-                .id("\(model.item.id ?? "")_\(model.nextEpisode?.id ?? "none")")
+            // TODO: fix this; setting an ID here will cause the video player to flicker, when a new episode is loaded.
+            // .id("\(model.item.id ?? "")_\(model.nextEpisode?.id ?? "none")")
                 .allowsTightening(!model.isAutoLoadingNext)
                 .task(id: player.timeControlStatus) {
                     await PlaybackUtilities.reportPlaybackProgress(

@@ -12,7 +12,7 @@ extension JFAPI {
         let request = Paths.getSeasons(seriesID: show.id ?? "", parameters: parameters)
         return try await send(request).items ?? []
     }
-
+    
     static func loadAllEpisodes(for show: BaseItemDto) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetEpisodesParameters()
@@ -24,16 +24,32 @@ extension JFAPI {
         return try await send(request).items ?? []
     }
     
-    static func loadNextEpisode(after episode: BaseItemDto) async throws -> BaseItemDto? {
+    static func loadEpisodesAfter(episode: BaseItemDto) async throws -> [BaseItemDto] {
         guard episode.type == .episode,
               let seriesID = episode.seriesID else {
-            return nil
+            return []
         }
+        
+        let context = try getAPIContext()
+        var parameters = Paths.GetEpisodesParameters()
+        parameters.userID = context.userID
+        parameters.limit = 3
+        parameters.startItemID = episode.id
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
         
         var show = BaseItemDto()
         show.id = seriesID
+        let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)
+        return try await send(request).items ?? []
+    }
+    
+    static func loadNextEpisode(after episode: BaseItemDto) async throws -> BaseItemDto? {
+        guard episode.type == .episode else {
+            return nil
+        }
         
-        let allEpisodes = try await loadAllEpisodes(for: show)
+        let allEpisodes = try await loadEpisodesAfter(episode: episode)
             .sorted { episodeSortComparator(lhs: $0, rhs: $1) }
         
         guard let currentIndex = allEpisodes.firstIndex(where: { candidate in

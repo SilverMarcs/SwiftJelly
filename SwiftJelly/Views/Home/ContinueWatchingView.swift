@@ -25,27 +25,32 @@ struct ContinueWatchingView: View {
                 }
             }
 
-            if isLoading {
+            if isLoading && items.isEmpty {
                 UniversalProgressView()
             }
         } header: {
             Text("Continue Watching")
         }
         .task {
-            await loadContinueWatching()
+            await fetchContinueWatching()
         }
-        .environment(\.refresh, loadContinueWatching)
+        .onAppear {
+            Task {
+                await fetchContinueWatching()
+            }
+        }
+        .environment(\.refresh, fetchContinueWatching)
     }
     
-    private func loadContinueWatching() async {
-        if !items.isEmpty { return }
+    private func fetchContinueWatching() async {
         guard !isLoading else { return }
         isLoading = true
-        defer { isLoading = false }
+
         do {
             let continueItems = try await JFAPI.loadContinueWatchingSmart()
             withAnimation {
                 items = continueItems
+                isLoading = false
             }
         } catch {
             print("Error loading Home items: \(error)")

@@ -150,7 +150,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
     private var logoHeight: CGFloat {
     #if os(tvOS)
-        150
+        300
     #else
         100
     #endif

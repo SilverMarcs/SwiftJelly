@@ -58,19 +58,20 @@ extension DeviceProfile {
                 context: .streaming,
                 isCopyTimestamps: true,
                 enableSubtitlesInManifest: true,
-                maxAudioChannels: nil,
+                maxAudioChannels: "2", // tvOS (and maybe iOS/macOS) has difficulties playing 5.1/7.1 AAC audio tracks which results in a broken player
                 minSegments: 2,
                 protocol: .hls,
                 type: .video,
                 videoCodec: "h264"
             ),
+            
             // Dedicated audio renditions so the manifest can expose named tracks
             TranscodingProfile(
                 audioCodec: nativeAudioOnlyCodecList,
                 container: "aac",
                 context: .streaming,
                 isCopyTimestamps: true,
-                maxAudioChannels: nil,
+                maxAudioChannels: "2",
                 minSegments: 2,
                 protocol: .hls,
                 type: .audio
@@ -110,10 +111,10 @@ extension DeviceProfile {
                 format: "vtt",
                 method: .external
             ),
-//            SubtitleProfile(
-//                format: "srt",
-//                method: .external
-//            ),
+            SubtitleProfile(
+                format: "srt",
+                method: .external
+            ),
             // Embedded subtitles in MP4
             SubtitleProfile(
                 format: "ttml",
