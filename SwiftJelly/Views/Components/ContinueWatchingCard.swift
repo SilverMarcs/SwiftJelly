@@ -15,18 +15,6 @@ struct ContinueWatchingCard: View {
     let item: BaseItemDto?
     let imageURLOverride: URL?
 
-    #if os(tvOS)
-    private let cardWidth: CGFloat = 420
-    private let overlayHeight: CGFloat = 160
-    private let overlayPadding: CGFloat = 25
-    #else
-    private let cardWidth: CGFloat = 230
-    private let overlayHeight: CGFloat = 160
-    private let overlayPadding: CGFloat = 15
-    #endif
-    
-    private var cardHeight: CGFloat { cardWidth * 0.5625 } // 16:9 Aspect Ratio
-
     private let gradient = LinearGradient(
         gradient: Gradient(stops: [
             .init(color: .black.opacity(0.8), location: 0),
@@ -51,9 +39,6 @@ struct ContinueWatchingCard: View {
                         .padding(.horizontal, overlayPadding)
                         .padding(.vertical, overlayPadding - 5)
                         .background(alignment: .bottom) {
-//                            Rectangle()
-//                                .fill(.regularMaterial)
-//                                .mask(gradient)
                             gradient
                         }
                 }
@@ -87,4 +72,24 @@ struct ContinueWatchingCard: View {
             }
         }
     }
+    
+    private var cardWidth: CGFloat {
+        #if os(tvOS)
+        420
+        #elseif os(macOS)
+        300
+        #else
+        250
+        #endif
+    }
+    
+    private var overlayPadding: CGFloat {
+        #if os(tvOS)
+        25
+        #else
+        15
+        #endif
+    }
+
+    private var cardHeight: CGFloat { cardWidth * 0.5625 } // 16:9 Aspect Ratio
 }
