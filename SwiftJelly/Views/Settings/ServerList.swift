@@ -48,7 +48,10 @@ struct ServerList: View {
                 #endif
             }
             .formStyle(.grouped)
+            #if os(tvOS)
             .safeAreaPadding(.leading, 40)
+            #endif
+
         } infoPanel: {
             VStack(spacing: 20) {
                 Image(systemName: "server.rack")
@@ -76,7 +79,9 @@ struct ServerList: View {
         }
         #else
         .sheet(isPresented: $showAddSheet) {
-            AddServerView()
+            NavigationStack {
+                AddServerView()
+            }
         }
         #endif
     }

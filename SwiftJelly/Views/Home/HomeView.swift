@@ -72,8 +72,9 @@ struct HomeView: View {
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
         .ignoresSafeArea(edges: .top)
         .scrollClipDisabled()
-//        .navigationTitle(showScrollEffect ? "" : "Home")
+        .navigationTitle(showScrollEffect ? "" : "Home")
         .platformNavigationToolbar()
+        .settingsSheet()
     }
     
     private var spacing: CGFloat {

@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowHeroDetailView: View {
-    @State var vm: ShowDetailViewModel
+    var vm: ShowDetailViewModel
 
     var body: some View {
         HeroBackdropView(item: vm.show) {

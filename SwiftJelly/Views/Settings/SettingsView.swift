@@ -70,7 +70,9 @@ struct SettingsView: View {
                 CacheManagerView()
             }
         }
+        #if os(tvOS)
         .safeAreaPadding(.leading)
+        #endif
         .formStyle(.grouped)
         .navigationTitle("Settings")
         .platformNavigationToolbar()

@@ -63,13 +63,14 @@ struct AddServerView: View {
                 }
             }
             .formStyle(.grouped)
-            .safeAreaPadding(40)
             .navigationTitle("Add Server")
             .toolbarTitleDisplayMode(.inline)
             #if os(iOS)
             .toolbar {
                 Button(role: .close) { dismiss() }
             }
+            #elseif os(tvOS)
+            .safeAreaPadding(.leading, 40)
             #endif
             .alert("Error", isPresented: $showingAlert) {
                 Button("OK") { }
@@ -89,6 +90,8 @@ struct AddServerView: View {
             }
         }
         .presentationBackground(.background.secondary)
+        .navigationTitle("Add Server")
+        .platformNavigationToolbar()
     }
 
     private func saveAndAuthenticate() {
