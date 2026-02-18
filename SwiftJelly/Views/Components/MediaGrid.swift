@@ -22,7 +22,6 @@ struct MediaGrid: View {
                 ForEach(items) { item in
                     MediaNavigationLink(item: item) {
                         MediaCard(item: item)
-
                     }
                     .frame(width: posterWidth, height: posterHeight)
                     .onAppear {

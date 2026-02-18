@@ -17,10 +17,10 @@ struct MediaCard: View {
             PortraitImageView(item: item) {
                 Image(systemName: "film")
                     .font(.title)
-                    .opacity(0.2)
+                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color("Card Background"))
+            .background(.background.secondary)
             .cardBorder()
             .clipped()
             .overlay(alignment: .topTrailing) {
@@ -32,9 +32,6 @@ struct MediaCard: View {
                         .padding(12)
                 }
             }
-//            #if os(tvOS)
-//            .hoverEffect(.highlight)
-//            #endif
         }
     }
 }

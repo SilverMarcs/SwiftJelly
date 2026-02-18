@@ -30,9 +30,10 @@ struct ContinueWatchingCard: View {
             LandscapeImageView(item: item, imageURLOverride: imageURLOverride) {
                 Image(systemName: "ellipsis")
                     .font(.title)
-                    .opacity(0.5)
+                    .foregroundStyle(.secondary)
             }
             .frame(width: cardWidth, height: cardHeight, alignment: .center)
+            .background(.background.secondary)
             .overlay(alignment: .bottomLeading) {
                 if let item = item {
                     ProgressBarOverlay(item: item)
@@ -43,10 +44,8 @@ struct ContinueWatchingCard: View {
                         }
                 }
             }
+            .cardBorder()
         }
-        .environment(\.colorScheme, .dark)
-        .foregroundStyle(.primary)
-        .cardBorder()
         .adaptiveCardButtonStyle()
         .contextMenu {
             if let item = item {

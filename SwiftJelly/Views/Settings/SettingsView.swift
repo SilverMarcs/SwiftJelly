@@ -16,6 +16,7 @@ enum Route: Hashable {
 struct SettingsView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         SettingsSplitView {
@@ -70,12 +71,19 @@ struct SettingsView: View {
                 CacheManagerView()
             }
         }
-        #if os(tvOS)
-        .safeAreaPadding(.leading)
-        #endif
         .formStyle(.grouped)
         .navigationTitle("Settings")
-        .platformNavigationToolbar()
+        #if os(tvOS)
+        .safeAreaPadding(.leading)
+        .toolbar(.hidden, for: .navigationBar)
+        #else
+        .toolbarTitleDisplayMode(.inline)
+        #endif
+        #if os(iOS)
+        .toolbar {
+            Button(role: .close) { dismiss() }
+        }
+        #endif
     }
 }
 

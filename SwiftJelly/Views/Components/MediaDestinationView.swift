@@ -17,6 +17,8 @@ struct MediaDestinationView: View {
             MovieDetailView(item: item)
         case .series:
             ShowDetailView(item: item)
+        case .genre:
+            FilteredMediaView(filter: .genre(item.name ?? ""))
         case .episode:
             ShowDetailView(item: BaseItemDto(id: item.seriesID))
         case .person:

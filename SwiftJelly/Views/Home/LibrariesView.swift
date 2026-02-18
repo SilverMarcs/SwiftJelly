@@ -21,10 +21,10 @@ struct LibrariesView: View {
                             Text(library.base?.name ?? "")
                                 .font(.title)
                                 .bold()
-                                .opacity(0.3)
+                                .foregroundStyle(.secondary)
                         }
                         .frame(width: columnMinimumWidth, height: columnMinimumHeight, alignment: .center)
-                        .background(Color("Card Background"))
+                        .background(.background.secondary)
                     }
                     .cardBorder()
                 }
