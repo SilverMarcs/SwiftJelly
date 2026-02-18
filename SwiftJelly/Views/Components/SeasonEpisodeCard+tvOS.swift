@@ -14,8 +14,6 @@
 //  Most of this behaviour is simply achieved by toggling `.disabled` of the description card based on `!episodeCardFocused && !descriptionFocused`
 //
 
-#if os(tvOS)
-
 import SwiftUI
 import JellyfinAPI
 
@@ -139,6 +137,3 @@ struct SeasonEpisodeCard: View {
 #Preview {
     SeasonEpisodeCard(item: ViewListItem(id: "test", base: BaseItemDto(indexNumber: 12, parentIndexNumber: 5, runTimeTicks: 30000, userData: UserItemDataDto(playbackPositionTicks: 1300, isPlayed: true))))
 }
-
-#endif
-

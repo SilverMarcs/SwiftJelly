@@ -20,7 +20,7 @@ struct GenreCarouselView: View {
                         GenreCardView(name: genre.base?.name ?? " ")
                     }
                     .id("\(genre.id)-\(genre.base?.name ?? "")")
-                    .adaptiveButtonStyle()
+                    .adaptiveCardButtonStyle()
                 }
             }
         } header: {

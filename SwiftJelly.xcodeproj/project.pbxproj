@@ -54,6 +54,8 @@
 				Info.plist,
 			);
 			platformFiltersByRelativePath = {
+				"Views/Components/SeasonEpisodeCard+tvOS.swift" = (tvos, );
+				Views/Components/SeasonEpisodeCard.swift = (ios, macos, xros, );
 				Views/MediaPlayer/iOS/AVMediaPlayerViewIOS.swift = (ios, );
 				Views/MediaPlayer/iOS/AVPlayerIos.swift = (ios, );
 				Views/MediaPlayer/macOS/AVMediaPlayerViewMac.swift = (macos, );

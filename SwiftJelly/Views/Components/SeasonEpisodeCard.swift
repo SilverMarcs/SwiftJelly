@@ -8,8 +8,6 @@
 import SwiftUI
 import JellyfinAPI
 
-#if !os(tvOS)
-
 struct SeasonEpisodeCard: View {
     @Environment(\.refresh) var refresh
     let item: ViewListItem<BaseItemDto>
@@ -86,7 +84,7 @@ struct SeasonEpisodeCard: View {
         }
         .foregroundStyle(.primary)
         .cardBorder(cornerRadius: 15)
-        .adaptiveButtonStyle()
+        .adaptiveCardButtonStyle()
         .contextMenu {
             if let item = item.base {
                 Button {
@@ -104,5 +102,3 @@ struct SeasonEpisodeCard: View {
         }
     }
 }
-
-#endif
