@@ -38,11 +38,11 @@ struct SeasonEpisodeCard: View {
                     Image(systemName: "ellipsis")
                         .font(.title)
                         .frame(width: cardWidth, height: cardHeight, alignment: .center)
-                        .opacity(0.3)
+                        .foregroundStyle(.secondary)
                 }
                 .scaledToFill()
                 .frame(width: cardWidth, height: cardHeight, alignment: .top)
-                .background(Color("Card Background"))
+                .background(.background.secondary)
                 .clipped()
                 .overlay(alignment: .bottom) {
                     if item.base != nil {

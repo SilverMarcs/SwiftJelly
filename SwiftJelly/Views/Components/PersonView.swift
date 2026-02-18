@@ -10,13 +10,13 @@ struct PersonView: View {
             LabelStack {
                 if let url = ImageURLProvider.personImageURL(for: person.id) {
                     CachedAsyncImage(url: url, targetSize: Int(imageSize * 2)) {
-                            Image(systemName: "person.fill")
-                                .font(.title)
-                                .opacity(0.3)
+                        Image(systemName: "person.fill")
+                            .font(.title)
+                            .foregroundStyle(.secondary)
                     }
                     .aspectRatio(contentMode: .fill)
                     .frame(width: imageSize, height: imageSize)
-                    .background(Color("Person Background"))
+                    .background(.background.secondary)
                     .overlay {
                         Circle()
                             .strokeBorder(.tertiary, lineWidth: 1)
