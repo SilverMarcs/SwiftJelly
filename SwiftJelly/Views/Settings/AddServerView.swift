@@ -69,9 +69,6 @@ struct AddServerView: View {
             } message: {
                 Text(alertMessage)
             }
-#if os(tvOS)
-.safeAreaPadding(.leading, 40)
-#endif
         } infoPanel: {
             VStack(spacing: 20) {
                 Image(systemName: "plus")

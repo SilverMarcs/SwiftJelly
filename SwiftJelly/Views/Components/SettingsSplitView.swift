@@ -19,6 +19,7 @@ struct SettingsSplitView<InfoPanelContent: View, Content: View>: View {
                     .frame(width: proxy.size.width * 0.5)
 
                 content
+                    .safeAreaPadding(.leading)
             }
         }
         #else
@@ -26,4 +27,3 @@ struct SettingsSplitView<InfoPanelContent: View, Content: View>: View {
         #endif
     }
 }
-

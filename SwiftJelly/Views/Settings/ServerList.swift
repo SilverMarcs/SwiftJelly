@@ -48,9 +48,6 @@ struct ServerList: View {
                 #endif
             }
             .formStyle(.grouped)
-            #if os(tvOS)
-            .safeAreaPadding(.leading, 40)
-            #endif
             #if os(iOS)
             .contentMargins(.top, 10)
             #endif

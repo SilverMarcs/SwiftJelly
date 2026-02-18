@@ -63,9 +63,6 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .navigationTitle("Settings")
         .platformNavigationToolbar(titleDisplayMode: .inline)
-        #if os(tvOS)
-        .safeAreaPadding(.leading)
-        #endif
         #if os(iOS)
         .toolbar {
             Button(role: .close) { dismiss() }
