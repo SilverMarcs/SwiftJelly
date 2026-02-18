@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     @Environment(\.dismiss) var dismiss
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
     var body: some View {
         SettingsSplitView {
@@ -65,7 +66,9 @@ struct SettingsView: View {
         .platformNavigationToolbar(titleDisplayMode: .inline)
         #if os(iOS)
         .toolbar {
-            Button(role: .close) { dismiss() }
+            if horizontalSizeClass == .compact {
+                Button(role: .close) { dismiss() }
+            }
         }
         .contentMargins(.top, 10)
         #endif

@@ -17,7 +17,6 @@ enum TabSelection: String, CaseIterable {
     case libraries = "libraries"
     case settings = "settings"
     case search = "search"
-    case serverSwitcher = "serverSwitcher"
     
     static let compactTabs: [TabSelection] = [.search, .home, .favorites, .movies, .shows]
     
@@ -33,7 +32,6 @@ enum TabSelection: String, CaseIterable {
         case .shows: return "Shows"
         case .movies: return "Movies"
         case .libraries: return "Libraries"
-        case .serverSwitcher: return "Servers"
         }
     }
     
@@ -46,7 +44,6 @@ enum TabSelection: String, CaseIterable {
         case .shows: return "tv"
         case .movies: return "movieclapper.fill"
         case .libraries: return "building.columns"
-        case .serverSwitcher: return "server.rack"
         }
     }
     
@@ -59,7 +56,6 @@ enum TabSelection: String, CaseIterable {
         case .shows: return "s"
         case .movies: return "m"
         case .libraries: return "3"
-        case .serverSwitcher: return "4"
         }
     }
     
@@ -73,7 +69,6 @@ enum TabSelection: String, CaseIterable {
         case .libraries: LibraryView()
         case .settings: SettingsView()
         case .search: SearchView()
-        case .serverSwitcher: HomeView()
         }
     }
 }
