@@ -8,11 +8,6 @@
 import SwiftUI
 import SwiftMediaViewer
 
-enum Route: Hashable {
-    case serverList
-    case addServer
-}
-
 struct SettingsView: View {
     @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
     @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
@@ -22,14 +17,6 @@ struct SettingsView: View {
         SettingsSplitView {
             NavigationStack {
                 form
-                    .navigationDestination(for: Route.self) { route in
-                        switch route {
-                        case .serverList:
-                            ServerList()
-                        case .addServer:
-                            AddServerView()
-                        }
-                    }
             }
         } infoPanel: {
             Image("AppLogo")
@@ -41,7 +28,9 @@ struct SettingsView: View {
     
     var form: some View {
         Form {
-            NavigationLink(value: Route.serverList){
+            NavigationLink {
+                ServerList()
+            } label: {
                 Label("Servers", systemImage: "server.rack")
             }
             
@@ -73,16 +62,15 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
+        .platformNavigationToolbar(titleDisplayMode: .inline)
         #if os(tvOS)
         .safeAreaPadding(.leading)
-        .toolbar(.hidden, for: .navigationBar)
-        #else
-        .toolbarTitleDisplayMode(.inline)
         #endif
         #if os(iOS)
         .toolbar {
             Button(role: .close) { dismiss() }
         }
+        .contentMargins(.top, 10)
         #endif
     }
 }

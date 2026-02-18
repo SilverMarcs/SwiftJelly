@@ -64,34 +64,28 @@ struct AddServerView: View {
             }
             .formStyle(.grouped)
             .navigationTitle("Add Server")
-            .toolbarTitleDisplayMode(.inline)
-            #if os(iOS)
-            .toolbar {
-                Button(role: .close) { dismiss() }
-            }
-            #elseif os(tvOS)
-            .safeAreaPadding(.leading, 40)
-            #endif
             .alert("Error", isPresented: $showingAlert) {
                 Button("OK") { }
             } message: {
                 Text(alertMessage)
             }
+#if os(tvOS)
+.safeAreaPadding(.leading, 40)
+#endif
         } infoPanel: {
             VStack(spacing: 20) {
                 Image(systemName: "plus")
                     .font(.system(size: 200))
-                    .opacity(0.4)
+                    .foregroundStyle(.secondary)
                 
                 Text("Add Server")
                     .font(.largeTitle)
                     .bold()
-                    .opacity(0.5)
+                    .foregroundStyle(.secondary)
             }
         }
-        .presentationBackground(.background.secondary)
         .navigationTitle("Add Server")
-        .platformNavigationToolbar()
+        .platformNavigationToolbar(titleDisplayMode: .inline)
     }
 
     private func saveAndAuthenticate() {

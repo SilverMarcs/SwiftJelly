@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ServerList: View {
     private var dataManager = DataManager.shared
-    @State private var showAddSheet = false
     
     var body: some View {
         SettingsSplitView {
@@ -30,7 +29,7 @@ struct ServerList: View {
                     }
                     .buttonStyle(.plain)
                     .tint(.primary)
-                    .buttonSizing(.flexible) // not doign anything yet so need to kee maxwidth above
+                    .buttonSizing(.flexible) // not doing anything yet so need to kee maxwidth above
                     .contextMenu {
                         Button(role: .destructive) {
                             dataManager.deleteServer(server)
@@ -41,49 +40,42 @@ struct ServerList: View {
                 }
                 
                 #if os(tvOS)
-                Button(action: { showAddSheet.toggle() } ) {
+                NavigationLink {
+                    AddServerView()
+                } label: {
                     Label("Add Server", systemImage: "plus")
                 }
-                .tint(.primary)
                 #endif
             }
             .formStyle(.grouped)
             #if os(tvOS)
             .safeAreaPadding(.leading, 40)
             #endif
+            #if os(iOS)
+            .contentMargins(.top, 10)
+            #endif
 
         } infoPanel: {
             VStack(spacing: 20) {
                 Image(systemName: "server.rack")
                     .font(.system(size: 200))
-                    .opacity(0.4)
+                    .foregroundStyle(.secondary)
                 
                 Text("Servers")
                     .font(.largeTitle)
                     .bold()
-                    .opacity(0.5)
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Servers")
+        .platformNavigationToolbar(titleDisplayMode: .inline)
         .toolbar {
-            Button {
-                showAddSheet = true
-            } label: {
-                Image(systemName: "plus")
-            }
-        }
-        .platformNavigationToolbar()
-        #if os(tvOS)
-        .fullScreenCover(isPresented: $showAddSheet) {
-            AddServerView()
-        }
-        #else
-        .sheet(isPresented: $showAddSheet) {
-            NavigationStack {
+            NavigationLink {
                 AddServerView()
+            } label: {
+                Label("Add Server", systemImage: "plus")
             }
         }
-        #endif
     }
 }
 
