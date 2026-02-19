@@ -21,9 +21,7 @@ struct HomeView: View {
 #if os(tvOS)
     @State private var belowFold = false
 #endif
-
-    @FocusState private var focusState: FocusField?
-
+    
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing) {
@@ -34,7 +32,6 @@ struct HomeView: View {
                     showScrollEffect = isVisible
                 }
                 #if os(tvOS)
-                
                 .ignoresSafeArea()
                 .onScrollVisibilityChange { isVisible in
                     belowFold = !isVisible
