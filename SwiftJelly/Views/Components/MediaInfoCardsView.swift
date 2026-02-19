@@ -183,9 +183,6 @@ private struct MediaInfoCard<Content: View>: View {
             }
             .padding(20)
             .frame(width: cardWidth, alignment: .topLeading)
-            #if !os(tvOS)
-            .background(.ultraThinMaterial, in: .rect(cornerRadius: 12))
-            #endif
         }
         .adaptiveCardButtonStyle()
         .cardBorder()

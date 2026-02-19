@@ -6,10 +6,15 @@ struct MediaShelf: View {
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
 
     @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 10)
+    @State private var isLoading = false
     @State private var dataLoaded = false
+    @State private var showPlaceholder = true
     
     var body: some View {
-        SectionContainer(showHeader: !items.isEmpty) {
+        SectionContainer(
+            isVisible: showPlaceholder || hasResolvedItems,
+            showHeader: showPlaceholder || hasResolvedItems
+        ) {
             HorizontalShelf(spacing: spacing) {
                 ForEach(items, id: \.id) { item in
                     MediaNavigationLink(item: item.base) {
@@ -52,19 +57,48 @@ struct MediaShelf: View {
         16
         #endif
     }
+    
+    private var hasResolvedItems: Bool {
+        items.contains { $0.base != nil }
+    }
 
     private func loadItems() async {
         if dataLoaded { return }
+        if isLoading { return }
+
+        isLoading = true
+        defer { isLoading = false }
+        async let placeholderTimeout: Void = hidePlaceholderAfterDelayIfNeeded()
 
         do {
             let loadedItems = try await loadItemsAction()
             dataLoaded = true
 
-            withAnimation {
-                items.update(with: loadedItems)
+            if loadedItems.isEmpty {
+                // Keep placeholders visible until timeout, then collapse if still unresolved.
+            } else {
+                withAnimation {
+                    items.update(with: loadedItems)
+                }
             }
         } catch {
+            dataLoaded = true
             print("Error loading MediaShelf items: \(error)")
+        }
+
+        await placeholderTimeout
+
+        if hasResolvedItems {
+            showPlaceholder = false
+        }
+    }
+
+    private func hidePlaceholderAfterDelayIfNeeded() async {
+        try? await Task.sleep(for: .seconds(10))
+
+        guard !hasResolvedItems else { return }
+        withAnimation {
+            showPlaceholder = false
         }
     }
 }

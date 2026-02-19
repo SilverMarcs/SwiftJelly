@@ -80,7 +80,6 @@ struct SeasonEpisodeCard: View {
                     }
                 }
             }
-            .environment(\.colorScheme, .dark)
         }
         .foregroundStyle(.primary)
         .cardBorder(cornerRadius: 15)
