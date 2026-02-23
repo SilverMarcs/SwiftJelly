@@ -21,11 +21,16 @@ struct LibraryView: View {
             LazyVGrid(columns: columns, spacing: gridSpacing) {
                 ForEach(libraries, id: \.id) { library in
                     MediaNavigationLink(item: library) {
-                        LandscapeImageView(item: library)
-                            #if !os(tvOS)
-                            .clipShape(.rect(cornerRadius: 12))
-                            #endif
+                        LandscapeImageView(item: library) {
+                            Text(library.name ?? "")
+                                .font(.title)
+                                .bold()
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(width: columnMinimumWidth, height: columnMinimumHeight, alignment: .center)
+                        .background(.background.secondary)
                     }
+                    .cardBorder()
                 }
             }
             .scenePadding(.horizontal)
@@ -62,11 +67,13 @@ struct LibraryView: View {
 
     private var columnMinimumWidth: CGFloat {
         #if os(tvOS)
-        400
+        500
         #else
         250
         #endif
     }
+    
+    private var columnMinimumHeight: CGFloat { columnMinimumWidth * 0.5625 } // 16:9 Aspect Ratio
 
     private var columnSpacing: CGFloat {
         #if os(tvOS)

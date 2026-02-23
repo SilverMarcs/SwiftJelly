@@ -19,7 +19,6 @@ struct FavoriteButton: View {
         .tint((item.userData?.isFavorite == true) ? .yellow : .primary)
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
-        .scaleEffect(0.97)
         #if os(tvOS)
         .controlSize(.regular)
         #else

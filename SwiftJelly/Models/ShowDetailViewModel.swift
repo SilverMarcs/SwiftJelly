@@ -2,15 +2,22 @@ import Foundation
 import JellyfinAPI
 import SwiftUI
 
+struct EpisodeItem {
+    var episodeItem: BaseItemDto?
+}
+
 @Observable
 class ShowDetailViewModel {
+    private static var episodesPlaceholder: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 6)
+    
     // Input
     private(set) var show: BaseItemDto
     
     // Seasons / Episodes
     private(set) var seasons: [BaseItemDto] = []
     var selectedSeason: BaseItemDto? = nil
-    private(set) var episodes: [BaseItemDto] = []
+    
+    private(set) var episodes: [ViewListItem] = episodesPlaceholder
     private var allEpisodes: [String: [BaseItemDto]] = [:]
      
     // Next Episode / play button
@@ -19,13 +26,14 @@ class ShowDetailViewModel {
     // Loading states
     var isLoading: Bool = false
     var isLoadingEpisodes: Bool = false
-    
+
     var playButtonDisabled: Bool { nextEpisode == nil || isLoading }
+
     
     init(item: BaseItemDto) {
         self.show = item
     }
-    
+
     // refreshes everything: show metadata, seasons, episodes, next episode
     func refreshAll() async {
         isLoading = true
@@ -83,9 +91,10 @@ class ShowDetailViewModel {
     }
     
     func updateEpisodesForSelectedSeason() async {
-        guard let selectedSeason else { episodes = []; return }
+        guard let selectedSeason else { episodes = ShowDetailViewModel.episodesPlaceholder; return }
         let sid = selectedSeason.id ?? ""
-        episodes = allEpisodes[sid] ?? []
+
+        episodes.update(with: allEpisodes[sid] ?? [])
         isLoadingEpisodes = false
     }
     
@@ -144,7 +153,7 @@ class ShowDetailViewModel {
             seasons = inferredSeasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
         } catch {
             seasons = []
-            episodes = []
+            episodes.update(with: (0..<10).map { _ in BaseItemDto()})
             allEpisodes = [:]
         }
         

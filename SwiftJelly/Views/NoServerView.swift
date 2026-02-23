@@ -8,21 +8,20 @@
 import SwiftUI
 
 struct NoServerView: View {
-    @State private var showAddServerSheet = false
-    
     var body: some View {
-        ContentUnavailableView {
-            Label("No Server Found", systemImage: "server.rack")
-        } description: {
-            Text("Please connect to a Jellyfin server to continue.")
-        } actions: {
-            Button("Add Server") {
-                showAddServerSheet = true
+        NavigationStack {
+            ContentUnavailableView {
+                Label("No Server Found", systemImage: "server.rack")
+            } description: {
+                Text("Please connect to a Jellyfin server to continue.")
+            } actions: {
+                NavigationLink {
+                    AddServerView()
+                } label: {
+                    Text("Add Server")
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
-        }
-        .sheet(isPresented: $showAddServerSheet) {
-            AddServerView()
         }
     }
 }

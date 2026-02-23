@@ -13,7 +13,7 @@ struct ShowDetailView: View {
             VStack(spacing: spacing) {
                 ShowSeasonsView(vm: vm)
                 
-                PeopleScrollView(people: vm.show.people)
+                PeopleScrollView(people: vm.show.people ?? [])
                 
                 SimilarItemsView(item: vm.show)
                 
@@ -33,7 +33,7 @@ struct ShowDetailView: View {
 
     private var spacing: CGFloat {
         #if os(tvOS)
-        100
+        150
         #else
         30
         #endif

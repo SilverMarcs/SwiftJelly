@@ -11,7 +11,7 @@ struct TMDBReviewsView: View {
     @State private var selectedReview: Review?
 
     var body: some View {
-        if !tmdbAPIKey.isEmpty {
+        if !tmdbAPIKey.isEmpty && !reviews.isEmpty {
             SectionContainer(showHeader: !reviews.isEmpty) {
                 HorizontalShelf(spacing: spacing) {
                     ForEach(reviews) { review in

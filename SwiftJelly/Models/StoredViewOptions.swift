@@ -31,6 +31,18 @@ enum EpisodeNamingStyle: String, CaseIterable {
     }
 }
 
+enum ContinueWatchingStyle: String, CaseIterable {
+    case combined
+    case separated
+    
+    var title: String {
+        switch self {
+        case .combined: "Combined"
+        case .separated: "Separated"
+        }
+    }
+}
+
 extension CaseIterable where Self: Equatable {
     func next() -> Self {
         let all = Self.allCases

@@ -17,6 +17,8 @@ struct MediaDestinationView: View {
             MovieDetailView(item: item)
         case .series:
             ShowDetailView(item: item)
+        case .genre:
+            FilteredMediaView(filter: .genre(item.name ?? ""))
         case .episode:
             ShowDetailView(item: BaseItemDto(id: item.seriesID))
         case .person:
@@ -28,7 +30,7 @@ struct MediaDestinationView: View {
                 "Unsupported Media Type",
                 systemImage: "questionmark.circle",
                 description: Text("Cannot display \(item.type?.rawValue.capitalized ?? "unknown") items")
-            )
+            ).focusable(true)
         }
     }
 }

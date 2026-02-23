@@ -9,9 +9,8 @@ struct ShowHeroDetailView: View {
             HStack(spacing: spacing) {
                 ShowPlayButton(vm: vm)
 
-                if let season = vm.selectedSeason {
-                    MarkPlayedButton(item: season)
-                }
+                MarkPlayedButton(item: vm.selectedSeason)
+                    .adaptiveDisabled(vm.playButtonDisabled)
 
                 FavoriteButton(item: vm.show)
             }
@@ -25,7 +24,7 @@ struct ShowHeroDetailView: View {
         #elseif os(macOS)
         8
         #else
-        4
+        0
         #endif
     }
 }

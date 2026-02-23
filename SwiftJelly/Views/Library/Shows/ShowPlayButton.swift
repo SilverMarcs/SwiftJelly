@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct ShowPlayButton: View {
-    var vm: ShowDetailViewModel
+    let vm: ShowDetailViewModel
     
     var body: some View {
         PlayMediaButton(item: vm.nextEpisode ?? BaseItemDto()) {
@@ -58,10 +58,6 @@ struct ShowPlayButton: View {
         #endif
         .buttonStyle(.glassProminent)
         .environment(\.refresh, vm.refreshAll)
-        #if !os(tvOS)
-        .disabled(vm.playButtonDisabled)
-        #else
-        .opacity(vm.playButtonDisabled ? 0.5 : 1)
-        #endif
+        .adaptiveDisabled(vm.playButtonDisabled)
     }
 }

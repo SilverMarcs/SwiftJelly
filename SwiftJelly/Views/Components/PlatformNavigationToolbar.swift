@@ -8,20 +8,27 @@
 import SwiftUI
 
 private struct PlatformNavigationToolbarModifier: ViewModifier {
+    var titleDisplayMode: ToolbarTitleDisplayMode // no-op on tvOS
+    
     func body(content: Content) -> some View {
         #if os(tvOS)
         content
             .toolbar(.hidden, for: .navigationBar)
         #else
         content
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbarTitleDisplayMode(titleDisplayMode)
         #endif
     }
 }
 
 extension View {
-    func platformNavigationToolbar() -> some View {
-        modifier(PlatformNavigationToolbarModifier())
+    #if os(tvOS)
+    func platformNavigationToolbar(titleDisplayMode: ToolbarTitleDisplayMode = .automatic) -> some View {
+        modifier(PlatformNavigationToolbarModifier(titleDisplayMode: .automatic))
     }
+    #else
+    func platformNavigationToolbar(titleDisplayMode: ToolbarTitleDisplayMode = .inlineLarge) -> some View {
+        modifier(PlatformNavigationToolbarModifier(titleDisplayMode: titleDisplayMode))
+    }
+    #endif
 }
-

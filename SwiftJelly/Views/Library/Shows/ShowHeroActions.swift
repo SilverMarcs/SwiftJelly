@@ -3,44 +3,25 @@ import JellyfinAPI
 
 struct ShowHeroActions: View {
     @Binding private var show: BaseItemDto
-    @State private var vm: ShowDetailViewModel
+    let vm: ShowDetailViewModel
     
     init(show: Binding<BaseItemDto>) {
         self._show = show
-        _vm = State(initialValue: ShowDetailViewModel(item: show.wrappedValue))
+        self.vm = ShowDetailViewModel(item: show.wrappedValue)
     }
     
     var body: some View {
         HStack(spacing: spacing) {
             ShowPlayButton(vm: vm)
-            
-            if let season = vm.selectedSeason {
-                MarkPlayedButton(item: season)
-            }
-            
+
+            MarkPlayedButton(item: vm.selectedSeason)
+                .adaptiveDisabled(vm.playButtonDisabled)
+
             FavoriteButton(item: vm.show)
         }
         .environment(\.refresh, refreshAllAndSync)
     }
-    
-    private var loadingButton: some View {
-        Button {} label: {
-            HStack(spacing: 8) {
-                ProgressView()
-                    .tint(.primary)
-                    .controlSize(.mini)
-                Text("Loading…")
-            }
-            .font(.callout)
-            .fontWeight(.semibold)
-        }
-        .tint(Color(.accent).secondary)
-        .buttonBorderShape(.capsule)
-        .controlSize(.extraLarge)
-        .buttonStyle(.glassProminent)
-        .disabled(true)
-    }
-    
+
     private var spacing: CGFloat {
         #if os(tvOS)
         15

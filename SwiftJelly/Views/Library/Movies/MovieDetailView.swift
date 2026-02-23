@@ -11,7 +11,7 @@ struct MovieDetailView: View {
     var body: some View {
         DetailView(item: movie) {
             VStack(spacing: spacing) {
-                PeopleScrollView(people: movie.people)
+                PeopleScrollView(people: movie.people ?? [])
                 
                 SimilarItemsView(item: movie)
                 
@@ -36,7 +36,7 @@ struct MovieDetailView: View {
     
     private var spacing: CGFloat {
         #if os(tvOS)
-        100
+        200
         #else
         30
         #endif

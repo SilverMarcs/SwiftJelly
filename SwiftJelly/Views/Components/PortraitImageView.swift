@@ -2,11 +2,34 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-struct PortraitImageView: View {
-    let item: BaseItemDto
+struct PortraitImageView<Placeholder: View>: View {
+    let item: BaseItemDto?
+    let placeholder: () -> Placeholder
     
+    public init(
+        item: BaseItemDto?,
+        @ViewBuilder placeholder: @escaping () -> Placeholder
+    ) {
+        self.item = item
+        self.placeholder = placeholder
+    }
+
+    // Default placeholder
+    public init(item: BaseItemDto?) where Placeholder == EmptyView {
+        self.item = item
+        self.placeholder = { EmptyView() }
+    }
+
     var body: some View {
-        CachedAsyncImage(url: ImageURLProvider.imageURL(for: item, type: .primary), targetSize: 500)
+        CachedAsyncImage(url: imageURL, targetSize: 500, placeholder: placeholder)
             .aspectRatio(1/1.5, contentMode: .fill)
+    }
+    
+    private var imageURL: URL? {
+        if let item {
+            ImageURLProvider.imageURL(for: item, type: .primary)
+        } else {
+            nil
+        }
     }
 }

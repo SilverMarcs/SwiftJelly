@@ -17,7 +17,7 @@ struct AddServerView: View {
     @State private var showingAlert = false
 
     var body: some View {
-        NavigationStack {
+        SettingsSplitView {
             Form {
                 Section("Server Details") {
                     TextField("Server Name", text: $serverName)
@@ -64,18 +64,25 @@ struct AddServerView: View {
             }
             .formStyle(.grouped)
             .navigationTitle("Add Server")
-            .toolbarTitleDisplayMode(.inline)
-            #if os(iOS)
-            .toolbar {
-                Button(role: .close) { dismiss() }
-            }
-            #endif
             .alert("Error", isPresented: $showingAlert) {
                 Button("OK") { }
             } message: {
                 Text(alertMessage)
             }
+        } infoPanel: {
+            VStack(spacing: 20) {
+                Image(systemName: "plus")
+                    .font(.system(size: 200))
+                    .foregroundStyle(.secondary)
+                
+                Text("Add Server")
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundStyle(.secondary)
+            }
         }
+        .navigationTitle("Add Server")
+        .platformNavigationToolbar(titleDisplayMode: .inline)
     }
 
     private func saveAndAuthenticate() {
