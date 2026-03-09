@@ -52,6 +52,7 @@ import Observation
         guard !isLoadingTaskActive else { return }
         isLoadingTaskActive = true
         defer { isLoadingTaskActive = false }
+        let activePlaybackToken = playbackToken
 
         isLoading = true
         requestedAudioStreamIndex = audioIndex ?? requestedAudioStreamIndex
@@ -69,6 +70,13 @@ import Observation
                 resumeSeconds: resumeSeconds
             )
 
+            guard activePlaybackToken == playbackToken else {
+                session.player.pause()
+                session.player.replaceCurrentItem(with: nil)
+                isLoading = false
+                return
+            }
+
             player = session.player
             playbackInfo = session.info
             item = session.item
@@ -85,20 +93,6 @@ import Observation
         isLoading = false
     }
 
-    func cleanup() async {
-        stopObservingTime()
-        nextEpisode = nil
-        isFetchingNextEpisode = false
-
-        await reportPlaybackStopped()
-
-        guard let player else { return }
-        player.pause()
-        player.replaceCurrentItem(with: nil)
-
-        self.player = nil
-    }
-    
     /// Internal cleanup for switching items without triggering endPlayback.
     func cleanupForSwitch() {
         stopObservingTime()
@@ -109,6 +103,23 @@ import Observation
             player.pause()
             player.replaceCurrentItem(with: nil)
         }
+    }
+
+    func stopPlaybackImmediately() {
+        stopObservingTime()
+        nextEpisode = nil
+        isFetchingNextEpisode = false
+        isLoading = false
+        playbackToken = UUID()
+
+        guard let player else { return }
+        player.pause()
+        player.replaceCurrentItem(with: nil)
+        self.player = nil
+    }
+
+    func finishStoppingPlayback() async {
+        await reportPlaybackStopped()
     }
 
     var skipIntroTargetSeconds: Double? {

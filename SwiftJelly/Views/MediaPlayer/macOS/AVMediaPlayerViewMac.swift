@@ -83,7 +83,7 @@ struct AVMediaPlayerViewMac: View {
             configureWindow()
         }
         .onDisappear {
-            Task { await playbackManager.endPlayback() }
+            playbackManager.endPlayback()
         }
     }
 

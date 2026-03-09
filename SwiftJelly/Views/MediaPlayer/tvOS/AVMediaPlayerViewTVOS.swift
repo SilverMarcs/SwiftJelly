@@ -17,10 +17,7 @@ struct AVMediaPlayerViewTVOS: View {
                 onSkipIntro: { Task { await model.skipIntro() } },
                 onNextEpisode: { Task { await model.transitionToNextEpisode() } },
                 onDismiss: {
-                    Task {
-                        playbackManager.isPlayerPresented = false
-                        await playbackManager.endPlayback()
-                    }
+                    playbackManager.endPlayback()
                 }
             )
             // TODO: fix this; setting an ID here will cause the video player to flicker, when a new episode is loaded.
@@ -34,7 +31,7 @@ struct AVMediaPlayerViewTVOS: View {
                     )
                 }
                 .onDisappear {
-                    Task { await PlaybackManager.shared.endPlayback() }
+                    PlaybackManager.shared.endPlayback()
                 }
         } else if let model = playbackManager.viewModel, model.isLoading {
             ProgressView()

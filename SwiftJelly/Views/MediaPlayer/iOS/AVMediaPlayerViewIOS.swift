@@ -21,7 +21,7 @@ struct AVMediaPlayerViewIOS: View {
                     )
                 }
                 .onDisappear {
-                    Task { await PlaybackManager.shared.endPlayback() }
+                    PlaybackManager.shared.endPlayback()
                 }
         } else if let model = playbackManager.viewModel, model.isLoading {
             ProgressView()

@@ -62,15 +62,28 @@ import AVFoundation
         viewModel?.player?.play()
     }
 
-    /// Called when playback ends to clean up and trigger the refresh handler.
-    func endPlayback() async {
-        await viewModel?.cleanup()
-        viewModel = nil
-        
-        if let handler = refreshHandler {
-            try? await Task.sleep(for: .milliseconds(100))
-            await handler()
+    /// Stops local playback immediately, then finishes server/reporting work asynchronously.
+    func endPlayback() {
+        guard let activeViewModel = viewModel else {
+            isPlayerPresented = false
             refreshHandler = nil
+            return
+        }
+
+        let handler = refreshHandler
+        refreshHandler = nil
+        viewModel = nil
+        isPlayerPresented = false
+
+        activeViewModel.stopPlaybackImmediately()
+
+        Task { @MainActor in
+            await activeViewModel.finishStoppingPlayback()
+
+            if let handler {
+                try? await Task.sleep(for: .milliseconds(100))
+                await handler()
+            }
         }
     }
 }

@@ -78,8 +78,3 @@ If SwiftData is configured to use CloudKit:
 ## PR instructions
 
 - If installed, make sure SwiftLint returns no warnings or errors before committing.
-
-
-## Build Instructions
-
-- Never run build or lint commands unless explicitly requested.
