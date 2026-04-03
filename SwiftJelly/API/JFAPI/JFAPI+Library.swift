@@ -56,6 +56,10 @@ extension JFAPI {
     ///   - itemTypes: Optional list of item types to include
     /// - Returns: Array of BaseItemDto representing latest items in the library
     static func loadLatestMediaInLibrary(limit: Int = 10, itemTypes: [BaseItemKind]? = nil) async throws -> [BaseItemDto] {
+        if shouldLoadLatestMediaViaItemsQuery(for: itemTypes) {
+            return try await loadLatestMediaViaItemsQuery(limit: limit, itemTypes: itemTypes)
+        }
+
         let context = try getAPIContext()
         var parameters = Paths.GetLatestMediaParameters()
         parameters.userID = context.userID
@@ -66,6 +70,26 @@ extension JFAPI {
         
         let request = Paths.getLatestMedia(parameters: parameters)
         return try await send(request)
+    }
+
+    private static func shouldLoadLatestMediaViaItemsQuery(for itemTypes: [BaseItemKind]?) -> Bool {
+        guard let itemTypes else { return false }
+        return itemTypes.contains(.series)
+    }
+
+    private static func loadLatestMediaViaItemsQuery(limit: Int, itemTypes: [BaseItemKind]?) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetItemsByUserIDParameters()
+        parameters.isRecursive = true
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        parameters.includeItemTypes = itemTypes
+        parameters.sortBy = [ItemSortBy.dateCreated.rawValue, ItemSortBy.sortName.rawValue]
+        parameters.sortOrder = [.descending, .ascending]
+        parameters.limit = limit
+
+        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
+        return try await send(request).items ?? []
     }
     
     /// Loads media items that a person appeared in
