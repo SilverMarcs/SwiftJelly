@@ -28,6 +28,8 @@ OldProject
 VLCUIPackageCode
 JellyFinApiPackageCode
 IgnoreFolder
-.DS_Store
 SwiftUI
 VLCVideoPlayer
+
+build.sh
+run.sh

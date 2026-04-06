@@ -14,8 +14,6 @@ struct MovieDetailView: View {
                 PeopleScrollView(people: movie.people ?? [])
                 
                 SimilarItemsView(item: movie)
-                
-                TMDBReviewsView(item: movie)
             }
         } heroView: {
             MovieHeroView(movie: $movie)

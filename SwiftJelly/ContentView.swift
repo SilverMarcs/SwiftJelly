@@ -20,8 +20,6 @@ struct ContentView: View {
     @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
     #endif
 
-    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
-    @State private var trendingViewModel = TrendingInLibraryViewModel()
 
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -80,10 +78,6 @@ struct ContentView: View {
                 #endif
             }
             #endif
-            .task(id: tmdbAPIKey) {
-                await trendingViewModel.loadTrendingIfNeeded(apiKey: tmdbAPIKey)
-            }
-            .environment(trendingViewModel)
         }
     }
     

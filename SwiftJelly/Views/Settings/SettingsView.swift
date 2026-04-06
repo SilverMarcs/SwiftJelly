@@ -9,11 +9,9 @@ import SwiftUI
 import SwiftMediaViewer
 
 struct SettingsView: View {
-    @AppStorage("tmdbAPIKey") private var tmdbAPIKey = ""
-    @AppStorage("showTrendingOnTop") private var showTrendingOnTop = true
     @Environment(\.dismiss) var dismiss
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
+
     var body: some View {
         SettingsSplitView {
             NavigationStack {
@@ -26,7 +24,7 @@ struct SettingsView: View {
                 .shadow(radius: 12)
         }
     }
-    
+
     var form: some View {
         Form {
             NavigationLink {
@@ -34,29 +32,12 @@ struct SettingsView: View {
             } label: {
                 Label("Servers", systemImage: "server.rack")
             }
-            
+
             Section("View Options") {
                 ViewOptions()
                     .foregroundStyle(.primary)
             }
-            
-            Section {
-                SecureField("Bearer Token", text: $tmdbAPIKey, prompt: Text("ey..."))
-                    .onChange(of: tmdbAPIKey) { _, newValue in
-                        if newValue.isEmpty {
-                            showTrendingOnTop = false
-                        }
-                    }
-                if !tmdbAPIKey.isEmpty {
-                    Toggle("Show trending on top", isOn: $showTrendingOnTop)
-                        .foregroundStyle(.primary)
-                }
-            } header: {
-                Text("TMDB API")
-            } footer: {
-                Text("Enter your TMDB API Bearer token to show trending content from your library.")
-            }
-            
+
             Section("Images") {
                 CacheManagerView()
             }
