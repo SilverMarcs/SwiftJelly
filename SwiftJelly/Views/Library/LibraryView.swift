@@ -27,7 +27,8 @@ struct LibraryView: View {
                                 .bold()
                                 .foregroundStyle(.secondary)
                         }
-                        .frame(width: columnMinimumWidth, height: columnMinimumHeight, alignment: .center)
+                        .frame(minWidth: columnMinimumWidth, maxWidth: .infinity)
+                        .aspectRatio(16/9, contentMode: .fit)
                         .background(.background.secondary)
                     }
                     .cardBorder()

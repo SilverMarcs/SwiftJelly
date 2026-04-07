@@ -57,7 +57,7 @@ struct MediaGrid: View {
         #if os(tvOS)
         30
         #elseif os(iOS)
-        5
+        12
         #elseif os(macOS)
         10
         #endif

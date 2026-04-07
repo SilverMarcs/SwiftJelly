@@ -107,6 +107,9 @@ struct TrendingInLibraryView: View {
         .onDisappear {
             viewModel.stopAutoScroll()
         }
+        .onChange(of: viewModel.scrolledID) {
+            viewModel.startAutoScroll()
+        }
     }
 
     @ViewBuilder

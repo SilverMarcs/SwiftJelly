@@ -129,11 +129,11 @@ struct ContentView: View {
     }
 
     private var primaryTabs: [TabSelection] {
-        if isCompactSize {
-            return TabSelection.compactTabs
-        } else {
-            return TabSelection.extendedTabs
+        var tabs = isCompactSize ? TabSelection.compactTabs : TabSelection.extendedTabs
+        if !SeerrAPI.isConfigured {
+            tabs.removeAll { $0 == .discover }
         }
+        return tabs
     }
     
     #if os(tvOS)
