@@ -33,6 +33,8 @@ struct SettingsView: View {
                 Label("Servers", systemImage: "server.rack")
             }
 
+            SeerrSettingsView()
+
             Section("View Options") {
                 ViewOptions()
                     .foregroundStyle(.primary)

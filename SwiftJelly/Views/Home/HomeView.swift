@@ -15,20 +15,34 @@ enum FocusField {
 struct HomeView: View {
     @AppStorage("continueWatchingStyle") private var continueWatchingStyle: ContinueWatchingStyle = .combined
 
-    @State private var showScrollEffect = false    
+    @Environment(TrendingInLibraryViewModel.self) private var trendingViewModel
+
+    @State private var showScrollEffect = false
 
 #if os(tvOS)
     @State private var belowFold = false
 #endif
-    
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing) {
-                FeaturedView {
-                    try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.movie, .tvProgram]).shuffled()
-                }
-                .onScrollVisibilityChange { isVisible in
-                    showScrollEffect = isVisible
+                if !trendingViewModel.items.isEmpty {
+                    TrendingInLibraryView()
+                        .onScrollVisibilityChange { isVisible in
+                            showScrollEffect = isVisible
+                        }
+                } else if trendingViewModel.hasLoaded {
+                    FeaturedView {
+                        try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.movie, .tvProgram]).shuffled()
+                    }
+                    .onScrollVisibilityChange { isVisible in
+                        showScrollEffect = isVisible
+                    }
+                } else {
+                    HeroBackdropView(item: BaseItemDto()) {}
+                        .onScrollVisibilityChange { isVisible in
+                            showScrollEffect = isVisible
+                        }
                 }
                 #if os(tvOS)
                 .ignoresSafeArea()

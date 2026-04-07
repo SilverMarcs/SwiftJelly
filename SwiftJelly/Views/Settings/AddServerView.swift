@@ -49,6 +49,9 @@ struct AddServerView: View {
                             Spacer()
                             if isAuthenticating {
                                 ProgressView()
+                                #if os(macOS)
+                                .controlSize(.small)
+                                #endif
                             } else {
                                 Text("Connect")
                                     .fontWeight(.semibold)

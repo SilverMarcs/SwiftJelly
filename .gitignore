@@ -33,3 +33,4 @@ VLCVideoPlayer
 
 build.sh
 run.sh
+run-ios.sh

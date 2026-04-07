@@ -98,7 +98,7 @@ struct FeaturedView: View {
                 #endif
                 
                 NavigationLink(value: item) {
-                    Image(systemName: "info.circle")
+                    Image(systemName: "info")
                 }
                 .buttonStyle(.glass)
                 .tint(.primary)

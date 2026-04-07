@@ -21,6 +21,7 @@ struct NoServerView: View {
                     Text("Add Server")
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.large)
             }
         }
     }

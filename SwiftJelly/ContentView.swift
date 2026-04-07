@@ -21,6 +21,8 @@ struct ContentView: View {
     #endif
 
 
+    @State private var trendingViewModel = TrendingInLibraryViewModel()
+
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     private var isCompactSize: Bool {
@@ -78,9 +80,13 @@ struct ContentView: View {
                 #endif
             }
             #endif
+            .task {
+                await trendingViewModel.loadTrendingIfNeeded()
+            }
+            .environment(trendingViewModel)
         }
     }
-    
+
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
             .navigationDestinations()
