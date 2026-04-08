@@ -23,7 +23,7 @@ struct MediaGrid: View {
                     MediaNavigationLink(item: item) {
                         MediaCard(item: item)
                     }
-                    .frame(width: posterWidth, height: posterHeight)
+                    .aspectRatio(2.0 / 3.0, contentMode: .fit)
                     .onAppear {
                         if item == items.last, let onLoadMore {
                             onLoadMore()

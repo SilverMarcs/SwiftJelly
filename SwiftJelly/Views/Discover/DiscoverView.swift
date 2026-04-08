@@ -18,7 +18,7 @@ struct DiscoverView: View {
                     DiscoverCard(item: item, isMatching: matchingItemID == item.uniqueID) {
                         Task { await navigateToMatch(for: item) }
                     }
-                    .frame(width: posterWidth, height: posterHeight)
+                    .aspectRatio(2.0 / 3.0, contentMode: .fit)
                     .onAppear {
                         if item.uniqueID == vm.results.last?.uniqueID {
                             Task { await vm.loadMore() }
