@@ -13,21 +13,31 @@ struct FeaturedView: View {
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
 
     @State private var scrollOffset: CGFloat = 0
-    @State private var item: BaseItemDto = BaseItemDto()
-    @State private var itemsLoaded = false
+    @State private var item: BaseItemDto?
+    @State private var loadFailed: Bool = false
+    @State private var hasStartedLoading: Bool = false
     @State private var showDetailViewModel: ShowDetailViewModel? = nil
     @State var shouldFocus: Bool = true
-    
+
     var body: some View {
-        #if os(tvOS)
-        tvOSView
-        #else
-        staticDetails(for: item)
-        #endif
+        if let item {
+            #if os(tvOS)
+            tvOSView(for: item)
+            #else
+            staticDetails(for: item)
+            #endif
+        } else if !loadFailed {
+            HeroBackdropView(item: BaseItemDto()) {}
+                .task {
+                    guard !hasStartedLoading else { return }
+                    hasStartedLoading = true
+                    await fetchItems()
+                }
+        }
     }
-    
+
     #if os(tvOS)
-    private var tvOSView: some View {
+    private func tvOSView(for item: BaseItemDto) -> some View {
         staticDetails(for: item)
             .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
                 content
@@ -64,15 +74,21 @@ struct FeaturedView: View {
     private func fetchItems() async {
         do {
             let loaded = try await loadItemsAction()
-            itemsLoaded = true
-            if let item = loaded.shuffled().first {
+            if let picked = loaded.shuffled().first {
                 await MainActor.run {
-                    showDetailViewModel = ShowDetailViewModel(item: item)
-                    self.item = item
+                    showDetailViewModel = ShowDetailViewModel(item: picked)
+                    self.item = picked
+                }
+            } else {
+                await MainActor.run {
+                    loadFailed = true
                 }
             }
         } catch {
-            print("Error loading genres: \(error)")
+            print("Error loading featured items: \(error)")
+            await MainActor.run {
+                loadFailed = true
+            }
         }
     }
     
@@ -119,11 +135,6 @@ struct FeaturedView: View {
         .focusSection()
         #endif
         .environment(\.colorScheme, .dark)
-        .onAppear {
-            Task {
-                await fetchItems()
-            }
-        }
     }
     
     private var overallAlignment: Alignment {

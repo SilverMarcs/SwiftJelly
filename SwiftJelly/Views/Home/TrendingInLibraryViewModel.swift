@@ -31,7 +31,10 @@ final class TrendingInLibraryViewModel {
     }
 
     func loadTrendingIfNeeded() async {
-        guard SeerrAPI.isConfigured else { return }
+        guard SeerrAPI.isConfigured else {
+            hasLoaded = true
+            return
+        }
         guard items.isEmpty else { return }
         await loadTrending()
     }
