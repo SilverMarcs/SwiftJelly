@@ -184,6 +184,8 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             logo
 
+            genreList
+
             heroActions
 
             OverviewView(item: item, compact: true)
@@ -193,12 +195,31 @@ struct HeroBackdropView<HeroActions: View>: View {
         .frame(maxWidth: .infinity, alignment: overallAlignment)
     }
     
+    @ViewBuilder
+    private var genreList: some View {
+        if let genres = item.genres, !genres.isEmpty {
+            Text(genres.joined(separator: " \u{00B7} "))
+                .font(genreFont)
+                .foregroundStyle(.white.opacity(0.7))
+        }
+    }
+
+    private var genreFont: Font {
+        #if os(iOS)
+        .subheadline
+        #elseif os(tvOS)
+        .caption
+        #else
+        .callout
+        #endif
+    }
+
     private var largeScreenContent: some View {
         VStack(alignment: contentAlignment, spacing: 20) {
             Spacer()
 
             logo
-            
+
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 30) {
                     OverviewView(item: item)
@@ -209,7 +230,10 @@ struct HeroBackdropView<HeroActions: View>: View {
 
                 Spacer()
 
-                AttributesView(item: item)
+                VStack(alignment: .trailing, spacing: 12) {
+                    AttributesView(item: item)
+                    genreList
+                }
             }
         }
         .scenePadding(.horizontal)
@@ -274,7 +298,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     }
     
     private var backdropHeight: CGFloat {
-        isCompactSize ? 380 : 500
+        isCompactSize ? 440 : 500
     }
 }
 

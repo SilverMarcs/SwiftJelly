@@ -21,7 +21,7 @@ struct OverviewView: View {
                     #if os(tvOS)
                     .font(.caption)
                     #elseif os(iOS)
-                    .font(compact ? .caption : .callout)
+                    .font(compact ? .subheadline : .callout)
                     #else
                     .font(.callout)
                     #endif
@@ -31,21 +31,19 @@ struct OverviewView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     #if !os(tvOS)
                     .overlay(alignment: .bottomTrailing) {
-                        if compact {
-                            Button {
-                                showFullOverview = true
-                            } label: {
-                                Text("More")
-                                    .font(.caption)
-                            }
-                            .buttonStyle(.glass)
-                            .sheet(isPresented: $showFullOverview) {
-                                OverviewSheetView(
-                                    title: item.name ?? "Overview",
-                                    overview: overview,
-                                    isPresented: $showFullOverview
-                                )
-                            }
+                        Button {
+                            showFullOverview = true
+                        } label: {
+                            Text("More")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.glass)
+                        .sheet(isPresented: $showFullOverview) {
+                            OverviewSheetView(
+                                item: item,
+                                overview: overview,
+                                isPresented: $showFullOverview
+                            )
                         }
                     }
                     #endif

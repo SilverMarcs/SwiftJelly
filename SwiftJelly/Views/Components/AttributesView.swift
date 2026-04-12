@@ -10,74 +10,239 @@ import JellyfinAPI
 
 struct AttributesView: View {
     let item: BaseItemDto
-    
+
     var body: some View {
-        HStack(spacing: 10) {
-            if let genre = item.genres?.first {
-                AttributeBadge(
-                    text: genre,
-                )
-            }
-            
-            // Community Rating (stars)
-            if let communityRating = item.communityRating {
-                unsafe AttributeBadge(
-                    text: String(format: "%.1f", communityRating),
-                    systemImage: "star.fill",
-                )
-            }
-            
-            // Critic Rating (tomato)
-            if let criticRating = item.criticRating {
-                unsafe AttributeBadge(
-                    text: String(format: "%.0f", criticRating),
-                    systemImage: criticRating >= 60 ? "checkmark.seal.fill" : "xmark.seal.fill",
-                )
-            }
-            
+        HStack(spacing: 8) {
             // Year
             if let year = item.productionYear {
-                AttributeBadge(text: String(year), systemImage: "calendar")
+                Text(String(year))
             }
-            
-            // Runtime (dont show for shows
+
+            // Runtime (don't show for series)
             if let runTimeTicks = item.runTimeTicks, item.type != .series {
-                let minutes = runTimeTicks / 10_000_000 / 60
-                AttributeBadge(text: "\(minutes)m", systemImage: "clock")
+                let totalMinutes = runTimeTicks / 10_000_000 / 60
+                let hours = totalMinutes / 60
+                let minutes = totalMinutes % 60
+                if hours > 0 {
+                    dotSeparator
+                    Text("\(hours)h \(minutes)m")
+                } else {
+                    dotSeparator
+                    Text("\(minutes)m")
+                }
+            }
+
+            // Official Rating (PG-13, R, 13+, etc.)
+            if let rating = item.officialRating {
+                BorderedBadge(text: rating)
+            }
+
+            // Resolution
+            if let resolution = resolutionLabel {
+                BorderedBadge(text: resolution)
+            }
+
+            // Audio codec badge (Dolby Atmos, DTS, etc.)
+            if let audioBadge = audioBadgeInfo {
+                AudioBadgeView(info: audioBadge)
+            }
+
+            // SDH
+            if hasSDHSubtitles {
+                BorderedBadge(text: "SDH")
+            }
+
+            // Critic Rating (Rotten Tomatoes)
+            if let criticRating = item.criticRating {
+                HStack(spacing: 4) {
+                    unsafe Text(criticRating >= 60 ? "🍅" : "🤢")
+                        .font(.caption2)
+                    unsafe Text("\(Int(criticRating))%")
+                }
+            }
+
+            // Community Rating (IMDb-style)
+            if let communityRating = item.communityRating {
+                HStack(spacing: 4) {
+                    IMDbBadge()
+                    unsafe Text(String(format: "%.1f", communityRating))
+                }
             }
         }
+        .font(attributeFont)
+        .foregroundStyle(.white.opacity(0.9))
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    // MARK: - Helpers
+
+    private var dotSeparator: some View {
+        Text("•")
+            .foregroundStyle(.white.opacity(0.5))
+    }
+
+    private var attributeFont: Font {
+        #if os(iOS)
+        .caption
+        #elseif os(tvOS)
+        .caption2
+        #else
+        .subheadline
+        #endif
+    }
+
+    private var resolutionLabel: String? {
+        guard let streams = item.mediaSources?.first?.mediaStreams,
+              let videoStream = streams.first(where: { $0.type == .video }),
+              let width = videoStream.width, let height = videoStream.height else {
+            return nil
+        }
+        if width >= 3840 || height >= 2160 { return "4K" }
+        if width >= 1920 || height >= 1080 { return "1080p" }
+        if width >= 1280 || height >= 720 { return "720p" }
+        if width >= 854 || height >= 480 { return "480p" }
+        return nil
+    }
+
+    private var audioBadgeInfo: AudioBadgeInfo? {
+        guard let streams = item.mediaSources?.first?.mediaStreams else { return nil }
+        let audioStreams = streams.filter { $0.type == .audio }
+
+        // Check for Dolby Atmos
+        for stream in audioStreams {
+            let title = (stream.displayTitle ?? "").lowercased()
+            if title.contains("atmos") {
+                return .dolbyAtmos
+            }
+        }
+
+        // Check for Dolby Digital Plus / Dolby Digital
+        for stream in audioStreams {
+            let codec = (stream.codec ?? "").lowercased()
+            if codec == "eac3" { return .dolbyDigitalPlus }
+            if codec == "ac3" { return .dolbyDigital }
+        }
+
+        // Check for TrueHD
+        for stream in audioStreams {
+            let codec = (stream.codec ?? "").lowercased()
+            if codec == "truehd" { return .dolbyTrueHD }
+        }
+
+        // Check for DTS variants
+        for stream in audioStreams {
+            let codec = (stream.codec ?? "").lowercased()
+            let title = (stream.displayTitle ?? "").lowercased()
+            if title.contains("dts-hd ma") || title.contains("dts-hd") { return .dtsHDMA }
+            if codec == "dts" { return .dts }
+        }
+
+        return nil
+    }
+
+    private var hasSDHSubtitles: Bool {
+        guard let streams = item.mediaSources?.first?.mediaStreams else { return false }
+        return streams.filter { $0.type == .subtitle }.contains { stream in
+            let title = (stream.displayTitle ?? "").lowercased()
+            return title.contains("sdh")
+        }
     }
 }
 
-struct AttributeBadge: View {
-    let text: String
-    let systemImage: String?
-    
-    init(text: String, systemImage: String? = nil) {
-        self.text = text
-        self.systemImage = systemImage
-    }
-    
-    var body: some View {
-        Label {
-            Text(text)
-                .lineLimit(1)
-        } icon: {
-            if let systemImage = systemImage {
-                Image(systemName: systemImage)
-            }
+// MARK: - Audio Badge Types
+
+enum AudioBadgeInfo {
+    case dolbyAtmos
+    case dolbyDigitalPlus
+    case dolbyDigital
+    case dolbyTrueHD
+    case dts
+    case dtsHDMA
+
+    var label: String {
+        switch self {
+        case .dolbyAtmos: "ATMOS"
+        case .dolbyDigitalPlus: "DD+"
+        case .dolbyDigital: "DD"
+        case .dolbyTrueHD: "TrueHD"
+        case .dts: "DTS"
+        case .dtsHDMA: "DTS-HD"
         }
-        #if os(iOS)
-        .font(.caption)
-        #elseif os(tvOS)
-        .font(.caption2)
-        #else
-        .font(.subheadline)
-        #endif
-        .labelIconToTitleSpacing(systemImage == nil ? 0 : 5)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .glassEffect(in: .rect(cornerRadius: 20))
+    }
+
+    var isDolby: Bool {
+        switch self {
+        case .dolbyAtmos, .dolbyDigitalPlus, .dolbyDigital, .dolbyTrueHD: true
+        case .dts, .dtsHDMA: false
+        }
+    }
+}
+
+// MARK: - Sub-views
+
+private struct BorderedBadge: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 9, weight: .medium))
+            .padding(.horizontal, 5)
+            .padding(.vertical, 1.5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 3)
+                    .stroke(.white.opacity(0.5), lineWidth: 0.75)
+            )
+    }
+}
+
+private struct AudioBadgeView: View {
+    let info: AudioBadgeInfo
+
+    var body: some View {
+        if info.isDolby {
+            HStack(spacing: 2) {
+                // Dolby "DD" icon approximation
+                Image(systemName: "dot.radiowaves.left.and.right")
+                    .font(.system(size: 8, weight: .bold))
+                Text("Dolby")
+                    .fontWeight(.bold)
+                    .font(.system(size: 9))
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(.white.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+
+            if info != .dolbyDigital {
+                Text(info.label)
+                    .fontWeight(.semibold)
+                    .font(.system(size: 9))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+                    .background(.white.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            }
+        } else {
+            Text(info.label)
+                .fontWeight(.bold)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(.white.opacity(0.15))
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+        }
+    }
+}
+
+private struct IMDbBadge: View {
+    var body: some View {
+        Text("IMDb")
+            .font(.system(size: 7.5, weight: .black))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 3)
+            .padding(.vertical, 1.5)
+            .background(
+                RoundedRectangle(cornerRadius: 2.5)
+                    .fill(Color.yellow)
+            )
     }
 }
