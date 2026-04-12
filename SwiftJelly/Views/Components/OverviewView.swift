@@ -10,13 +10,18 @@ import JellyfinAPI
 
 struct OverviewView: View {
     let item: BaseItemDto
-    
+    var compact: Bool = false
+
+    @State private var showFullOverview = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let overview = item.overview ??  item.taglines?.first {
+            if let overview = item.overview ?? item.taglines?.first {
                 Text(overview)
                     #if os(tvOS)
                     .font(.caption)
+                    #elseif os(iOS)
+                    .font(compact ? .caption : .callout)
                     #else
                     .font(.callout)
                     #endif
@@ -24,6 +29,26 @@ struct OverviewView: View {
                     .multilineTextAlignment(.leading)
                     .lineLimit(2, reservesSpace: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    #if !os(tvOS)
+                    .overlay(alignment: .bottomTrailing) {
+                        if compact {
+                            Button {
+                                showFullOverview = true
+                            } label: {
+                                Text("More")
+                                    .font(.caption)
+                            }
+                            .buttonStyle(.glass)
+                            .sheet(isPresented: $showFullOverview) {
+                                OverviewSheetView(
+                                    title: item.name ?? "Overview",
+                                    overview: overview,
+                                    isPresented: $showFullOverview
+                                )
+                            }
+                        }
+                    }
+                    #endif
             }
         }
     }

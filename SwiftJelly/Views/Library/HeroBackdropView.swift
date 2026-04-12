@@ -84,13 +84,18 @@ struct HeroBackdropView<HeroActions: View>: View {
              }
             .overlay(alignment: .bottom) {
                 if isCompactSize {
-                    Rectangle()
-                        .fill(.regularMaterial)
-                        .mask {
-                            bottomGradient
-                        }
-                        .frame(height: reflectionHeight + 150)
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: .black, location: 0),
+                            .init(color: .black.opacity(0.9), location: 0.4),
+                            .init(color: .black.opacity(0), location: 1.0)
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .frame(height: reflectionHeight + 150)
                 } else {
+                    #if os(macOS)
                     LinearGradient(
                         gradient: Gradient(stops: [
                             .init(color: .black, location: 0),
@@ -101,6 +106,18 @@ struct HeroBackdropView<HeroActions: View>: View {
                         endPoint: .top
                     )
                         .frame(height: 300)
+                    #else
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: .black, location: 0),
+                            .init(color: .black.opacity(0.9), location: 0.4),
+                            .init(color: .black.opacity(0), location: 1.0)
+                        ]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                        .frame(height: 300)
+                    #endif
                 }
             }
             .backgroundExtensionEffect()
@@ -112,7 +129,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     let bottomGradient = LinearGradient(
         gradient: Gradient(stops: [
             .init(color: .black, location: 0),
-            .init(color: .black.opacity(1), location: 0.6),
+            .init(color: .black.opacity(0.9), location: 0.5),
             .init(color: .black.opacity(0), location: 1.0)
         ]),
         startPoint: .bottom,
@@ -169,7 +186,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             heroActions
 
-            OverviewView(item: item)
+            OverviewView(item: item, compact: true)
 
             AttributesView(item: item)
         }

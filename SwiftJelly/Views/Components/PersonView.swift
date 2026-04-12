@@ -19,7 +19,7 @@ struct PersonView: View {
                     .background(.background.secondary)
                     .overlay {
                         Circle()
-                            .strokeBorder(.tertiary, lineWidth: 1)
+                            .strokeBorder(.tertiary, lineWidth: 0.5)
                     }
                     #if !os(macOS)
                     .hoverEffect(.highlight)

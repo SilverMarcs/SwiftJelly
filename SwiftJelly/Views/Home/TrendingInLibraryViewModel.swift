@@ -100,7 +100,7 @@ final class TrendingInLibraryViewModel {
         guard items.count > 1 else { return }
         autoScrollTask = Task { @MainActor [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(8))
+                try? await Task.sleep(for: .seconds(10))
                 guard !Task.isCancelled, let self else { return }
                 let nextIndex = (self.currentIndex + 1) % self.items.count
                 withAnimation {
