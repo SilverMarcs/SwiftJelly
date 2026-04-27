@@ -9,7 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct ContinueWatchingView: View {
-    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 10)
+    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 20)
     @State private var isLoading = false
     
     let header: String

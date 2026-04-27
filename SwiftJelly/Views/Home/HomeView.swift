@@ -26,23 +26,25 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing) {
-                if !trendingViewModel.items.isEmpty {
-                    TrendingInLibraryView()
+                Group {
+                    if !trendingViewModel.items.isEmpty {
+                        TrendingInLibraryView()
+                            .onScrollVisibilityChange { isVisible in
+                                showScrollEffect = isVisible
+                            }
+                    } else if trendingViewModel.hasLoaded {
+                        FeaturedView {
+                            try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.movie, .tvProgram]).shuffled()
+                        }
                         .onScrollVisibilityChange { isVisible in
                             showScrollEffect = isVisible
                         }
-                } else if trendingViewModel.hasLoaded {
-                    FeaturedView {
-                        try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.movie, .tvProgram]).shuffled()
+                    } else {
+                        HeroBackdropView(item: BaseItemDto()) {}
+                            .onScrollVisibilityChange { isVisible in
+                                showScrollEffect = isVisible
+                            }
                     }
-                    .onScrollVisibilityChange { isVisible in
-                        showScrollEffect = isVisible
-                    }
-                } else {
-                    HeroBackdropView(item: BaseItemDto()) {}
-                        .onScrollVisibilityChange { isVisible in
-                            showScrollEffect = isVisible
-                        }
                 }
                 #if os(tvOS)
                 .ignoresSafeArea()

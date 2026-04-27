@@ -167,6 +167,7 @@ struct PlaybackUtilities {
         await player.seek(to: time)
         
         #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
 
