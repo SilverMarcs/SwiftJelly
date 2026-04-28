@@ -12,14 +12,22 @@ import JellyfinAPI
 @Observable class DataManager {
     var servers: [Server] = []
     var activeServerID: String?
-    
+
     @ObservationIgnored static let shared = DataManager()
 
     @ObservationIgnored private let serversKey = "SavedServers"
     @ObservationIgnored private let activeServerKey = "ActiveServerID"
+    @ObservationIgnored private let kvs = NSUbiquitousKeyValueStore.default
 
     init() {
         loadServers()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(iCloudStoreChanged(_:)),
+            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+            object: kvs
+        )
+        kvs.synchronize()
     }
 
     var server: Server? {
@@ -52,17 +60,21 @@ import JellyfinAPI
     }
 
     private func loadServers() {
-        if let data = UserDefaults.standard.data(forKey: serversKey),
+        if let data = kvs.data(forKey: serversKey),
            let decoded = try? JSONDecoder().decode([Server].self, from: data) {
             self.servers = decoded
         }
-        self.activeServerID = UserDefaults.standard.string(forKey: activeServerKey) ?? servers.first?.id
+        self.activeServerID = kvs.string(forKey: activeServerKey) ?? servers.first?.id
     }
 
     private func saveServers() {
         if let data = try? JSONEncoder().encode(servers) {
-            UserDefaults.standard.set(data, forKey: serversKey)
+            kvs.set(data, forKey: serversKey)
         }
-        UserDefaults.standard.set(activeServerID, forKey: activeServerKey)
+        kvs.set(activeServerID, forKey: activeServerKey)
+    }
+
+    @objc private func iCloudStoreChanged(_ notification: Notification) {
+        Task { @MainActor in loadServers() }
     }
 }
