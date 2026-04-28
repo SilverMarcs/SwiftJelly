@@ -11,6 +11,8 @@ import SwiftMediaViewer
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @AppStorage("showAppIconPicker") private var showAppIconPicker = false
+    @State private var easterEggTapCount = 0
 
     var body: some View {
         SettingsSplitView {
@@ -32,17 +34,44 @@ struct SettingsView: View {
             } label: {
                 Label("Servers", systemImage: "server.rack")
             }
-
-            SeerrSettingsView()
+            
+            if showAppIconPicker {
+                SeerrSettingsView()
+            }
 
             Section("View Options") {
                 ViewOptions()
                     .foregroundStyle(.primary)
             }
+            
+            #if os(iOS) || os(tvOS) || os(visionOS)
+            if showAppIconPicker {
+                Section {
+                    NavigationLink {
+                        AppIconPicker()
+                    } label: {
+                        Label("App Icon", systemImage: "app.dashed")
+                    }
+                }
+            }
+            #endif
 
             Section("Images") {
                 CacheManagerView()
             }
+
+        }
+        .safeAreaInset(edge: .bottom) {
+            Color.clear
+                .frame(height: 44)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    easterEggTapCount += 1
+                    if easterEggTapCount >= 7 {
+                        showAppIconPicker = true
+                        easterEggTapCount = 0
+                    }
+                }
         }
         .formStyle(.grouped)
         .navigationTitle("Settings")
