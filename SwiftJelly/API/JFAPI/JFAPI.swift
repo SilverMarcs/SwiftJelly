@@ -13,6 +13,16 @@ import Get
 enum JFAPI {
     static let dataManager: DataManager = .shared
 
+    static var clientName: String {
+        #if os(tvOS)
+        return "FinStream tvOS"
+        #elseif os(macOS)
+        return "FinStream MacOS"
+        #else
+        return "FinStream iOS"
+        #endif
+    }
+
     /// Returns a configured JellyfinClient for the current server, or throws if not available
     static func getClient() throws -> JellyfinClient {
         guard let server = dataManager.server,
@@ -23,8 +33,8 @@ enum JFAPI {
         let configuration = JellyfinClient.Configuration(
             url: server.url,
             accessToken: accessToken,
-            client: "SwiftJelly",
-            deviceName: "SwiftJelly",
+            client: clientName,
+            deviceName: clientName,
             deviceID: server.id,
             version: "1.0"
         )

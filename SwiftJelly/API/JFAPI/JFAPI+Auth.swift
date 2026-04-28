@@ -19,8 +19,8 @@ extension JFAPI {
     static func authenticateUser(username: String, password: String, server: Server) async throws -> AuthenticationResult {
         let configuration = JellyfinClient.Configuration(
             url: server.url,
-            client: "SwiftJelly",
-            deviceName: "SwiftJelly",
+            client: clientName,
+            deviceName: clientName,
             deviceID: UUID().uuidString,
             version: "1.0"
         )
