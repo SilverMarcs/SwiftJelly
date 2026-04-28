@@ -29,7 +29,14 @@ extension DeviceProfile {
     // MARK: - Direct Play Profiles
     
     private static var nativeDirectPlayProfiles: [DirectPlayProfile] {
-        []
+        [
+            DirectPlayProfile(
+                audioCodec: nativeVideoAudioCodecList,
+                container: "mp4,m4v,mov",
+                type: .video,
+                videoCodec: "h264,hevc"
+            )
+        ]
     }
     
     // MARK: - Transcoding Profiles
@@ -58,25 +65,38 @@ extension DeviceProfile {
                 context: .streaming,
                 isCopyTimestamps: true,
                 enableSubtitlesInManifest: true,
-                maxAudioChannels: "2", // tvOS (and maybe iOS/macOS) has difficulties playing 5.1/7.1 AAC audio tracks which results in a broken player
+                maxAudioChannels: nativeMaxAudioChannels,
                 minSegments: 2,
                 protocol: .hls,
                 type: .video,
                 videoCodec: "h264"
             ),
-            
+
             // Dedicated audio renditions so the manifest can expose named tracks
             TranscodingProfile(
                 audioCodec: nativeAudioOnlyCodecList,
                 container: "aac",
                 context: .streaming,
                 isCopyTimestamps: true,
-                maxAudioChannels: "2",
+                maxAudioChannels: nativeMaxAudioChannels,
                 minSegments: 2,
                 protocol: .hls,
                 type: .audio
             )
         ]
+    }
+
+    // Letting the server downmix 5.1/7.1 → 2ch produces noticeably quiet audio because
+    // Jellyfin's downmix doesn't apply loudness compensation. On macOS we let the source
+    // keep its native channel count and rely on CoreAudio for downmix when needed.
+    // iOS/tvOS/visionOS stay at stereo: tvOS is known to break on 5.1/7.1 AAC, and iOS
+    // playback is already at expected loudness without lifting the cap.
+    private static var nativeMaxAudioChannels: String {
+#if os(tvOS)
+        "2"
+#else
+        "8"
+#endif
     }
 
     private static var nativeVideoAudioCodecList: String {
