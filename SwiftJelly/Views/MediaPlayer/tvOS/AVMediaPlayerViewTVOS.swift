@@ -12,9 +12,15 @@ struct AVMediaPlayerViewTVOS: View {
                 item: model.item,
                 isTransitioning: model.isAutoLoadingNext,
                 showSkipIntro: model.shouldShowSkipIntro,
+                selectedAudioTrack: model.selectedAudioTrack,
+                isSwitchingAudio: model.isSwitchingAudio,
+                audioTracks: model.audioTracks,
                 nextEpisode: model.nextEpisode,
                 creditsStartSeconds: model.creditsStartSeconds,
                 onSkipIntro: { Task { await model.skipIntro() } },
+                onSelectAudioTrack: { track in
+                    Task { await model.switchAudioTrack(to: track) }
+                },
                 onNextEpisode: { Task { await model.transitionToNextEpisode() } },
                 onDismiss: {
                     playbackManager.endPlayback()

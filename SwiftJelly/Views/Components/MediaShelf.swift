@@ -5,7 +5,7 @@ struct MediaShelf: View {
     let header: String
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
 
-    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 10)
+    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 40)
     @State private var isLoading = false
     @State private var dataLoaded = false
     @State private var showPlaceholder = true
