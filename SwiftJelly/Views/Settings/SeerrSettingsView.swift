@@ -77,7 +77,11 @@ struct SeerrSettingsView: View {
     @ViewBuilder
     private var connectedView: some View {
         Label {
-            Text(user?.displayName ?? "Loading account")
+            if case .connected(let user) = connectionStatus {
+                Text(user.displayName ?? "Connected")
+            } else {
+                Text("Loading account")
+            }
             Text(seerrServerURL)
         } icon: {
             Image(systemName: "checkmark.circle.fill")
