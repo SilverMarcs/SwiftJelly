@@ -23,7 +23,7 @@ struct SeerrSettingsView: View {
         } header: {
             Text("Seerr")
         } footer: {
-            Text("Connect to a Seerr (Jellyseer) server to discover trending content and request media.")
+            Text("Connect to a Seerr (Jellyseer) server to discover trending content")
         }
         .task {
             if seerrAuthenticated, let url = URL(string: seerrServerURL) {
@@ -76,17 +76,10 @@ struct SeerrSettingsView: View {
 
     @ViewBuilder
     private var connectedView: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                if case .connected(let user) = connectionStatus {
-                    Text(user.displayName ?? "Connected")
-                        .fontWeight(.medium)
-                }
-                Text(seerrServerURL)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
+        Label {
+            Text(user?.displayName ?? "Loading account")
+            Text(seerrServerURL)
+        } icon: {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.green)
         }
