@@ -8,27 +8,26 @@ import JellyfinAPI
 
 extension DeviceProfile {
     
-    /// Builds a device profile for native AVPlayer with proper codec and subtitle support.
-    /// Honours the user's `MaxBitratePreference` for bitrate and resolution caps;
-    /// the server will transcode any source that exceeds them.
-    static func buildNativeProfile(quality: MaxBitratePreference = .current) -> DeviceProfile {
+    /// Builds a device profile for native AVPlayer with proper codec and subtitle support
+    /// Forces transcoding for all streams and limits resolution to 1080p max
+    static func buildNativeProfile() -> DeviceProfile {
         var profile = DeviceProfile()
-
+        
         profile.name = "SwiftJelly Native"
-        profile.maxStreamingBitrate = quality.maxBitrate
-        profile.maxStaticBitrate = quality.maxBitrate
-        profile.musicStreamingTranscodingBitrate = quality.maxBitrate
-
+//        profile.maxStreamingBitrate = maxBitrate
+//        profile.maxStaticBitrate = maxBitrate
+//        profile.musicStreamingTranscodingBitrate = maxBitrate
+        
         profile.directPlayProfiles = nativeDirectPlayProfiles
-        profile.transcodingProfiles = nativeTranscodingProfiles(quality: quality)
+        profile.transcodingProfiles = nativeTranscodingProfiles
         profile.subtitleProfiles = nativeSubtitleProfiles
-        profile.codecProfiles = nativeCodecProfiles(quality: quality)
-
+        profile.codecProfiles = nativeCodecProfiles
+        
         return profile
     }
-
+    
     // MARK: - Direct Play Profiles
-
+    
     private static var nativeDirectPlayProfiles: [DirectPlayProfile] {
         [
             DirectPlayProfile(
@@ -39,10 +38,10 @@ extension DeviceProfile {
             )
         ]
     }
-
+    
     // MARK: - Transcoding Profiles
-
-    private static func nativeTranscodingProfiles(quality: MaxBitratePreference) -> [TranscodingProfile] {
+    
+    private static var nativeTranscodingProfiles: [TranscodingProfile] {
         [
             // Primary video+audio stream
             TranscodingProfile(
@@ -53,13 +52,13 @@ extension DeviceProfile {
                         condition: .lessThanEqual,
                         isRequired: false,
                         property: .width,
-                        value: String(quality.maxWidth)
+                        value: "1920"
                     ),
                     ProfileCondition(
                         condition: .lessThanEqual,
                         isRequired: false,
                         property: .height,
-                        value: String(quality.maxHeight)
+                        value: "1080"
                     )
                 ],
                 container: "m3u8",
@@ -145,59 +144,26 @@ extension DeviceProfile {
     }
     
     // MARK: - Codec Profiles
-
-    /// Codec profile conditions are how the server decides whether direct‑play is allowed.
-    /// We mark width / height / bitrate caps as `isRequired: true` so a source that exceeds
-    /// the user's quality preference gets refused for direct‑play and falls back to the
-    /// transcoding profile (which has the same caps and will downscale + re‑encode).
-    private static func nativeCodecProfiles(quality: MaxBitratePreference) -> [CodecProfile] {
-        let qualityConditions: [ProfileCondition] = [
-            ProfileCondition(
-                condition: .lessThanEqual,
-                isRequired: true,
-                property: .width,
-                value: String(quality.maxWidth)
-            ),
-            ProfileCondition(
-                condition: .lessThanEqual,
-                isRequired: true,
-                property: .height,
-                value: String(quality.maxHeight)
-            ),
-            ProfileCondition(
-                condition: .lessThanEqual,
-                isRequired: true,
-                property: .videoBitrate,
-                value: String(quality.maxBitrate)
-            )
-        ]
-
-        let h264Conditions: [ProfileCondition] = qualityConditions + [
-            ProfileCondition(
-                condition: .lessThanEqual,
-                isRequired: false,
-                property: .videoLevel,
-                value: "51"
-            ),
-            ProfileCondition(
-                condition: .notEquals,
-                isRequired: false,
-                property: .isAnamorphic,
-                value: "true"
-            )
-        ]
-
-        return [
+    
+    private static var nativeCodecProfiles: [CodecProfile] {
+        [
             CodecProfile(
                 applyConditions: [],
                 codec: "h264",
-                conditions: h264Conditions,
-                type: .video
-            ),
-            CodecProfile(
-                applyConditions: [],
-                codec: "hevc",
-                conditions: qualityConditions,
+                conditions: [
+                    ProfileCondition(
+                        condition: .lessThanEqual,
+                        isRequired: false,
+                        property: .videoLevel,
+                        value: "51"
+                    ),
+                    ProfileCondition(
+                        condition: .notEquals,
+                        isRequired: false,
+                        property: .isAnamorphic,
+                        value: "true"
+                    )
+                ],
                 type: .video
             )
         ]
