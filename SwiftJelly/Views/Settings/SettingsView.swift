@@ -39,7 +39,12 @@ struct SettingsView: View {
                 SeerrSettingsView()
             }
 
-            Section("View Options") {
+            Section("Playback") {
+                PlaybackOptions()
+                    .foregroundStyle(.primary)
+            }
+
+            Section("Appearance") {
                 ViewOptions()
                     .foregroundStyle(.primary)
             }

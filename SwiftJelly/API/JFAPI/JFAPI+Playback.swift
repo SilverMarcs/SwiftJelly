@@ -30,9 +30,10 @@ extension JFAPI {
         }
         
         let context = try getAPIContext()
-        
-        let deviceProfile = DeviceProfile.buildNativeProfile()
-        
+
+        let quality = MaxBitratePreference.current
+        let deviceProfile = DeviceProfile.buildNativeProfile(quality: quality)
+
         let playbackInfoDto = PlaybackInfoDto(
             allowAudioStreamCopy: true,
             allowVideoStreamCopy: true,
@@ -41,14 +42,16 @@ extension JFAPI {
             enableDirectPlay: true,
             enableDirectStream: true,
             enableTranscoding: true,
+            maxStreamingBitrate: quality.maxBitrate,
             mediaSourceID: mediaSourceID ?? item.mediaSources?.first?.id,
             startTimeTicks: startPositionTicks.map { Int($0) },
             subtitleStreamIndex: subtitleStreamIndex,
             userID: context.userID
         )
-        
+
         let parameters = Paths.GetPostedPlaybackInfoParameters(
             userID: context.userID,
+            maxStreamingBitrate: quality.maxBitrate,
             startTimeTicks: startPositionTicks.map { Int($0) },
             audioStreamIndex: audioStreamIndex,
             subtitleStreamIndex: subtitleStreamIndex,

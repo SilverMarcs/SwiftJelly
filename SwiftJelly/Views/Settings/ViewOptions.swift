@@ -28,7 +28,7 @@ struct ViewOptions: View {
         } label: {
             LabeledContent("Naming Style", value: episodeNamingStyle.title)
         }
-        
+
         Button {
             continueWatchingStyle = continueWatchingStyle.next()
         } label: {
@@ -39,7 +39,7 @@ struct ViewOptions: View {
             Text(EpisodeNamingStyle.compact.title).tag(EpisodeNamingStyle.compact)
             Text(EpisodeNamingStyle.detailed.title).tag(EpisodeNamingStyle.detailed)
         }
-        
+
         Picker("Show Next Up & Resume", selection: $continueWatchingStyle) {
             Text(ContinueWatchingStyle.combined.title).tag(ContinueWatchingStyle.combined)
             Text(ContinueWatchingStyle.separated.title).tag(ContinueWatchingStyle.separated)
