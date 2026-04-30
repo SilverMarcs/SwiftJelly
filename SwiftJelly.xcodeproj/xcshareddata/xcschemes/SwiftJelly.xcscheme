@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "083128A82E0EE1F70096527C"
-               BuildableName = "SwiftJelly.app"
+               BuildableName = "FinStream.app"
                BlueprintName = "SwiftJelly"
                ReferencedContainer = "container:SwiftJelly.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "083128A82E0EE1F70096527C"
-            BuildableName = "SwiftJelly.app"
+            BuildableName = "FinStream.app"
             BlueprintName = "SwiftJelly"
             ReferencedContainer = "container:SwiftJelly.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "083128A82E0EE1F70096527C"
-            BuildableName = "SwiftJelly.app"
+            BuildableName = "FinStream.app"
             BlueprintName = "SwiftJelly"
             ReferencedContainer = "container:SwiftJelly.xcodeproj">
          </BuildableReference>

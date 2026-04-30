@@ -32,7 +32,7 @@ struct AVMediaPlayerViewMac: View {
         }
         .ignoresSafeArea()
         .navigationTitle(playbackManager.viewModel?.item.seriesName ?? playbackManager.viewModel?.item.name ?? "Media Player")
-        .navigationSubtitle(playbackManager.viewModel?.item.seasonEpisodeString ?? "")
+        .navigationSubtitle(navigationSubtitleText)
         .windowFullScreenBehavior(.disabled)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .gesture(WindowDragGesture())
@@ -91,6 +91,15 @@ struct AVMediaPlayerViewMac: View {
         guard let model = playbackManager.viewModel else { return }
         if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
             let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: model.item)
+    private var navigationSubtitleText: String {
+        guard let item = playbackManager.viewModel?.item,
+              let seasonEpisode = item.seasonEpisodeString else { return "" }
+        if let name = item.name, !name.isEmpty {
+            return "\(seasonEpisode) · \(name)"
+        }
+        return seasonEpisode
+    }
+
             
             window.aspectRatio = NSSize(width: videoWidth, height: videoHeight)
             
