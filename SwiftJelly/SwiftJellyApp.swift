@@ -35,7 +35,10 @@ struct SwiftJellyApp: App {
     init() {
         AVPlayer.isObservationEnabled = true
         #if !os(macOS)
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .moviePlayback)
+        try? session.setActive(true)
         #endif
+        _ = PlaybackManager.shared
     }
 }

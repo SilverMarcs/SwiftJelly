@@ -80,7 +80,7 @@ extension BaseItemDto {
         
         // For TV shows, show season and episode
         if let seasonEpisodeString {
-            return "\(name ?? "") • \(seasonEpisodeString)"
+            return "\(seasonEpisodeString) • \(name ?? "")"
         }
         
         return nil

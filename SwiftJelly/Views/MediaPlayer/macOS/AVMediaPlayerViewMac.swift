@@ -87,10 +87,6 @@ struct AVMediaPlayerViewMac: View {
         }
     }
 
-    private func configureWindow() {
-        guard let model = playbackManager.viewModel else { return }
-        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
-            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: model.item)
     private var navigationSubtitleText: String {
         guard let item = playbackManager.viewModel?.item,
               let seasonEpisode = item.seasonEpisodeString else { return "" }
@@ -100,7 +96,11 @@ struct AVMediaPlayerViewMac: View {
         return seasonEpisode
     }
 
-            
+    private func configureWindow() {
+        guard let model = playbackManager.viewModel else { return }
+        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
+            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: model.item)
+
             window.aspectRatio = NSSize(width: videoWidth, height: videoHeight)
             
             let maxWidth: CGFloat = 1024

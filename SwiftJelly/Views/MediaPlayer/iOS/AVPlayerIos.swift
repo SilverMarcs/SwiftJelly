@@ -19,6 +19,7 @@ struct AVPlayerIos: UIViewControllerRepresentable {
         #endif
         controller.entersFullScreenWhenPlaybackBegins = true
         controller.exitsFullScreenWhenPlaybackEnds = false
+        controller.updatesNowPlayingInfoCenter = false
         return controller
     }
 

@@ -40,6 +40,11 @@ import Observation
     @ObservationIgnored private var lastProgressReportTime: Date?
     @ObservationIgnored private var progressReportInterval: TimeInterval = 10
 
+    @ObservationIgnored var nowPlayingInfo: [String: Any] = [:]
+    @ObservationIgnored var rateObservation: NSKeyValueObservation?
+    @ObservationIgnored var statusObservation: NSKeyValueObservation?
+    @ObservationIgnored var durationObservation: NSKeyValueObservation?
+
     init(item: BaseItemDto) {
         self.item = item
     }
@@ -86,6 +91,9 @@ import Observation
             selectedAudioTrack = resolveSelectedTrack(preferredIndex: audioIndex)
 
             startObservingTime(for: session.player)
+            attachNowPlayingObservers(to: session.player)
+            await updateNowPlayingMetadata(for: session.item)
+            updateNowPlayingPlaybackInfo()
         } catch {
             // Intentionally ignore; just stop loading.
         }
@@ -96,9 +104,10 @@ import Observation
     /// Internal cleanup for switching items without triggering endPlayback.
     func cleanupForSwitch() {
         stopObservingTime()
+        detachNowPlayingObservers()
         nextEpisode = nil
         isFetchingNextEpisode = false
-        
+
         if let player {
             player.pause()
             player.replaceCurrentItem(with: nil)
@@ -107,6 +116,8 @@ import Observation
 
     func stopPlaybackImmediately() {
         stopObservingTime()
+        detachNowPlayingObservers()
+        clearNowPlayingInfo()
         nextEpisode = nil
         isFetchingNextEpisode = false
         isLoading = false
@@ -197,6 +208,7 @@ import Observation
             Task { @MainActor in
                 self.currentSeconds = time.seconds.isFinite ? max(0, time.seconds) : 0
                 self.durationSeconds = self.resolvedDurationSeconds(for: player)
+                self.updateNowPlayingPlaybackInfo()
                 await self.prefetchNextEpisodeIfNeeded()
                 
                 // Report playback start once when playback begins
