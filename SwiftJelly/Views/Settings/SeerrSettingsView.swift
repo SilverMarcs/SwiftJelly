@@ -8,14 +8,22 @@
 import SwiftUI
 
 struct SeerrSettingsView: View {
-    @AppStorage("seerrServerURL") private var seerrServerURL = ""
-    @AppStorage("seerrAuthenticated") private var seerrAuthenticated = false
+    @Bindable private var auth = SeerrAuth.shared
     @State private var connectionStatus: SeerrConnectionStatus = .idle
+    #if os(macOS)
     @State private var showingLogin = false
+    #endif
+
+    private var serverURLBinding: Binding<String> {
+        Binding(
+            get: { auth.serverURL },
+            set: { auth.setServerURL($0) }
+        )
+    }
 
     var body: some View {
         Section {
-            if seerrAuthenticated {
+            if auth.isAuthenticated {
                 connectedView
             } else {
                 loginSection
@@ -25,51 +33,57 @@ struct SeerrSettingsView: View {
         } footer: {
             Text("Connect to a Seerr (Jellyseer) server to discover trending content")
         }
-        .task {
-            if seerrAuthenticated, let url = URL(string: seerrServerURL) {
+        .task(id: auth.isAuthenticated) {
+            if auth.isAuthenticated, let url = URL(string: auth.serverURL) {
                 do {
                     let user = try await SeerrAPI.validateConnection(serverURL: url)
                     connectionStatus = .connected(user)
                 } catch {
                     connectionStatus = .failed
-                    seerrAuthenticated = false
+                    auth.setAuthenticated(false)
                 }
             }
         }
+        #if os(macOS)
         .sheet(isPresented: $showingLogin) {
-            if let url = URL(string: seerrServerURL) {
-                SeerrLoginWebView(serverURL: url) { user in
-                    connectionStatus = .connected(user)
+            if let url = URL(string: auth.serverURL) {
+                NavigationStack {
+                    SeerrLoginWebView(serverURL: url)
                 }
-                #if os(macOS)
                 .frame(minWidth: 500, minHeight: 600)
-                #endif
             }
         }
+        #endif
     }
 
     // MARK: - Login Section
 
     @ViewBuilder
     private var loginSection: some View {
-        TextField("Server URL", text: $seerrServerURL)
+        TextField("Server URL", text: serverURLBinding)
             .textContentType(.URL)
             .autocorrectionDisabled()
             #if !os(macOS)
             .textInputAutocapitalization(.never)
             #endif
 
+        #if os(macOS)
         Button {
             showingLogin = true
         } label: {
-             Text("Sign In")
+            Label("Sign In", systemImage: "person.crop.circle.badge.plus")
+                .labelStyle(.titleOnly)
         }
-        #if !os(macOS)
-        .buttonSizing(.flexible)
+        .disabled(auth.serverURL.isEmpty)
         #else
-        .buttonStyle(.plain)
+        if let url = URL(string: auth.serverURL), !auth.serverURL.isEmpty {
+            NavigationLink {
+                SeerrLoginWebView(serverURL: url)
+            } label: {
+                Label("Sign In", systemImage: "person.crop.circle.badge.plus")
+            }
+        }
         #endif
-        .disabled(seerrServerURL.isEmpty)
     }
 
     // MARK: - Connected View
@@ -82,7 +96,7 @@ struct SeerrSettingsView: View {
             } else {
                 Text("Loading account")
             }
-            Text(seerrServerURL)
+            Text(auth.serverURL)
         } icon: {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.green)
@@ -94,13 +108,13 @@ struct SeerrSettingsView: View {
     }
 
     private func signOut() {
-        if let url = URL(string: seerrServerURL) {
+        if let url = URL(string: auth.serverURL) {
             Task {
                 await SeerrAPI.logout(serverURL: url)
             }
         }
         connectionStatus = .idle
-        seerrServerURL = ""
+        auth.setServerURL("")
     }
 }
 

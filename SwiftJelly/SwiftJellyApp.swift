@@ -40,5 +40,6 @@ struct SwiftJellyApp: App {
         try? session.setActive(true)
         #endif
         _ = PlaybackManager.shared
+        _ = SeerrAuth.shared
     }
 }

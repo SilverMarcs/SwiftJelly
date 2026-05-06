@@ -48,7 +48,7 @@ final class TrendingInLibraryViewModel {
             hasLoaded = true
         }
 
-        guard let serverURL = URL(string: UserDefaults.standard.string(forKey: "seerrServerURL") ?? "") else { return }
+        guard let serverURL = URL(string: SeerrAuth.shared.serverURL) else { return }
 
         do {
             let response = try await SeerrAPI.fetchTrending(serverURL: serverURL)

@@ -43,6 +43,17 @@ struct LibraryView: View {
         }
         .navigationTitle("Libraries")
         .platformNavigationToolbar()
+        #if !os(macOS)
+        .toolbar {
+            ToolbarItem {
+                NavigationLink {
+                    SettingsView()
+                } label: {
+                    Label("Settings", systemImage: "gear")
+                }
+            }
+        }
+        #endif
         .task {
             if libraries.isEmpty {
                 isLoading = true

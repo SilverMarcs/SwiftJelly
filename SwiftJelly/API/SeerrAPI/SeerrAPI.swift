@@ -37,8 +37,6 @@ enum SeerrAPI {
     }
 
     static var isConfigured: Bool {
-        let url = UserDefaults.standard.string(forKey: "seerrServerURL") ?? ""
-        let authenticated = UserDefaults.standard.bool(forKey: "seerrAuthenticated")
-        return !url.isEmpty && authenticated
+        !SeerrAuth.shared.serverURL.isEmpty && SeerrAuth.shared.isAuthenticated
     }
 }

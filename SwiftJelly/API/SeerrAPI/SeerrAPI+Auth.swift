@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import WebKit
 
 extension SeerrAPI {
     /// Sign in to Seerr using Jellyfin credentials
@@ -39,7 +40,7 @@ extension SeerrAPI {
         }
 
         let user = try makeDecoder().decode(SeerrUser.self, from: data)
-        UserDefaults.standard.set(true, forKey: "seerrAuthenticated")
+        SeerrAuth.shared.setAuthenticated(true)
         return user
     }
 
@@ -63,7 +64,7 @@ extension SeerrAPI {
         }
 
         let user = try makeDecoder().decode(SeerrUser.self, from: data)
-        UserDefaults.standard.set(true, forKey: "seerrAuthenticated")
+        SeerrAuth.shared.setAuthenticated(true)
         return user
     }
 
@@ -94,7 +95,17 @@ extension SeerrAPI {
             }
         }
 
-        UserDefaults.standard.set(false, forKey: "seerrAuthenticated")
+        SeerrAuth.shared.clearCookie()
+
+        // Also clear WebKit's cookie store so the next login sheet starts fresh
+        // (otherwise the WKWebView reuses a stale-but-still-server-valid connect.sid
+        // and the cookie observer auto-dismisses on first open).
+        await WKWebsiteDataStore.default().removeData(
+            ofTypes: [WKWebsiteDataTypeCookies],
+            modifiedSince: .distantPast
+        )
+
+        SeerrAuth.shared.setAuthenticated(false)
     }
 }
 

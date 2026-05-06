@@ -42,7 +42,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		083128A92E0EE1F70096527C /* SwiftJelly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinStream.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		083128A92E0EE1F70096527C /* FinStream.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinStream.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		085B2EE12F0E1D6D0096E06D /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		085B2EE32F0E1D6D0096E06D /* TVServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TVServices.framework; path = Library/Frameworks/TVServices.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
@@ -136,7 +136,7 @@
 		083128AA2E0EE1F70096527C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				083128A92E0EE1F70096527C /* SwiftJelly.app */,
+				083128A92E0EE1F70096527C /* FinStream.app */,
 				085B2EE12F0E1D6D0096E06D /* TopShelf.appex */,
 			);
 			name = Products;
@@ -180,7 +180,7 @@
 				08E374E32EEC3D3000137A0F /* JellyfinAPI */,
 			);
 			productName = SwiftJelly;
-			productReference = 083128A92E0EE1F70096527C /* SwiftJelly.app */;
+			productReference = 083128A92E0EE1F70096527C /* FinStream.app */;
 			productType = "com.apple.product-type.application";
 		};
 		085B2EE02F0E1D6D0096E06D /* TopShelf */ = {

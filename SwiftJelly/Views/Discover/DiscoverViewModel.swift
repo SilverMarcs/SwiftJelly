@@ -23,9 +23,7 @@ final class DiscoverViewModel {
     private var lastLoadedFilters: DiscoverFilters?
 
     var serverURL: URL? {
-        guard let urlString = UserDefaults.standard.string(forKey: "seerrServerURL"),
-              let url = URL(string: urlString) else { return nil }
-        return url
+        URL(string: SeerrAuth.shared.serverURL)
     }
 
     var needsReload: Bool {

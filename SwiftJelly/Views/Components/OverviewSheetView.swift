@@ -58,6 +58,7 @@ struct OverviewSheetView: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.hidden)
     }
 
     @ViewBuilder
@@ -83,9 +84,9 @@ struct OverviewSheetView: View {
                 // Critic Rating (Rotten Tomatoes)
                 if let criticRating = item.criticRating {
                     HStack(spacing: 6) {
-                        unsafe Text(criticRating >= 60 ? "🍅" : "🤢")
+                        Text(criticRating >= 60 ? "🍅" : "🤢")
                             .font(.subheadline)
-                        unsafe Text("\(Int(criticRating))%")
+                        Text("\(Int(criticRating))%")
                             .font(.title3)
                             .fontWeight(.semibold)
                     }

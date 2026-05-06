@@ -16,9 +16,13 @@ struct SettingsView: View {
 
     var body: some View {
         SettingsSplitView {
+            #if os(macOS)
             NavigationStack {
                 form
             }
+            #else
+            form
+            #endif
         } infoPanel: {
             Image("AppLogo")
                 .resizable()
@@ -34,7 +38,7 @@ struct SettingsView: View {
             } label: {
                 Label("Servers", systemImage: "server.rack")
             }
-            
+
             if showAppIconPicker {
                 SeerrSettingsView()
             }
@@ -43,8 +47,8 @@ struct SettingsView: View {
                 ViewOptions()
                     .foregroundStyle(.primary)
             }
-            
-            #if os(iOS) || os(tvOS) || os(visionOS)
+
+            #if !os(macOS)
             if showAppIconPicker {
                 Section {
                     NavigationLink {
@@ -77,11 +81,6 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .platformNavigationToolbar(titleDisplayMode: .inline)
         #if os(iOS)
-        .toolbar {
-            if horizontalSizeClass == .compact {
-                Button(role: .close) { dismiss() }
-            }
-        }
         .contentMargins(.top, 10)
         #endif
     }

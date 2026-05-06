@@ -38,7 +38,10 @@ struct DiscoverView: View {
                 UniversalProgressView()
             }
         }
+        #if !os(iOS)
         .navigationTitle("Discover")
+        #endif
+        .platformNavigationToolbar()
         .navigationDestination(item: $matchedItem) { item in
             MediaDestinationView(item: item)
         }
