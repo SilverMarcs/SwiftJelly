@@ -18,6 +18,7 @@ struct MarkPlayedButton: View {
             Image(systemName: "checkmark")
                 .fontWeight(.medium)
                 .animation(.snappy, value: isPlayed)
+                .heroActionIcon()
         }
         .tint((isPlayed == true) ? Color.green : Color.primary)
         #if os(tvOS)

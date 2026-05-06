@@ -12,9 +12,9 @@ struct FavoriteButton: View {
             }
         } label: {
             Image(systemName: (item.userData?.isFavorite == true) ? "star.fill" : "star")
-                .fontWeight(.medium)
+                // .fontWeight(.medium)
                 .animation(.snappy, value: item.userData?.isFavorite)
-    
+                .heroActionIcon()
         }
         .tint((item.userData?.isFavorite == true) ? .yellow : .primary)
         .buttonStyle(.glass)

@@ -16,6 +16,7 @@ struct HeroInfoButton: View {
     var body: some View {
         NavigationLink(value: item) {
             Image(systemName: "info")
+                .heroActionIcon()
         }
         .buttonStyle(.glass)
         .tint(.primary)

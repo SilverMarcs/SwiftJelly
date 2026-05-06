@@ -82,7 +82,10 @@ struct SeerrSettingsView: View {
             } label: {
                 Label("Sign In", systemImage: "person.crop.circle.badge.plus")
                 .labelStyle(.titleOnly)
+                .foregroundColor(.accent)
             }
+            .navigationLinkIndicatorVisibility(.hidden)
+       
         }
         #endif
     }
