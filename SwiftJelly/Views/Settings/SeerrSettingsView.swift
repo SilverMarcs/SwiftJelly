@@ -81,6 +81,7 @@ struct SeerrSettingsView: View {
                 SeerrLoginWebView(serverURL: url)
             } label: {
                 Label("Sign In", systemImage: "person.crop.circle.badge.plus")
+                .labelStyle(.titleOnly)
             }
         }
         #endif

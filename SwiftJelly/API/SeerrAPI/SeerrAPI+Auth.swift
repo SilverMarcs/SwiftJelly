@@ -97,9 +97,8 @@ extension SeerrAPI {
 
         SeerrAuth.shared.clearCookie()
 
-        // Also clear WebKit's cookie store so the next login sheet starts fresh
-        // (otherwise the WKWebView reuses a stale-but-still-server-valid connect.sid
-        // and the cookie observer auto-dismisses on first open).
+        // Clear WebKit's cookie store too, otherwise the next login WebView reuses
+        // the stale-but-still-server-valid connect.sid and auto-dismisses on first open.
         await WKWebsiteDataStore.default().removeData(
             ofTypes: [WKWebsiteDataTypeCookies],
             modifiedSince: .distantPast
