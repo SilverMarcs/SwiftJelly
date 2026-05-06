@@ -14,6 +14,8 @@ struct ShowHeroActions: View {
         HStack(spacing: spacing) {
             ShowPlayButton(vm: vm)
 
+            HeroInfoButton(item: show)
+
             MarkPlayedButton(item: vm.selectedSeason)
                 .adaptiveDisabled(vm.playButtonDisabled)
 

@@ -11,24 +11,8 @@ import JellyfinAPI
 @Observable
 final class TrendingInLibraryViewModel {
     var items: [BaseItemDto] = []
-    var scrolledID: String?
     private(set) var isLoading = false
     private(set) var hasLoaded = false
-
-    var currentIndex: Int {
-        guard let scrolledID else { return 0 }
-        return items.firstIndex { $0.id == scrolledID } ?? 0
-    }
-
-    func scrollToPrevious() {
-        guard currentIndex > 0 else { return }
-        scrolledID = items[currentIndex - 1].id
-    }
-
-    func scrollToNext() {
-        guard currentIndex < items.count - 1 else { return }
-        scrolledID = items[currentIndex + 1].id
-    }
 
     func loadTrendingIfNeeded() async {
         guard SeerrAPI.isConfigured else {
@@ -75,44 +59,12 @@ final class TrendingInLibraryViewModel {
                 items = unique
             }
 
-            // Delay so the ScrollView has time to lay out the new items
-            if items.count > 1 {
-                try? await Task.sleep(for: .milliseconds(300))
-                withAnimation {
-                    scrolledID = items[1].id
-                }
-            }
-
             if !items.isEmpty {
                 TopShelfCache.save(items: items)
             }
-
-            startAutoScroll()
         } catch {
             print("Error loading trending items: \(error)")
         }
-    }
-
-    private var autoScrollTask: Task<Void, Never>?
-
-    func startAutoScroll() {
-        autoScrollTask?.cancel()
-        guard items.count > 1 else { return }
-        autoScrollTask = Task { @MainActor [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(10))
-                guard !Task.isCancelled, let self else { return }
-                let nextIndex = (self.currentIndex + 1) % self.items.count
-                withAnimation {
-                    self.scrolledID = self.items[nextIndex].id
-                }
-            }
-        }
-    }
-
-    func stopAutoScroll() {
-        autoScrollTask?.cancel()
-        autoScrollTask = nil
     }
 
     private static func findMatch(for trending: SeerrSearchResult) async -> BaseItemDto? {

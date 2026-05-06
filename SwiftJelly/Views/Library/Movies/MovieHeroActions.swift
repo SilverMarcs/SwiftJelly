@@ -7,9 +7,11 @@ struct MovieHeroActions: View {
     var body: some View {
         HStack(spacing: spacing) {
             MoviePlayButton(item: movie)
-            
+
+            HeroInfoButton(item: movie)
+
             MarkPlayedButton(item: movie)
-            
+
             FavoriteButton(item: movie)
         }
     }

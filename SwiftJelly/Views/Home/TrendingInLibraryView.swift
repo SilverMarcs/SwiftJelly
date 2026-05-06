@@ -7,120 +7,12 @@
 
 import SwiftUI
 import JellyfinAPI
-import SwiftMediaViewer
 
 struct TrendingInLibraryView: View {
     @Environment(TrendingInLibraryViewModel.self) private var viewModel
 
     var body: some View {
         @Bindable var viewModel = viewModel
-
-        ScrollView(.horizontal) {
-            LazyHStack(spacing: 0) {
-                ForEach($viewModel.items, id: \.id) { item in
-                    Group {
-                    #if !os(tvOS)
-                    MediaNavigationLink(item: item.wrappedValue) {
-                        hero(item: item)
-                    }
-                    #else
-                    hero(item: item)
-                    .frame(height: 1080 * 0.75)
-                    .padding(40)
-                    .background {
-                        if let url = ImageURLProvider.imageURL(for: item.wrappedValue, type: .backdrop) {
-                            CachedAsyncImage(url: url, targetSize: 2000)
-                                .scaledToFill()
-                                .overlay {
-                                    Rectangle()
-                                        .fill(.regularMaterial)
-                                        .mask {
-                                            LinearGradient(
-                                                stops: [
-                                                    .init(color: .white, location: 0),
-                                                    .init(color: .white.opacity(0.7), location: 0.5),
-                                                    .init(color: .white.opacity(0), location: 1)
-                                                ],
-                                                startPoint: .bottomLeading, endPoint: .topTrailing
-                                            )
-                                        }
-                                }
-                        }
-                    }
-                    #endif
-                    }
-                    .id(item.wrappedValue.id)
-                    .containerRelativeFrame(.horizontal)
-                }
-            }
-            .scrollTargetLayout()
-        }
-        #if os(iOS)
-        .stretchy()
-        #endif
-        .scrollPosition(id: $viewModel.scrolledID, anchor: .center)
-        .scrollTargetBehavior(.viewAligned)
-        .scrollIndicators(.hidden)
-        #if os(tvOS)
-        .ignoresSafeArea()
-        .contentMargins(.horizontal, 1, for: .scrollContent) // peek tiny bit of next card for scroll to work
-        #else
-        .overlay {
-            // Navigation chevrons
-            if viewModel.items.count > 1 {
-                HStack {
-                    Button {
-                        withAnimation {
-                            viewModel.scrollToPrevious()
-                        }
-                        viewModel.startAutoScroll()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                    }
-                    .disabled(viewModel.currentIndex <= 0)
-
-                    Spacer()
-
-                    Button {
-                        withAnimation {
-                            viewModel.scrollToNext()
-                        }
-                        viewModel.startAutoScroll()
-                    } label: {
-                        Image(systemName: "chevron.right")
-
-                    }
-                    .disabled(viewModel.currentIndex >= viewModel.items.count - 1)
-                }
-                .buttonBorderShape(.circle)
-                .buttonStyle(.glass)
-                #if os(macOS)
-                .controlSize(.large)
-                #endif
-                .padding(.horizontal, 16)
-            }
-        }
-        #endif
-        .onAppear {
-            viewModel.startAutoScroll()
-        }
-        .onDisappear {
-            viewModel.stopAutoScroll()
-        }
-        .onChange(of: viewModel.scrolledID) {
-            viewModel.startAutoScroll()
-        }
-    }
-
-    @ViewBuilder
-    private func hero(item: Binding<BaseItemDto>) -> some View {
-        switch item.wrappedValue.type {
-        case .movie:
-            MovieHeroView(movie: item)
-        case .series:
-            ShowHeroView(show: item)
-        default:
-            EmptyView()
-        }
+        HeroCarouselView(items: $viewModel.items)
     }
 }

@@ -1,0 +1,169 @@
+//
+//  HeroCarouselView.swift
+//  SwiftJelly
+//
+//  Created by Zabir Raihan on 06/05/2026.
+//
+
+import SwiftUI
+import JellyfinAPI
+import SwiftMediaViewer
+
+/// Shared hero-style horizontal carousel: full-bleed hero panels, auto-scroll,
+/// chevron navigation, tap-to-detail. Used by both `TrendingInLibraryView`
+/// (Seerr trending) and `FeaturedView` (latest library items).
+struct HeroCarouselView: View {
+    @Binding var items: [BaseItemDto]
+
+    @State private var scrolledID: String?
+    @State private var autoScrollTask: Task<Void, Never>?
+
+    private var currentIndex: Int {
+        guard let scrolledID else { return 0 }
+        return items.firstIndex { $0.id == scrolledID } ?? 0
+    }
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: 0) {
+                ForEach($items, id: \.id) { item in
+                    Group {
+                    #if !os(tvOS)
+                    MediaNavigationLink(item: item.wrappedValue) {
+                        hero(item: item)
+                    }
+                    #else
+                    hero(item: item)
+                        .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
+                            content.offset(y: phase.isIdentity ? 0 : -200)
+                        }
+                        .frame(height: 800)
+                        .background {
+                            GeometryReader { geo in
+                                if let url = ImageURLProvider.imageURL(for: item.wrappedValue, type: .backdrop) {
+                                    CachedAsyncImage(url: url, targetSize: 1920)
+                                        .overlay(alignment: .bottom) {
+                                            LinearGradient(
+                                                gradient: Gradient(stops: [
+                                                    .init(color: .black, location: 0),
+                                                    .init(color: .black.opacity(0.6), location: 0.8),
+                                                    .init(color: .black.opacity(0), location: 1.0)
+                                                ]),
+                                                startPoint: .bottom,
+                                                endPoint: .top
+                                            )
+                                            .frame(height: geo.size.height / 2 + 200)
+                                        }
+                                        .scaledToFill()
+                                        .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
+                                            content.offset(y: phase.isIdentity ? (geo.safeAreaInsets.top + geo.safeAreaInsets.bottom) : -700)
+                                        }
+                                }
+                            }
+                        }
+                    #endif
+                    }
+                    .id(item.wrappedValue.id)
+                    .containerRelativeFrame(.horizontal)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        #if os(iOS)
+        .stretchy()
+        #endif
+        .scrollPosition(id: $scrolledID, anchor: .center)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollIndicators(.hidden)
+        #if os(tvOS)
+        .ignoresSafeArea()
+        .contentMargins(.horizontal, 1, for: .scrollContent)
+        #else
+        .overlay {
+            if items.count > 1 {
+                HStack {
+                    Button {
+                        withAnimation { scrollToPrevious() }
+                        startAutoScroll()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(currentIndex <= 0)
+
+                    Spacer()
+
+                    Button {
+                        withAnimation { scrollToNext() }
+                        startAutoScroll()
+                    } label: {
+                        Image(systemName: "chevron.right")
+                    }
+                    .disabled(currentIndex >= items.count - 1)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+                #if os(macOS)
+                .controlSize(.large)
+                #endif
+                .padding(.horizontal, 16)
+            }
+        }
+        #endif
+        .onAppear { startAutoScroll() }
+        .onDisappear { stopAutoScroll() }
+        .onChange(of: scrolledID) { _, _ in startAutoScroll() }
+        .onChange(of: items.count) { _, newCount in
+            // When items first populate, nudge to the second item so the
+            // carousel feels alive (matches the original trending behavior).
+            if scrolledID == nil, newCount > 1 {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(300))
+                    withAnimation { scrolledID = items[1].id }
+                }
+            }
+            startAutoScroll()
+        }
+    }
+
+    @ViewBuilder
+    private func hero(item: Binding<BaseItemDto>) -> some View {
+        switch item.wrappedValue.type {
+        case .movie:
+            MovieHeroView(movie: item)
+        case .series:
+            ShowHeroView(show: item)
+        default:
+            EmptyView()
+        }
+    }
+
+    private func scrollToPrevious() {
+        guard currentIndex > 0 else { return }
+        scrolledID = items[currentIndex - 1].id
+    }
+
+    private func scrollToNext() {
+        guard currentIndex < items.count - 1 else { return }
+        scrolledID = items[currentIndex + 1].id
+    }
+
+    private func startAutoScroll() {
+        autoScrollTask?.cancel()
+        guard items.count > 1 else { return }
+        autoScrollTask = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(10))
+                guard !Task.isCancelled else { return }
+                let nextIndex = (currentIndex + 1) % items.count
+                withAnimation {
+                    scrolledID = items[nextIndex].id
+                }
+            }
+        }
+    }
+
+    private func stopAutoScroll() {
+        autoScrollTask?.cancel()
+        autoScrollTask = nil
+    }
+}
