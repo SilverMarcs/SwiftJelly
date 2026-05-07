@@ -5,6 +5,7 @@
 //  Created by Zabir Raihan on 04/04/2026.
 //
 
+#if !os(tvOS)
 import SwiftUI
 import WebKit
 
@@ -94,3 +95,4 @@ final class SeerrCookieObserver: NSObject, WKHTTPCookieStoreObserver {
         cookieStore?.remove(self)
     }
 }
+#endif

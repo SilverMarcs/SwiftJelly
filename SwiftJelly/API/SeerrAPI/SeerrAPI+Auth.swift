@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if !os(tvOS)
 import WebKit
+#endif
 
 extension SeerrAPI {
     /// Sign in to Seerr using Jellyfin credentials
@@ -99,10 +101,12 @@ extension SeerrAPI {
 
         // Clear WebKit's cookie store too, otherwise the next login WebView reuses
         // the stale-but-still-server-valid connect.sid and auto-dismisses on first open.
+        #if !os(tvOS)
         await WKWebsiteDataStore.default().removeData(
             ofTypes: [WKWebsiteDataTypeCookies],
             modifiedSince: .distantPast
         )
+        #endif
 
         SeerrAuth.shared.setAuthenticated(false)
     }

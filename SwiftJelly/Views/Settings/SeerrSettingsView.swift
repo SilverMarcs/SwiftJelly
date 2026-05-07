@@ -75,7 +75,7 @@ struct SeerrSettingsView: View {
                 .labelStyle(.titleOnly)
         }
         .disabled(auth.serverURL.isEmpty)
-        #else
+        #elseif !os(tvOS)
         if let url = URL(string: auth.serverURL), !auth.serverURL.isEmpty {
             NavigationLink {
                 SeerrLoginWebView(serverURL: url)
@@ -85,7 +85,7 @@ struct SeerrSettingsView: View {
                 .foregroundColor(.accent)
             }
             .navigationLinkIndicatorVisibility(.hidden)
-       
+
         }
         #endif
     }
