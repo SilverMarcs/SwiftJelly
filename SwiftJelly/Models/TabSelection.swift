@@ -45,7 +45,7 @@ enum TabSelection: String, CaseIterable {
         case .settings: return "gear"
         case .search: return "magnifyingglass"
         case .shows: return "tv"
-        case .movies: return "movieclapper.fill"
+        case .movies: return "movieclapper"
         case .libraries: return "rectangle.stack"
         }
     }
