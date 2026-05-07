@@ -147,6 +147,7 @@ import Observation
 
     var shouldShowNextEpisode: Bool {
         guard item.type == .episode else { return false }
+        guard !isAutoLoadingNext else { return false }
         let duration = durationSeconds
         guard duration > 0 else { return false }
         let promptStartSeconds = markers.creditsStartSeconds ?? max(0, duration - 60)
