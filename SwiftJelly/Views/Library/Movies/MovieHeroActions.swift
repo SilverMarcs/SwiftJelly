@@ -3,10 +3,13 @@ import JellyfinAPI
 
 struct MovieHeroActions: View {
     let movie: BaseItemDto
-    
+
+    @Namespace private var actionButtonsNamespace
+
     var body: some View {
         HStack(spacing: spacing) {
             MoviePlayButton(item: movie)
+                .prefersDefaultFocus(in: actionButtonsNamespace)
 
             #if os(tvOS)
             HeroInfoButton(item: movie)
@@ -16,6 +19,7 @@ struct MovieHeroActions: View {
 
             FavoriteButton(item: movie)
         }
+        .focusScope(actionButtonsNamespace)
     }
 
     private var spacing: CGFloat {

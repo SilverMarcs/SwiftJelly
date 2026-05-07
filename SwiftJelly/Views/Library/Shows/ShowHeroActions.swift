@@ -4,15 +4,18 @@ import JellyfinAPI
 struct ShowHeroActions: View {
     @Binding private var show: BaseItemDto
     let vm: ShowDetailViewModel
-    
+
+    @Namespace private var actionButtonsNamespace
+
     init(show: Binding<BaseItemDto>) {
         self._show = show
         self.vm = ShowDetailViewModel(item: show.wrappedValue)
     }
-    
+
     var body: some View {
         HStack(spacing: spacing) {
             ShowPlayButton(vm: vm)
+                .prefersDefaultFocus(in: actionButtonsNamespace)
 
             #if os(tvOS)
             HeroInfoButton(item: show)
@@ -23,6 +26,7 @@ struct ShowHeroActions: View {
 
             FavoriteButton(item: vm.show)
         }
+        .focusScope(actionButtonsNamespace)
         .environment(\.refresh, refreshAllAndSync)
     }
 

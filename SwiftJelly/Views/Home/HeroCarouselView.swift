@@ -34,10 +34,13 @@ struct HeroCarouselView: View {
                     }
                     #else
                     hero(item: item)
+                        .padding(.horizontal, 80)
+                        .focusSection()
                         .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
                             content.offset(y: phase.isIdentity ? 0 : -200)
                         }
                         .frame(height: 800)
+                        .padding(.bottom, 40)
                         .background {
                             GeometryReader { geo in
                                 if let url = ImageURLProvider.imageURL(for: item.wrappedValue, type: .backdrop) {
