@@ -10,7 +10,9 @@ struct MovieHeroActions: View {
     var body: some View {
         HStack(spacing: spacing) {
             MoviePlayButton(item: movie)
+#if os(tvOS)
                 .prefersDefaultFocus(in: actionButtonsNamespace)
+#endif
 
             #if os(tvOS)
             if showsInfoButton {
@@ -22,7 +24,9 @@ struct MovieHeroActions: View {
 
             FavoriteButton(item: movie)
         }
+#if os(tvOS)
         .focusScope(actionButtonsNamespace)
+#endif
     }
 
     private var spacing: CGFloat {

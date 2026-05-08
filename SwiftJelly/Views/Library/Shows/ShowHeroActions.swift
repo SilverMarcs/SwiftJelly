@@ -15,8 +15,9 @@ struct ShowHeroActions: View {
     var body: some View {
         HStack(spacing: spacing) {
             ShowPlayButton(vm: vm)
+#if os(tvOS)
                 .prefersDefaultFocus(in: actionButtonsNamespace)
-
+#endif
             #if os(tvOS)
             HeroInfoButton(item: show)
             #endif
@@ -26,7 +27,9 @@ struct ShowHeroActions: View {
 
             FavoriteButton(item: vm.show)
         }
+#if os(tvOS)
         .focusScope(actionButtonsNamespace)
+#endif
         .environment(\.refresh, refreshAllAndSync)
     }
 

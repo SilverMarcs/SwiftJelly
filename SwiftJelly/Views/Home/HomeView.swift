@@ -47,7 +47,6 @@ struct HomeView: View {
                     }
                 }
                 #if os(tvOS)
-                .ignoresSafeArea()
                 .onScrollVisibilityChange { isVisible in
                     belowFold = !isVisible
                 }
