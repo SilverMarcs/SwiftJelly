@@ -55,9 +55,9 @@ struct AttributesView: View {
             // Critic Rating (Rotten Tomatoes)
             if let criticRating = item.criticRating {
                 HStack(spacing: 4) {
-                    unsafe Text(criticRating >= 60 ? "🍅" : "🤢")
+                    Text(criticRating >= 60 ? "🍅" : "🤢")
                         .font(.caption2)
-                    unsafe Text("\(Int(criticRating))%")
+                    Text("\(Int(criticRating))%")
                 }
             }
 
@@ -88,6 +88,14 @@ struct AttributesView: View {
         .caption2
         #else
         .subheadline
+        #endif
+    }
+
+    private var ratingFont: Font {
+        #if os(tvOS)
+        .body
+        #else
+        attributeFont
         #endif
     }
 
@@ -185,13 +193,23 @@ private struct BorderedBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 9, weight: .medium))
+            #if os(tvOS)
+            .font(.system(size: 16, weight: .medium))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 3)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(.white.opacity(0.5), lineWidth: 1.5)
+            )
+            #else
+            .font(.system(size: 8, weight: .medium))
             .padding(.horizontal, 5)
             .padding(.vertical, 1.5)
             .overlay(
                 RoundedRectangle(cornerRadius: 3)
                     .stroke(.white.opacity(0.5), lineWidth: 0.75)
             )
+            #endif
     }
 }
 
@@ -236,6 +254,16 @@ private struct AudioBadgeView: View {
 private struct IMDbBadge: View {
     var body: some View {
         Text("IMDb")
+            #if os(tvOS)
+            .font(.system(size: 15, weight: .black))
+            .foregroundStyle(.black)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(Color.yellow)
+            )
+            #else
             .font(.system(size: 7.5, weight: .black))
             .foregroundStyle(.black)
             .padding(.horizontal, 3)
@@ -244,5 +272,6 @@ private struct IMDbBadge: View {
                 RoundedRectangle(cornerRadius: 2.5)
                     .fill(Color.yellow)
             )
+            #endif
     }
 }

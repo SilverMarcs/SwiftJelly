@@ -3,6 +3,7 @@ import JellyfinAPI
 
 struct MovieHeroActions: View {
     let movie: BaseItemDto
+    var showsInfoButton: Bool = true
 
     @Namespace private var actionButtonsNamespace
 
@@ -12,7 +13,9 @@ struct MovieHeroActions: View {
                 .prefersDefaultFocus(in: actionButtonsNamespace)
 
             #if os(tvOS)
-            HeroInfoButton(item: movie)
+            if showsInfoButton {
+                HeroInfoButton(item: movie)
+            }
             #endif
 
             MarkPlayedButton(item: movie)

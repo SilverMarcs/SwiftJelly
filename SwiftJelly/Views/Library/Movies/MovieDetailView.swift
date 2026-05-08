@@ -16,7 +16,7 @@ struct MovieDetailView: View {
                 SimilarItemsView(item: movie)
             }
         } heroView: {
-            MovieHeroView(movie: $movie)
+            MovieHeroView(movie: $movie, showsInfoButton: false)
         }
         .refreshToolbar {
             await fetchMovie()

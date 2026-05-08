@@ -17,6 +17,7 @@ struct HeroCarouselView: View {
 
     @State private var scrolledID: String?
     @State private var autoScrollTask: Task<Void, Never>?
+    @FocusState private var focusedHeroID: String?
 
     private var currentIndex: Int {
         guard let scrolledID else { return 0 }
@@ -36,6 +37,7 @@ struct HeroCarouselView: View {
                     hero(item: item)
                         .padding(.horizontal, 80)
                         .focusSection()
+                        .focused($focusedHeroID, equals: item.wrappedValue.id ?? "")
                         .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
                             content.offset(y: phase.isIdentity ? 0 : -200)
                         }
@@ -115,6 +117,10 @@ struct HeroCarouselView: View {
         .onAppear { startAutoScroll() }
         .onDisappear { stopAutoScroll() }
         .onChange(of: scrolledID) { _, _ in startAutoScroll() }
+        .onChange(of: focusedHeroID) { _, newID in
+            guard let newID, !newID.isEmpty, newID != scrolledID else { return }
+            withAnimation { scrolledID = newID }
+        }
         .onChange(of: items.count) { _, newCount in
             // When items first populate, nudge to the second item so the
             // carousel feels alive (matches the original trending behavior).
@@ -158,8 +164,15 @@ struct HeroCarouselView: View {
                 try? await Task.sleep(for: .seconds(10))
                 guard !Task.isCancelled else { return }
                 let nextIndex = (currentIndex + 1) % items.count
+                let nextID = items[nextIndex].id
                 withAnimation {
-                    scrolledID = items[nextIndex].id
+                    scrolledID = nextID
+                }
+                // If the user is currently focused inside the carousel,
+                // drag focus along to the new hero so subsequent manual
+                // navigation doesn't snap the carousel backward.
+                if focusedHeroID != nil {
+                    focusedHeroID = nextID
                 }
             }
         }
