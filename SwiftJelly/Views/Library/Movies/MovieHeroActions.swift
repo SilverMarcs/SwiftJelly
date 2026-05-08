@@ -3,7 +3,6 @@ import JellyfinAPI
 
 struct MovieHeroActions: View {
     let movie: BaseItemDto
-    var showsInfoButton: Bool = true
 
     @Namespace private var actionButtonsNamespace
 
@@ -15,9 +14,7 @@ struct MovieHeroActions: View {
 #endif
 
             #if os(tvOS)
-            if showsInfoButton {
-                HeroInfoButton(item: movie)
-            }
+            HeroInfoButton(item: movie)
             #endif
 
             MarkPlayedButton(item: movie)

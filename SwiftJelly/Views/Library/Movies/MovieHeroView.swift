@@ -4,15 +4,14 @@ import JellyfinAPI
 /// A complete standalone hero view for movies with backdrop, overlay, and action buttons.
 struct MovieHeroView: View {
     @Binding var movie: BaseItemDto
-    var showsInfoButton: Bool = true
 
     var body: some View {
         HeroBackdropView(item: movie) {
-            MovieHeroActions(movie: movie, showsInfoButton: showsInfoButton)
+            MovieHeroActions(movie: movie)
                 .environment(\.refresh, refreshMovie)
         }
     }
-    
+
     private func refreshMovie() async {
         guard let id = movie.id, !id.isEmpty else { return }
         do {

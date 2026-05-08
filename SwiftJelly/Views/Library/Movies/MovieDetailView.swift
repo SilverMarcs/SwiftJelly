@@ -2,36 +2,31 @@ import SwiftUI
 import JellyfinAPI
 
 struct MovieDetailView: View {
-    @State private var movie: BaseItemDto
+    @State private var vm: MovieDetailViewModel
 
     init(item: BaseItemDto) {
-        self._movie = State(initialValue: item)
-    }
-    
-    var body: some View {
-        DetailView(item: movie) {
-            VStack(spacing: spacing) {
-                PeopleScrollView(people: movie.people ?? [])
-                
-                SimilarItemsView(item: movie)
-            }
-        } heroView: {
-            MovieHeroView(movie: $movie, showsInfoButton: false)
-        }
-        .refreshToolbar {
-            await fetchMovie()
-        }
-        .environment(\.refresh, fetchMovie)
+        self._vm = State(initialValue: MovieDetailViewModel(item: item))
     }
 
-    private func fetchMovie() async {
-        do {
-            movie = try await JFAPI.loadItem(by: movie.id ?? "")
-        } catch {
-            print("Error loading Movie Detail: \(error.localizedDescription)")
+    var body: some View {
+        DetailView(item: vm.movie) {
+            VStack(spacing: spacing) {
+                PeopleScrollView(people: vm.movie.people ?? [])
+
+                SimilarItemsView(item: vm.movie)
+            }
+        } heroView: {
+            MovieHeroDetailView(vm: vm)
+        }
+        .environment(\.refresh, vm.refresh)
+        .task {
+            await vm.refresh()
+        }
+        .refreshToolbar {
+            await vm.refresh()
         }
     }
-    
+
     private var spacing: CGFloat {
         #if os(tvOS)
         200
