@@ -14,7 +14,8 @@ enum MediaFilter {
     case studio(NameGuidPair)
     case favorites
     case person(id: String, name: String)
-    
+    case recentlyAdded(BaseItemKind)
+
     var navigationTitle: String {
         switch self {
         case .library(let library):
@@ -27,6 +28,12 @@ enum MediaFilter {
             return "Favorites"
         case .person(_, let name):
             return name
+        case .recentlyAdded(let kind):
+            switch kind {
+            case .movie: return "Recently Added Movies"
+            case .series: return "Recently Added Shows"
+            default: return "Recently Added"
+            }
         }
     }
 }

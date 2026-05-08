@@ -146,6 +146,13 @@ class FilteredMediaViewModel {
             parameters.personIDs = [id]
             parameters.isRecursive = true
             parameters.includeItemTypes = [.movie, .series]
+        case .recentlyAdded(let kind):
+            parameters.isRecursive = true
+            parameters.includeItemTypes = [kind]
+            if sortOption == .none {
+                parameters.sortBy = [ItemSortBy.dateCreated.rawValue]
+                parameters.sortOrder = [.descending]
+            }
         }
         
         let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)

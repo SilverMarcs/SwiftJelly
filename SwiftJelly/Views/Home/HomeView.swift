@@ -69,18 +69,24 @@ struct HomeView: View {
 
                 MediaShelf(header: "Favorites") {
                     try await JFAPI.loadFavoriteItems(limit: 30)
+                } destination: {
+                    FilteredMediaView(filter: .favorites)
                 }
-                
+
                 GenreCarouselView()
-                
+
                 MediaShelf(header: "Recently Added Movies") {
                     try await JFAPI.loadLatestMediaInLibrary(limit: 40, itemTypes: [.movie])
+                } destination: {
+                    FilteredMediaView(filter: .recentlyAdded(.movie))
                 }
-                
+
                 LibrariesView()
 
                 MediaShelf(header: "Recently Added Shows") {
                     try await JFAPI.loadLatestMediaInLibrary(limit: 40, itemTypes: [.series])
+                } destination: {
+                    FilteredMediaView(filter: .recentlyAdded(.series))
                 }
             }
             .scenePadding(.bottom)

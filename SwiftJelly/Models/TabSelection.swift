@@ -67,7 +67,7 @@ enum TabSelection: String, CaseIterable {
     var tabView: some View {
         switch self {
         case .home: HomeView()
-        case .favorites: FilteredMediaView(filter: .favorites)
+        case .favorites: FilteredMediaView(filter: .favorites, largeTitle: true)
         case .discover: DiscoverView()
         case .shows: FilteredMediaView(filter: .library(BaseItemDto(collectionType: .tvshows, name: "TV Shows")))
         case .movies: FilteredMediaView(filter: .library(BaseItemDto(collectionType: .movies, name: "Movies")))
