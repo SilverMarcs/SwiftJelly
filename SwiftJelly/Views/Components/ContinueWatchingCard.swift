@@ -54,6 +54,12 @@ struct ContinueWatchingCard: View {
                         MediaNavigationLink(item: item) {
                             PlayableItemTypeLabel(item: item)
                         }
+
+                        if item.type == .episode {
+                            NavigationLink(value: item) {
+                                Label("Go to Episode", systemImage: "tv")
+                            }
+                        }
                     }
                 }
 

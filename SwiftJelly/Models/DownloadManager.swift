@@ -128,7 +128,8 @@ final class DownloadManager: NSObject {
             #if os(iOS)
             DownloadActivityCoordinator.shared.startTracking(
                 itemID: itemID,
-                name: item.name ?? "Item"
+                name: item.name ?? "Item",
+                sourceFileSize: Int64(item.mediaSources?.first?.size ?? 0)
             )
             #endif
         } catch {
@@ -243,8 +244,7 @@ extension DownloadManager: URLSessionDownloadDelegate {
             #if os(iOS)
             DownloadActivityCoordinator.shared.updateProgress(
                 itemID: itemID,
-                bytesWritten: record.bytesWritten,
-                totalBytes: record.totalBytes
+                bytesWritten: record.bytesWritten
             )
             #endif
         }

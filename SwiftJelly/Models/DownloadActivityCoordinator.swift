@@ -21,18 +21,24 @@ final class DownloadActivityCoordinator {
 
     private struct Tracked {
         var name: String
+        /// Source file size from Jellyfin (`MediaSourceInfo.size`). May be 0
+        /// if the server didn't report one — we substitute a placeholder so
+        /// the bar still makes visible progress.
+        var sourceFileSize: Int64
+        var bytesWritten: Int64
     }
 
-    /// Total units of the fake-progress bar. Generous so the bar advances
-    /// visibly without ever reaching the cap during a typical download.
-    private static let fakeProgressTotal: Int64 = 1000
-    /// Minimum spacing between fake-progress ticks so a high-rate URLSession
-    /// callback stream doesn't race the bar to the cap in seconds.
-    private static let progressTickInterval: TimeInterval = 0.5
+    /// Used when Jellyfin doesn't expose a source file size — gives the bar
+    /// something large enough to crawl across without falsely hitting 100%
+    /// for any realistic download.
+    private static let unknownSizeFallback: Int64 = 1_000_000_000  // 1 GB
+    /// Multiplier on source size: the actual download may exceed the source
+    /// file size if Jellyfin transcodes (different container/codec/bitrate).
+    /// Doubling gives plenty of room without the bar saturating early.
+    private static let sizeMultiplier: Int64 = 2
 
     private var activeTask: BGContinuedProcessingTask?
     private var tracked: [String: Tracked] = [:]
-    private var lastTickAt: TimeInterval = 0
 
     private init() {}
 
@@ -54,35 +60,38 @@ final class DownloadActivityCoordinator {
 
     // MARK: - Lifecycle hooks called from DownloadManager
 
-    func startTracking(itemID: String, name: String) {
+    func startTracking(itemID: String, name: String, sourceFileSize: Int64) {
         if tracked[itemID] == nil {
-            tracked[itemID] = Tracked(name: name)
+            let effectiveSize = sourceFileSize > 0 ? sourceFileSize : Self.unknownSizeFallback
+            tracked[itemID] = Tracked(
+                name: name,
+                sourceFileSize: effectiveSize,
+                bytesWritten: 0
+            )
         }
         ensureTaskRunning()
-        refreshActivity(tickProgress: false)
+        refreshActivity()
     }
 
-    func updateProgress(itemID: String, bytesWritten: Int64, totalBytes: Int64) {
-        // Real bytes are ignored for the bar — Jellyfin's `/Items/{id}/Download`
-        // often replies without a `Content-Length` header, so a real-progress
-        // bar either pegs at 100% immediately or jitters wildly. A creeping
-        // fake bar that never reaches the cap until completion looks honest.
-        guard tracked[itemID] != nil else { return }
-        refreshActivity(tickProgress: true)
+    func updateProgress(itemID: String, bytesWritten: Int64) {
+        guard var t = tracked[itemID] else { return }
+        t.bytesWritten = bytesWritten
+        tracked[itemID] = t
+        refreshActivity()
     }
 
     func stopTracking(itemID: String, success: Bool = true) {
         guard tracked.removeValue(forKey: itemID) != nil else { return }
         if tracked.isEmpty {
-            if success {
+            if success, let task = activeTask {
                 // Snap the bar to full just before teardown so the user sees a
                 // definite "done" frame on the Live Activity.
-                activeTask?.progress.completedUnitCount = Self.fakeProgressTotal
+                task.progress.completedUnitCount = task.progress.totalUnitCount
             }
             activeTask?.setTaskCompleted(success: success)
             activeTask = nil
         } else {
-            refreshActivity(tickProgress: false)
+            refreshActivity()
         }
     }
 
@@ -97,7 +106,7 @@ final class DownloadActivityCoordinator {
         )
         // `.queue` lets iOS queue the request rather than reject it under
         // resource pressure — without an explicit strategy the system can
-        // refuse to launch the task at all. Mirrors the LynkChat pattern.
+        // refuse to launch the task at all.
         request.strategy = .queue
         do {
             try BGTaskScheduler.shared.submit(request)
@@ -111,9 +120,6 @@ final class DownloadActivityCoordinator {
 
     private func adopt(task: BGContinuedProcessingTask) {
         activeTask = task
-        task.progress.totalUnitCount = Self.fakeProgressTotal
-        task.progress.completedUnitCount = 0
-        lastTickAt = 0
         task.expirationHandler = { [weak self] in
             // System (or user via Live Activity) is asking us to stop. Cancel
             // every in-flight download; the manager will tear down each
@@ -129,22 +135,24 @@ final class DownloadActivityCoordinator {
                 self.activeTask = nil
             }
         }
-        refreshActivity(tickProgress: false)
+        refreshActivity()
     }
 
-    private func refreshActivity(tickProgress: Bool) {
+    private func refreshActivity() {
         guard let task = activeTask else { return }
 
-        if tickProgress {
-            let now = ProcessInfo.processInfo.systemUptime
-            if now - lastTickAt >= Self.progressTickInterval {
-                lastTickAt = now
-                let cap = Self.fakeProgressTotal - 1
-                if task.progress.completedUnitCount < cap {
-                    task.progress.completedUnitCount += 1
-                }
-            }
+        // Total = 2× the sum of known source sizes. Doubling means even a
+        // download that grows above the source size during transcoding never
+        // reads "complete" before we explicitly snap it on stopTracking.
+        let totalUnits = tracked.values.reduce(Int64(0)) {
+            $0 + $1.sourceFileSize * Self.sizeMultiplier
         }
+        let writtenUnits = tracked.values.reduce(Int64(0)) { $0 + $1.bytesWritten }
+        let safeTotal = max(totalUnits, 1)
+        let cap = max(safeTotal - 1, 1)
+
+        task.progress.totalUnitCount = safeTotal
+        task.progress.completedUnitCount = min(writtenUnits, cap)
 
         task.updateTitle(title, subtitle: subtitle)
     }
