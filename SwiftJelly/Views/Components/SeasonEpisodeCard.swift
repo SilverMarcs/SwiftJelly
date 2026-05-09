@@ -86,6 +86,10 @@ struct SeasonEpisodeCard: View {
         .adaptiveCardButtonStyle()
         .contextMenu {
             if let item = item.base {
+                NavigationLink(value: item) {
+                    Label("Go to Episode", systemImage: "tv")
+                }
+
                 Button {
                     Task {
                         try? await JFAPI.toggleItemPlayedStatus(item: item)

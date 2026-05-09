@@ -4,18 +4,19 @@ import SwiftMediaViewer
 
 struct HeroBackdropView<HeroActions: View>: View {
     @ViewBuilder let heroActions: HeroActions
-    
+
     let item: BaseItemDto
+    let logoItem: BaseItemDto
     let badge: String?
-    
-    init(item: BaseItemDto, @ViewBuilder heroActions: () -> HeroActions) {
+
+    init(
+        item: BaseItemDto,
+        logoItem: BaseItemDto? = nil,
+        badge: String? = nil,
+        @ViewBuilder heroActions: () -> HeroActions
+    ) {
         self.item = item
-        self.badge = nil
-        self.heroActions = heroActions()
-    }
-    
-    init(item: BaseItemDto, badge: String, @ViewBuilder heroActions: () -> HeroActions) {
-        self.item = item
+        self.logoItem = logoItem ?? item
         self.badge = badge
         self.heroActions = heroActions()
     }
@@ -150,18 +151,18 @@ struct HeroBackdropView<HeroActions: View>: View {
     private var logo: some View {
         
         VStack(alignment: .center) {
-            if let url = ImageURLProvider.imageURL(for: item, type: .logo) {
-                if let badge = badge {
-                    Text(badge)
-                        .font(.subheadline)
-                        .bold()
-                        .opacity(0.7)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 8)
-                        .glassEffect(in: .capsule)
-                        .scaleEffect(0.8)
-                }
-                
+            if let badge = badge {
+                Text(badge)
+                    .font(.subheadline)
+                    .bold()
+                    .opacity(0.7)
+                    .padding(.horizontal, 15)
+                    .padding(.vertical, 8)
+                    .glassEffect(in: .capsule)
+                    .scaleEffect(0.8)
+            }
+
+            if let url = ImageURLProvider.imageURL(for: logoItem, type: .logo) {
                 CachedAsyncImage(url: url, targetSize: 450) {
                     Color.clear
                 }
@@ -169,7 +170,7 @@ struct HeroBackdropView<HeroActions: View>: View {
                 .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
                 .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text(item.name ?? "")
+                Text(logoItem.name ?? "")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)

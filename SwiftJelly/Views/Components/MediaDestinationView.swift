@@ -20,7 +20,7 @@ struct MediaDestinationView: View {
         case .genre:
             FilteredMediaView(filter: .genre(item.name ?? ""))
         case .episode:
-            ShowDetailView(item: BaseItemDto(id: item.seriesID))
+            EpisodeDetailView(item: item)
         case .person:
             FilteredMediaView(filter: .person(id: item.id ?? "", name: item.name ?? "Person"))
         case .collectionFolder, .boxSet:
