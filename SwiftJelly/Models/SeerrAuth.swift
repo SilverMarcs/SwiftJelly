@@ -14,31 +14,26 @@ final class SeerrAuth {
     var isAuthenticated: Bool = false
 
     @ObservationIgnored static let shared = SeerrAuth()
-    @ObservationIgnored private let kvs = NSUbiquitousKeyValueStore.default
+    @ObservationIgnored private let defaults = UserDefaults.standard
     @ObservationIgnored private let serverURLKey = "seerrServerURL"
     @ObservationIgnored private let authenticatedKey = "seerrAuthenticated"
     @ObservationIgnored private let cookieKey = "seerrPersistedCookie"
+    @ObservationIgnored private let migrationKey = "SeerrAuth.iCloudMigrated"
 
     private init() {
+        migrateFromICloudIfNeeded()
         load()
         restoreCookie()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(iCloudStoreChanged(_:)),
-            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
-            object: kvs
-        )
-        kvs.synchronize()
     }
 
     func setServerURL(_ url: String) {
         serverURL = url
-        kvs.set(url, forKey: serverURLKey)
+        defaults.set(url, forKey: serverURLKey)
     }
 
     func setAuthenticated(_ flag: Bool) {
         isAuthenticated = flag
-        kvs.set(flag, forKey: authenticatedKey)
+        defaults.set(flag, forKey: authenticatedKey)
     }
 
     func persistCookie(_ cookie: HTTPCookie) {
@@ -52,17 +47,17 @@ final class SeerrAuth {
             dict["expires"] = String(expires.timeIntervalSince1970)
         }
         if cookie.isSecure { dict["secure"] = "1" }
-        kvs.set(dict, forKey: cookieKey)
+        defaults.set(dict, forKey: cookieKey)
 
         SeerrAPI.session.configuration.httpCookieStorage?.setCookie(cookie)
     }
 
     func clearCookie() {
-        kvs.removeObject(forKey: cookieKey)
+        defaults.removeObject(forKey: cookieKey)
     }
 
     func restoreCookie() {
-        guard let dict = kvs.dictionary(forKey: cookieKey) as? [String: String],
+        guard let dict = defaults.dictionary(forKey: cookieKey) as? [String: String],
               let name = dict["name"],
               let value = dict["value"],
               let domain = dict["domain"],
@@ -85,14 +80,24 @@ final class SeerrAuth {
     }
 
     private func load() {
-        serverURL = kvs.string(forKey: serverURLKey) ?? ""
-        isAuthenticated = kvs.bool(forKey: authenticatedKey)
+        serverURL = defaults.string(forKey: serverURLKey) ?? ""
+        isAuthenticated = defaults.bool(forKey: authenticatedKey)
     }
 
-    @objc private func iCloudStoreChanged(_ notification: Notification) {
-        Task { @MainActor in
-            load()
-            restoreCookie()
+    private func migrateFromICloudIfNeeded() {
+        guard !defaults.bool(forKey: migrationKey) else { return }
+        let kvs = NSUbiquitousKeyValueStore.default
+        kvs.synchronize()
+        if defaults.string(forKey: serverURLKey) == nil, let url = kvs.string(forKey: serverURLKey) {
+            defaults.set(url, forKey: serverURLKey)
         }
+        if defaults.object(forKey: authenticatedKey) == nil {
+            defaults.set(kvs.bool(forKey: authenticatedKey), forKey: authenticatedKey)
+        }
+        if defaults.dictionary(forKey: cookieKey) == nil,
+           let dict = kvs.dictionary(forKey: cookieKey) {
+            defaults.set(dict, forKey: cookieKey)
+        }
+        defaults.set(true, forKey: migrationKey)
     }
 }

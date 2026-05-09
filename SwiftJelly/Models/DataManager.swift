@@ -17,17 +17,12 @@ import JellyfinAPI
 
     @ObservationIgnored private let serversKey = "SavedServers"
     @ObservationIgnored private let activeServerKey = "ActiveServerID"
-    @ObservationIgnored private let kvs = NSUbiquitousKeyValueStore.default
+    @ObservationIgnored private let migrationKey = "DataManager.iCloudMigrated"
+    @ObservationIgnored private let defaults = UserDefaults.standard
 
     init() {
+        migrateFromICloudIfNeeded()
         loadServers()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(iCloudStoreChanged(_:)),
-            name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
-            object: kvs
-        )
-        kvs.synchronize()
     }
 
     var server: Server? {
@@ -60,21 +55,30 @@ import JellyfinAPI
     }
 
     private func loadServers() {
-        if let data = kvs.data(forKey: serversKey),
+        if let data = defaults.data(forKey: serversKey),
            let decoded = try? JSONDecoder().decode([Server].self, from: data) {
             self.servers = decoded
         }
-        self.activeServerID = kvs.string(forKey: activeServerKey) ?? servers.first?.id
+        self.activeServerID = defaults.string(forKey: activeServerKey) ?? servers.first?.id
     }
 
     private func saveServers() {
         if let data = try? JSONEncoder().encode(servers) {
-            kvs.set(data, forKey: serversKey)
+            defaults.set(data, forKey: serversKey)
         }
-        kvs.set(activeServerID, forKey: activeServerKey)
+        defaults.set(activeServerID, forKey: activeServerKey)
     }
 
-    @objc private func iCloudStoreChanged(_ notification: Notification) {
-        Task { @MainActor in loadServers() }
+    private func migrateFromICloudIfNeeded() {
+        guard !defaults.bool(forKey: migrationKey) else { return }
+        let kvs = NSUbiquitousKeyValueStore.default
+        kvs.synchronize()
+        if defaults.data(forKey: serversKey) == nil, let data = kvs.data(forKey: serversKey) {
+            defaults.set(data, forKey: serversKey)
+        }
+        if defaults.string(forKey: activeServerKey) == nil, let active = kvs.string(forKey: activeServerKey) {
+            defaults.set(active, forKey: activeServerKey)
+        }
+        defaults.set(true, forKey: migrationKey)
     }
 }
