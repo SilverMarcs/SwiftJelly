@@ -125,6 +125,12 @@ final class DownloadManager: NSObject {
             task.taskDescription = itemID
             tasks[itemID] = task
             task.resume()
+            #if os(iOS)
+            DownloadActivityCoordinator.shared.startTracking(
+                itemID: itemID,
+                name: item.name ?? "Item"
+            )
+            #endif
         } catch {
             print("Download start failed: \(error)")
         }
@@ -139,6 +145,9 @@ final class DownloadManager: NSObject {
             .filter { $0.lastPathComponent.hasPrefix(itemID + ".") }
             .forEach { try? FileManager.default.removeItem(at: $0) }
         saveMetadata()
+        #if os(iOS)
+        DownloadActivityCoordinator.shared.stopTracking(itemID: itemID, success: false)
+        #endif
     }
 
     func deleteDownload(for itemID: String) {
@@ -150,6 +159,9 @@ final class DownloadManager: NSObject {
         tasks[itemID] = nil
         downloads[itemID] = nil
         saveMetadata()
+        #if os(iOS)
+        DownloadActivityCoordinator.shared.stopTracking(itemID: itemID)
+        #endif
     }
 
     // MARK: - Persistence
@@ -188,6 +200,9 @@ extension DownloadManager: URLSessionDownloadDelegate {
                 downloads[itemID] = record
                 tasks[itemID] = nil
                 saveMetadata()
+                #if os(iOS)
+                DownloadActivityCoordinator.shared.stopTracking(itemID: itemID, success: false)
+                #endif
                 return
             }
 
@@ -206,6 +221,9 @@ extension DownloadManager: URLSessionDownloadDelegate {
             downloads[itemID] = record
             tasks[itemID] = nil
             saveMetadata()
+            #if os(iOS)
+            DownloadActivityCoordinator.shared.stopTracking(itemID: itemID)
+            #endif
         }
     }
 
@@ -222,6 +240,13 @@ extension DownloadManager: URLSessionDownloadDelegate {
             record.bytesWritten = totalBytesWritten
             record.totalBytes = max(record.totalBytes, totalBytesExpectedToWrite)
             downloads[itemID] = record
+            #if os(iOS)
+            DownloadActivityCoordinator.shared.updateProgress(
+                itemID: itemID,
+                bytesWritten: record.bytesWritten,
+                totalBytes: record.totalBytes
+            )
+            #endif
         }
     }
 
@@ -243,6 +268,9 @@ extension DownloadManager: URLSessionDownloadDelegate {
             downloads[itemID] = record
             tasks[itemID] = nil
             saveMetadata()
+            #if os(iOS)
+            DownloadActivityCoordinator.shared.stopTracking(itemID: itemID, success: false)
+            #endif
         }
     }
 }

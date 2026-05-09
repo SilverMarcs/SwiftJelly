@@ -94,11 +94,6 @@ struct DownloadsView: View {
         }
         .navigationTitle("Downloads")
         .platformNavigationToolbar(titleDisplayMode: .inline)
-        .keepScreenAwakeWhile(hasActiveDownloads)
-    }
-
-    private var hasActiveDownloads: Bool {
-        manager.downloads.values.contains { $0.status == .downloading }
     }
 
     @ViewBuilder

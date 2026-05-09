@@ -18,5 +18,9 @@
 		<string>audio</string>
 		<string>remote-notification</string>
 	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.SilverMarcs.SwiftJelly.downloads</string>
+	</array>
 </dict>
 </plist>

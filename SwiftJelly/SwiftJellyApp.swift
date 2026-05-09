@@ -42,8 +42,9 @@ struct SwiftJellyApp: App {
         _ = PlaybackManager.shared
         _ = SeerrAuth.shared
         #if os(iOS)
-        // Eagerly init so the lifecycle observers are registered and any
-        // partially-downloaded items resume on first foreground transition.
+        // Register BGContinuedProcessingTask handler before any submit() call.
+        DownloadActivityCoordinator.register()
+        // Eagerly init so the manager is ready when the first download starts.
         _ = DownloadManager.shared
         #endif
     }
