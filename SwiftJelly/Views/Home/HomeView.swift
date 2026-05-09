@@ -13,10 +13,6 @@ enum FocusField {
 }
 
 struct HomeView: View {
-    @AppStorage("continueWatchingStyle") private var continueWatchingStyle: ContinueWatchingStyle = .combined
-
-    @Environment(TrendingInLibraryViewModel.self) private var trendingViewModel
-
     @State private var showScrollEffect = false
 
 #if os(tvOS)
@@ -26,48 +22,16 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing) {
-                Group {
-                    if !trendingViewModel.items.isEmpty {
-                        TrendingInLibraryView()
-                            .onScrollVisibilityChange { isVisible in
-                                showScrollEffect = isVisible
-                            }
-                    } else if trendingViewModel.hasLoaded {
-                        FeaturedView {
-                            try await JFAPI.loadLatestMediaInLibrary(limit: 10, itemTypes: [.movie, .tvProgram]).shuffled()
-                        }
-                        .onScrollVisibilityChange { isVisible in
-                            showScrollEffect = isVisible
-                        }
-                    } else {
-                        HeroBackdropView(item: BaseItemDto()) {}
-                            .onScrollVisibilityChange { isVisible in
-                                showScrollEffect = isVisible
-                            }
-                    }
-                }
                 #if os(tvOS)
-                .onScrollVisibilityChange { isVisible in
-                    belowFold = !isVisible
-                }
+                HomeHeroView(showScrollEffect: $showScrollEffect, belowFold: $belowFold)
+                #else
+                HomeHeroView(showScrollEffect: $showScrollEffect)
                 #endif
                 
-                if continueWatchingStyle == .combined {
-                    ContinueWatchingView(header: "Continue Watching") {
-                        try await JFAPI.loadContinueWatchingSmart()
-                    }
-                } else {
-                    ContinueWatchingView(header: "Continue Watching") {
-                        try await JFAPI.loadResumeItems(limit: 20)
-                    }
-                    
-                    ContinueWatchingView(header: "Next Up") {
-                        try await JFAPI.loadNextUpItems(limit: 20)
-                    }
-                }
+                ContinueWatchingView()
 
                 MediaShelf(header: "Favorites") {
-                    try await JFAPI.loadFavoriteItems(limit: 30)
+                    try await JFAPI.loadFavoriteItems(limit: 15)
                 } destination: {
                     FilteredMediaView(filter: .favorites)
                 }
@@ -75,7 +39,7 @@ struct HomeView: View {
                 GenreCarouselView()
 
                 MediaShelf(header: "Recently Added Movies") {
-                    try await JFAPI.loadLatestMediaInLibrary(limit: 40, itemTypes: [.movie])
+                    try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
                 } destination: {
                     FilteredMediaView(filter: .recentlyAdded(.movie))
                 }
@@ -83,7 +47,7 @@ struct HomeView: View {
                 LibrariesView()
 
                 MediaShelf(header: "Recently Added Shows") {
-                    try await JFAPI.loadLatestMediaInLibrary(limit: 40, itemTypes: [.series])
+                    try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
                 } destination: {
                     FilteredMediaView(filter: .recentlyAdded(.series))
                 }

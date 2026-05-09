@@ -9,54 +9,103 @@ import SwiftUI
 import JellyfinAPI
 
 struct ContinueWatchingView: View {
-    @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 20)
-    @State private var isLoading = false
-    
-    let header: String
-    let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
+    @AppStorage("continueWatchingStyle") private var continueWatchingStyle: ContinueWatchingStyle = .combined
 
     var body: some View {
-        SectionContainer {
-            HorizontalShelf(spacing: spacing) {
-                ForEach(items, id: \.id) { item in
-                    ContinueWatchingCard(
-                        item: item.base,
-                        imageURLOverride: item.base != nil ? ImageURLProvider.seriesImageURL(for: item.base!) : nil
-                    )
+        if continueWatchingStyle == .combined {
+            Shelf(header: "Continue Watching") {
+                try await JFAPI.loadContinueWatchingSmart()
+            }
+        } else {
+            Shelf(header: "Continue Watching") {
+                try await JFAPI.loadResumeItems(limit: 20)
+            }
+
+            Shelf(header: "Next Up") {
+                try await JFAPI.loadNextUpItems(limit: 20)
+            }
+        }
+    }
+
+    private struct Shelf: View {
+        @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 20)
+        @State private var isLoading = false
+        @State private var dataLoaded = false
+        @State private var showPlaceholder = true
+
+        let header: String
+        let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
+
+        var body: some View {
+            SectionContainer(
+                isVisible: showPlaceholder || hasResolvedItems,
+                showHeader: showPlaceholder || hasResolvedItems
+            ) {
+                HorizontalShelf(spacing: spacing) {
+                    ForEach(items, id: \.id) { item in
+                        ContinueWatchingCard(
+                            item: item.base,
+                            imageURLOverride: item.base != nil ? ImageURLProvider.seriesImageURL(for: item.base!) : nil
+                        )
+                    }
+                }
+            } header: {
+                Text(header)
+            }
+            .onAppear {
+                Task {
+                    await fetchContinueWatching()
                 }
             }
-        } header: {
-            Text(header)
+            .environment(\.refresh, fetchContinueWatching)
         }
-        .onAppear {
-            Task {
-                await fetchContinueWatching()
+
+        private var hasResolvedItems: Bool {
+            items.contains { $0.base != nil }
+        }
+
+        private func fetchContinueWatching() async {
+            guard !isLoading else { return }
+            isLoading = true
+            defer { isLoading = false }
+            async let placeholderTimeout: Void = hidePlaceholderAfterDelayIfNeeded()
+
+            do {
+                let loadedItems = try await loadItemsAction()
+                dataLoaded = true
+
+                if !loadedItems.isEmpty {
+                    withAnimation {
+                        items.update(with: loadedItems)
+                    }
+                }
+            } catch {
+                dataLoaded = true
+                print("Error loading Home items: \(error)")
+            }
+
+            await placeholderTimeout
+
+            if hasResolvedItems {
+                showPlaceholder = false
             }
         }
-        .environment(\.refresh, fetchContinueWatching)
-    }
-    
-    private func fetchContinueWatching() async {
-        guard !isLoading else { return }
-        isLoading = true
 
-        do {
-            let loadedItems = try await loadItemsAction()
+        private func hidePlaceholderAfterDelayIfNeeded() async {
+            try? await Task.sleep(for: .seconds(10))
+
+            guard !hasResolvedItems else { return }
             withAnimation {
-                items.update(with: loadedItems)
-                isLoading = false
+                showPlaceholder = false
             }
-        } catch {
-            print("Error loading Home items: \(error)")
+        }
+
+        private var spacing: CGFloat {
+            #if os(tvOS)
+            35
+            #else
+            12
+            #endif
         }
     }
-    
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        35
-        #else
-        12
-        #endif
-    }
-
 }

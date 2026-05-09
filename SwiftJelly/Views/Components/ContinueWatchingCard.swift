@@ -57,7 +57,7 @@ struct ContinueWatchingCard: View {
 
                         if item.type == .episode {
                             NavigationLink(value: item) {
-                                Label("Go to Episode", systemImage: "tv")
+                                Label("Go to Episode", systemImage: "play.rectangle")
                             }
                         }
                     }

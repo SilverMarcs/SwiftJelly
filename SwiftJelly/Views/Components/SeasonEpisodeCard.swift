@@ -87,7 +87,7 @@ struct SeasonEpisodeCard: View {
         .contextMenu {
             if let episode = item.base {
                 NavigationLink(value: episode) {
-                    Label("Go to Episode", systemImage: "tv")
+                    Label("Go to Episode", systemImage: "play.rectangle")
                 }
 
                 Button {
