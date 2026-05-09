@@ -44,6 +44,11 @@ struct SeriesDownloadsView: View {
         }
         .navigationTitle(seriesName)
         .platformNavigationToolbar(titleDisplayMode: .inline)
+        .keepScreenAwakeWhile(hasActiveSeriesDownloads)
+    }
+
+    private var hasActiveSeriesDownloads: Bool {
+        seasonGroups.contains { $0.records.contains { $0.status == .downloading } }
     }
 
     private func sectionTitle(for season: Int) -> String {

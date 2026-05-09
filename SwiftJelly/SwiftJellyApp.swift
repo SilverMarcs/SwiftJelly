@@ -11,10 +11,6 @@ import AVKit
 
 @main
 struct SwiftJellyApp: App {
-    #if os(iOS)
-    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    #endif
-
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
@@ -46,8 +42,8 @@ struct SwiftJellyApp: App {
         _ = PlaybackManager.shared
         _ = SeerrAuth.shared
         #if os(iOS)
-        // Eagerly attach to the background URLSession so any in-flight downloads
-        // resume reporting to our delegate as soon as the app launches.
+        // Eagerly init so the lifecycle observers are registered and any
+        // partially-downloaded items resume on first foreground transition.
         _ = DownloadManager.shared
         #endif
     }

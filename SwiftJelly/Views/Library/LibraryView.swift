@@ -11,6 +11,9 @@ import JellyfinAPI
 struct LibraryView: View {
     @State private var libraries: [BaseItemDto] = []
     @State private var isLoading = false
+    #if os(iOS)
+    @State private var downloadManager = DownloadManager.shared
+    #endif
 
     private var columns: [GridItem] {
         [GridItem(.adaptive(minimum: columnMinimumWidth), spacing: columnSpacing)]
@@ -20,15 +23,9 @@ struct LibraryView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: gridSpacing) {
                 #if os(iOS)
-                NavigationLink {
-                    DownloadsView()
-                } label: {
-                    libraryCardShape {
-                        DownloadsLibraryCard()
-                    }
+                if !downloadManager.downloads.isEmpty {
+                    downloadsLink
                 }
-                .buttonStyle(.plain)
-                .cardBorder()
                 #endif
 
                 ForEach(libraries, id: \.id) { library in
@@ -45,6 +42,12 @@ struct LibraryView: View {
                     }
                     .cardBorder()
                 }
+
+                #if os(iOS)
+                if downloadManager.downloads.isEmpty {
+                    downloadsLink
+                }
+                #endif
             }
             .scenePadding(.horizontal)
         }
@@ -99,6 +102,20 @@ struct LibraryView: View {
             .overlay { content() }
             .frame(minWidth: columnMinimumWidth, maxWidth: .infinity)
     }
+
+    #if os(iOS)
+    private var downloadsLink: some View {
+        NavigationLink {
+            DownloadsView()
+        } label: {
+            libraryCardShape {
+                DownloadsLibraryCard()
+            }
+        }
+        .buttonStyle(.plain)
+        .cardBorder()
+    }
+    #endif
 
     private var columnMinimumWidth: CGFloat {
         #if os(tvOS)

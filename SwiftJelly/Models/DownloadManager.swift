@@ -33,16 +33,12 @@ final class DownloadManager: NSObject {
 
     @ObservationIgnored private var tasks: [String: URLSessionDownloadTask] = [:]
 
-    /// System-invoked completion handler set by `application(_:handleEventsForBackgroundURLSession:completionHandler:)`.
-    var backgroundCompletionHandler: (() -> Void)?
-
-    @ObservationIgnored private static let backgroundSessionIdentifier = "com.swiftjelly.downloads"
-
+    /// Foreground-only session. Tasks die when the app is suspended; the user
+    /// can retry from the UI on a failed record.
     @ObservationIgnored private lazy var session: URLSession = {
-        let config = URLSessionConfiguration.background(withIdentifier: Self.backgroundSessionIdentifier)
+        let config = URLSessionConfiguration.default
         config.allowsCellularAccess = true
-        config.isDiscretionary = false
-        config.sessionSendsLaunchEvents = true
+        config.waitsForConnectivity = true
         return URLSession(configuration: config, delegate: self, delegateQueue: .main)
     }()
 
@@ -63,32 +59,19 @@ final class DownloadManager: NSObject {
     override private init() {
         super.init()
         loadMetadata()
-        // Touch session to reattach to any pending background tasks left over from
-        // a previous launch and reconcile our metadata against in-flight tasks.
-        reconcileWithRunningTasks()
+        // No tasks survive process death — anything that says "downloading"
+        // from a previous launch is stale, mark it failed so the user can retry.
+        markStaleDownloadsAsFailed()
     }
 
-    private func reconcileWithRunningTasks() {
-        session.getAllTasks { [weak self] runningTasks in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                var liveIDs = Set<String>()
-                for task in runningTasks {
-                    if let id = task.taskDescription, !id.isEmpty {
-                        liveIDs.insert(id)
-                        if let download = task as? URLSessionDownloadTask {
-                            self.tasks[id] = download
-                        }
-                    }
-                }
-                // Mark records that claim to be downloading but have no live task as failed.
-                for (id, var record) in self.downloads where record.status == .downloading && !liveIDs.contains(id) {
-                    record.status = .failed
-                    self.downloads[id] = record
-                }
-                self.saveMetadata()
-            }
+    private func markStaleDownloadsAsFailed() {
+        var changed = false
+        for (id, var record) in downloads where record.status == .downloading {
+            record.status = .failed
+            downloads[id] = record
+            changed = true
         }
+        if changed { saveMetadata() }
     }
 
     // MARK: - Public queries
@@ -117,22 +100,18 @@ final class DownloadManager: NSObject {
 
     func startDownload(for item: BaseItemDto) {
         guard let itemID = item.id else { return }
-        if let existing = downloads[itemID],
-           existing.status == .completed || existing.status == .downloading {
-            return
+        if let existing = downloads[itemID] {
+            if existing.status == .completed { return }
+            if tasks[itemID] != nil { return }
+            // Otherwise it's a failed record the user is retrying.
         }
 
         do {
             let url = try JFAPI.downloadURL(for: item)
-            // We always request the server to deliver an MP4 (remuxed when
-            // possible), so the on-disk file is always .mp4 regardless of
-            // the source container.
-            let fileName = "\(itemID).mp4"
-
             let record = DownloadRecord(
                 id: itemID,
                 item: item,
-                fileName: fileName,
+                fileName: "\(itemID).mp4",
                 status: .downloading,
                 bytesWritten: 0,
                 totalBytes: 0,
@@ -155,8 +134,8 @@ final class DownloadManager: NSObject {
         tasks[itemID]?.cancel()
         tasks[itemID] = nil
         downloads[itemID] = nil
-        let url = downloadsDirectory
-        try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+        try? FileManager.default
+            .contentsOfDirectory(at: downloadsDirectory, includingPropertiesForKeys: nil)
             .filter { $0.lastPathComponent.hasPrefix(itemID + ".") }
             .forEach { try? FileManager.default.removeItem(at: $0) }
         saveMetadata()
@@ -180,8 +159,6 @@ final class DownloadManager: NSObject {
               let decoded = try? JSONDecoder().decode([String: DownloadRecord].self, from: data) else {
             return
         }
-        // Keep "downloading" records as-is — `reconcileWithRunningTasks` will downgrade
-        // any that no longer have a live URLSession task.
         downloads = decoded
     }
 
@@ -254,22 +231,18 @@ extension DownloadManager: URLSessionDownloadDelegate {
         didCompleteWithError error: Error?
     ) {
         guard let error else { return }
-        if (error as NSError).code == NSURLErrorCancelled { return }
         MainActor.assumeIsolated {
             let itemID = task.taskDescription ?? ""
+            // User-initiated cancel removes the record before this fires;
+            // missing record == nothing to do.
             guard var record = downloads[itemID] else { return }
+            // Anything else (network drop, suspension, server error) is a failure.
+            // The user can retry from the UI.
+            _ = error
             record.status = .failed
             downloads[itemID] = record
             tasks[itemID] = nil
             saveMetadata()
-        }
-    }
-
-    nonisolated func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        MainActor.assumeIsolated {
-            let handler = backgroundCompletionHandler
-            backgroundCompletionHandler = nil
-            handler?()
         }
     }
 }
