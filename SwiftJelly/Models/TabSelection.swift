@@ -36,7 +36,7 @@ enum TabSelection: String, CaseIterable {
         case .libraries: return "Libraries"
         }
     }
-    
+
     var systemImage: String {
         switch self {
         case .home: return "house"
@@ -49,7 +49,7 @@ enum TabSelection: String, CaseIterable {
         case .libraries: return "rectangle.stack"
         }
     }
-    
+
     var shortcutKey: String? {
         switch self {
         case .home: return "1"
@@ -62,7 +62,7 @@ enum TabSelection: String, CaseIterable {
         case .libraries: return "3"
         }
     }
-    
+
     @ViewBuilder
     var tabView: some View {
         switch self {

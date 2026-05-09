@@ -15,6 +15,19 @@ struct PlaybackUtilities {
         audioStreamIndex: Int? = nil,
         resumeSeconds: Double? = nil
     ) async throws -> PlaybackLoadResult {
+        // Offline path: play from local file if a completed download exists.
+        if let localURL: URL = await MainActor.run(body: {
+            guard let id = item.id else { return nil as URL? }
+            return DownloadManager.shared.localFileURL(for: id)
+        }) {
+            return try await loadLocalPlayback(
+                for: item,
+                fileURL: localURL,
+                existingPlayer: existingPlayer,
+                resumeSeconds: resumeSeconds
+            )
+        }
+
         let hasSubtitleStreams = item.mediaSources?
             .first?
             .mediaStreams?
@@ -176,6 +189,46 @@ struct PlaybackUtilities {
         return PlaybackLoadResult(player: player, info: info, item: latestItem)
     }
     
+    private static func loadLocalPlayback(
+        for item: BaseItemDto,
+        fileURL: URL,
+        existingPlayer: AVPlayer?,
+        resumeSeconds: Double?
+    ) async throws -> PlaybackLoadResult {
+        let playerItem = AVPlayerItem(url: fileURL)
+
+        #if !os(macOS)
+        let metadata = await item.createMetadataItems()
+        playerItem.externalMetadata = metadata
+        #endif
+
+        let player = existingPlayer ?? AVPlayer()
+        player.pause()
+        player.replaceCurrentItem(with: playerItem)
+        player.automaticallyWaitsToMinimizeStalling = true
+        playerItem.preferredForwardBufferDuration = 30
+
+        let fallbackStartSeconds = Double(item.startTimeSeconds)
+        let targetStartSeconds = resumeSeconds ?? fallbackStartSeconds
+        await player.seek(to: CMTime(seconds: targetStartSeconds, preferredTimescale: 1))
+
+        #if !os(macOS)
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
+
+        player.play()
+
+        let mediaSource = item.mediaSources?.first ?? MediaSourceInfo()
+        let info = PlaybackInfoResponse(
+            playbackURL: fileURL,
+            mediaSource: mediaSource,
+            playMethod: .directPlay,
+            playSessionId: nil
+        )
+        return PlaybackLoadResult(player: player, info: info, item: item)
+    }
+
     /// Reports current playback progress to Jellyfin server
     static func reportPlaybackProgress(
         player: AVPlayer,

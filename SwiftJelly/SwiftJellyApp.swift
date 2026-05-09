@@ -10,7 +10,11 @@ import JellyfinAPI
 import AVKit
 
 @main
-struct SwiftJellyApp: App {    
+struct SwiftJellyApp: App {
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    #endif
+
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {
@@ -41,5 +45,10 @@ struct SwiftJellyApp: App {
         #endif
         _ = PlaybackManager.shared
         _ = SeerrAuth.shared
+        #if os(iOS)
+        // Eagerly attach to the background URLSession so any in-flight downloads
+        // resume reporting to our delegate as soon as the app launches.
+        _ = DownloadManager.shared
+        #endif
     }
 }

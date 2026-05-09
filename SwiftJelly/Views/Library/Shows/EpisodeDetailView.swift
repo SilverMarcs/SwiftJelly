@@ -23,6 +23,13 @@ struct EpisodeDetailView: View {
         .refreshToolbar {
             await vm.refresh()
         }
+        #if os(iOS)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                DownloadButton(item: vm.episode)
+            }
+        }
+        #endif
     }
 
     private var spacing: CGFloat {

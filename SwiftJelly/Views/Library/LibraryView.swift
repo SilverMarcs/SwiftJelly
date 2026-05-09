@@ -19,16 +19,28 @@ struct LibraryView: View {
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: gridSpacing) {
+                #if os(iOS)
+                NavigationLink {
+                    DownloadsView()
+                } label: {
+                    libraryCardShape {
+                        DownloadsLibraryCard()
+                    }
+                }
+                .buttonStyle(.plain)
+                .cardBorder()
+                #endif
+
                 ForEach(libraries, id: \.id) { library in
                     MediaNavigationLink(item: library) {
-                        LandscapeImageView(item: library) {
-                            Text(library.name ?? "")
-                                .font(.title)
-                                .bold()
-                                .foregroundStyle(.secondary)
+                        libraryCardShape {
+                            LandscapeImageView(item: library) {
+                                Text(library.name ?? "")
+                                    .font(.title)
+                                    .bold()
+                                    .foregroundStyle(.secondary)
+                            }
                         }
-                        .frame(minWidth: columnMinimumWidth, maxWidth: .infinity)
-                        .aspectRatio(16/9, contentMode: .fit)
                         .background(.background.secondary)
                     }
                     .cardBorder()
@@ -75,6 +87,17 @@ struct LibraryView: View {
         } catch {
             print("Error loading Library: \(error.localizedDescription)")
         }
+    }
+
+    /// Forces a 16:9 sized container regardless of whether the inner content
+    /// has intrinsic size. Without this, a card whose image is missing and
+    /// whose placeholder is just text would collapse to the text's height.
+    @ViewBuilder
+    private func libraryCardShape<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        Color.clear
+            .aspectRatio(16/9, contentMode: .fit)
+            .overlay { content() }
+            .frame(minWidth: columnMinimumWidth, maxWidth: .infinity)
     }
 
     private var columnMinimumWidth: CGFloat {

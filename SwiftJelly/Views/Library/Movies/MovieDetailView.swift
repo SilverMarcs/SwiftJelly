@@ -25,6 +25,13 @@ struct MovieDetailView: View {
         .refreshToolbar {
             await vm.refresh()
         }
+        #if os(iOS)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                DownloadButton(item: vm.movie)
+            }
+        }
+        #endif
     }
 
     private var spacing: CGFloat {

@@ -85,22 +85,57 @@ struct SeasonEpisodeCard: View {
         .cardBorder(cornerRadius: 15)
         .adaptiveCardButtonStyle()
         .contextMenu {
-            if let item = item.base {
-                NavigationLink(value: item) {
+            if let episode = item.base {
+                NavigationLink(value: episode) {
                     Label("Go to Episode", systemImage: "tv")
                 }
 
                 Button {
                     Task {
-                        try? await JFAPI.toggleItemPlayedStatus(item: item)
+                        try? await JFAPI.toggleItemPlayedStatus(item: episode)
                         await refresh()
                     }
                 } label: {
                     Label(
-                        item.userData?.isPlayed == true ? "Mark as Unwatched" : "Mark as Watched",
-                        systemImage: item.userData?.isPlayed == true ? "eye.slash" : "eye"
+                        episode.userData?.isPlayed == true ? "Mark as Unwatched" : "Mark as Watched",
+                        systemImage: episode.userData?.isPlayed == true ? "eye.slash" : "eye"
                     )
                 }
+                
+                Divider()
+                
+                #if os(iOS)
+                EpisodeDownloadMenuItem(item: episode)
+                #endif
+            }
+        }
+    }
+}
+
+private struct EpisodeDownloadMenuItem: View {
+    let item: BaseItemDto
+    @State private var manager = DownloadManager.shared
+
+    var body: some View {
+        let record = manager.record(for: item.id)
+        switch record?.status {
+        case .completed:
+            Button(role: .destructive) {
+                if let id = item.id { manager.deleteDownload(for: id) }
+            } label: {
+                Label("Remove Download", systemImage: "trash")
+            }
+        case .downloading:
+            Button(role: .destructive) {
+                if let id = item.id { manager.cancelDownload(for: id) }
+            } label: {
+                Label("Cancel Download", systemImage: "xmark")
+            }
+        default:
+            Button {
+                manager.startDownload(for: item)
+            } label: {
+                Label("Download", systemImage: "arrow.down.to.line")
             }
         }
     }

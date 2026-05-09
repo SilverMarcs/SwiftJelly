@@ -59,6 +59,26 @@ enum ImageURLProvider {
         return nil
     }
 
+    /// Best-effort backdrop URL. For an episode this returns the *show's*
+    /// backdrop (via `parentBackdropItemID`) rather than the episode's
+    /// thumbnail; for movies it returns the item's own backdrop. Falls back
+    /// to thumb / primary if a backdrop tag isn't present.
+    static func bestBackdropURL(for item: BaseItemDto) -> URL? {
+        if item.type == .episode {
+            if let tags = item.parentBackdropImageTags, !tags.isEmpty,
+               let parentID = item.parentBackdropItemID {
+                return url(forItemID: parentID, imageType: .backdrop)
+            }
+            if let tag = item.parentThumbImageTag, !tag.isEmpty,
+               let parentID = item.parentThumbItemID {
+                return url(forItemID: parentID, imageType: .thumb)
+            }
+        }
+        return imageURL(for: item, type: .backdrop)
+            ?? imageURL(for: item, type: .thumb)
+            ?? imageURL(for: item, type: .primary)
+    }
+
     static func genreImageURL(forGenreName name: String) -> URL? {
         guard let client = try? JFAPI.getClient() else { return nil }
         guard let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return nil }
