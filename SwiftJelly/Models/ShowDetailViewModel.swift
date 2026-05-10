@@ -94,8 +94,14 @@ class ShowDetailViewModel {
         guard let selectedSeason else { episodes = ShowDetailViewModel.episodesPlaceholder; return }
         let sid = selectedSeason.id ?? ""
 
-        episodes.update(with: allEpisodes[sid] ?? [])
-        isLoadingEpisodes = false
+        if let eps = allEpisodes[sid] {
+            episodes.update(with: eps)
+            isLoadingEpisodes = false
+        } else {
+            // Episodes for this season haven't loaded yet — keep placeholders.
+            episodes = ShowDetailViewModel.episodesPlaceholder
+            isLoadingEpisodes = true
+        }
     }
     
     func markEpisodePlayed(_ episode: BaseItemDto) async {
@@ -118,50 +124,58 @@ class ShowDetailViewModel {
         }
     }
     
-    // loads all seasons and episodes, inferring seasons if needed
+    // Loads seasons first, then fetches episodes for every season in parallel.
+    // Each season's episodes populate as soon as they arrive; the selected
+    // season's episode list updates live.
     func loadSeasonsAndEpisodes() async {
         isLoadingEpisodes = true
-        defer { isLoadingEpisodes = false }
+        let seriesID = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
+        guard !seriesID.isEmpty else { isLoadingEpisodes = false; return }
+        var seriesShow = show
+        if show.type == .episode { seriesShow = BaseItemDto(); seriesShow.id = seriesID }
+
+        let loadedSeasons: [BaseItemDto]
         do {
-            let allEps = try await JFAPI.loadAllEpisodes(for: show)
-            
-            // Group episodes by seasonID
-            let grouped = Dictionary(grouping: allEps) { $0.seasonID ?? "" }
-            
-            var inferredSeasons: [BaseItemDto] = []
-            allEpisodes = [:]
-            
-            for (seasonID, eps) in grouped where !seasonID.isEmpty {
-                if let firstEp = eps.first {
-                    // Create season from episode data
-                    var season = BaseItemDto()
-                    season.id = seasonID
-                    season.name = firstEp.seasonName
-                    season.indexNumber = firstEp.parentIndexNumber
-                    season.type = .season
-                    season.seriesID = show.id
-                    season.seriesName = show.name
-                    // Add other fields if needed, but for now, id, name, indexNumber suffice
-                    
-                    inferredSeasons.append(season)
-                    
-                    // Sort and store episodes
-                    allEpisodes[seasonID] = eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
-                }
-            }
-            
-            seasons = inferredSeasons.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
+            loadedSeasons = try await JFAPI.loadSeasons(for: seriesShow)
+                .sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) }
         } catch {
             seasons = []
-            episodes.update(with: (0..<10).map { _ in BaseItemDto()})
+            episodes.update(with: (0..<10).map { _ in BaseItemDto() })
             allEpisodes = [:]
+            isLoadingEpisodes = false
+            return
         }
-        
+
+        seasons = loadedSeasons
+        allEpisodes = [:]
+        await autoSelectSeasonAndEpisode()
+        if selectedSeason == nil, let first = loadedSeasons.first {
+            selectedSeason = first
+            await updateEpisodesForSelectedSeason()
+        }
+
+        await withTaskGroup(of: (String, [BaseItemDto]).self) { group in
+            for season in loadedSeasons {
+                guard let sid = season.id, !sid.isEmpty else { continue }
+                group.addTask {
+                    let eps = (try? await JFAPI.loadEpisodes(for: seriesShow, seasonID: sid)) ?? []
+                    return (sid, eps.sorted { ($0.indexNumber ?? 0) < ($1.indexNumber ?? 0) })
+                }
+            }
+            for await (sid, eps) in group {
+                allEpisodes[sid] = eps
+                if selectedSeason?.id == sid {
+                    episodes.update(with: eps)
+                    isLoadingEpisodes = false
+                }
+            }
+        }
+
+        isLoadingEpisodes = false
+
         if nextEpisode == nil {
             await computeNextEpisode()
         }
-        
-        // Auto-select season if different
         await autoSelectSeasonAndEpisode()
     }
     

@@ -23,6 +23,17 @@ extension JFAPI {
         let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)
         return try await send(request).items ?? []
     }
+
+    static func loadEpisodes(for show: BaseItemDto, seasonID: String) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetEpisodesParameters()
+        parameters.userID = context.userID
+        parameters.seasonID = seasonID
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)
+        return try await send(request).items ?? []
+    }
     
     static func loadEpisodesAfter(episode: BaseItemDto) async throws -> [BaseItemDto] {
         guard episode.type == .episode,
