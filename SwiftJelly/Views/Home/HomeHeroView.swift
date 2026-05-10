@@ -42,6 +42,7 @@ struct HomeHeroView: View {
         .onScrollVisibilityChange { isVisible in
             belowFold = !isVisible
         }
+        .frame(height: 800)
         #endif
     }
 }

@@ -43,20 +43,6 @@ struct SeasonEpisodeCard: View {
                 .background(.background.secondary)
                 .clipped()
                 .overlay(alignment: .bottom) {
-                    if item.base != nil {
-                        LinearGradient(
-                            gradient: Gradient(stops: [
-                                .init(color: .black.opacity(1.0), location: 0),
-                                .init(color: .black.opacity(0.5), location: 0.6),
-                                .init(color: .clear, location: 1.0)
-                            ]),
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                        .frame(height: 50)
-                    }
-                }
-                .overlay(alignment: .bottom) {
                     if let episodeItem = item.base {
                         ProgressBarOverlay(item: episodeItem, showEpisodeInformation: false)
                             .padding(.vertical, 15)
@@ -89,15 +75,17 @@ struct SeasonEpisodeCard: View {
             .animation(.snappy, value: descriptionFocused)
             
             Button(action: {}) {
+                let isPlaceholder = item.base == nil
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "")
+                    Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "SEASON 1 EPISODE 1")
                         .foregroundStyle(.white)
                         .font(.caption2.scaled(by: 0.7))
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .multilineTextAlignment(.leading)
-                    
-                    Text(item.base?.name ?? "")
+                        .redacted(reason: isPlaceholder ? .placeholder : [])
+
+                    Text(item.base?.name ?? "Loading Episode Title")
                         .foregroundStyle(.white)
                         .font(.caption)
                         .bold()
@@ -105,13 +93,15 @@ struct SeasonEpisodeCard: View {
                         .truncationMode(.middle)
                         .multilineTextAlignment(.leading)
                         .padding(.bottom, 5)
-                    
-                    Text(item.base?.overview ?? "")
+                        .redacted(reason: isPlaceholder ? .placeholder : [])
+
+                    Text(item.base?.overview ?? "A placeholder description that occupies enough room to mimic the real episode overview while content is loading.")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption2)
                         .opacity(0.7)
                         .multilineTextAlignment(.leading)
                         .lineLimit(3, reservesSpace: true)
+                        .redacted(reason: isPlaceholder ? .placeholder : [])
                 }
                 .padding(24)
                 .frame(height: 170)
@@ -127,7 +117,7 @@ struct SeasonEpisodeCard: View {
             .animation(.snappy, value: episodeCardFocused)
             .animation(.snappy, value: descriptionFocused)
             .buttonStyle(.card)
-            .disabled(!episodeCardFocused && !descriptionFocused || item.base == nil)
+            .disabled(!episodeCardFocused && !descriptionFocused)
             .buttonBorderShape(.roundedRectangle(radius: 25))
         }
         .focusSection()

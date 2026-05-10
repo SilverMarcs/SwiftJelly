@@ -23,15 +23,19 @@ struct ProgressBarOverlay: View {
             
             Text(item.totalDurationString ?? "--")
                 .font(.caption2)
-            
+
             Spacer()
-            
+
             if showEpisodeInformation, let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
                 Text(episodeText)
                     .font(.caption2)
             }
         }
         .foregroundStyle(.white)
+        #if os(tvOS)
+        .shadow(color: .black, radius: 8)
+        .shadow(color: .black.opacity(0.8), radius: 12)
+        #endif
     }
 }
 
