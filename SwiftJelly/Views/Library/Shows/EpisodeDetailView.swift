@@ -17,6 +17,7 @@ struct EpisodeDetailView: View {
             EpisodeHeroDetailView(vm: vm)
         }
         .environment(\.refresh, vm.refresh)
+        .navigationTitle(vm.episode.name ?? "Episode")
         .task {
             await vm.refresh()
         }
