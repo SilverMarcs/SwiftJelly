@@ -15,22 +15,25 @@ struct OverviewView: View {
     @State private var showFullOverview = false
 
     var body: some View {
+        let overview = item.overview ?? item.taglines?.first
+        let display = overview ?? "A placeholder description that occupies enough room to mimic the real overview while content is loading from the server."
         VStack(alignment: .leading, spacing: 12) {
-            if let overview = item.overview ?? item.taglines?.first {
-                Text(overview)
-                    #if os(tvOS)
-                    .font(.caption)
-                    #elseif os(iOS)
-                    .font(compact ? .subheadline : .callout)
-                    #else
-                    .font(.callout)
-                    #endif
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(2, reservesSpace: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    #if !os(tvOS)
-                    .overlay(alignment: .bottomTrailing) {
+            Text(display)
+                #if os(tvOS)
+                .font(.caption)
+                #elseif os(iOS)
+                .font(compact ? .subheadline : .callout)
+                #else
+                .font(.callout)
+                #endif
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.leading)
+                .lineLimit(2, reservesSpace: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .redacted(reason: overview == nil ? .placeholder : [])
+                #if !os(tvOS)
+                .overlay(alignment: .bottomTrailing) {
+                    if let realOverview = overview {
                         Button {
                             showFullOverview = true
                         } label: {
@@ -41,13 +44,13 @@ struct OverviewView: View {
                         .sheet(isPresented: $showFullOverview) {
                             OverviewSheetView(
                                 item: item,
-                                overview: overview,
+                                overview: realOverview,
                                 isPresented: $showFullOverview
                             )
                         }
                     }
-                    #endif
-            }
+                }
+                #endif
         }
     }
 }

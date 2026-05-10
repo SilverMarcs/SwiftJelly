@@ -12,6 +12,28 @@ struct AttributesView: View {
     let item: BaseItemDto
 
     var body: some View {
+        if hasAnyAttribute {
+            attributesStack
+        } else {
+            Text("2024 \u{00B7} 1h 30m \u{00B7} PG-13")
+                .font(attributeFont)
+                .foregroundStyle(.white.opacity(0.9))
+                .redacted(reason: .placeholder)
+        }
+    }
+
+    private var hasAnyAttribute: Bool {
+        item.productionYear != nil
+            || (item.runTimeTicks != nil && item.type != .series)
+            || item.officialRating != nil
+            || resolutionLabel != nil
+            || audioBadgeInfo != nil
+            || hasSDHSubtitles
+            || item.criticRating != nil
+            || item.communityRating != nil
+    }
+
+    private var attributesStack: some View {
         HStack(spacing: 8) {
             // Year
             if let year = item.productionYear {

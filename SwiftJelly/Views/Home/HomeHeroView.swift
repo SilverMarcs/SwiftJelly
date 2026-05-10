@@ -32,7 +32,7 @@ struct HomeHeroView: View {
                     showScrollEffect = isVisible
                 }
             } else {
-                HeroBackdropView(item: BaseItemDto()) {}
+                HomeHeroSkeletonView()
                     .onScrollVisibilityChange { isVisible in
                         showScrollEffect = isVisible
                     }

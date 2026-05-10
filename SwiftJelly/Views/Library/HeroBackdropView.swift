@@ -87,8 +87,8 @@ struct HeroBackdropView<HeroActions: View>: View {
                 if isCompactSize {
                     LinearGradient(
                         gradient: Gradient(stops: [
-                            .init(color: .black, location: 0),
-                            .init(color: .black.opacity(0.9), location: 0.4),
+                            .init(color: .black.opacity(0.9), location: 0),
+                            .init(color: .black.opacity(0.81), location: 0.4),
                             .init(color: .black.opacity(0), location: 1.0)
                         ]),
                         startPoint: .bottom,
@@ -110,8 +110,8 @@ struct HeroBackdropView<HeroActions: View>: View {
                     #else
                     LinearGradient(
                         gradient: Gradient(stops: [
-                            .init(color: .black, location: 0),
-                            .init(color: .black.opacity(0.9), location: 0.4),
+                            .init(color: .black.opacity(0.9), location: 0),
+                            .init(color: .black.opacity(0.81), location: 0.4),
                             .init(color: .black.opacity(0), location: 1.0)
                         ]),
                         startPoint: .bottom,
@@ -170,11 +170,13 @@ struct HeroBackdropView<HeroActions: View>: View {
                 .frame(maxWidth: logoWidth, maxHeight: logoHeight, alignment: logoAlignment)
                 .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text(logoItem.name ?? "")
+                let name = logoItem.name
+                Text(name?.isEmpty == false ? name! : "Title Placeholder")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.5), radius: 4)
+                    .redacted(reason: name?.isEmpty == false ? [] : .placeholder)
             }
         }
     }
@@ -195,14 +197,16 @@ struct HeroBackdropView<HeroActions: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: overallAlignment)
     }
-    
-    @ViewBuilder
+
     private var genreList: some View {
-        if let genres = item.genres, !genres.isEmpty {
-            Text(genres.joined(separator: " \u{00B7} "))
-                .font(genreFont)
-                .foregroundStyle(.white.opacity(0.7))
-        }
+        let genres = item.genres ?? []
+        let display = genres.isEmpty
+            ? "Genre \u{00B7} Another Genre \u{00B7} Third"
+            : genres.joined(separator: " \u{00B7} ")
+        return Text(display)
+            .font(genreFont)
+            .foregroundStyle(.white.opacity(0.7))
+            .redacted(reason: genres.isEmpty ? .placeholder : [])
     }
 
     private var genreFont: Font {

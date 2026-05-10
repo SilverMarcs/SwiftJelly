@@ -138,9 +138,13 @@ struct HeroCarouselView: View {
     private func hero(item: Binding<BaseItemDto>) -> some View {
         switch item.wrappedValue.type {
         case .movie:
-            MovieHeroView(movie: item)
+            HeroBackdropView(item: item.wrappedValue) {
+                MovieHeroActions(movie: item)
+            }
         case .series:
-            ShowHeroView(show: item)
+            HeroBackdropView(item: item.wrappedValue) {
+                ShowHeroActions(show: item)
+            }
         default:
             EmptyView()
         }

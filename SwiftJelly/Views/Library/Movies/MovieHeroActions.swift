@@ -2,7 +2,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct MovieHeroActions: View {
-    let movie: BaseItemDto
+    @Binding var movie: BaseItemDto
 
     @Namespace private var actionButtonsNamespace
 
@@ -24,6 +24,16 @@ struct MovieHeroActions: View {
 #if os(tvOS)
         .focusScope(actionButtonsNamespace)
 #endif
+        .environment(\.refresh, refresh)
+    }
+
+    private func refresh() async {
+        guard let id = movie.id, !id.isEmpty else { return }
+        do {
+            movie = try await JFAPI.loadItem(by: id)
+        } catch {
+            print("Error refreshing movie: \(error)")
+        }
     }
 
     private var spacing: CGFloat {
