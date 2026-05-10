@@ -5,7 +5,6 @@ struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     @FocusState private var focusedEpisodeID: String?
-    @State private var alreadyAutoSelectedSeason = false
     
     var body: some View {
         SectionContainer {
@@ -13,6 +12,9 @@ struct ShowSeasonsView: View {
                 ForEach(vm.episodes) { episode in
                     SeasonEpisodeCard(item: episode)
                         .id(episode.id)
+                        #if os(tvOS)
+                        .focused($focusedEpisodeID, equals: episode.id)
+                        #endif
                 }
             }
             .scrollPosition($episodeScrollPosition)
@@ -25,10 +27,10 @@ struct ShowSeasonsView: View {
         .environment(\.isInSeasonView, true)
         .task(id: vm.selectedSeason) {
             await vm.updateEpisodesForSelectedSeason()
-            if !alreadyAutoSelectedSeason {
-                alreadyAutoSelectedSeason = true
-                scrollToLatestEpisode()
-            }
+        }
+        .onChange(of: vm.episodes.first?.base?.id, initial: true) {
+            guard vm.episodes.contains(where: { $0.base != nil }) else { return }
+            scrollToLatestEpisode()
         }
     }
     

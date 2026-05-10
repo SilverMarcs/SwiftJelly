@@ -95,13 +95,17 @@ class ShowDetailViewModel {
         let sid = selectedSeason.id ?? ""
 
         if let eps = allEpisodes[sid] {
-            episodes.update(with: eps)
+            episodes = Self.makeWrappers(eps)
             isLoadingEpisodes = false
         } else {
             // Episodes for this season haven't loaded yet — keep placeholders.
             episodes = ShowDetailViewModel.episodesPlaceholder
             isLoadingEpisodes = true
         }
+    }
+
+    private static func makeWrappers(_ eps: [BaseItemDto]) -> [ViewListItem<BaseItemDto>] {
+        eps.map { ViewListItem(id: $0.id ?? UUID().uuidString, base: $0) }
     }
     
     func markEpisodePlayed(_ episode: BaseItemDto) async {
@@ -165,7 +169,7 @@ class ShowDetailViewModel {
             for await (sid, eps) in group {
                 allEpisodes[sid] = eps
                 if selectedSeason?.id == sid {
-                    episodes.update(with: eps)
+                    episodes = Self.makeWrappers(eps)
                     isLoadingEpisodes = false
                 }
             }
