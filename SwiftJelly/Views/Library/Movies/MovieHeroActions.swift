@@ -7,19 +7,21 @@ struct MovieHeroActions: View {
     @Namespace private var actionButtonsNamespace
 
     var body: some View {
-        HStack(spacing: spacing) {
-            MoviePlayButton(item: movie)
+        GlassEffectContainer(spacing: spacing) {
+            HStack(spacing: spacing) {
+                MoviePlayButton(item: movie)
 #if os(tvOS)
-                .prefersDefaultFocus(in: actionButtonsNamespace)
+                    .prefersDefaultFocus(in: actionButtonsNamespace)
 #endif
 
-            #if os(tvOS)
-            HeroInfoButton(item: movie)
-            #endif
+                #if os(tvOS)
+                HeroInfoButton(item: movie)
+                #endif
 
-            MarkPlayedButton(item: movie)
+                MarkPlayedButton(item: movie)
 
-            FavoriteButton(item: movie)
+                FavoriteButton(item: movie)
+            }
         }
         .redacted(reason: movie.name?.isEmpty == false ? [] : .placeholder)
 #if os(tvOS)

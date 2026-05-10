@@ -13,19 +13,21 @@ struct ShowHeroActions: View {
     }
 
     var body: some View {
-        HStack(spacing: spacing) {
-            ShowPlayButton(vm: vm)
+        GlassEffectContainer(spacing: spacing) {
+            HStack(spacing: spacing) {
+                ShowPlayButton(vm: vm)
 #if os(tvOS)
-                .prefersDefaultFocus(in: actionButtonsNamespace)
+                    .prefersDefaultFocus(in: actionButtonsNamespace)
 #endif
-            #if os(tvOS)
-            HeroInfoButton(item: show)
-            #endif
+                #if os(tvOS)
+                HeroInfoButton(item: show)
+                #endif
 
-            MarkPlayedButton(item: vm.selectedSeason)
-                .adaptiveDisabled(vm.playButtonDisabled)
+                MarkPlayedButton(item: vm.selectedSeason)
+                    .adaptiveDisabled(vm.playButtonDisabled)
 
-            FavoriteButton(item: vm.show)
+                FavoriteButton(item: vm.show)
+            }
         }
 #if os(tvOS)
         .focusScope(actionButtonsNamespace)

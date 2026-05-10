@@ -10,10 +10,12 @@ struct EpisodeHeroDetailView: View {
             logoItem: vm.show,
             badge: vm.episode.seasonEpisodeString
         ) {
-            HStack(spacing: spacing) {
-                EpisodePlayButton(item: vm.episode)
+            GlassEffectContainer(spacing: spacing) {
+                HStack(spacing: spacing) {
+                    EpisodePlayButton(item: vm.episode)
 
-                MarkPlayedButton(item: vm.episode)
+                    MarkPlayedButton(item: vm.episode)
+                }
             }
             .environment(\.refresh, vm.refresh)
         }
