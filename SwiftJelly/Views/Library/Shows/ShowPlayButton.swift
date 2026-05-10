@@ -9,9 +9,12 @@ struct ShowPlayButton: View {
             ZStack {
                 if vm.nextEpisode == nil {
                     HStack(spacing: 8) {
-                        ProgressView()
-                            .tint(.primary)
-                            .controlSize(.mini)
+                       ProgressView()
+                           .tint(.primary)
+                           .controlSize(.mini)
+                        #if os(tvOS)
+                           .frame(height: 35) // see              .heroActionIcon()
+                        #endif
 
                         Text("Loading…")
                     }
