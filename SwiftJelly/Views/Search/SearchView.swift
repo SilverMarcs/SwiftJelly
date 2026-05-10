@@ -14,9 +14,10 @@ struct SearchView: View {
             .navigationTitle("Search")
             .platformNavigationToolbar()
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
-            .searchFocused($isSearchFocused)
+            
             .searchPresentationToolbarBehavior(.avoidHidingContent)
             #if os(macOS)
+            .searchFocused($isSearchFocused)
             .task {
                 isSearchFocused = true
             }
