@@ -11,6 +11,10 @@ struct MovieDetailView: View {
     var body: some View {
         DetailView(item: vm.movie) {
             VStack(spacing: spacing) {
+                #if !os(tvOS)
+                TrailersShelfView(item: vm.movie)
+                #endif
+
                 PeopleScrollView(people: vm.movie.people ?? [])
 
                 SimilarItemsView(item: vm.movie)

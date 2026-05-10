@@ -9,7 +9,8 @@ extension ItemFields {
 //        .parentID,
 //        .taglines,
         .people,
-        .chapters
+        .chapters,
+        .remoteTrailers
     ]
 }
 

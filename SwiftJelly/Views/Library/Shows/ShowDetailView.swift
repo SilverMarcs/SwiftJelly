@@ -12,7 +12,11 @@ struct ShowDetailView: View {
         DetailView(item: vm.show) {
             VStack(spacing: spacing) {
                 ShowSeasonsView(vm: vm)
-                
+
+                #if !os(tvOS)
+                TrailersShelfView(item: vm.show)
+                #endif
+
                 PeopleScrollView(people: vm.show.people ?? [])
                 
                 SimilarItemsView(item: vm.show)
