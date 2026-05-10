@@ -1,7 +1,7 @@
 import SwiftUI
 import JellyfinAPI
 
-struct ShowHeroDetailView: View {
+struct ShowDetailHeroView: View {
     let vm: ShowDetailViewModel
 
     var body: some View {

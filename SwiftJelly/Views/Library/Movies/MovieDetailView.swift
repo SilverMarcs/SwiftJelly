@@ -16,7 +16,7 @@ struct MovieDetailView: View {
                 SimilarItemsView(item: vm.movie)
             }
         } heroView: {
-            MovieHeroDetailView(vm: vm)
+            MovieDetailHeroView(vm: vm)
         }
         .environment(\.refresh, vm.refresh)
         .task {

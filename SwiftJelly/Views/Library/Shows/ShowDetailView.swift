@@ -18,7 +18,7 @@ struct ShowDetailView: View {
                 SimilarItemsView(item: vm.show)
             }
         } heroView: {
-            ShowHeroDetailView(vm: vm)
+            ShowDetailHeroView(vm: vm)
         }
         .environment(\.refresh, vm.refreshAll)
         .task {
