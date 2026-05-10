@@ -17,25 +17,24 @@ struct ProgressBarOverlay: View {
     var body: some View {
         HStack(spacing: 12) {
             ProgressIcon(isPlayed: item.userData?.isPlayed ?? false)
-            
+                .textShadow()
+
             ProgressGauge(progress: item.playbackProgress)
                 .offset(y: 1)
-            
+
             Text(item.totalDurationString ?? "--")
                 .font(.caption2)
+                .textShadow()
 
             Spacer()
 
             if showEpisodeInformation, let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
                 Text(episodeText)
                     .font(.caption2)
+                    .textShadow()
             }
         }
         .foregroundStyle(.white)
-        #if os(tvOS)
-        .shadow(color: .black, radius: 8)
-        .shadow(color: .black.opacity(0.8), radius: 12)
-        #endif
     }
 }
 
@@ -71,6 +70,14 @@ struct ProgressGauge: View {
     }
 }
 
+
+private extension View {
+    func textShadow() -> some View {
+        self
+            .shadow(color: .black, radius: 8)
+            .shadow(color: .black.opacity(0.8), radius: 12)
+    }
+}
 
 #Preview {
     ProgressBarOverlay(item: BaseItemDto(indexNumber: 12, parentIndexNumber: 5, runTimeTicks: 30000, userData: UserItemDataDto(playbackPositionTicks: 1300, isPlayed: true)))

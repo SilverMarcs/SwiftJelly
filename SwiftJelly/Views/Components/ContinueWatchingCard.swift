@@ -15,16 +15,6 @@ struct ContinueWatchingCard: View {
     let item: BaseItemDto?
     let imageURLOverride: URL?
 
-    private let gradient = LinearGradient(
-        gradient: Gradient(stops: [
-            .init(color: .black.opacity(0.8), location: 0),
-            .init(color: .black.opacity(0.7), location: 0.5),
-            .init(color: .black.opacity(0), location: 1.0)
-        ]),
-        startPoint: .bottom,
-        endPoint: .top
-    )
-
     var body: some View {
         PlayMediaButton(item: item) {
             LandscapeImageView(item: item, imageURLOverride: imageURLOverride) {
@@ -39,9 +29,6 @@ struct ContinueWatchingCard: View {
                     ProgressBarOverlay(item: item)
                         .padding(.horizontal, overlayPadding)
                         .padding(.vertical, overlayPadding - 5)
-                        .background(alignment: .bottom) {
-                            gradient
-                        }
                 }
             }
             .cardBorder()
