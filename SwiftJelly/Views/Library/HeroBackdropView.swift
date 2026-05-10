@@ -33,6 +33,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     var body: some View {
     #if os(tvOS)
         largeScreenContent
+            .padding(40)
             .environment(\.colorScheme, .dark)
     #else
         backdropImage

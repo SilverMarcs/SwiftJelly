@@ -9,9 +9,6 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-/// Shared hero-style horizontal carousel: full-bleed hero panels, auto-scroll,
-/// chevron navigation, tap-to-detail. Used by both `TrendingInLibraryView`
-/// (Seerr trending) and `FeaturedView` (latest library items).
 struct HeroCarouselView: View {
     @Binding var items: [BaseItemDto]
 
@@ -35,14 +32,12 @@ struct HeroCarouselView: View {
                     }
                     #else
                     hero(item: item)
-                        .padding(.horizontal, 80)
                         .focusSection()
                         .focused($focusedHeroID, equals: item.wrappedValue.id ?? "")
                         .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
                             content.offset(y: phase.isIdentity ? 0 : -200)
                         }
-                        .padding(.bottom, 40)
-                        .frame(height: 800)
+                        .frame(maxHeight: .infinity)
                         .background {
                             GeometryReader { geo in
                                 if let url = ImageURLProvider.imageURL(for: item.wrappedValue, type: .backdrop) {

@@ -21,6 +21,7 @@ struct MovieHeroActions: View {
 
             FavoriteButton(item: movie)
         }
+        .redacted(reason: movie.name?.isEmpty == false ? [] : .placeholder)
 #if os(tvOS)
         .focusScope(actionButtonsNamespace)
 #endif
