@@ -7,13 +7,20 @@ struct SearchView: View {
     @State private var mediaResults: [BaseItemDto] = []
     @State private var isLoading = false
     @State private var searchTask: Task<Void, Never>?
+    @FocusState private var isSearchFocused: Bool
     
     var body: some View {
         MediaGrid(items: filteredMediaResults, isLoading: isLoading)
             .navigationTitle("Search")
             .platformNavigationToolbar()
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
+            .searchFocused($isSearchFocused)
             .searchPresentationToolbarBehavior(.avoidHidingContent)
+            #if os(macOS)
+            .task {
+                isSearchFocused = true
+            }
+            #endif
             #if os(tvOS)
             .frame(maxWidth: .infinity, alignment: .leading)
             .focusSection()
