@@ -10,7 +10,7 @@ import JellyfinAPI
 import AVKit
 
 @main
-struct SwiftJellyApp: App {
+struct FinStreamApp: App {
     @State var selectedTab: TabSelection = .home
     
     var body: some Scene {

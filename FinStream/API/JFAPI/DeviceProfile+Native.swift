@@ -13,7 +13,7 @@ extension DeviceProfile {
     static func buildNativeProfile() -> DeviceProfile {
         var profile = DeviceProfile()
         
-        profile.name = "SwiftJelly Native"
+        profile.name = "FinStream Native"
 //        profile.maxStreamingBitrate = maxBitrate
 //        profile.maxStaticBitrate = maxBitrate
 //        profile.musicStreamingTranscodingBitrate = maxBitrate

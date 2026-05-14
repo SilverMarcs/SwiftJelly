@@ -1,4 +1,4 @@
-# SwiftJelly
+# FinStream
 
 Jellyfin Media Server client with SwiftUI & Liquid Glass.
 Uses several new SwiftUI APIs introduced in WWDC25.

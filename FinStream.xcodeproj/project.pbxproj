@@ -48,7 +48,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		084962382E1FBBA700CA183B /* Exceptions for "SwiftJelly" folder in "SwiftJelly" target */ = {
+		084962382E1FBBA700CA183B /* Exceptions for "FinStream" folder in "FinStream" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -68,7 +68,7 @@
 				Views/MediaPlayer/tvOS/RelatedContentCollectionViewCell.swift = (tvos, );
 				Views/MediaPlayer/tvOS/RelatedContentViewController.swift = (tvos, );
 			};
-			target = 083128A82E0EE1F70096527C /* SwiftJelly */;
+			target = 083128A82E0EE1F70096527C /* FinStream */;
 		};
 		085B2EF02F0E1D6D0096E06D /* Exceptions for "TopShelf" folder in "TopShelf" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -80,12 +80,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		083128AB2E0EE1F70096527C /* SwiftJelly */ = {
+		083128AB2E0EE1F70096527C /* FinStream */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				084962382E1FBBA700CA183B /* Exceptions for "SwiftJelly" folder in "SwiftJelly" target */,
+				084962382E1FBBA700CA183B /* Exceptions for "FinStream" folder in "FinStream" target */,
 			);
-			path = SwiftJelly;
+			path = FinStream;
 			sourceTree = "<group>";
 		};
 		085B2EE52F0E1D6D0096E06D /* TopShelf */ = {
@@ -126,7 +126,7 @@
 		083128A02E0EE1F70096527C = {
 			isa = PBXGroup;
 			children = (
-				083128AB2E0EE1F70096527C /* SwiftJelly */,
+				083128AB2E0EE1F70096527C /* FinStream */,
 				085B2EE52F0E1D6D0096E06D /* TopShelf */,
 				085B2EE22F0E1D6D0096E06D /* Frameworks */,
 				083128AA2E0EE1F70096527C /* Products */,
@@ -153,9 +153,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		083128A82E0EE1F70096527C /* SwiftJelly */ = {
+		083128A82E0EE1F70096527C /* FinStream */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 083128B42E0EE1F90096527C /* Build configuration list for PBXNativeTarget "SwiftJelly" */;
+			buildConfigurationList = 083128B42E0EE1F90096527C /* Build configuration list for PBXNativeTarget "FinStream" */;
 			buildPhases = (
 				083128A52E0EE1F70096527C /* Sources */,
 				083128A62E0EE1F70096527C /* Frameworks */,
@@ -168,9 +168,9 @@
 				085B2EEA2F0E1D6D0096E06D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				083128AB2E0EE1F70096527C /* SwiftJelly */,
+				083128AB2E0EE1F70096527C /* FinStream */,
 			);
-			name = SwiftJelly;
+			name = FinStream;
 			packageProductDependencies = (
 				08493C5B2E292DBC007F0D75 /* JellyfinAPI */,
 				082A202C2E82178600F1626F /* JellyfinAPI */,
@@ -179,7 +179,7 @@
 				087DF2012EEB34FF009B147B /* JellyfinAPI */,
 				08E374E32EEC3D3000137A0F /* JellyfinAPI */,
 			);
-			productName = SwiftJelly;
+			productName = FinStream;
 			productReference = 083128A92E0EE1F70096527C /* FinStream.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -223,7 +223,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 083128A42E0EE1F70096527C /* Build configuration list for PBXProject "SwiftJelly" */;
+			buildConfigurationList = 083128A42E0EE1F70096527C /* Build configuration list for PBXProject "FinStream" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -241,7 +241,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				083128A82E0EE1F70096527C /* SwiftJelly */,
+				083128A82E0EE1F70096527C /* FinStream */,
 				085B2EE02F0E1D6D0096E06D /* TopShelf */,
 			);
 		};
@@ -437,7 +437,7 @@
 				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=iphonesimulator*]" = AppIconModern;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = SwiftJelly/SwiftJelly.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FinStream/FinStream.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 12;
@@ -457,7 +457,7 @@
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwiftJelly/Info.plist;
+				INFOPLIST_FILE = FinStream/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FinStream;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
@@ -502,7 +502,7 @@
 				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=iphonesimulator*]" = AppIconModern;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = SwiftJelly/SwiftJelly.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FinStream/FinStream.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CREATE_INFOPLIST_SECTION_IN_BINARY = NO;
 				CURRENT_PROJECT_VERSION = 12;
@@ -522,7 +522,7 @@
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwiftJelly/Info.plist;
+				INFOPLIST_FILE = FinStream/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FinStream;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
@@ -625,7 +625,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		083128A42E0EE1F70096527C /* Build configuration list for PBXProject "SwiftJelly" */ = {
+		083128A42E0EE1F70096527C /* Build configuration list for PBXProject "FinStream" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				083128B22E0EE1F90096527C /* Debug */,
@@ -634,7 +634,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		083128B42E0EE1F90096527C /* Build configuration list for PBXNativeTarget "SwiftJelly" */ = {
+		083128B42E0EE1F90096527C /* Build configuration list for PBXNativeTarget "FinStream" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				083128B52E0EE1F90096527C /* Debug */,

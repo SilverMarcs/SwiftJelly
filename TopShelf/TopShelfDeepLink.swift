@@ -13,7 +13,7 @@ enum TopShelfDeepLinkAction: String {
 }
 
 struct TopShelfDeepLink {
-    static let scheme = "swiftjelly"
+    static let scheme = "finstream"
 
     static func makeURL(action: TopShelfDeepLinkAction, itemID: String) -> URL? {
         var components = URLComponents()

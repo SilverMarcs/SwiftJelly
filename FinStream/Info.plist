@@ -9,7 +9,7 @@
 			<string>com.mush.SwiftJelly</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>swiftjelly</string>
+				<string>finstream</string>
 			</array>
 		</dict>
 	</array>

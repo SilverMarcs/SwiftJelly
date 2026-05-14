@@ -17,8 +17,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "083128A82E0EE1F70096527C"
                BuildableName = "FinStream.app"
-               BlueprintName = "SwiftJelly"
-               ReferencedContainer = "container:SwiftJelly.xcodeproj">
+               BlueprintName = "FinStream"
+               ReferencedContainer = "container:FinStream.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,8 +46,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "083128A82E0EE1F70096527C"
             BuildableName = "FinStream.app"
-            BlueprintName = "SwiftJelly"
-            ReferencedContainer = "container:SwiftJelly.xcodeproj">
+            BlueprintName = "FinStream"
+            ReferencedContainer = "container:FinStream.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -63,8 +63,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "083128A82E0EE1F70096527C"
             BuildableName = "FinStream.app"
-            BlueprintName = "SwiftJelly"
-            ReferencedContainer = "container:SwiftJelly.xcodeproj">
+            BlueprintName = "FinStream"
+            ReferencedContainer = "container:FinStream.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
