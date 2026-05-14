@@ -8,6 +8,7 @@ struct EpisodeHeroDetailView: View {
         HeroBackdropView(
             item: vm.episode,
             logoItem: vm.show,
+            genreItem: (vm.episode.genres?.isEmpty ?? true) ? vm.show : vm.episode,
             badge: vm.episode.seasonEpisodeString
         ) {
             GlassEffectContainer(spacing: spacing) {

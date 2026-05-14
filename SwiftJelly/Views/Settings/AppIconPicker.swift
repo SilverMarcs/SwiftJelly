@@ -12,8 +12,8 @@ struct AppIconPicker: View {
     @State private var currentIcon: String? = UIApplication.shared.alternateIconName
 
     private let icons: [(name: String?, displayName: String)] = [
-        (nil, "Default"),
-        ("AppIconModern", "Modern"),
+        (nil, "Modern"),
+        ("AppIcon", "Classic"),
     ]
 
     var body: some View {

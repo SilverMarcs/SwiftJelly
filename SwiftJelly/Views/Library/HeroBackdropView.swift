@@ -7,16 +7,19 @@ struct HeroBackdropView<HeroActions: View>: View {
 
     let item: BaseItemDto
     let logoItem: BaseItemDto
+    let genreItem: BaseItemDto
     let badge: String?
 
     init(
         item: BaseItemDto,
         logoItem: BaseItemDto? = nil,
+        genreItem: BaseItemDto? = nil,
         badge: String? = nil,
         @ViewBuilder heroActions: () -> HeroActions
     ) {
         self.item = item
         self.logoItem = logoItem ?? item
+        self.genreItem = genreItem ?? item
         self.badge = badge
         self.heroActions = heroActions()
     }
@@ -200,7 +203,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     }
 
     private var genreList: some View {
-        let genres = item.genres ?? []
+        let genres = genreItem.genres ?? []
         let display = genres.isEmpty
             ? "Genre \u{00B7} Another Genre \u{00B7} Third"
             : genres.joined(separator: " \u{00B7} ")
