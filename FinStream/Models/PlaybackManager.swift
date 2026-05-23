@@ -12,9 +12,7 @@ import AVFoundation
 @MainActor
 @Observable final class PlaybackManager {
     static let shared = PlaybackManager()
-    private init() {
-        registerRemoteCommands()
-    }
+    private init() {}
 
     /// The view model for the currently active playback session, if any.
     private(set) var viewModel: MediaPlaybackViewModel?

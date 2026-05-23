@@ -229,22 +229,6 @@ struct PlaybackUtilities {
         return PlaybackLoadResult(player: player, info: info, item: item)
     }
 
-    /// Reports current playback progress to Jellyfin server
-    static func reportPlaybackProgress(
-        player: AVPlayer,
-        item: BaseItemDto,
-        isPaused: Bool
-    ) async {
-        guard let itemID = item.id else { return }
-        let ticks = player.currentTime().seconds.toPositionTicks
-        await JFAPI.reportPlaybackProgress(
-            itemID: itemID,
-            mediaSourceID: item.mediaSources?.first?.id ?? itemID,
-            positionTicks: ticks,
-            isPaused: isPaused
-        )
-    }
-    
     /// Gets video dimensions for window sizing
     static func getVideoDimensions(from item: BaseItemDto) -> (width: Int, height: Int) {
         // Prefer the first VIDEO stream for dimensions

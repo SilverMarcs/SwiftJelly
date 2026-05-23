@@ -4,6 +4,7 @@ import JellyfinAPI
 
 struct AVMediaPlayerViewTVOS: View {
     @State private var playbackManager = PlaybackManager.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         if let model = playbackManager.viewModel, let player = model.player {
@@ -30,11 +31,16 @@ struct AVMediaPlayerViewTVOS: View {
             // .id("\(model.item.id ?? "")_\(model.nextEpisode?.id ?? "none")")
                 .allowsTightening(!model.isAutoLoadingNext)
                 .task(id: player.timeControlStatus) {
-                    await PlaybackUtilities.reportPlaybackProgress(
-                        player: player,
-                        item: model.item,
-                        isPaused: true
-                    )
+                    if player.timeControlStatus == .playing {
+                        await model.reportPlaybackStart()
+                    } else {
+                        await model.reportProgress()
+                    }
+                }
+                .task(id: scenePhase) {
+                    if scenePhase == .background {
+                        await model.reportProgress()
+                    }
                 }
                 .onDisappear {
                     PlaybackManager.shared.endPlayback()

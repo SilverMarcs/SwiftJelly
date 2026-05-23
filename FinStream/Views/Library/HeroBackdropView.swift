@@ -60,29 +60,27 @@ struct HeroBackdropView<HeroActions: View>: View {
         let reflectionHeight: CGFloat = 200
         let backdrop = CachedAsyncImage(
             url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 2000
+            targetSize: 1000
         )
         
-        GeometryReader { geo in
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
+            backdrop
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: backdropHeight, alignment: .top)
+                .clipped()
+
+            if isCompactSize {
                 backdrop
                     .scaledToFill()
-                    .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: backdropHeight, alignment: .top)
+                    .scaleEffect(x: 1, y: -1, anchor: .center)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: reflectionHeight, alignment: .top)
                     .clipped()
-
-                if isCompactSize {
-                    backdrop
-                        .scaledToFill()
-                        .frame(width: geo.size.width, height: backdropHeight, alignment: .top)
-                        .scaleEffect(x: 1, y: -1, anchor: .center)
-                        .frame(
-                            width: geo.size.width,
-                            height: reflectionHeight,
-                            alignment: .top
-                        )
-                        .clipped()
-                }
             }
+        }
             .scrollTransition(axis: .vertical) { content, phase in
                  content
                     .offset(y: phase.isIdentity ? 0 : phase.value * -200)
@@ -125,9 +123,10 @@ struct HeroBackdropView<HeroActions: View>: View {
                     #endif
                 }
             }
-            .backgroundExtensionEffect()
-            .stretchy()
-        }
+        .backgroundExtensionEffect()
+        #if os(iOS)
+        .stretchy()
+        #endif
         .frame(height: isCompactSize ? backdropHeight + reflectionHeight : backdropHeight)
     }
     

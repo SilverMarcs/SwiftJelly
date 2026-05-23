@@ -37,13 +37,7 @@ import Observation
     @ObservationIgnored private var isLoadingTaskActive = false
     @ObservationIgnored private var playbackEndObserver: NSObjectProtocol?
     @ObservationIgnored private var hasReportedPlaybackStart = false
-    @ObservationIgnored private var lastProgressReportTime: Date?
-    @ObservationIgnored private var progressReportInterval: TimeInterval = 10
 
-    @ObservationIgnored var nowPlayingInfo: [String: Any] = [:]
-    @ObservationIgnored var rateObservation: NSKeyValueObservation?
-    @ObservationIgnored var statusObservation: NSKeyValueObservation?
-    @ObservationIgnored var durationObservation: NSKeyValueObservation?
 
     init(item: BaseItemDto) {
         self.item = item
@@ -63,8 +57,7 @@ import Observation
         requestedAudioStreamIndex = audioIndex ?? requestedAudioStreamIndex
 
         hasReportedPlaybackStart = false
-        lastProgressReportTime = nil
-        
+
         stopObservingTime()
 
         do {
@@ -91,9 +84,11 @@ import Observation
             selectedAudioTrack = resolveSelectedTrack(preferredIndex: audioIndex)
 
             startObservingTime(for: session.player)
-            attachNowPlayingObservers(to: session.player)
-            await updateNowPlayingMetadata(for: session.item)
-            updateNowPlayingPlaybackInfo()
+            #if !os(macOS)
+            if let playerItem = session.player.currentItem {
+                await setNowPlayingMetadata(for: session.item, on: playerItem)
+            }
+            #endif
         } catch {
             // Intentionally ignore; just stop loading.
         }
@@ -104,7 +99,6 @@ import Observation
     /// Internal cleanup for switching items without triggering endPlayback.
     func cleanupForSwitch() {
         stopObservingTime()
-        detachNowPlayingObservers()
         nextEpisode = nil
         isFetchingNextEpisode = false
 
@@ -116,8 +110,6 @@ import Observation
 
     func stopPlaybackImmediately() {
         stopObservingTime()
-        detachNowPlayingObservers()
-        clearNowPlayingInfo()
         nextEpisode = nil
         isFetchingNextEpisode = false
         isLoading = false
@@ -203,28 +195,13 @@ import Observation
     }
 
     private func startObservingTime(for player: AVPlayer) {
-        let interval = CMTime(seconds: 0.5, preferredTimescale: 10)
+        let interval = CMTime(seconds: 1, preferredTimescale: 1)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self else { return }
             Task { @MainActor in
                 self.currentSeconds = time.seconds.isFinite ? max(0, time.seconds) : 0
                 self.durationSeconds = self.resolvedDurationSeconds(for: player)
-                self.updateNowPlayingPlaybackInfo()
                 await self.prefetchNextEpisodeIfNeeded()
-                
-                // Report playback start once when playback begins
-                if !self.hasReportedPlaybackStart {
-                    await self.reportPlaybackStart()
-                }
-                
-                // Report progress periodically
-                await self.reportProgressIfNeeded(player: player)
-
-                guard self.item.type == .episode,
-                      !self.isAutoLoadingNext,
-                      !self.isLoadingTaskActive else {
-                    return
-                }
             }
         }
     }
@@ -298,65 +275,48 @@ import Observation
     }
     
     
-     // MARK: - Playback Progress Reporting
-     
-     private func reportPlaybackStart() async {
-         guard let itemID = item.id else { return }
-         hasReportedPlaybackStart = true
-         lastProgressReportTime = Date()
-         
-         let positionTicks = Int64(currentSeconds * 10_000_000)
-         
-         await JFAPI.reportPlaybackStart(
-             itemID: itemID,
-             mediaSourceID: playbackInfo?.mediaSource.id,
-             playSessionID: playbackInfo?.playSessionId,
-             playMethod: .transcode,
-             audioStreamIndex: selectedAudioTrack?.index,
-             subtitleStreamIndex: -1,
-             canSeek: true,
-             positionTicks: positionTicks
-         )
-     }
-     
-     private func reportProgressIfNeeded(player: AVPlayer) async {
-         guard hasReportedPlaybackStart else { return }
-         guard let itemID = item.id else { return }
-         
-         let now = Date()
-         let shouldReport: Bool
-         if let lastReport = lastProgressReportTime {
-             shouldReport = now.timeIntervalSince(lastReport) >= progressReportInterval
-         } else {
-             shouldReport = true
-         }
-         
-         guard shouldReport else { return }
-         lastProgressReportTime = now
-         
-         let isPaused = player.timeControlStatus != .playing
-         let positionTicks = Int64(currentSeconds * 10_000_000)
-         
-         await JFAPI.reportPlaybackProgress(
-             itemID: itemID,
-             mediaSourceID: playbackInfo?.mediaSource.id ?? itemID,
-             positionTicks: positionTicks,
-             isPaused: isPaused
-         )
-     }
-     
-     func reportPlaybackStopped() async {
-         guard hasReportedPlaybackStart, let itemID = item.id else { return }
-         
-         let positionTicks = Int64(currentSeconds * 10_000_000)
-         await JFAPI.reportPlaybackStopped(
-             itemID: itemID,
-             mediaSourceID: playbackInfo?.mediaSource.id,
-             playSessionID: playbackInfo?.playSessionId,
-             positionTicks: positionTicks
-         )
-         
-         hasReportedPlaybackStart = false
-         lastProgressReportTime = nil
-     }
+    // MARK: - Playback Progress Reporting
+
+    func reportPlaybackStart() async {
+        guard !hasReportedPlaybackStart, let itemID = item.id else { return }
+        hasReportedPlaybackStart = true
+
+        let positionTicks = Int64(currentSeconds * 10_000_000)
+
+        await JFAPI.reportPlaybackStart(
+            itemID: itemID,
+            mediaSourceID: playbackInfo?.mediaSource.id,
+            playSessionID: playbackInfo?.playSessionId,
+            playMethod: .transcode,
+            audioStreamIndex: selectedAudioTrack?.index,
+            subtitleStreamIndex: -1,
+            canSeek: true,
+            positionTicks: positionTicks
+        )
+    }
+
+    func reportProgress() async {
+        guard hasReportedPlaybackStart, let itemID = item.id else { return }
+        let positionTicks = Int64(currentSeconds * 10_000_000)
+        await JFAPI.reportPlaybackProgress(
+            itemID: itemID,
+            mediaSourceID: playbackInfo?.mediaSource.id ?? itemID,
+            positionTicks: positionTicks,
+            isPaused: true
+        )
+    }
+
+    func reportPlaybackStopped() async {
+        guard hasReportedPlaybackStart, let itemID = item.id else { return }
+
+        let positionTicks = Int64(currentSeconds * 10_000_000)
+        await JFAPI.reportPlaybackStopped(
+            itemID: itemID,
+            mediaSourceID: playbackInfo?.mediaSource.id,
+            playSessionID: playbackInfo?.playSessionId,
+            positionTicks: positionTicks
+        )
+
+        hasReportedPlaybackStart = false
+    }
 }
