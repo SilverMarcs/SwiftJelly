@@ -63,7 +63,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         controller.player = player
         controller.delegate = context.coordinator
         controller.transportBarIncludesTitleView = true
-        controller.allowsPictureInPicturePlayback = false
+        controller.allowsPictureInPicturePlayback = true
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: controller, coordinator: context.coordinator)
