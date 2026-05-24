@@ -84,11 +84,6 @@ import Observation
             selectedAudioTrack = resolveSelectedTrack(preferredIndex: audioIndex)
 
             startObservingTime(for: session.player)
-            #if !os(macOS)
-            if let playerItem = session.player.currentItem {
-                await setNowPlayingMetadata(for: session.item, on: playerItem)
-            }
-            #endif
         } catch {
             // Intentionally ignore; just stop loading.
         }
