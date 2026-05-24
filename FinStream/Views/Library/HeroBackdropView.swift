@@ -2,6 +2,20 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
+private extension View {
+    /// Constrains width to the enclosing scroll container on platforms where
+    /// `containerRelativeFrame` is well-supported. macOS gets a no-op since it
+    /// can crash inside ScrollView + backgroundExtensionEffect compositions.
+    @ViewBuilder
+    func boundToContainerWidth() -> some View {
+        #if os(macOS)
+        self.frame(maxWidth: .infinity)
+        #else
+        self.containerRelativeFrame(.horizontal)
+        #endif
+    }
+}
+
 struct HeroBackdropView<HeroActions: View>: View {
     @ViewBuilder let heroActions: HeroActions
 
@@ -66,17 +80,16 @@ struct HeroBackdropView<HeroActions: View>: View {
         VStack(spacing: 0) {
             backdrop
                 .scaledToFill()
-                .frame(maxWidth: .infinity)
+                .boundToContainerWidth()
                 .frame(height: backdropHeight, alignment: .top)
                 .clipped()
 
             if isCompactSize {
                 backdrop
                     .scaledToFill()
-                    .frame(maxWidth: .infinity)
+                    .boundToContainerWidth()
                     .frame(height: backdropHeight, alignment: .top)
                     .scaleEffect(x: 1, y: -1, anchor: .center)
-                    .frame(maxWidth: .infinity)
                     .frame(height: reflectionHeight, alignment: .top)
                     .clipped()
             }

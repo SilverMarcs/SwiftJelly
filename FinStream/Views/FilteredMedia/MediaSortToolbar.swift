@@ -17,6 +17,9 @@ struct MediaSortMenu: View {
             } label: {
                 Label("Default", systemImage: "line.3.horizontal.decrease")
             }
+            #if os(tvOS)
+            .tint(.primary)
+            #endif
 
             Divider()
 
