@@ -57,6 +57,7 @@ private struct PlatformTopBarModifier<Trailing: View>: ViewModifier {
             .padding(.vertical, 24)
             content
         }
+        .focusSection()
         .ignoresSafeArea(edges: [.top])
         .toolbar(.hidden, for: .navigationBar)
         #else

@@ -56,26 +56,35 @@ struct LibraryView: View {
                 UniversalProgressView()
             }
         }
-        #if os(macOS)
-        .platformTopBar("Libraries")
-        #else
         .platformTopBar("Libraries") {
+            #if os(iOS)
             NavigationLink {
                 SettingsView()
             } label: {
                 Label("Settings", systemImage: "gear")
+                    .labelStyle(.iconOnly)
             }
+            .tint(.primary)
+            #elseif os(macOS)
+            Button {
+                Task { await loadLibraries() }
+            } label: {
+                Label("Refresh", systemImage: "arrow.clockwise")
+                    .labelStyle(.iconOnly)
+            }
+            .tint(.primary)
+            .keyboardShortcut("r")
+            #endif
         }
-        #endif
+        .refreshable {
+            await loadLibraries()
+        }
         .task {
             if libraries.isEmpty {
                 isLoading = true
                 await loadLibraries()
                 isLoading = false
             }
-        }
-        .refreshToolbar {
-            await loadLibraries()
         }
     }
     

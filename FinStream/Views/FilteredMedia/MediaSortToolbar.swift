@@ -81,6 +81,7 @@ struct MediaSortMenu: View {
             }
         } label: {
             Label("Sort", systemImage: viewModel.sortOption.systemImage)
+            .labelStyle(.iconOnly)
         }
         .disabled(viewModel.isLoading || viewModel.isSorting)
     }

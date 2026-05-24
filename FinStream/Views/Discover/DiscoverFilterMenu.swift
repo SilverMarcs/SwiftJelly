@@ -129,6 +129,7 @@ struct DiscoverFilterMenu: View {
             }
         } label: {
             Label("Filter", systemImage: "line.3.horizontal.decrease")
+            .labelStyle(.iconOnly)
         }
         .disabled(vm.isLoading)
     }
