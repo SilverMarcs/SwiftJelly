@@ -56,16 +56,14 @@ struct LibraryView: View {
                 UniversalProgressView()
             }
         }
-        .navigationTitle("Libraries")
-        .platformNavigationToolbar()
-        #if !os(macOS)
-        .toolbar {
-            ToolbarItem {
-                NavigationLink {
-                    SettingsView()
-                } label: {
-                    Label("Settings", systemImage: "gear")
-                }
+        #if os(macOS)
+        .platformTopBar("Libraries")
+        #else
+        .platformTopBar("Libraries") {
+            NavigationLink {
+                SettingsView()
+            } label: {
+                Label("Settings", systemImage: "gear")
             }
         }
         #endif

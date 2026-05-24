@@ -38,28 +38,12 @@ struct DiscoverView: View {
                 UniversalProgressView()
             }
         }
-        #if !os(iOS)
-        .navigationTitle("Discover")
-        #endif
-        .platformNavigationToolbar()
         .navigationDestination(item: $matchedItem) { item in
             MediaDestinationView(item: item)
         }
-        #if !os(tvOS)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Picker("Type", selection: $vm.selectedType) {
-                    ForEach(DiscoverViewModel.MediaType.allCases, id: \.self) { type in
-                        Text(type.rawValue).tag(type)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 200)
-            }
-
+        .platformTopBar("Discover") {
             DiscoverFilterMenu(vm: vm)
         }
-        #endif
         .onChange(of: vm.selectedType) {
             // Reset genre when switching type since movie/TV genres differ
             vm.filters.genre = nil

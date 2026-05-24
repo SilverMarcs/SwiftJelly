@@ -17,7 +17,6 @@ struct ContentView: View {
     #if os(tvOS)
     @State private var isTopShelfNavigationActive = false
     @State private var topShelfNavigationItem: BaseItemDto?
-    @AppStorage("tvOSNavigationStyle") private var navigationStyle = TVNavigationStyle.tabBar
     #endif
 
 
@@ -61,9 +60,9 @@ struct ContentView: View {
                 isTopShelfNavigationActive = false
                 topShelfNavigationItem = nil
             }
-            .tvNavigationStyle(navigationStyle)
-            #else
+            #endif
             .tabViewStyle(.sidebarAdaptable)
+            #if !os(tvOS)
             .tabViewSearchActivation(.searchTabSelection)
             #endif
             #if os(iOS)

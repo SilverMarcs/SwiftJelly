@@ -78,8 +78,7 @@ struct SettingsView: View {
                 }
         }
         .formStyle(.grouped)
-        .navigationTitle("Settings")
-        .platformNavigationToolbar(titleDisplayMode: .inline)
+        .platformTopBar("Settings", titleDisplayMode: .inline)
         #if os(iOS)
         .contentMargins(.top, 10)
         #endif

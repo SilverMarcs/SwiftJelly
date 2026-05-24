@@ -8,21 +8,11 @@
 import SwiftUI
 
 struct ViewOptions: View {
-    #if os(tvOS)
-    @AppStorage("tvOSNavigationStyle") private var navigationStyle: TVNavigationStyle = .tabBar
-    #endif
-
     @AppStorage("episodeNamingStyle") private var episodeNamingStyle: EpisodeNamingStyle = .compact
     @AppStorage("continueWatchingStyle") private var continueWatchingStyle: ContinueWatchingStyle = .combined
 
     var body: some View {
         #if os(tvOS)
-        Button {
-            navigationStyle = navigationStyle.next()
-        } label: {
-            LabeledContent("Navigation Style", value: navigationStyle.title)
-        }
-
         Button {
             episodeNamingStyle = episodeNamingStyle.next()
         } label: {

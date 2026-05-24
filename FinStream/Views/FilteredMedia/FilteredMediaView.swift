@@ -27,19 +27,18 @@ struct FilteredMediaView: View {
         }
         #if os(tvOS)
         .focusSection()
-        .navigationTitle(filter.navigationTitle)
-        .platformNavigationToolbar()
+        .platformTopBar(filter.navigationTitle) {
+            MediaSortMenu(viewModel: viewModel)
+        }
         #else
-        .navigationTitle(filter.navigationTitle)
-        .platformNavigationToolbar(titleDisplayMode: largeTitle ? .inlineLarge : .inline)
+        .platformTopBar(filter.navigationTitle, titleDisplayMode: largeTitle ? .inlineLarge : .inline) {
+            MediaSortMenu(viewModel: viewModel)
+        }
         #endif
         .task {
             if viewModel.items.isEmpty {
                 await viewModel.loadInitialItems()
             }
-        }
-        .toolbar {
-            MediaSortToolbar(viewModel: viewModel)
         }
         .refreshToolbar {
             await viewModel.loadInitialItems()

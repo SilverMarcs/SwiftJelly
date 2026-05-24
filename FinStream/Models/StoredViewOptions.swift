@@ -7,18 +7,6 @@
 
 import SwiftUI
 
-enum TVNavigationStyle: String, CaseIterable {
-    case sidebar
-    case tabBar
-    
-    var title: String {
-        switch self {
-        case .sidebar: "Sidebar"
-        case .tabBar: "Top Tab Bar"
-        }
-    }
-}
-
 enum EpisodeNamingStyle: String, CaseIterable {
     case compact
     case detailed
@@ -52,18 +40,3 @@ extension CaseIterable where Self: Equatable {
     }
 }
 
-extension View {
-    @ViewBuilder
-    func tvNavigationStyle(_ style: TVNavigationStyle) -> some View {
-        #if os(tvOS)
-        switch style {
-        case .sidebar:
-            self.tabViewStyle(.sidebarAdaptable)
-        case .tabBar:
-            self.tabViewStyle(.tabBarOnly)
-        }
-        #else
-        self
-        #endif
-    }
-}

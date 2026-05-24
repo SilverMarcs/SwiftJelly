@@ -78,13 +78,13 @@ struct PlaybackUtilities {
                 let title = stream.displayTitle ?? "nil"
                 return "index=\(index) codec=\(codec) lang=\(language) title=\(title)"
             }
-            print(
-                "Playback subtitle streams for item \(itemForPlayback.id ?? "unknown"): \(streamDescriptions.joined(separator: " | "))"
-            )
+            // print(
+                // "Playback subtitle streams for item \(itemForPlayback.id ?? "unknown"): \(streamDescriptions.joined(separator: " | "))"
+            // )
         } else {
-            print("Playback subtitle streams for item \(itemForPlayback.id ?? "unknown"): none")
+            // print("Playback subtitle streams for item \(itemForPlayback.id ?? "unknown"): none")
         }
-        print("Selected subtitle stream index: \(subtitleStreamIndex.map(String.init) ?? "nil")")
+        // print("Selected subtitle stream index: \(subtitleStreamIndex.map(String.init) ?? "nil")")
         #endif
 
         // Start fetching playback info, then refresh the item in the background
