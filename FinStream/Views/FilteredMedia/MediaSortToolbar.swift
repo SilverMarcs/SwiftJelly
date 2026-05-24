@@ -17,9 +17,6 @@ struct MediaSortMenu: View {
             } label: {
                 Label("Default", systemImage: "line.3.horizontal.decrease")
             }
-            #if os(tvOS)
-            .tint(.primary)
-            #endif
 
             Divider()
 
@@ -87,5 +84,8 @@ struct MediaSortMenu: View {
             .labelStyle(.iconOnly)
         }
         .disabled(viewModel.isLoading || viewModel.isSorting)
+        #if os(tvOS)
+        .tint(.primary)
+        #endif
     }
 }
