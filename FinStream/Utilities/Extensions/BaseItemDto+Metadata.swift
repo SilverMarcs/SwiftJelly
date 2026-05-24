@@ -67,23 +67,22 @@ extension BaseItemDto {
     }
     
     private var metadataTitle: String {
-        if type == .movie {
-            return name ?? "Unknown"
-        } else {
-            return seriesName ?? name ?? "Unknown"
-        }
+        name ?? seriesName ?? "Unknown"
     }
-    
+
     private var metadataSubtitle: String? {
-        // No subtitle for movies
-        guard type != .movie else { return nil }
-        
-        // For TV shows, show season and episode
-        if let seasonEpisodeString {
-            return "\(seasonEpisodeString) • \(name ?? "")"
+        if type == .movie {
+            return productionYear.map { String($0) }
         }
-        
-        return nil
+
+        let show = seriesName
+        let episodeTag = seasonEpisodeString
+        switch (show, episodeTag) {
+        case let (show?, episodeTag?): return "\(show) • \(episodeTag)"
+        case let (show?, nil): return show
+        case let (nil, episodeTag?): return episodeTag
+        default: return nil
+        }
     }
     
     private func loadArtwork() async -> Data? {

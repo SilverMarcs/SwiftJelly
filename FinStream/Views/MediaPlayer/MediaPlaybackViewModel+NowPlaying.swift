@@ -9,7 +9,7 @@ extension MediaPlaybackViewModel {
 
         metadata.append(makeMetadataItem(.commonIdentifierTitle, value: item.nowPlayingTitle))
         if let subtitle = item.nowPlayingSubtitle {
-            metadata.append(makeMetadataItem(.commonIdentifierArtist, value: subtitle))
+            metadata.append(makeMetadataItem(.iTunesMetadataTrackSubTitle, value: subtitle))
         }
 
         if let url = ImageURLProvider.imageURL(for: item, type: .primary),
@@ -31,15 +31,21 @@ private func makeMetadataItem(_ identifier: AVMetadataIdentifier, value: any Sen
 
 private extension BaseItemDto {
     var nowPlayingTitle: String {
-        type == .movie ? (name ?? "Unknown") : (seriesName ?? name ?? "Unknown")
+        name ?? seriesName ?? "Unknown"
     }
 
     var nowPlayingSubtitle: String? {
-        guard type != .movie else { return nil }
-        if let seasonEpisodeString {
-            return "\(seasonEpisodeString) • \(name ?? "")"
+        if type == .movie {
+            return productionYear.map { String($0) }
         }
-        return name
+        let show = seriesName
+        let episodeTag = seasonEpisodeString
+        switch (show, episodeTag) {
+        case let (show?, episodeTag?): return "\(show) • \(episodeTag)"
+        case let (show?, nil): return show
+        case let (nil, episodeTag?): return episodeTag
+        default: return nil
+        }
     }
 }
 #endif

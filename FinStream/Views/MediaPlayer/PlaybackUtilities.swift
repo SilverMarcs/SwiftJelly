@@ -157,14 +157,16 @@ struct PlaybackUtilities {
         }
         #endif
         
-        #if !os(macOS)
-        let metadata = await latestItem.createMetadataItems()
-        playerItem.externalMetadata = metadata
-        #endif
-        
         let player = existingPlayer ?? AVPlayer()
         player.pause()
         player.replaceCurrentItem(with: playerItem)
+
+        #if !os(macOS)
+        // Set externalMetadata AFTER replaceCurrentItem so AVPlayerViewController
+        // observes it as a change on the currentItem.
+        let metadata = await latestItem.createMetadataItems()
+        playerItem.externalMetadata = metadata
+        #endif
 
         player.automaticallyWaitsToMinimizeStalling = true
         playerItem.preferredForwardBufferDuration = 30
@@ -197,14 +199,17 @@ struct PlaybackUtilities {
     ) async throws -> PlaybackLoadResult {
         let playerItem = AVPlayerItem(url: fileURL)
 
+        let player = existingPlayer ?? AVPlayer()
+        player.pause()
+        player.replaceCurrentItem(with: playerItem)
+
         #if !os(macOS)
+        // Set externalMetadata AFTER replaceCurrentItem so AVPlayerViewController
+        // observes it as a change on the currentItem.
         let metadata = await item.createMetadataItems()
         playerItem.externalMetadata = metadata
         #endif
 
-        let player = existingPlayer ?? AVPlayer()
-        player.pause()
-        player.replaceCurrentItem(with: playerItem)
         player.automaticallyWaitsToMinimizeStalling = true
         playerItem.preferredForwardBufferDuration = 30
 
