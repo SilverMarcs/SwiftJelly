@@ -54,7 +54,7 @@ enum TopShelfCache {
                 durationSeconds: durationSeconds
             )
         }
-        let limited = Array(snapshots.prefix(maxItems))
+        let limited = Array(snapshots.shuffled().prefix(maxItems))
         
         do {
             let data = try JSONEncoder().encode(limited)
