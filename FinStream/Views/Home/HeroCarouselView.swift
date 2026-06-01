@@ -22,68 +22,67 @@ struct HeroCarouselView: View {
     }
 
     var body: some View {
-        ScrollView(.horizontal) {
-            LazyHStack(spacing: 0) {
-                ForEach($items, id: \.id) { item in
+        ZStack {
+            if !items.isEmpty {
+                let activeIndex = currentIndex
+                if activeIndex >= 0 && activeIndex < items.count {
+                    let activeItem = items[activeIndex]
+                    let activeBinding = activeItemBinding(for: activeIndex)
+                    
                     Group {
-                    #if !os(tvOS)
-                    MediaNavigationLink(item: item.wrappedValue) {
-                        hero(item: item)
-                    }
-                    #else
-                    hero(item: item)
-                        .focusSection()
-                        .focused($focusedHeroID, equals: item.wrappedValue.id ?? "")
-                        .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
-                            content.offset(y: phase.isIdentity ? 0 : -200)
+                        #if !os(tvOS)
+                        MediaNavigationLink(item: activeItem) {
+                            hero(item: activeBinding)
                         }
-                        .frame(maxHeight: .infinity)
-                        .background {
-                            GeometryReader { geo in
-                                if let url = ImageURLProvider.imageURL(for: item.wrappedValue, type: .backdrop) {
-                                    CachedAsyncImage(url: url, targetSize: 1920)
-                                        .overlay(alignment: .bottom) {
-                                            LinearGradient(
-                                                gradient: Gradient(stops: [
-                                                    .init(color: .black, location: 0),
-                                                    .init(color: .black.opacity(0.6), location: 0.8),
-                                                    .init(color: .black.opacity(0), location: 1.0)
-                                                ]),
-                                                startPoint: .bottom,
-                                                endPoint: .top
-                                            )
-                                            .frame(height: geo.size.height / 2 + 200)
-                                        }
-                                        .scaledToFill()
-                                        .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
-                                            content.offset(y: phase.isIdentity ? (geo.safeAreaInsets.top + geo.safeAreaInsets.bottom) : -700)
-                                        }
+                        #else
+                        hero(item: activeBinding)
+                            .focusSection()
+                            .focused($focusedHeroID, equals: activeItem.id ?? "")
+                            .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
+                                content.offset(y: phase.isIdentity ? 0 : -200)
+                            }
+                            .frame(maxHeight: .infinity)
+                            .background {
+                                GeometryReader { geo in
+                                    if let url = ImageURLProvider.imageURL(for: activeItem, type: .backdrop) {
+                                        CachedAsyncImage(url: url, targetSize: 1920)
+                                            .overlay(alignment: .bottom) {
+                                                LinearGradient(
+                                                    gradient: Gradient(stops: [
+                                                        .init(color: .black, location: 0),
+                                                        .init(color: .black.opacity(0.6), location: 0.8),
+                                                        .init(color: .black.opacity(0), location: 1.0)
+                                                    ]),
+                                                    startPoint: .bottom,
+                                                    endPoint: .top
+                                                )
+                                                .frame(height: geo.size.height / 2 + 200)
+                                            }
+                                            .scaledToFill()
+                                            .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
+                                                content.offset(y: phase.isIdentity ? (geo.safeAreaInsets.top + geo.safeAreaInsets.bottom) : -700)
+                                            }
+                                    }
                                 }
                             }
-                        }
-                    #endif
+                        #endif
                     }
-                    .id(item.wrappedValue.id)
-                    .containerRelativeFrame(.horizontal)
+                    .id(activeItem.id)
+                    .transition(.opacity)
                 }
             }
-            .scrollTargetLayout()
         }
         #if os(iOS)
         .stretchy()
         #endif
-        .scrollPosition(id: $scrolledID, anchor: .center)
-        .scrollTargetBehavior(.viewAligned)
-        .scrollIndicators(.hidden)
         #if os(tvOS)
         .ignoresSafeArea()
-        .contentMargins(.horizontal, 1, for: .scrollContent)
         #else
         .overlay {
             if items.count > 1 {
                 HStack {
                     Button {
-                        withAnimation { scrollToPrevious() }
+                        scrollToPrevious()
                         startAutoScroll()
                     } label: {
                         Image(systemName: "chevron.left")
@@ -93,7 +92,7 @@ struct HeroCarouselView: View {
                     Spacer()
 
                     Button {
-                        withAnimation { scrollToNext() }
+                        scrollToNext()
                         startAutoScroll()
                     } label: {
                         Image(systemName: "chevron.right")
@@ -102,19 +101,22 @@ struct HeroCarouselView: View {
                 }
                 .buttonBorderShape(.circle)
                 .buttonStyle(.glass)
-                #if os(macOS)
                 .controlSize(.large)
-                #endif
                 .padding(.horizontal, 16)
             }
         }
         #endif
-        .onAppear { startAutoScroll() }
+        .onAppear {
+            if scrolledID == nil, !items.isEmpty {
+                scrolledID = items.first?.id
+            }
+            startAutoScroll()
+        }
         .onDisappear { stopAutoScroll() }
         .onChange(of: scrolledID) { _, _ in startAutoScroll() }
         .onChange(of: focusedHeroID) { _, newID in
             guard let newID, !newID.isEmpty, newID != scrolledID else { return }
-            withAnimation { scrolledID = newID }
+            withAnimation(.easeInOut(duration: 0.6)) { scrolledID = newID }
         }
         .onChange(of: items.count) { _, newCount in
             // When items first populate, nudge to the second item so the
@@ -122,7 +124,7 @@ struct HeroCarouselView: View {
             if scrolledID == nil, newCount > 1 {
                 Task { @MainActor in
                     try? await Task.sleep(for: .milliseconds(300))
-                    withAnimation { scrolledID = items[1].id }
+                    withAnimation(.easeInOut(duration: 0.6)) { scrolledID = items[1].id }
                 }
             }
             startAutoScroll()
@@ -145,14 +147,34 @@ struct HeroCarouselView: View {
         }
     }
 
+    private func activeItemBinding(for index: Int) -> Binding<BaseItemDto> {
+        Binding(
+            get: {
+                if index >= 0 && index < items.count {
+                    return items[index]
+                }
+                return BaseItemDto()
+            },
+            set: { newValue in
+                if index >= 0 && index < items.count {
+                    items[index] = newValue
+                }
+            }
+        )
+    }
+
     private func scrollToPrevious() {
         guard currentIndex > 0 else { return }
-        scrolledID = items[currentIndex - 1].id
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[currentIndex - 1].id
+        }
     }
 
     private func scrollToNext() {
         guard currentIndex < items.count - 1 else { return }
-        scrolledID = items[currentIndex + 1].id
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[currentIndex + 1].id
+        }
     }
 
     private func startAutoScroll() {
@@ -164,7 +186,7 @@ struct HeroCarouselView: View {
                 guard !Task.isCancelled else { return }
                 let nextIndex = (currentIndex + 1) % items.count
                 let nextID = items[nextIndex].id
-                withAnimation {
+                withAnimation(.easeInOut(duration: 0.6)) {
                     scrolledID = nextID
                 }
                 // If the user is currently focused inside the carousel,
