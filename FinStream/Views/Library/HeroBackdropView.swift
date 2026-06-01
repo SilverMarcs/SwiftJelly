@@ -4,15 +4,15 @@ import SwiftMediaViewer
 
 private extension View {
     /// Constrains width to the enclosing scroll container on platforms where
-    /// `containerRelativeFrame` is well-supported. macOS gets a no-op since it
-    /// can crash inside ScrollView + backgroundExtensionEffect compositions.
+    /// `containerRelativeFrame` is well-supported. macOS and iPadOS get a no-op since they
+    /// can crash inside ScrollView + backgroundExtensionEffect compositions or bleed/exceed boundaries in split views.
     @ViewBuilder
     func boundToContainerWidth() -> some View {
-        #if os(macOS)
-        self.frame(maxWidth: .infinity)
-        #else
-        self.containerRelativeFrame(.horizontal)
-        #endif
+        if Device.isMacOrPad {
+            self.frame(maxWidth: .infinity)
+        } else {
+            self.containerRelativeFrame(.horizontal)
+        }
     }
 }
 

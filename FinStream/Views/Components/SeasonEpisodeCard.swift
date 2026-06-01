@@ -11,17 +11,7 @@ import JellyfinAPI
 struct SeasonEpisodeCard: View {
     @Environment(\.refresh) var refresh
     let item: ViewListItem<BaseItemDto>
-
-    #if os(tvOS)
-    private let cardWidth: CGFloat = 550
-    private let cardHeight: CGFloat = 483
-    private let overlayPadding: CGFloat = 30
-    #else
-    private let cardWidth: CGFloat = 230
-    private let cardHeight: CGFloat = 230
-    private let overlayPadding: CGFloat = 15
-    #endif
-
+    
     private let largeGradient = LinearGradient(
         gradient: Gradient(stops: [
             .init(color: .white, location: 0),
@@ -33,6 +23,10 @@ struct SeasonEpisodeCard: View {
     )
 
     var body: some View {
+        
+        
+        
+        
         PlayMediaButton(item: item.base) {
             LandscapeImageView(item: item.base) {
                 Image(systemName: "ellipsis")
@@ -57,6 +51,7 @@ struct SeasonEpisodeCard: View {
 
                     if let overview = item.base?.overview, !overview.isEmpty {
                         Text(overview)
+                            .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .font(.footnote)
                             .opacity(0.9)
@@ -109,6 +104,30 @@ struct SeasonEpisodeCard: View {
                 #endif
             }
         }
+    }
+    
+    private var cardWidth: CGFloat {
+        #if os(tvOS)
+        550
+        #else
+        Device.isMacOrPad ? 280 : 230
+        #endif
+    }
+    
+    private var cardHeight: CGFloat {
+        #if os(tvOS)
+        483
+        #else
+        Device.isMacOrPad ? 280 : 230
+        #endif
+    }
+    
+    private var overlayPadding: CGFloat {
+        #if os(tvOS)
+        30
+        #else
+        15
+        #endif
     }
 }
 

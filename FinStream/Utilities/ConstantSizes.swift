@@ -11,10 +11,8 @@ import CoreFoundation
 public var posterWidth: CGFloat {
     #if os(tvOS)
     260
-    #elseif os(iOS)
-    110
-    #elseif os(macOS)
-    160
+    #else
+    Device.isMacOrPad ? 165 : 110
     #endif
 }
 

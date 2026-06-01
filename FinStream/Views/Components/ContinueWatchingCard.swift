@@ -68,10 +68,8 @@ struct ContinueWatchingCard: View {
     private var cardWidth: CGFloat {
         #if os(tvOS)
         420
-        #elseif os(macOS)
-        300
         #else
-        250
+        Device.isMacOrPad ? 300 : 250
         #endif
     }
     

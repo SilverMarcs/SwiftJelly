@@ -109,7 +109,6 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
                 
                 content
                 
-                
                 MediaInfoCardsView(item: item)
             }
             .scenePadding(.bottom)
