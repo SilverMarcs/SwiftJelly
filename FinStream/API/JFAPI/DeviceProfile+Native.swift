@@ -87,32 +87,19 @@ extension DeviceProfile {
     }
 
     // Letting the server downmix 5.1/7.1 → 2ch produces noticeably quiet audio because
-    // Jellyfin's downmix doesn't apply loudness compensation. On macOS we let the source
-    // keep its native channel count and rely on CoreAudio for downmix when needed.
-    // iOS/tvOS/visionOS stay at stereo: tvOS is known to break on 5.1/7.1 AAC, and iOS
-    // playback is already at expected loudness without lifting the cap.
+    // Jellyfin's downmix doesn't apply loudness compensation. We let the source
+    // keep its native channel count and rely on CoreAudio/AVPlayer for downmix when needed
+    // across all platforms (macOS, iOS, tvOS, etc.).
     private static var nativeMaxAudioChannels: String {
-#if os(tvOS)
-        "2"
-#else
         "8"
-#endif
     }
 
     private static var nativeVideoAudioCodecList: String {
-#if os(iOS)
-        "aac,alac"
-#else
         "aac,ac3,eac3,alac,flac,dts,opus"
-#endif
     }
 
     private static var nativeAudioOnlyCodecList: String {
-#if os(iOS)
-        "aac,alac"
-#else
         "aac,ac3,eac3,alac,flac,dts,opus"
-#endif
     }
     
     // MARK: - Subtitle Profiles

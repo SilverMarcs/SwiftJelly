@@ -74,7 +74,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         let reflectionHeight: CGFloat = 200
         let backdrop = CachedAsyncImage(
             url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1000
+            targetSize: 1500
         )
         
         VStack(spacing: 0) {
