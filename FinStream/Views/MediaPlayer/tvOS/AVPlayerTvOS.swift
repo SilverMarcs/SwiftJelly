@@ -24,8 +24,8 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         var lastNextEpisodeID: String?
         var lastAudioMenuToken: String?
         var activityIndicator: UIActivityIndicatorView?
-        var relatedContentController: UIViewController?
-        var relatedContentToken: String?
+        var infoTabController: UIViewController?
+        var infoTabToken: String?
         var onNextEpisode: (() -> Void)?
         var onDismiss: (() -> Void)?
 
@@ -260,17 +260,25 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
 
     private func updateInfoTabs(for controller: AVPlayerViewController, coordinator: Coordinator) {
         let token = String(describing: item.id)
-        guard coordinator.relatedContentToken != token else {
-            if let related = coordinator.relatedContentController {
-                controller.customInfoViewControllers = [related]
+        guard coordinator.infoTabToken != token else {
+            if let cached = coordinator.infoTabController {
+                controller.customInfoViewControllers = [cached]
             }
             return
         }
 
-        let related = RelatedContentViewController(item: item)
-        coordinator.relatedContentController = related
-        coordinator.relatedContentToken = token
-        controller.customInfoViewControllers = [related]
+        // For an episode, show the other episodes in its season; for movies (and
+        // anything without season context) fall back to related content.
+        let infoTab: UIViewController
+        if item.type == .episode, item.seriesID != nil, item.seasonID != nil {
+            infoTab = SeasonEpisodesViewController(item: item)
+        } else {
+            infoTab = RelatedContentViewController(item: item)
+        }
+
+        coordinator.infoTabController = infoTab
+        coordinator.infoTabToken = token
+        controller.customInfoViewControllers = [infoTab]
     }
 
     private func updateTransitionOverlay(for controller: AVPlayerViewController, coordinator: Coordinator) {
