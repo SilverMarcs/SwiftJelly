@@ -153,8 +153,12 @@ import Observation
 
     func transitionToNextEpisode() async {
         guard item.type == .episode, !isAutoLoadingNext else { return }
+        // Detach the finished item immediately. Otherwise AVKit's play() on
+        // proposal dismissal restarts the (ended) old item from 0 during the
+        // async load gap, so the old episode visibly replays before the swap.
         player?.pause()
-        
+        player?.replaceCurrentItem(with: nil)
+
         isAutoLoadingNext = true
         defer { isAutoLoadingNext = false }
         
