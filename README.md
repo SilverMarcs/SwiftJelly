@@ -1,5 +1,7 @@
 # FinStream
 
+<a href="https://www.buymeacoffee.com/SilverMarcs" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 35px !important;width: 150px !important;" ></a>
+
 Jellyfin Media Server client with SwiftUI & Liquid Glass.
 Uses several new SwiftUI APIs introduced in WWDC25.
 
