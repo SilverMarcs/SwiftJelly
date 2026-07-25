@@ -4,18 +4,16 @@ import JellyfinAPI
 struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
-    @FocusState private var focusedEpisodeID: String?
+    // Once the user picks a season themselves, stop auto-scrolling so the
+    // selection isn't yanked back to the latest episode of another season.
+    @State private var hasUserInteracted = false
     
     var body: some View {
         SectionContainer {
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
                     SeasonEpisodeCard(item: episode)
-                        .id(episode.id)
-                        #if os(tvOS)
-                        .focused($focusedEpisodeID, equals: episode.id)
-                        #endif
-                }
+                        .id(episode.id)                }
             }
             .scrollPosition($episodeScrollPosition)
         } header: {
@@ -29,6 +27,9 @@ struct ShowSeasonsView: View {
             await vm.updateEpisodesForSelectedSeason()
         }
         .onChange(of: vm.episodes.first?.base?.id, initial: true) {
+            // Only scroll to the latest episode on first presentation. As soon
+            // as the user has picked a season, leave their selection alone.
+            guard !hasUserInteracted else { return }
             guard vm.episodes.contains(where: { $0.base != nil }) else { return }
             scrollToLatestEpisode()
         }
@@ -36,7 +37,7 @@ struct ShowSeasonsView: View {
     
     @ViewBuilder
     private var seasonPicker: some View {
-        Picker("Season", selection: $vm.selectedSeason) {
+        Picker("Season", selection: seasonSelection) {
             if vm.selectedSeason == nil {
                 Text("Seasons").tag(nil as BaseItemDto?)
             }
@@ -57,6 +58,19 @@ struct ShowSeasonsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .focusSection()
         #endif
+    }
+
+    // Wraps the season selection so that a user-driven change (the only path
+    // that calls this setter) marks the view as interacted. Programmatic
+    // updates to `vm.selectedSeason` bypass this and keep auto-scroll enabled.
+    private var seasonSelection: Binding<BaseItemDto?> {
+        Binding(
+            get: { vm.selectedSeason },
+            set: { newValue in
+                hasUserInteracted = true
+                vm.selectedSeason = newValue
+            }
+        )
     }
     
     private func scrollToLatestEpisode() {
@@ -82,7 +96,6 @@ struct ShowSeasonsView: View {
         if let episode = targetEpisode {
             withAnimation {
                 episodeScrollPosition.scrollTo(id: episode.id, anchor: .trailing) // trailing so it doesnt getcut off for smaller window sizes
-                focusedEpisodeID = episode.id
             }
         }
     }

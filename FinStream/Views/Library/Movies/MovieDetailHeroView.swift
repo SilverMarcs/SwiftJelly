@@ -23,7 +23,7 @@ struct MovieDetailHeroView: View {
         #elseif os(macOS)
         8
         #else
-        0
+        10
         #endif
     }
 }

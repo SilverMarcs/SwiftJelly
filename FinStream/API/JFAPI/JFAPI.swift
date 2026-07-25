@@ -73,7 +73,8 @@ enum JFAPIError: LocalizedError {
     case setupFailed
     case loginFailed
     case itemNotFound
-    
+    case quickConnectFailed
+
     var errorDescription: String? {
         switch self {
         case .setupFailed:
@@ -82,6 +83,8 @@ enum JFAPIError: LocalizedError {
             return "Login failed - invalid username or password"
         case .itemNotFound:
             return "The requested item could not be found"
+        case .quickConnectFailed:
+            return "Quick Connect is unavailable on this server"
         }
     }
 }

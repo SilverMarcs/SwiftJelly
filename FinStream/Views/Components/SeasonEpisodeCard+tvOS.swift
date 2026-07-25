@@ -11,6 +11,7 @@
 //    - the description card should only be accessable when the parent episode card is selected
 //    - scrolling left or right on the remote when the description card is selected should result in focusing the neighbour episode card instead of the description card
 //    - when the episode card is focused, the description card should adjust its y-offset to allow for a spacing between the episode card and the description
+//    - the description card's background is only shown when the parent episode card (or the description itself) is focused, otherwise it is transparent
 //  Most of this behaviour is simply achieved by toggling `.disabled` of the description card based on `!episodeCardFocused && !descriptionFocused`
 //
 
@@ -73,54 +74,68 @@ struct SeasonEpisodeCard: View {
                 content.offset(y: descriptionFocused ? -25 : 0)
             }
             .animation(.snappy, value: descriptionFocused)
-            
-            Button(action: {}) {
-                let isPlaceholder = item.base == nil
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "SEASON 1 EPISODE 1")
-                        .foregroundStyle(.white)
-                        .font(.caption2.scaled(by: 0.7))
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .multilineTextAlignment(.leading)
-                        .redacted(reason: isPlaceholder ? .placeholder : [])
 
-                    Text(item.base?.name ?? "Loading Episode Title")
-                        .foregroundStyle(.white)
-                        .font(.caption)
-                        .bold()
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .multilineTextAlignment(.leading)
-                        .padding(.bottom, 5)
-                        .redacted(reason: isPlaceholder ? .placeholder : [])
-
-                    Text(item.base?.overview ?? "A placeholder description that occupies enough room to mimic the real episode overview while content is loading.")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption2)
-                        .opacity(0.7)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(3, reservesSpace: true)
-                        .redacted(reason: isPlaceholder ? .placeholder : [])
-                }
-                .padding(24)
-                .frame(height: 170)
+            // The `.card` button style always paints a background. To keep the
+            // description card transparent when its parent episode card is not
+            // selected, only use `.card` when the episode (or the description
+            // itself) is focused, and fall back to `.plain` otherwise.
+            if episodeCardFocused || descriptionFocused {
+                descriptionButton
+                    .buttonStyle(.card)
+            } else {
+                descriptionButton
+                    .buttonStyle(.plain)
             }
-            .focused($descriptionFocused)
-            .frame(maxWidth: cardWidth)
-            .visualEffect { content, geometry in
-                content
-                    .offset(y: episodeCardFocused ? 25 : 0)
-                    .opacity(episodeCardFocused || descriptionFocused ? 1.0 : 0.6)
-//                    .scaleEffect(episodeCardFocused || descriptionFocused ? 1.06 : 1.0)
-            }
-            .animation(.snappy, value: episodeCardFocused)
-            .animation(.snappy, value: descriptionFocused)
-            .buttonStyle(.card)
-            .disabled(!episodeCardFocused && !descriptionFocused)
-            .buttonBorderShape(.roundedRectangle(radius: 25))
         }
         .focusSection()
+    }
+
+    @ViewBuilder
+    private var descriptionButton: some View {
+        Button(action: {}) {
+            let isPlaceholder = item.base == nil
+            VStack(alignment: .leading, spacing: 0) {
+                Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "SEASON 1 EPISODE 1")
+                    .foregroundStyle(.white)
+                    .font(.caption2.scaled(by: 0.7))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .multilineTextAlignment(.leading)
+                    .redacted(reason: isPlaceholder ? .placeholder : [])
+
+                Text(item.base?.name ?? "Loading Episode Title")
+                    .foregroundStyle(.white)
+                    .font(.caption)
+                    .bold()
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .multilineTextAlignment(.leading)
+                    .padding(.bottom, 5)
+                    .redacted(reason: isPlaceholder ? .placeholder : [])
+
+                Text(item.base?.overview ?? "A placeholder description that occupies enough room to mimic the real episode overview while content is loading.")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.caption2)
+                    .opacity(0.7)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(3, reservesSpace: true)
+                    .redacted(reason: isPlaceholder ? .placeholder : [])
+            }
+            .padding(24)
+            .frame(height: 170)
+        }
+        .focused($descriptionFocused)
+        .frame(maxWidth: cardWidth)
+        .visualEffect { content, geometry in
+            content
+                .offset(y: episodeCardFocused ? 25 : 0)
+                .opacity(episodeCardFocused || descriptionFocused ? 1.0 : 0.6)
+//                    .scaleEffect(episodeCardFocused || descriptionFocused ? 1.06 : 1.0)
+        }
+        .animation(.snappy, value: episodeCardFocused)
+        .animation(.snappy, value: descriptionFocused)
+        .disabled(!episodeCardFocused && !descriptionFocused)
+        .buttonBorderShape(.roundedRectangle(radius: 25))
     }
 }
 

@@ -52,11 +52,11 @@ struct ShowPlayButton: View {
             .font(.callout)
             .fontWeight(.semibold)
         }
-        .tint(Color(.accent).secondary)
         .buttonBorderShape(.capsule)
         #if os(tvOS)
         .controlSize(.regular)
         #else
+        .tint(Color(.accent).secondary)
         .controlSize(.extraLarge)
         #endif
         .buttonStyle(.glassProminent)

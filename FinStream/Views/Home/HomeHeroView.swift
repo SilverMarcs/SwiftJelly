@@ -19,21 +19,33 @@ struct HomeHeroView: View {
 
     #if os(tvOS)
     @Binding var belowFold: Bool
+    @Binding var backdropItem: BaseItemDto?
     #endif
 
     var body: some View {
         @Bindable var trendingViewModel = trendingViewModel
         Group {
             if !trendingViewModel.items.isEmpty {
+                #if os(tvOS)
+                HeroCarouselView(items: $trendingViewModel.items, belowFold: $belowFold, backdropItem: $backdropItem)
+                #else
                 HeroCarouselView(items: $trendingViewModel.items)
+                #endif
             } else if !fallbackItems.isEmpty {
+                #if os(tvOS)
+                HeroCarouselView(items: $fallbackItems, belowFold: $belowFold, backdropItem: $backdropItem)
+                #else
                 HeroCarouselView(items: $fallbackItems)
+                #endif
             } else if trendingViewModel.hasLoaded && hasFinishedFallbackLoad {
                 EmptyView()
             } else {
                 HeroBackdropView(item: BaseItemDto()) {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
+                #if os(tvOS)
+                .onAppear { backdropItem = nil }
+                #endif
             }
         }
         .onScrollVisibilityChange { isVisible in

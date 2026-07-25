@@ -57,15 +57,7 @@ struct LibraryView: View {
             }
         }
         .platformTopBar("Libraries") {
-            #if os(iOS)
-            NavigationLink {
-                SettingsView()
-            } label: {
-                Label("Settings", systemImage: "gear")
-                    .labelStyle(.iconOnly)
-            }
-            .tint(.primary)
-            #elseif os(macOS)
+            #if os(macOS)
             Button {
                 Task { await loadLibraries() }
             } label: {

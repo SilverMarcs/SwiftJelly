@@ -24,17 +24,25 @@ struct HeroBackdropView<HeroActions: View>: View {
     let genreItem: BaseItemDto
     let badge: String?
 
+    /// When `false`, the backdrop image is omitted and only the overlay content
+    /// (logo, genres, actions, overview, attributes) is rendered over a
+    /// transparent, flexible frame. Used by the iOS hero carousel, which draws a
+    /// separate parallax-scrolling backdrop behind a fixed, cross-fading overlay.
+    let showsBackground: Bool
+
     init(
         item: BaseItemDto,
         logoItem: BaseItemDto? = nil,
         genreItem: BaseItemDto? = nil,
         badge: String? = nil,
+        showsBackground: Bool = true,
         @ViewBuilder heroActions: () -> HeroActions
     ) {
         self.item = item
         self.logoItem = logoItem ?? item
         self.genreItem = genreItem ?? item
         self.badge = badge
+        self.showsBackground = showsBackground
         self.heroActions = heroActions()
     }
 
@@ -53,17 +61,28 @@ struct HeroBackdropView<HeroActions: View>: View {
             .padding(40)
             .environment(\.colorScheme, .dark)
     #else
-        backdropImage
-            .overlay(alignment: .bottomLeading) {
-                if isCompactSize {
-                    overlayContent
-                        .padding()
-                } else {
-                    largeScreenContent
-                        .padding()
-                }
+        Group {
+            if showsBackground {
+                backdropImage
+            } else {
+                // Overlay-only mode: a flexible, non-interactive frame so the
+                // details sit at the bottom, matching the height of the separate
+                // backdrop the carousel scrolls behind it.
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(false)
             }
-            .environment(\.colorScheme, .dark)
+        }
+        .overlay(alignment: .bottomLeading) {
+            if isCompactSize {
+                overlayContent
+                    .padding()
+            } else {
+                largeScreenContent
+                    .padding()
+            }
+        }
+        .environment(\.colorScheme, .dark)
     #endif
     }
     
@@ -102,8 +121,8 @@ struct HeroBackdropView<HeroActions: View>: View {
                 if isCompactSize {
                     LinearGradient(
                         gradient: Gradient(stops: [
-                            .init(color: .black.opacity(0.9), location: 0),
-                            .init(color: .black.opacity(0.81), location: 0.4),
+                            .init(color: .black.opacity(1), location: 0),
+                            .init(color: .black.opacity(0.9), location: 0.8),
                             .init(color: .black.opacity(0), location: 1.0)
                         ]),
                         startPoint: .bottom,
@@ -195,6 +214,9 @@ struct HeroBackdropView<HeroActions: View>: View {
                     .redacted(reason: name?.isEmpty == false ? [] : .placeholder)
             }
         }
+        // Purely decorative: never intercept touches, so swipes over the logo
+        // scroll the iOS hero carousel behind it.
+        .allowsHitTesting(false)
     }
     
     private var overlayContent: some View {
@@ -210,6 +232,7 @@ struct HeroBackdropView<HeroActions: View>: View {
             OverviewView(item: item, compact: true)
 
             AttributesView(item: item)
+                .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, alignment: overallAlignment)
     }
@@ -223,6 +246,7 @@ struct HeroBackdropView<HeroActions: View>: View {
             .font(genreFont)
             .foregroundStyle(.white.opacity(0.7))
             .redacted(reason: genres.isEmpty ? .placeholder : [])
+            .allowsHitTesting(false)
     }
 
     private var genreFont: Font {
@@ -253,6 +277,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
                 VStack(alignment: .trailing, spacing: 12) {
                     AttributesView(item: item)
+                        .allowsHitTesting(false)
                     genreList
                 }
             }

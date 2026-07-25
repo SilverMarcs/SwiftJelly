@@ -13,6 +13,10 @@ struct ContentView: View {
     
     @State private var dataManager = DataManager.shared
     @State private var playbackManager = PlaybackManager.shared
+
+    #if os(iOS)
+    @State private var showingSettings = false
+    #endif
     
     #if os(tvOS)
     @State private var isTopShelfNavigationActive = false
@@ -45,6 +49,7 @@ struct ContentView: View {
                         NavigationStack {
                             tabWithNavigationDestinations(tab: tab)
                         }
+                        .id(dataManager.activeServerID)
                     }
                 }
 
@@ -52,6 +57,23 @@ struct ContentView: View {
                     libraryTabs()
                 }
             }
+            #if !os(tvOS)
+            .tabViewSidebarHeader {
+                ProfileSidebarButton()
+            }
+            #endif
+            #if os(iOS)
+            .sheet(isPresented: $showingSettings) {
+                NavigationStack {
+                    SettingsView()
+                        .toolbar {
+                            ToolbarItem(placement: .automatic) {
+                                Button(role: .close) { showingSettings = false }
+                            }
+                        }
+                }
+            }
+            #endif
             #if os(tvOS)
             .onOpenURL { url in
                 handleTopShelfURL(url)
@@ -63,10 +85,10 @@ struct ContentView: View {
             #endif
             .tabViewStyle(.sidebarAdaptable)
             #if !os(tvOS)
-            .tabViewSearchActivation(.searchTabSelection)
+            .tabViewSearchActivation(.automatic)
             #endif
             #if os(iOS)
-            .tabBarMinimizeBehavior(.onScrollDown)
+            .tabBarMinimizeBehavior(.never)
             #endif
             #if !os(macOS)
             .fullScreenCover(isPresented: $playbackManager.isPlayerPresented) {
@@ -89,6 +111,15 @@ struct ContentView: View {
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
             .navigationDestinations()
+        #if os(iOS)
+            .toolbar {
+                if isCompactSize {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        ProfileToolbarMenu(showingSettings: $showingSettings)
+                    }
+                }
+            }
+        #endif
         #if os(macOS)
             .frame(minWidth: 800)
         #endif
@@ -120,6 +151,7 @@ struct ContentView: View {
                     NavigationStack {
                         tabWithNavigationDestinations(tab: libraryTab)
                     }
+                    .id(dataManager.activeServerID)
                 }
             }
         } header: {
@@ -132,6 +164,11 @@ struct ContentView: View {
         if !SeerrAPI.isConfigured {
             tabs.removeAll { $0 == .discover }
         }
+        #if os(tvOS)
+        // tvOS can't use `tabViewSidebarHeader` (tvOS 27+), so the profile lives
+        // as the first entry at the top of the sidebar instead.
+        tabs.insert(.profile, at: 0)
+        #endif
         return tabs
     }
     

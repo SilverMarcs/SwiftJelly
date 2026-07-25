@@ -20,7 +20,7 @@ struct MarkPlayedButton: View {
                 .animation(.snappy, value: isPlayed)
                 .heroActionIcon()
         }
-        .tint((isPlayed == true) ? Color.green : Color.primary)
+        .tint(isPlayed ? Color.green : nil)
         #if os(tvOS)
         .controlSize(.regular)
         #else

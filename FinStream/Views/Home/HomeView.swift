@@ -17,17 +17,53 @@ struct HomeView: View {
 
 #if os(tvOS)
     @State private var belowFold = false
+    @State private var scrollOffset: CGFloat = 0
+    @State private var heroBackdropItem: BaseItemDto?
+
+    /// Height of the hero showcase. Kept in sync with `HomeHeroView`'s frame and
+    /// the fold-snapping behavior so the first shelf peeks below the hero.
+    private let showcaseHeight: CGFloat = 800
 #endif
 
     var body: some View {
+#if os(tvOS)
+        ZStack(alignment: .top) {
+            Rectangle()
+                .fill(.background.secondary)
+                .ignoresSafeArea()
+
+            HeroParallaxBackground(
+                item: heroBackdropItem,
+                scrollOffset: scrollOffset,
+                showcaseHeight: showcaseHeight
+            )
+
+            scrollContent
+                .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                    geometry.contentOffset.y + geometry.contentInsets.top
+                } action: { _, newValue in
+                    scrollOffset = newValue
+                }
+        }
+        .ignoresSafeArea(edges: .top)
+#else
+        scrollContent
+#endif
+    }
+
+    private var scrollContent: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing) {
                 #if os(tvOS)
-                HomeHeroView(showScrollEffect: $showScrollEffect, belowFold: $belowFold)
+                HomeHeroView(
+                    showScrollEffect: $showScrollEffect,
+                    belowFold: $belowFold,
+                    backdropItem: $heroBackdropItem
+                )
                 #else
                 HomeHeroView(showScrollEffect: $showScrollEffect)
                 #endif
-                
+
                 ContinueWatchingView()
 
                 MediaShelf(header: "Favorites") {
@@ -55,8 +91,7 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         #if os(tvOS)
-        .background(.background.secondary)
-        .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: 800))
+        .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: showcaseHeight))
         #endif
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
         .ignoresSafeArea(edges: .top)
@@ -64,7 +99,7 @@ struct HomeView: View {
         .navigationTitle(showScrollEffect ? "" : "Home")
         .platformNavigationToolbar()
     }
-    
+
     private var spacing: CGFloat {
         #if os(tvOS)
         80

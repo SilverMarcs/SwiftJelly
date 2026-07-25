@@ -39,6 +39,14 @@ struct SettingsView: View {
                 Label("Servers", systemImage: "server.rack")
             }
 
+            #if !os(tvOS)
+            NavigationLink {
+                PairDeviceView()
+            } label: {
+                Label("Pair a Device", systemImage: "bolt.horizontal.circle")
+            }
+            #endif
+
             if showAppIconPicker {
                 SeerrSettingsView()
             }
