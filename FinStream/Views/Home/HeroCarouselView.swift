@@ -120,6 +120,10 @@ struct HeroCarouselView: View {
                             stopAutoScroll()
                         }
                     }
+                    .scrollTransition(axis: .vertical) { content, phase in
+                         content
+                            .offset(y: phase.isIdentity ? 0 : phase.value * -200)
+                     }
                     // Only the backdrop layer gets the rubber-band stretch when
                     // the home scroll is pulled down; the details stay put.
                     .stretchy()
@@ -171,8 +175,8 @@ struct HeroCarouselView: View {
         .overlay(alignment: .bottom) {
             LinearGradient(
                 gradient: Gradient(stops: [
-                    .init(color: .black.opacity(isCompact ? 1.0 : 0.9), location: 0),
-                    .init(color: .black.opacity(isCompact ? 0.9 : 0.81), location: isCompact ? 0.8 : 0.4),
+                    .init(color: .black.opacity(1), location: 0),
+                    .init(color: .black.opacity(0.8), location: isCompact ? 0.8 : 0.4),
                     .init(color: .black.opacity(0.0), location: 1.0)
                 ]),
                 startPoint: .bottom,

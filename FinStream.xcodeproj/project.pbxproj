@@ -67,6 +67,8 @@
 				Views/MediaPlayer/tvOS/NextEpisodeProposalViewController.swift = (tvos, );
 				Views/MediaPlayer/tvOS/RelatedContentCollectionViewCell.swift = (tvos, );
 				Views/MediaPlayer/tvOS/RelatedContentViewController.swift = (tvos, );
+				Views/MediaPlayer/tvOS/SeasonEpisodeCollectionViewCell.swift = (ios, tvos, xros, );
+				Views/MediaPlayer/tvOS/SeasonEpisodesViewController.swift = (ios, tvos, );
 			};
 			target = 083128A82E0EE1F70096527C /* FinStream */;
 		};

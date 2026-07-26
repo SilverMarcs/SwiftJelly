@@ -59,19 +59,43 @@ extension JFAPI {
     }
 
     /// Authorizes a pending Quick Connect request that was initiated on another device, using the
-    /// currently signed-in user. This is the "pair a new device" direction of the flow: the other
-    /// device displays a code, and this authenticated device approves it.
+    /// currently active signed-in server. This is the "pair a new device" direction of the flow.
     /// - Parameter code: The code shown on the device that is waiting to be signed in.
     /// - Returns: `true` when the server accepted the code and authorized the pending request.
     static func authorizeQuickConnect(code: String) async throws -> Bool {
-        let context = try getAPIContext()
+        guard let server = dataManager.server else {
+            throw JFAPIError.setupFailed
+        }
+        return try await authorizeQuickConnect(code: code, server: server)
+    }
+
+    /// Authorizes a pending Quick Connect request against a *specific* authenticated server, using
+    /// that server's stored credentials. Used when sharing a server with a nearby device, which may
+    /// not be the currently active server.
+    /// - Parameters:
+    ///   - code: The code the pending device is displaying.
+    ///   - server: The authenticated server whose session approves the request.
+    /// - Returns: `true` when the server accepted the code.
+    static func authorizeQuickConnect(code: String, server: Server) async throws -> Bool {
+        guard server.isAuthenticated, let accessToken = server.accessToken else {
+            throw JFAPIError.setupFailed
+        }
+        let configuration = JellyfinClient.Configuration(
+            url: server.url,
+            accessToken: accessToken,
+            client: clientName,
+            deviceName: clientName,
+            deviceID: server.id,
+            version: "1.0"
+        )
+        let client = JellyfinClient(configuration: configuration)
         let request = Request<Bool>(
             path: "/QuickConnect/Authorize",
             method: "POST",
-            query: [("code", code), ("userId", context.userID)],
+            query: [("code", code), ("userId", server.jellyfinUserID ?? "")],
             id: "AuthorizeQuickConnect"
         )
-        let response = try await context.client.send(request)
+        let response = try await client.send(request)
         return response.value
     }
 }

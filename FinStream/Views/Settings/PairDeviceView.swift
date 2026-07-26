@@ -26,7 +26,7 @@ struct PairDeviceView: View {
     var body: some View {
         SettingsSplitView {
             formContent
-                .navigationTitle("Pair a Device")
+                .navigationTitle("Quick Connect")
                 .platformNavigationToolbar(titleDisplayMode: .inline)
         } infoPanel: {
             VStack(spacing: 20) {

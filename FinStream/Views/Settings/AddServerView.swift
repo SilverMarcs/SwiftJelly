@@ -41,6 +41,11 @@ struct AddServerView: View {
                     }
                 }
         } infoPanel: {
+            #if os(tvOS)
+            // The left half of the split screen: pair a nearby signed-in device to sign in
+            // instantly, no typing required.
+            PairNearbyDeviceView()
+            #else
             VStack(spacing: 20) {
                 Image(systemName: "plus")
                     .font(.system(size: 200))
@@ -51,6 +56,7 @@ struct AddServerView: View {
                     .bold()
                     .foregroundStyle(.secondary)
             }
+            #endif
         }
         .navigationTitle("Add Server")
         .platformNavigationToolbar(titleDisplayMode: .inline)
@@ -62,7 +68,7 @@ struct AddServerView: View {
     private var formContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 40) {
-                fieldSection("Server Details") {
+                fieldSection("Enter Details Manually") {
                     TextField("Server Name", text: $serverName)
                     TextField("Server URL", text: $serverURL)
                         .textContentType(.URL)
@@ -87,11 +93,11 @@ struct AddServerView: View {
                     .disabled(!canSubmit || username.isEmpty || isAuthenticating)
                 }
 
-                fieldSection("Or") {
+                fieldSection("Or Use Quick Connect") {
                     Button {
                         startQuickConnect()
                     } label: {
-                        Label("Use Quick Connect", systemImage: "bolt.horizontal.circle")
+                        Label("Show a Quick Connect Code", systemImage: "bolt.horizontal.circle")
                             .frame(maxWidth: .infinity)
                     }
                     .disabled(!canSubmit || isAuthenticating)

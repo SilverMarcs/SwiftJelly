@@ -36,6 +36,23 @@ struct ServerSwitcherList: View {
                 } label: {
                     Label("Add Server", systemImage: "plus")
                 }
+
+                #if os(tvOS)
+                NavigationLink {
+                    PairNearbyDeviceView()
+                } label: {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Pair a Nearby Device")
+                            Text("Sign in with your iPhone, iPad, or Mac")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "iphone.gen3.radiowaves.left.and.right")
+                    }
+                }
+                #endif
             }
         }
         .formStyle(.grouped)

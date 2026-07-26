@@ -38,9 +38,17 @@ final class QuickConnectViewModel {
         self.client = JFAPI.makeQuickConnectClient(for: server)
     }
 
-    /// Starts (or restarts) the Quick Connect flow, calling `onSuccess` with an authenticated
-    /// server once the request has been approved.
-    func start(onSuccess: @escaping (Server) -> Void) {
+    /// Starts (or restarts) the Quick Connect flow.
+    /// - Parameters:
+    ///   - onCode: Called with the user-facing code as soon as it is obtained. Used by the nearby
+    ///     pairing flow to relay the code to the approving device instead of displaying it.
+    ///   - onFailure: Called with a user-facing message if the flow fails or times out.
+    ///   - onSuccess: Called with an authenticated server once the request has been approved.
+    func start(
+        onCode: ((String) -> Void)? = nil,
+        onFailure: ((String) -> Void)? = nil,
+        onSuccess: @escaping (Server) -> Void
+    ) {
         flowTask?.cancel()
         phase = .connecting
 
@@ -48,6 +56,7 @@ final class QuickConnectViewModel {
             do {
                 let (secret, code) = try await JFAPI.initiateQuickConnect(client: client)
                 phase = .awaitingApproval(code: code)
+                onCode?(code)
 
                 for _ in 0 ..< maxPolls {
                     try Task.checkCancellation()
@@ -67,11 +76,14 @@ final class QuickConnectViewModel {
                     try await Task.sleep(nanoseconds: pollIntervalSeconds * 1_000_000_000)
                 }
 
-                phase = .failed("Quick Connect timed out. Please try again.")
+                let message = "Quick Connect timed out. Please try again."
+                phase = .failed(message)
+                onFailure?(message)
             } catch is CancellationError {
                 // The flow was cancelled intentionally, nothing to report.
             } catch {
                 phase = .failed(error.localizedDescription)
+                onFailure?(error.localizedDescription)
             }
         }
     }

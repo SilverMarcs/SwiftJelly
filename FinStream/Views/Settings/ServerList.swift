@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ServerList: View {
     private var dataManager = DataManager.shared
-    
+
     var body: some View {
         SettingsSplitView {
             Form {
@@ -44,6 +44,12 @@ struct ServerList: View {
                     AddServerView()
                 } label: {
                     Label("Add Server", systemImage: "plus")
+                }
+
+                NavigationLink {
+                    PairNearbyDeviceView()
+                } label: {
+                    Label("Pair a Nearby Device", systemImage: "iphone.gen3.radiowaves.left.and.right")
                 }
                 #endif
             }

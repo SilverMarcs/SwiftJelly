@@ -16,8 +16,10 @@ struct ContentView: View {
 
     #if os(iOS)
     @State private var showingSettings = false
+    @State private var hostPairing = HostPairingCoordinator()
+    @Environment(\.scenePhase) private var scenePhase
     #endif
-    
+
     #if os(tvOS)
     @State private var isTopShelfNavigationActive = false
     @State private var topShelfNavigationItem: BaseItemDto?
@@ -73,6 +75,22 @@ struct ContentView: View {
                         }
                 }
             }
+            // Present the sharing status sheet when a nearby Apple TV connects (after the system's
+            // trust prompt), so it never appears unprompted.
+            .sheet(isPresented: Binding(
+                get: { hostPairing.isSessionActive },
+                set: { if !$0 { hostPairing.endSession() } }
+            )) {
+                ShareServersSheet(coordinator: hostPairing)
+            }
+            .task { startPairingListenerIfNeeded() }
+            .onChange(of: scenePhase) { _, phase in
+                switch phase {
+                case .active: startPairingListenerIfNeeded()
+                case .background: hostPairing.stopListening()
+                default: break
+                }
+            }
             #endif
             #if os(tvOS)
             .onOpenURL { url in
@@ -107,6 +125,14 @@ struct ContentView: View {
             .environment(trendingViewModel)
         }
     }
+
+    #if os(iOS)
+    /// Starts listening for a nearby Apple TV, but only when there's a signed-in server to share.
+    private func startPairingListenerIfNeeded() {
+        guard dataManager.servers.contains(where: { $0.isAuthenticated }) else { return }
+        hostPairing.startListening()
+    }
+    #endif
 
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView

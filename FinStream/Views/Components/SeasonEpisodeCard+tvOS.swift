@@ -74,19 +74,12 @@ struct SeasonEpisodeCard: View {
                 content.offset(y: descriptionFocused ? -25 : 0)
             }
             .animation(.snappy, value: descriptionFocused)
-
-            // The `.card` button style always paints a background. To keep the
-            // description card transparent when its parent episode card is not
-            // selected, only use `.card` when the episode (or the description
-            // itself) is focused, and fall back to `.plain` otherwise.
-            if episodeCardFocused || descriptionFocused {
-                descriptionButton
-                    .buttonStyle(.card)
-            } else {
-                descriptionButton
-                    .buttonStyle(.plain)
-            }
+            
+            descriptionButton
+                .buttonStyle(.card)
         }
+        .animation(.snappy, value: episodeCardFocused)
+        .animation(.snappy, value: descriptionFocused)
         .focusSection()
     }
 

@@ -43,7 +43,7 @@ struct SettingsView: View {
             NavigationLink {
                 PairDeviceView()
             } label: {
-                Label("Pair a Device", systemImage: "bolt.horizontal.circle")
+                Label("Quick Connect", systemImage: "bolt.horizontal.circle")
             }
             #endif
 

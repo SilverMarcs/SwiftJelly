@@ -17,6 +17,32 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>FinStream connects to Jellyfin servers on your local network.</string>
+	<key>NSApplicationServices</key>
+	<dict>
+		<key>Browses</key>
+		<array>
+			<dict>
+				<key>NSApplicationServiceIdentifier</key>
+				<string>FinStream-Pairing</string>
+				<key>NSApplicationServiceUsageDescription</key>
+				<string>Sign this Apple TV into your Jellyfin servers using FinStream on a nearby iPhone or iPad.</string>
+				<key>NSApplicationServicePlatformSupport</key>
+				<array>
+					<string>iOS</string>
+					<string>iPadOS</string>
+				</array>
+			</dict>
+		</array>
+		<key>Advertises</key>
+		<array>
+			<dict>
+				<key>NSApplicationServiceIdentifier</key>
+				<string>FinStream-Pairing</string>
+			</dict>
+		</array>
+	</dict>
 	<key>TVTopShelfImage</key>
 	<dict>
 		<key>TVTopShelfPrimaryImage</key>
