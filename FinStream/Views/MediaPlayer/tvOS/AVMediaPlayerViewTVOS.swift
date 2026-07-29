@@ -22,6 +22,9 @@ struct AVMediaPlayerViewTVOS: View {
                 onSelectAudioTrack: { track in
                     Task { await model.switchAudioTrack(to: track) }
                 },
+                onSelectEpisode: { episode in
+                    Task { await model.transition(to: episode) }
+                },
                 onNextEpisode: { Task { await model.transitionToNextEpisode() } },
                 onDismiss: {
                     playbackManager.endPlayback()

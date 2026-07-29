@@ -4,6 +4,7 @@ import JellyfinAPI
 @MainActor
 final class SeasonEpisodesViewController: UIViewController {
     private let item: BaseItemDto
+    private let onSelectEpisode: (BaseItemDto) -> Void
     private var items: [BaseItemDto] = []
 
     private lazy var collectionView: UICollectionView = {
@@ -43,8 +44,9 @@ final class SeasonEpisodesViewController: UIViewController {
         return label
     }()
 
-    init(item: BaseItemDto) {
+    init(item: BaseItemDto, onSelectEpisode: @escaping (BaseItemDto) -> Void) {
         self.item = item
+        self.onSelectEpisode = onSelectEpisode
         super.init(nibName: nil, bundle: nil)
         title = "Episodes"
     }
@@ -111,15 +113,6 @@ final class SeasonEpisodesViewController: UIViewController {
         let indexPath = IndexPath(item: index, section: 0)
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
     }
-
-    private func showDetails(for item: BaseItemDto) {
-        // Pause current playback when navigating to another episode.
-        PlaybackManager.shared.pausePlayback()
-
-        let destination = MediaNavigationDestinationBuilder.viewController(for: item)
-        destination.modalPresentationStyle = .fullScreen
-        present(destination, animated: true)
-    }
 }
 
 extension SeasonEpisodesViewController: UICollectionViewDataSource {
@@ -142,7 +135,7 @@ extension SeasonEpisodesViewController: UICollectionViewDataSource {
 
 extension SeasonEpisodesViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        showDetails(for: items[indexPath.item])
+        onSelectEpisode(items[indexPath.item])
     }
 }
 

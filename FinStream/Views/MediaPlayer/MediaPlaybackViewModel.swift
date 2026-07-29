@@ -213,6 +213,28 @@ import Observation
         await load(audioIndex: requestedAudioStreamIndex, resumeSeconds: nil)
     }
 
+    func transition(to episode: BaseItemDto) async {
+        guard !isAutoLoadingNext else { return }
+
+        guard episode.id != item.id else {
+            player?.play()
+            return
+        }
+
+        player?.pause()
+        player?.replaceCurrentItem(with: nil)
+
+        isAutoLoadingNext = true
+        defer { isAutoLoadingNext = false }
+
+        await reportPlaybackStopped()
+        stopObservingTime()
+
+        nextEpisode = nil
+        item = episode
+        await load(audioIndex: requestedAudioStreamIndex, resumeSeconds: nil)
+    }
+
     func switchAudioTrack(to track: PlaybackAudioTrack) async {
         guard track != selectedAudioTrack else { return }
         preferredAudioLanguage = track.languageCode ?? preferredAudioLanguage
