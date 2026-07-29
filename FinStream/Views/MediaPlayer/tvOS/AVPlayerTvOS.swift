@@ -15,6 +15,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
     let creditsStartSeconds: Double?
     let onSkipIntro: () -> Void
     let onSelectAudioTrack: (PlaybackAudioTrack) -> Void
+    let onSelectEpisode: (BaseItemDto) -> Void
     let onNextEpisode: () -> Void
     let onDismiss: () -> Void
 
@@ -271,7 +272,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         // anything without season context) fall back to related content.
         let infoTab: UIViewController
         if item.type == .episode, item.seriesID != nil, item.seasonID != nil {
-            infoTab = SeasonEpisodesViewController(item: item)
+            infoTab = SeasonEpisodesViewController(item: item, onSelectEpisode: onSelectEpisode)
         } else {
             infoTab = RelatedContentViewController(item: item)
         }
