@@ -13,6 +13,8 @@ import SwiftMediaViewer
 struct UserAvatarView: View {
     let server: Server
     var size: CGFloat = 32
+    /// Draws a prominent green ring to mark the active profile.
+    var isSelected: Bool = false
 
     var body: some View {
         Group {
@@ -29,7 +31,10 @@ struct UserAvatarView: View {
         .background(.background.secondary)
         .clipShape(.circle)
         .overlay {
-            Circle().strokeBorder(.tertiary, lineWidth: 0.5)
+            Circle().strokeBorder(
+                isSelected ? AnyShapeStyle(.green) : AnyShapeStyle(.tertiary),
+                lineWidth: isSelected ? max(3, size * 0.06) : 0.5
+            )
         }
     }
 

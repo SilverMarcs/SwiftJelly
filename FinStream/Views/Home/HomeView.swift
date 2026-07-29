@@ -28,10 +28,6 @@ struct HomeView: View {
     var body: some View {
 #if os(tvOS)
         ZStack(alignment: .top) {
-            Rectangle()
-                .fill(.background.secondary)
-                .ignoresSafeArea()
-
             HeroParallaxBackground(
                 item: heroBackdropItem,
                 scrollOffset: scrollOffset,
@@ -66,26 +62,20 @@ struct HomeView: View {
 
                 ContinueWatchingView()
 
-                MediaShelf(header: "Favorites") {
+                MediaShelf(header: "Favorites", filter: .favorites) {
                     try await JFAPI.loadFavoriteItems(limit: 15)
-                } destination: {
-                    FilteredMediaView(filter: .favorites)
                 }
 
                 GenreCarouselView()
 
-                MediaShelf(header: "Recently Added Movies") {
+                MediaShelf(header: "Recently Added Movies", filter: .recentlyAdded(.movie)) {
                     try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
-                } destination: {
-                    FilteredMediaView(filter: .recentlyAdded(.movie))
                 }
 
                 LibrariesView()
 
-                MediaShelf(header: "Recently Added Shows") {
+                MediaShelf(header: "Recently Added Shows", filter: .recentlyAdded(.series)) {
                     try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
-                } destination: {
-                    FilteredMediaView(filter: .recentlyAdded(.series))
                 }
             }
             .scenePadding(.bottom)

@@ -15,6 +15,11 @@ struct ContentView: View {
     @State private var playbackManager = PlaybackManager.shared
 
     #if os(iOS)
+    @Namespace private var detailZoomNamespace
+    @Namespace private var playerZoomNamespace
+    #endif
+
+    #if os(iOS)
     @State private var showingSettings = false
     #endif
     
@@ -41,27 +46,14 @@ struct ContentView: View {
         } else {
             TabView(selection: $selectedTab) {
                 ForEach(primaryTabs, id: \.self) { tab in
-                    Tab(tab.title,
-                        systemImage: tab.systemImage,
-                        value: tab,
-                        role: tab == .search ? .search : .none
-                    ) {
-                        NavigationStack {
-                            tabWithNavigationDestinations(tab: tab)
-                        }
-                        .id(dataManager.activeServerID)
-                    }
+                    defaultTab(tab)
                 }
 
                 if !isCompactSize {
                     libraryTabs()
                 }
             }
-            #if !os(tvOS)
-            .tabViewSidebarHeader {
-                ProfileSidebarButton()
-            }
-            #endif
+            .profileSidebarHeader()
             #if os(iOS)
             .sheet(isPresented: $showingSettings) {
                 NavigationStack {
@@ -98,6 +90,7 @@ struct ContentView: View {
                 #else
                 AVMediaPlayerViewIOS()
                     .ignoresSafeArea()
+                    .zoomTransitionDestination(sourceID: playbackManager.zoomSourceID, in: playerZoomNamespace)
                 #endif
             }
             #endif
@@ -105,6 +98,10 @@ struct ContentView: View {
                 await trendingViewModel.loadTrendingIfNeeded()
             }
             .environment(trendingViewModel)
+            #if os(iOS)
+            .environment(\.detailZoomNamespace, detailZoomNamespace)
+            .environment(\.playerZoomNamespace, playerZoomNamespace)
+            #endif
         }
     }
 
@@ -141,6 +138,20 @@ struct ContentView: View {
     }
     
     @TabContentBuilder<TabSelection>
+    private func defaultTab(_ tab: TabSelection) -> some TabContent<TabSelection> {
+        Tab(tab.title,
+            systemImage: tab.systemImage,
+            value: tab,
+            role: tab == .search ? .search : .none
+        ) {
+            NavigationStack {
+                tabWithNavigationDestinations(tab: tab)
+            }
+            .id(dataManager.activeServerID)
+        }
+    }
+
+    @TabContentBuilder<TabSelection>
     private func libraryTabs() -> some TabContent<TabSelection> {
         TabSection {
             ForEach(TabSelection.extendedlibraryTabs, id: \.self) { libraryTab in
@@ -165,9 +176,11 @@ struct ContentView: View {
             tabs.removeAll { $0 == .discover }
         }
         #if os(tvOS)
-        // tvOS can't use `tabViewSidebarHeader` (tvOS 27+), so the profile lives
-        // as the first entry at the top of the sidebar instead.
-        tabs.insert(.profile, at: 0)
+        // `tabViewSidebarHeader` is tvOS 27+. On older versions the profile can't
+        // live in the header, so fall back to it being the first sidebar tab.
+        if #unavailable(tvOS 27.0) {
+            tabs.insert(.profile, at: 0)
+        }
         #endif
         return tabs
     }
@@ -194,4 +207,28 @@ struct ContentView: View {
         }
     }
     #endif
+}
+
+private extension View {
+    /// Places the profile button at the top of the tab view sidebar. The tvOS
+    /// header API requires tvOS 27; on older versions the profile is shown as
+    /// the first sidebar tab instead (see `ContentView.primaryTabs`).
+    @ViewBuilder
+    func profileSidebarHeader() -> some View {
+        #if os(tvOS)
+        if #available(tvOS 27.0, *) {
+            tabViewSidebarHeader {
+                ProfileSidebarButton()
+                    .padding()
+            }
+        } else {
+            self
+        }
+        #else
+        tabViewSidebarHeader {
+            ProfileSidebarButton()
+            Spacer()
+        }
+        #endif
+    }
 }

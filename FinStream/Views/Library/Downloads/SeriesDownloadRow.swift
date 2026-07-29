@@ -30,9 +30,7 @@ struct SeriesDownloadRow: View {
     }
 
     var body: some View {
-        NavigationLink {
-            SeriesDownloadsView(seriesID: seriesID, seriesName: seriesName)
-        } label: {
+        NavigationLink(value: DownloadRoute.series(seriesID: seriesID, seriesName: seriesName)) {
             HStack {
                 DownloadCellContent(
                     item: representativeEpisode,
@@ -93,3 +91,9 @@ struct SeriesDownloadRow: View {
         }
     }
 }
+/// Navigation value for pushing a series' downloaded-episodes list. Registered
+/// once by the enclosing `DownloadsView` list rather than per row.
+enum DownloadRoute: Hashable {
+    case series(seriesID: String, seriesName: String)
+}
+

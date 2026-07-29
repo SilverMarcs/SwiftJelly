@@ -37,13 +37,15 @@ struct OverviewView: View {
                         Button {
                             showFullOverview = true
                         } label: {
-//                            Image(systemName: "ellipsis")
-
                             Text("MORE...")
                                 .font(.caption)
                         }
                         .buttonStyle(.glass)
+                        #if !os(macOS)
                         .tint(.primary)
+                        #else
+                        .buttonBorderShape(.capsule)
+                        #endif
                         .sheet(isPresented: $showFullOverview) {
                             OverviewSheetView(
                                 item: item,

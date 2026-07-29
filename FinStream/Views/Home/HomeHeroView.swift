@@ -44,6 +44,9 @@ struct HomeHeroView: View {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
                 #if os(tvOS)
+                // Match the horizontal inset `HeroCarouselView` adds around the
+                // real hero so the loading skeleton lines up with actual content.
+                .padding(.horizontal, 40)
                 .onAppear { backdropItem = nil }
                 #endif
             }

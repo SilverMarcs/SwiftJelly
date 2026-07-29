@@ -94,6 +94,12 @@ struct DownloadsView: View {
         }
         .navigationTitle("Downloads")
         .platformNavigationToolbar(titleDisplayMode: .inline)
+        .navigationDestination(for: DownloadRoute.self) { route in
+            switch route {
+            case .series(let seriesID, let seriesName):
+                SeriesDownloadsView(seriesID: seriesID, seriesName: seriesName)
+            }
+        }
     }
 
     @ViewBuilder

@@ -53,6 +53,13 @@ struct SeerrSettingsView: View {
                 .frame(minWidth: 500, minHeight: 600)
             }
         }
+        #elseif !os(tvOS)
+        .navigationDestination(for: SeerrSettingsRoute.self) { route in
+            switch route {
+            case .login(let url):
+                SeerrLoginWebView(serverURL: url)
+            }
+        }
         #endif
     }
 
@@ -77,15 +84,11 @@ struct SeerrSettingsView: View {
         .disabled(auth.serverURL.isEmpty)
         #elseif !os(tvOS)
         if let url = URL(string: auth.serverURL), !auth.serverURL.isEmpty {
-            NavigationLink {
-                SeerrLoginWebView(serverURL: url)
-            } label: {
+            NavigationLink(value: SeerrSettingsRoute.login(url)) {
                 Label("Sign In", systemImage: "person.crop.circle.badge.plus")
                 .labelStyle(.titleOnly)
                 .foregroundColor(.accent)
             }
-            .navigationLinkIndicatorVisibility(.hidden)
-
         }
         #endif
     }
@@ -121,6 +124,13 @@ struct SeerrSettingsView: View {
         auth.setServerURL("")
     }
 }
+
+#if !os(macOS) && !os(tvOS)
+/// Navigation value for pushing the Seerr web login for a given server URL.
+enum SeerrSettingsRoute: Hashable {
+    case login(URL)
+}
+#endif
 
 enum SeerrConnectionStatus {
     case idle

@@ -7,6 +7,38 @@ struct MediaChapterMarkers: Equatable, Sendable {
 }
 
 enum MediaChapterMarkerResolver {
+    /// Resolves markers from media segments provided by server plugins such as
+    /// the Intro Skipper plugin. This is the authoritative source when
+    /// available; chapters are only a fallback.
+    static func resolve(from segments: [MediaSegmentDto]) -> MediaChapterMarkers {
+        guard !segments.isEmpty else {
+            return .init(introRangeSeconds: nil, creditsStartSeconds: nil)
+        }
+
+        // Treat both Intro and Recap segments as skippable "intro" ranges.
+        // Prefer the earliest such range in the item.
+        let introRangeSeconds: Range<Double>? = segments
+            .filter { $0.type == .intro || $0.type == .recap }
+            .compactMap { segment -> Range<Double>? in
+                guard let start = segment.startSeconds,
+                      let end = segment.endSeconds,
+                      start.isFinite, end.isFinite, end > start else { return nil }
+                return start..<end
+            }
+            .min(by: { $0.lowerBound < $1.lowerBound })
+
+        // The credits/outro prompt starts at the beginning of the Outro segment.
+        let creditsStartSeconds: Double? = segments
+            .filter { $0.type == .outro }
+            .compactMap { segment -> Double? in
+                guard let start = segment.startSeconds, start.isFinite, start >= 0 else { return nil }
+                return start
+            }
+            .min()
+
+        return .init(introRangeSeconds: introRangeSeconds, creditsStartSeconds: creditsStartSeconds)
+    }
+
     static func resolve(from chapters: [ChapterInfo]?) -> MediaChapterMarkers {
         guard let chapters, !chapters.isEmpty else {
             return .init(introRangeSeconds: nil, creditsStartSeconds: nil)

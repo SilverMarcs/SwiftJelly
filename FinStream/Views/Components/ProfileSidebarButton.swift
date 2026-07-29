@@ -24,7 +24,6 @@ struct ProfileSidebarButton: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(server.username ?? server.name)
-                            .font(.headline)
                             .lineLimit(1)
                         Text(server.name)
                             .font(.caption)
@@ -47,16 +46,22 @@ struct ProfileSidebarButton: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        #if os(tvOS)
+        .fullScreenCover(isPresented: $showingSwitcher) {
+            ServerSwitcherView()
+        }
+        #else
         .sheet(isPresented: $showingSwitcher) {
             ServerSwitcherView()
         }
+        #endif
     }
 
     private var avatarSize: CGFloat {
         #if os(tvOS)
         60
         #else
-        36
+        30
         #endif
     }
 }

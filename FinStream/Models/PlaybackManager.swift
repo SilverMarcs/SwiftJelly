@@ -23,6 +23,12 @@ import AVFoundation
     /// Whether the player UI should be presented (non-macOS platforms).
     var isPlayerPresented = false
 
+    #if os(iOS)
+    /// Identifier of the view the player's zoom transition should originate
+    /// from. Set by the play button that starts playback.
+    var zoomSourceID = ""
+    #endif
+
     /// The currently playing item, if any.
     var currentItem: BaseItemDto? {
         viewModel?.item

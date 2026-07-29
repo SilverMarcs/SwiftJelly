@@ -102,35 +102,7 @@ struct HeroBackdropView<HeroActions: View>: View {
                 .boundToContainerWidth()
                 .frame(height: backdropHeight, alignment: .top)
                 .clipped()
-
-            if isCompactSize {
-                backdrop
-                    .scaledToFill()
-                    .boundToContainerWidth()
-                    .frame(height: backdropHeight, alignment: .top)
-                    .scaleEffect(x: 1, y: -1, anchor: .center)
-                    .frame(height: reflectionHeight, alignment: .top)
-                    .clipped()
-            }
-        }
-            .scrollTransition(axis: .vertical) { content, phase in
-                 content
-                    .offset(y: phase.isIdentity ? 0 : phase.value * -200)
-             }
-            .overlay(alignment: .bottom) {
-                if isCompactSize {
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .black.opacity(1), location: 0),
-                            .init(color: .black.opacity(0.9), location: 0.8),
-                            .init(color: .black.opacity(0), location: 1.0)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                    .frame(height: reflectionHeight + 150)
-                } else {
-                    #if os(macOS)
+                .overlay(alignment: .bottom) {
                     LinearGradient(
                         gradient: Gradient(stops: [
                             .init(color: .black, location: 0),
@@ -140,19 +112,29 @@ struct HeroBackdropView<HeroActions: View>: View {
                         startPoint: .bottom,
                         endPoint: .top
                     )
-                        .frame(height: 300)
-                    #else
+                    .frame(height: 300)
+                }
+
+            if isCompactSize {
+                Spacer(minLength: reflectionHeight)
+            }
+        }
+            .scrollTransition(axis: .vertical) { content, phase in
+                 content
+                    .offset(y: phase.isIdentity ? 0 : phase.value * -200)
+             }
+            .overlay(alignment: .bottom) { // Additional gradient for the iOS controls for the parallax scroll
+                if isCompactSize {
                     LinearGradient(
                         gradient: Gradient(stops: [
-                            .init(color: .black.opacity(0.9), location: 0),
-                            .init(color: .black.opacity(0.81), location: 0.4),
+                            .init(color: .black.opacity(1), location: 0),
+                            .init(color: .black.opacity(0.8), location: 0.8),
                             .init(color: .black.opacity(0), location: 1.0)
                         ]),
                         startPoint: .bottom,
                         endPoint: .top
                     )
-                        .frame(height: 300)
-                    #endif
+                    .frame(height: reflectionHeight + 150)
                 }
             }
         .backgroundExtensionEffect()

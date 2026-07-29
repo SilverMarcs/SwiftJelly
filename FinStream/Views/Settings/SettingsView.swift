@@ -33,16 +33,12 @@ struct SettingsView: View {
 
     var form: some View {
         Form {
-            NavigationLink {
-                ServerList()
-            } label: {
+            NavigationLink(value: SettingsRoute.serverList) {
                 Label("Servers", systemImage: "server.rack")
             }
 
             #if !os(tvOS)
-            NavigationLink {
-                PairDeviceView()
-            } label: {
+            NavigationLink(value: SettingsRoute.pairDevice) {
                 Label("Pair a Device", systemImage: "bolt.horizontal.circle")
             }
             #endif
@@ -59,9 +55,7 @@ struct SettingsView: View {
             #if !os(macOS)
             if showAppIconPicker {
                 Section {
-                    NavigationLink {
-                        AppIconPicker()
-                    } label: {
+                    NavigationLink(value: SettingsRoute.appIcon) {
                         Label("App Icon", systemImage: "app.dashed")
                     }
                 }
@@ -86,6 +80,20 @@ struct SettingsView: View {
                 }
         }
         .formStyle(.grouped)
+        .navigationDestination(for: SettingsRoute.self) { route in
+            switch route {
+            case .serverList:
+                ServerList()
+            #if !os(tvOS)
+            case .pairDevice:
+                PairDeviceView()
+            #endif
+            #if !os(macOS)
+            case .appIcon:
+                AppIconPicker()
+            #endif
+            }
+        }
         .platformTopBar("Settings", titleDisplayMode: .inline)
         #if os(iOS)
         .contentMargins(.top, 10)
@@ -93,6 +101,19 @@ struct SettingsView: View {
     }
 }
 
+
+/// Navigation values for the settings screen, pushed onto the enclosing
+/// `NavigationStack` via `NavigationLink(value:)`. Cases are conditional to
+/// match where each row (and its destination view) is available per platform.
+enum SettingsRoute: Hashable {
+    case serverList
+    #if !os(tvOS)
+    case pairDevice
+    #endif
+    #if !os(macOS)
+    case appIcon
+    #endif
+}
 
 #Preview {
     SettingsView()

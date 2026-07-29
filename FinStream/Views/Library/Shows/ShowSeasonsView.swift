@@ -13,7 +13,9 @@ struct ShowSeasonsView: View {
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
                     SeasonEpisodeCard(item: episode)
-                        .id(episode.id)                }
+                        .id(episode.id)
+                    
+                }
             }
             .scrollPosition($episodeScrollPosition)
         } header: {
@@ -92,7 +94,7 @@ struct ShowSeasonsView: View {
                 return !isWatched
             }
         }
-        if targetEpisode == nil { targetEpisode = sortedEpisodes.first } // why .last vs .first?
+        if targetEpisode == nil { targetEpisode = sortedEpisodes.first }
         if let episode = targetEpisode {
             withAnimation {
                 episodeScrollPosition.scrollTo(id: episode.id, anchor: .trailing) // trailing so it doesnt getcut off for smaller window sizes

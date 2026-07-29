@@ -8,7 +8,7 @@
 import Foundation
 import JellyfinAPI
 
-enum MediaFilter {
+enum MediaFilter: Hashable {
     case library(BaseItemDto)
     case genre(String)
     case studio(NameGuidPair)

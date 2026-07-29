@@ -71,6 +71,11 @@ struct LibraryView: View {
         .refreshable {
             await loadLibraries()
         }
+        #if os(iOS)
+        .navigationDestination(for: LibraryRoute.self) { _ in
+            DownloadsView()
+        }
+        #endif
         .task {
             if libraries.isEmpty {
                 isLoading = true
@@ -104,9 +109,7 @@ struct LibraryView: View {
 
     #if os(iOS)
     private var downloadsLink: some View {
-        NavigationLink {
-            DownloadsView()
-        } label: {
+        NavigationLink(value: LibraryRoute.downloads) {
             libraryCardShape {
                 DownloadsLibraryCard()
             }
@@ -142,3 +145,10 @@ struct LibraryView: View {
         #endif
     }
 }
+#if os(iOS)
+/// Navigation value for pushing the downloads screen from the library grid.
+enum LibraryRoute: Hashable {
+    case downloads
+}
+#endif
+

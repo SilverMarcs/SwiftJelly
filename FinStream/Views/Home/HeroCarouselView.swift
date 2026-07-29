@@ -28,6 +28,12 @@ struct HeroCarouselView: View {
     @State private var containerWidth: CGFloat = 0
     /// Whether the user (or a programmatic animation) is actively scrolling.
     @State private var isUserScrolling = false
+    /// Progress (0...1) of the current page's auto-scroll timer, driving the
+    /// paginator's fill. Resets whenever the settled page changes or the user
+    /// starts scrolling.
+    @State private var pageProgress: CGFloat = 0
+    /// Seconds each page stays before the carousel auto-advances.
+    private let autoScrollInterval: Double = 8
     #endif
 
     #if os(tvOS)
@@ -92,45 +98,60 @@ struct HeroCarouselView: View {
     }
 
     private var iosCarouselBody: some View {
-        GeometryReader { geo in
-            let width = geo.size.width
-            ScrollViewReader { proxy in
-                ZStack(alignment: .bottom) {
-                    ScrollView(.horizontal) {
-                        LazyHStack(spacing: 0) {
-                            ForEach(Array(items.enumerated()), id: \.element.id) { _, item in
-                                MediaNavigationLink(item: item) {
-                                    parallaxBackdrop(item, width: width)
-                                }
-                                .frame(width: width)
-                                .id(item.id)
+        ScrollViewReader { proxy in
+            ZStack(alignment: .bottom) {
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 0) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { _, item in
+                            MediaNavigationLink(item: item) {
+                                parallaxBackdrop(item)
                             }
+                            // Size pages to the scroll container. Unlike a width
+                            // read from a `GeometryReader` rooting this lazy child
+                            // — which can stick at zero after the carousel is
+                            // recycled off-screen and leave every page blank when
+                            // scrolled back — `containerRelativeFrame` is resolved
+                            // by the layout system on every pass, so it is always
+                            // correct on reappear.
+                            .containerRelativeFrame(.horizontal)
+                            .id(item.id)
                         }
                     }
-                    .scrollIndicators(.hidden)
-                    .scrollTargetBehavior(.paging)
-                    .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.x } action: { _, newX in
-                        scrollX = newX
+                }
+                .scrollIndicators(.hidden)
+                .scrollTargetBehavior(.paging)
+                .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.x } action: { _, newX in
+                    scrollX = newX
+                }
+                .onScrollGeometryChange(for: CGFloat.self) { $0.containerSize.width } action: { _, newWidth in
+                    containerWidth = newWidth
+                }
+                .onScrollPhaseChange { _, newPhase in
+                    isUserScrolling = newPhase != .idle
+                    if newPhase == .idle {
+                        startAutoScrollIOS(proxy: proxy)
+                    } else {
+                        // The user (or a programmatic scroll) took over: halt
+                        // the timer and wind the fill back to empty. Retarget
+                        // via an explicit animation so the in-flight 8s fill is
+                        // cancelled immediately instead of running to completion.
+                        stopAutoScroll()
+                        withAnimation(.linear(duration: 0.2)) { pageProgress = 0 }
                     }
-                    .onScrollPhaseChange { _, newPhase in
-                        isUserScrolling = newPhase != .idle
-                        if newPhase == .idle {
-                            startAutoScrollIOS(proxy: proxy)
-                        } else {
-                            stopAutoScroll()
-                        }
-                    }
-                    // Only the backdrop layer gets the rubber-band stretch when
-                    // the home scroll is pulled down; the details stay put.
-                    .stretchy()
+                }
+                // Only the backdrop layer gets the rubber-band stretch when
+                // the home scroll is pulled down; the details stay put.
+                .stretchy()
 
-                    detailsLayer
+                detailsLayer
+
+                if items.count > 1 {
+                    paginator
+                        .padding(.bottom, 16)
                 }
-                .onAppear {
-                    containerWidth = width
-                    startAutoScrollIOS(proxy: proxy)
-                }
-                .onChange(of: width) { _, newWidth in containerWidth = newWidth }
+            }
+            .onAppear {
+                startAutoScrollIOS(proxy: proxy)
             }
         }
         .frame(height: pageHeight)
@@ -140,8 +161,7 @@ struct HeroCarouselView: View {
     /// A single backdrop page, styled like `HeroBackdropView`: on compact widths
     /// a vertically-mirrored reflection extends the artwork. The image pans
     /// slower than the page, producing parallax against its neighbours.
-    private func parallaxBackdrop(_ item: BaseItemDto, width: CGFloat) -> some View {
-        let overscanWidth = width * overscanRatio
+    private func parallaxBackdrop(_ item: BaseItemDto) -> some View {
         let image = CachedAsyncImage(
             url: ImageURLProvider.imageURL(for: item, type: .backdrop),
             targetSize: 1500
@@ -150,13 +170,19 @@ struct HeroCarouselView: View {
         return VStack(spacing: 0) {
             image
                 .scaledToFill()
-                .frame(width: overscanWidth, height: backdropHeight, alignment: .top)
+                // Draw the image wider than the page so the parallax pan never
+                // reveals a gap at the edges. The width is taken straight from the
+                // scroll container every layout pass, so it survives off-screen
+                // recycling (no zero-width collapse).
+                .containerRelativeFrame(.horizontal) { length, _ in length * overscanRatio }
+                .frame(height: backdropHeight, alignment: .top)
                 .clipped()
 
             if isCompact {
                 image
                     .scaledToFill()
-                    .frame(width: overscanWidth, height: backdropHeight, alignment: .top)
+                    .containerRelativeFrame(.horizontal) { length, _ in length * overscanRatio }
+                    .frame(height: backdropHeight, alignment: .top)
                     .scaleEffect(x: 1, y: -1, anchor: .center)
                     .frame(height: reflectionHeight, alignment: .top)
                     .clipped()
@@ -166,13 +192,14 @@ struct HeroCarouselView: View {
             let minX = proxy.frame(in: .scrollView(axis: .horizontal)).minX
             return content.offset(x: -minX * parallaxFactor)
         }
-        .frame(width: width, height: pageHeight)
+        .containerRelativeFrame(.horizontal)
+        .frame(height: pageHeight)
         .clipped()
         .overlay(alignment: .bottom) {
             LinearGradient(
                 gradient: Gradient(stops: [
                     .init(color: .black.opacity(isCompact ? 1.0 : 0.9), location: 0),
-                    .init(color: .black.opacity(isCompact ? 0.9 : 0.81), location: isCompact ? 0.8 : 0.4),
+                    .init(color: .black.opacity(isCompact ? 0.9 : 0.81), location: isCompact ? 0.7 : 0.4),
                     .init(color: .black.opacity(0.0), location: 1.0)
                 ]),
                 startPoint: .bottom,
@@ -192,24 +219,75 @@ struct HeroCarouselView: View {
                 let distance = abs(CGFloat(index) - fraction)
                 if distance < 1 {
                     hero(item: activeItemBinding(for: index), showsBackground: false)
-                        .opacity(Double(1 - distance))
+                        .opacity(Double(1 - distance * 2))
                         .allowsHitTesting(index == nearestIndex)
                 }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        // Lift the details so the attributes clear the paginator sitting below.
+        .padding(.bottom, items.count > 1 ? 24 : 0)
         // Let the swipe gesture reach the backdrop layer while scrolling; the
         // decorative content is individually non-interactive, so only the action
         // buttons intercept touches once settled.
         .allowsHitTesting(!isUserScrolling)
     }
 
+    /// App Store-style paginator: a dot per page, with the active page shown as a
+    /// capsule whose bright fill tracks the auto-scroll timer. The pill expands
+    /// and contracts continuously with the swipe via `fraction`.
+    private var paginator: some View {
+        let dotHeight: CGFloat = 8
+        let dotWidth: CGFloat = 8
+        let activeWidth: CGFloat = 28
+
+        return HStack(spacing: 6) {
+            ForEach(items.indices, id: \.self) { index in
+                // Continuous "activeness": 1 when settled on this page, 0 a full
+                // page away. Driven by the live scroll fraction so the pill morphs
+                // smoothly under the finger instead of snapping at the midpoint.
+                let activeness = max(0, 1 - abs(fraction - CGFloat(index)))
+                let trackWidth = dotWidth + (activeWidth - dotWidth) * activeness
+                let isCurrent = index == nearestIndex
+
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.35))
+                        .frame(width: trackWidth, height: dotHeight)
+
+                    if isCurrent {
+                        // Bright timer fill, clamped to a minimum so the active
+                        // page always reads as a solid nub that grows into a pill
+                        // rather than vanishing when the timer is near empty.
+                        Capsule()
+                            .fill(Color.white)
+                            .frame(width: max(dotHeight, trackWidth * pageProgress), height: dotHeight)
+                    }
+                }
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    /// Resets the paginator fill to empty and animates it linearly across the
+    /// dwell interval, matching the pending auto-advance.
+    private func restartPageProgress() {
+        withAnimation(.linear(duration: 0.2)) { pageProgress = 0 }
+        withAnimation(.linear(duration: autoScrollInterval).delay(0.2)) {
+            pageProgress = 1
+        }
+    }
+
     private func startAutoScrollIOS(proxy: ScrollViewProxy) {
         autoScrollTask?.cancel()
-        guard items.count > 1 else { return }
+        guard items.count > 1 else {
+            pageProgress = 0
+            return
+        }
+        restartPageProgress()
         autoScrollTask = Task { @MainActor in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(8))
+                try? await Task.sleep(for: .seconds(autoScrollInterval))
                 guard !Task.isCancelled, !isUserScrolling else { continue }
                 let next = (nearestIndex + 1) % items.count
                 withAnimation(.easeInOut(duration: 0.6)) {
@@ -251,6 +329,7 @@ struct HeroCarouselView: View {
             }
         }
         #if os(tvOS)
+        .padding(.horizontal, 40)
         .ignoresSafeArea()
         #else
         .overlay {
@@ -367,11 +446,20 @@ struct HeroCarouselView: View {
     #if os(tvOS)
     /// Drives focus onto the hero's Play button. `@FocusState` (unlike
     /// `resetFocus`) can move focus across focus scopes, so this reliably pulls
-    /// focus off a Continue Watching card. We assign it now and again shortly
-    /// after so our request beats the focus engine's own update for the event.
+    /// focus off a Continue Watching card.
+    ///
+    /// `@FocusState` only moves focus on a *change* of value. After a navigation
+    /// round-trip the focus engine restores focus itself and leaves this binding
+    /// desynced — it can still read `true` while focus actually sits on another
+    /// action button. Assigning `true` again would then be a no-op and focus
+    /// would stay on the wrong button. So we first clear to `false`, then assert
+    /// `true` after a yield to guarantee a real `false -> true` edge, re-asserting
+    /// a couple of times so our request beats the focus engine's own update.
     private func focusPlayButton() {
-        playButtonFocused = true
+        playButtonFocused = false
         Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(20))
+            playButtonFocused = true
             try? await Task.sleep(for: .milliseconds(120))
             playButtonFocused = true
             try? await Task.sleep(for: .milliseconds(200))

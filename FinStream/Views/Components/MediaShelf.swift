@@ -1,10 +1,13 @@
 import SwiftUI
 import JellyfinAPI
 
-struct MediaShelf<Destination: View>: View {
+struct MediaShelf: View {
     let header: String
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
-    private let destination: (() -> Destination)?
+    /// When set, a "See All" affordance pushes `FilteredMediaView(filter:)` via
+    /// value-based navigation (the destination is registered by
+    /// `navigationDestinations()`). `nil` hides the affordance.
+    private let filter: MediaFilter?
 
     @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 40)
     @State private var isLoading = false
@@ -13,22 +16,12 @@ struct MediaShelf<Destination: View>: View {
 
     init(
         header: String,
-        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto],
-        @ViewBuilder destination: @escaping () -> Destination
+        filter: MediaFilter? = nil,
+        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto]
     ) {
         self.header = header
+        self.filter = filter
         self.loadItemsAction = loadItemsAction
-        self.destination = destination
-    }
-
-    fileprivate init(
-        header: String,
-        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto],
-        destination: (() -> Destination)?
-    ) {
-        self.header = header
-        self.loadItemsAction = loadItemsAction
-        self.destination = destination
     }
 
     var body: some View {
@@ -46,10 +39,8 @@ struct MediaShelf<Destination: View>: View {
                 }
 
                 #if os(tvOS)
-                if let destination, hasResolvedItems {
-                    NavigationLink {
-                        destination()
-                    } label: {
+                if let filter, hasResolvedItems {
+                    NavigationLink(value: filter) {
                         SeeAllCard()
                     }
                     .buttonStyle(.card)
@@ -61,10 +52,8 @@ struct MediaShelf<Destination: View>: View {
             #if os(tvOS)
             Text(header)
             #else
-            if let destination {
-                NavigationLink {
-                    destination()
-                } label: {
+            if let filter {
+                NavigationLink(value: filter) {
                     HStack(spacing: 4) {
                         Text(header)
                         Image(systemName: "chevron.right")
@@ -149,15 +138,6 @@ struct MediaShelf<Destination: View>: View {
         withAnimation {
             showPlaceholder = false
         }
-    }
-}
-
-extension MediaShelf where Destination == EmptyView {
-    init(
-        header: String,
-        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto]
-    ) {
-        self.init(header: header, loadItemsAction: loadItemsAction, destination: nil)
     }
 }
 

@@ -78,17 +78,49 @@ import Observation
             player = session.player
             playbackInfo = session.info
             item = session.item
+            // Start with chapter-derived markers as a fallback, then refine
+            // with plugin-provided media segments (e.g. Intro Skipper) below.
             markers = MediaChapterMarkerResolver.resolve(from: session.item.chapters)
 
             audioTracks = PlaybackAudioTrack.tracks(from: session.info)
             selectedAudioTrack = resolveSelectedTrack(preferredIndex: audioIndex)
 
             startObservingTime(for: session.player)
+            loadMediaSegments(for: session.item, token: activePlaybackToken)
         } catch {
             // Intentionally ignore; just stop loading.
         }
 
         isLoading = false
+    }
+
+    /// Fetches plugin-provided media segments (intro/outro ranges from the
+    /// Intro Skipper plugin) and refines the current markers with them. Runs
+    /// in the background so it never delays the start of playback. The chapter
+    /// fallback set in `load` remains in effect if no segments are available.
+    private func loadMediaSegments(for item: BaseItemDto, token: UUID) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+
+            let segments: [MediaSegmentDto]
+            do {
+                segments = try await JFAPI.getMediaSegments(for: item)
+            } catch {
+                print("[MediaSegments] fetch failed for \(item.name ?? "?") (\(item.id ?? "?")): \(error)")
+                return
+            }
+
+            print("[MediaSegments] \(segments.count) segment(s) for \(item.name ?? "?"): " +
+                  segments.map { "\($0.type.rawValue)[\($0.startSeconds ?? -1)-\($0.endSeconds ?? -1)]" }.joined(separator: ", "))
+
+            guard !segments.isEmpty else { return }
+            guard token == self.playbackToken else { return }
+
+            let resolved = MediaChapterMarkerResolver.resolve(from: segments)
+            print("[MediaSegments] resolved intro=\(String(describing: resolved.introRangeSeconds)) credits=\(String(describing: resolved.creditsStartSeconds))")
+            guard resolved.introRangeSeconds != nil || resolved.creditsStartSeconds != nil else { return }
+            self.markers = resolved
+        }
     }
 
     /// Internal cleanup for switching items without triggering endPlayback.

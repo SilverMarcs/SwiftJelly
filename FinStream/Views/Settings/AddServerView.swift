@@ -6,8 +6,12 @@ struct AddServerView: View {
 
     private var dataManager = DataManager.shared
 
-    @State private var serverName = ""
-    @State private var serverURL = ""
+    /// When adding an account to an existing server, its name and URL are fixed
+    /// and only credentials are requested.
+    private let isAddingAccount: Bool
+
+    @State private var serverName: String
+    @State private var serverURL: String
     @State private var username = ""
     @State private var password = ""
 
@@ -19,6 +23,18 @@ struct AddServerView: View {
     /// The server being connected via Quick Connect, if any. Non-nil presents the Quick Connect sheet.
     @State private var quickConnectServer: Server?
 
+    /// Adds a brand-new server, or — when `existingServerURL` is supplied — a new
+    /// account (profile) to an already-saved server, reusing its name and URL.
+    init(existingServerName: String? = nil, existingServerURL: URL? = nil) {
+        _serverName = State(initialValue: existingServerName ?? "")
+        _serverURL = State(initialValue: existingServerURL?.absoluteString ?? "")
+        isAddingAccount = existingServerURL != nil
+    }
+
+    private var title: LocalizedStringKey {
+        isAddingAccount ? "Add Account" : "Add Server"
+    }
+
     private var canSubmit: Bool {
         !serverName.isEmpty && !serverURL.isEmpty
     }
@@ -26,7 +42,7 @@ struct AddServerView: View {
     var body: some View {
         SettingsSplitView {
             formContent
-                .navigationTitle("Add Server")
+                .navigationTitle(title)
                 .alert("Error", isPresented: $showingAlert) {
                     Button("OK") { }
                 } message: {
@@ -42,17 +58,17 @@ struct AddServerView: View {
                 }
         } infoPanel: {
             VStack(spacing: 20) {
-                Image(systemName: "plus")
+                Image(systemName: isAddingAccount ? "person.badge.plus" : "plus")
                     .font(.system(size: 200))
                     .foregroundStyle(.secondary)
 
-                Text("Add Server")
+                Text(title)
                     .font(.largeTitle)
                     .bold()
                     .foregroundStyle(.secondary)
             }
         }
-        .navigationTitle("Add Server")
+        .navigationTitle(title)
         .platformNavigationToolbar(titleDisplayMode: .inline)
     }
 
@@ -62,12 +78,18 @@ struct AddServerView: View {
     private var formContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 40) {
-                fieldSection("Server Details") {
-                    TextField("Server Name", text: $serverName)
-                    TextField("Server URL", text: $serverURL)
-                        .textContentType(.URL)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                if isAddingAccount {
+                    fieldSection("Server") {
+                        serverSummary
+                    }
+                } else {
+                    fieldSection("Server Details") {
+                        TextField("Server Name", text: $serverName)
+                        TextField("Server URL", text: $serverURL)
+                            .textContentType(.URL)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                    }
                 }
 
                 fieldSection("Sign In") {
@@ -84,6 +106,7 @@ struct AddServerView: View {
                     } label: {
                         connectLabel
                     }
+                    .buttonStyle(.borderedProminent)
                     .disabled(!canSubmit || username.isEmpty || isAuthenticating)
                 }
 
@@ -97,8 +120,23 @@ struct AddServerView: View {
                     .disabled(!canSubmit || isAuthenticating)
                 }
             }
-            .padding(.vertical)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 40)
         }
+    }
+
+    /// A clean, left-aligned summary of the fixed server when adding an account,
+    /// instead of sparse right-aligned `LabeledContent` rows.
+    private var serverSummary: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(serverName)
+                .font(.headline)
+            Text(serverURL)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func fieldSection<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
@@ -112,14 +150,21 @@ struct AddServerView: View {
     #else
     private var formContent: some View {
         Form {
-            Section("Server Details") {
-                TextField("Server Name", text: $serverName)
-                TextField("Server URL", text: $serverURL)
-                    .textContentType(.URL)
-                    .autocorrectionDisabled()
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
+            if isAddingAccount {
+                Section("Server") {
+                    LabeledContent("Name", value: serverName)
+                    LabeledContent("Address", value: serverURL)
+                }
+            } else {
+                Section("Server Details") {
+                    TextField("Server Name", text: $serverName)
+                    TextField("Server URL", text: $serverURL)
+                        .textContentType(.URL)
+                        .autocorrectionDisabled()
+                        #if !os(macOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                }
             }
 
             Section("Authentication") {

@@ -75,17 +75,17 @@ struct SeasonEpisodeCard: View {
             }
             .animation(.snappy, value: descriptionFocused)
 
-            // The `.card` button style always paints a background. To keep the
-            // description card transparent when its parent episode card is not
-            // selected, only use `.card` when the episode (or the description
-            // itself) is focused, and fall back to `.plain` otherwise.
-            if episodeCardFocused || descriptionFocused {
-                descriptionButton
-                    .buttonStyle(.card)
-            } else {
-                descriptionButton
-                    .buttonStyle(.plain)
-            }
+            descriptionButton
+                .buttonStyle(DescriptionCardButtonStyle(isActive: episodeCardFocused || descriptionFocused))
+                .visualEffect { content, geometry in
+                    content
+                        .offset(y: episodeCardFocused ? 25 : 0)
+                        .opacity(episodeCardFocused || descriptionFocused ? 1.0 : 0.6)
+                }
+                .animation(.snappy, value: episodeCardFocused)
+                .animation(.snappy, value: descriptionFocused)
+                .disabled(!episodeCardFocused && !descriptionFocused)
+                .buttonBorderShape(.roundedRectangle(radius: 25))
         }
         .focusSection()
     }
@@ -125,17 +125,30 @@ struct SeasonEpisodeCard: View {
             .frame(height: 170)
         }
         .focused($descriptionFocused)
-        .frame(maxWidth: cardWidth)
-        .visualEffect { content, geometry in
-            content
-                .offset(y: episodeCardFocused ? 25 : 0)
-                .opacity(episodeCardFocused || descriptionFocused ? 1.0 : 0.6)
-//                    .scaleEffect(episodeCardFocused || descriptionFocused ? 1.06 : 1.0)
-        }
-        .animation(.snappy, value: episodeCardFocused)
-        .animation(.snappy, value: descriptionFocused)
-        .disabled(!episodeCardFocused && !descriptionFocused)
-        .buttonBorderShape(.roundedRectangle(radius: 25))
+        .frame(maxWidth: cardWidth + 30)
+    }
+}
+
+/// A card-like button style for the episode description.
+///
+/// It keeps the tvOS card focus motion via `.hoverEffect(.highlight)`, but draws its own
+/// platter so the background can be transparent while inactive and animate in when active.
+private struct DescriptionCardButtonStyle: ButtonStyle {
+    /// Whether the parent episode card (or the description itself) is focused.
+    let isActive: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background {
+                RoundedRectangle(cornerRadius: 25)
+                    .fill(.quaternary)
+                    .opacity(isActive ? 1 : 0)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 25))
+            .hoverEffect(.highlight)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.snappy, value: isActive)
+            .animation(.snappy, value: configuration.isPressed)
     }
 }
 

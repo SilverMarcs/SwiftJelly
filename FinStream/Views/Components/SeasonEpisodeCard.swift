@@ -110,7 +110,7 @@ struct SeasonEpisodeCard: View {
         #if os(tvOS)
         550
         #else
-        Device.isMacOrPad ? 280 : 230
+        230
         #endif
     }
     
@@ -118,7 +118,7 @@ struct SeasonEpisodeCard: View {
         #if os(tvOS)
         483
         #else
-        Device.isMacOrPad ? 280 : 230
+        230
         #endif
     }
     
