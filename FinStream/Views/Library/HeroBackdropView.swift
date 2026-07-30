@@ -2,20 +2,6 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-private extension View {
-    /// Constrains width to the enclosing scroll container on platforms where
-    /// `containerRelativeFrame` is well-supported. macOS and iPadOS get a no-op since they
-    /// can crash inside ScrollView + backgroundExtensionEffect compositions or bleed/exceed boundaries in split views.
-    @ViewBuilder
-    func boundToContainerWidth() -> some View {
-        if Device.isMacOrPad {
-            self.frame(maxWidth: .infinity)
-        } else {
-            self.containerRelativeFrame(.horizontal)
-        }
-    }
-}
-
 struct HeroBackdropView<HeroActions: View>: View {
     @ViewBuilder let heroActions: HeroActions
 
@@ -88,60 +74,14 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     // MARK: - Backdrop
     
-    @ViewBuilder
     private var backdropImage: some View {
-        let reflectionHeight: CGFloat = 200
-        let backdrop = CachedAsyncImage(
-            url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1500
+        HeroBackdropImage(
+            item: item,
+            isCompact: isCompactSize,
+            backdropHeight: backdropHeight,
+            reflectionHeight: 200,
+            parallax: .vertical
         )
-        
-        VStack(spacing: 0) {
-            backdrop
-                .scaledToFill()
-                .boundToContainerWidth()
-                .frame(height: backdropHeight, alignment: .top)
-                .clipped()
-                .overlay(alignment: .bottom) {
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .black, location: 0),
-                            .init(color: .black.opacity(0.5), location: 0.4),
-                            .init(color: .black.opacity(0), location: 1.0)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                    .frame(height: 300)
-                }
-
-            if isCompactSize {
-                Spacer(minLength: reflectionHeight)
-            }
-        }
-            .scrollTransition(axis: .vertical) { content, phase in
-                 content
-                    .offset(y: phase.isIdentity ? 0 : phase.value * -200)
-             }
-            .overlay(alignment: .bottom) { // Additional gradient for the iOS controls for the parallax scroll
-                if isCompactSize {
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .black.opacity(1), location: 0),
-                            .init(color: .black.opacity(0.8), location: 0.8),
-                            .init(color: .black.opacity(0), location: 1.0)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                    .frame(height: reflectionHeight + 150)
-                }
-            }
-        .backgroundExtensionEffect()
-        #if os(iOS)
-        .stretchy()
-        #endif
-        .frame(height: isCompactSize ? backdropHeight + reflectionHeight : backdropHeight)
     }
     
     let bottomGradient = LinearGradient(

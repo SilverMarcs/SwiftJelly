@@ -12,34 +12,19 @@ struct MovieHeroActions: View {
     /// button (e.g. when the hero scrolls back into view).
     var playFocus: FocusState<Bool>.Binding? = nil
 
-    @Namespace private var actionButtonsNamespace
-
-    #if os(tvOS)
-    private var focusNamespace: Namespace.ID { externalFocusNamespace ?? actionButtonsNamespace }
-    #endif
-
     var body: some View {
-        GlassEffectContainer(spacing: spacing) {
-            HStack(spacing: spacing) {
-                MoviePlayButton(item: movie)
-#if os(tvOS)
-                    .prefersDefaultFocus(in: focusNamespace)
-                    .focused(optional: playFocus)
-#endif
-
-                #if os(tvOS)
-                HeroInfoButton(item: movie)
-                #endif
-
-                MarkPlayedButton(item: movie)
-
-                FavoriteButton(item: movie)
-            }
+        HeroActionButtons(
+            context: .carousel,
+            usesGlassContainer: true,
+            infoItem: movie,
+            markPlayedItem: movie,
+            favoriteItem: movie,
+            redactWhenEmpty: movie,
+            externalFocusNamespace: externalFocusNamespace,
+            playFocus: playFocus
+        ) {
+            MoviePlayButton(item: movie)
         }
-        .redacted(reason: movie.name?.isEmpty == false ? [] : .placeholder)
-#if os(tvOS)
-        .focusScope(focusNamespace)
-#endif
         .environment(\.refresh, refresh)
     }
 
@@ -50,15 +35,5 @@ struct MovieHeroActions: View {
         } catch {
             print("Error refreshing movie: \(error)")
         }
-    }
-
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        15
-        #elseif os(macOS)
-        8
-        #else
-        6
-        #endif
     }
 }

@@ -18,6 +18,12 @@ struct FinStreamApp: App {
             ContentView(selectedTab: $selectedTab)
                 .preferredColorScheme(.dark)
         }
+        #if os(macOS)
+        // Hide the titlebar backing so window content (e.g. the home hero
+        // artwork) fills the full window height, right up behind the traffic
+        // lights, instead of stopping below an empty translucent bar.
+        .windowStyle(.hiddenTitleBar)
+        #endif
         #if !os(tvOS)
         .commands {
             AppCommands(selectedTab: $selectedTab)

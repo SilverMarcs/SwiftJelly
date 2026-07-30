@@ -72,9 +72,9 @@ struct HeroCarouselView: View {
     private var isCompact: Bool { horizontalSizeClass == .compact }
     private var backdropHeight: CGFloat { isCompact ? 440 : 500 }
     private let reflectionHeight: CGFloat = 200
-    /// Full page height. On compact widths a mirrored reflection extends the
-    /// artwork downward (mirroring `HeroBackdropView`), so the page is taller and
-    /// shows a larger image.
+    /// Full page height. On compact widths the artwork extends downward into a
+    /// reflection (matching `HeroBackdropView`), so the page is taller and shows a
+    /// larger image.
     private var pageHeight: CGFloat { isCompact ? backdropHeight + reflectionHeight : backdropHeight }
 
     /// How much of the page translation the backdrop image absorbs, creating the
@@ -158,56 +158,19 @@ struct HeroCarouselView: View {
         .onDisappear { stopAutoScroll() }
     }
 
-    /// A single backdrop page, styled like `HeroBackdropView`: on compact widths
-    /// a vertically-mirrored reflection extends the artwork. The image pans
-    /// slower than the page, producing parallax against its neighbours.
+    /// A single backdrop page, styled to match the detail hero (`HeroBackdropView`):
+    /// the artwork darkens under a gradient over the image plus a separate controls
+    /// gradient, and on compact widths extends into a reflection via
+    /// `backgroundExtensionEffect` (a `Spacer`, not a hand-mirrored copy). The image
+    /// pans slower than the page, producing horizontal parallax against its neighbours.
     private func parallaxBackdrop(_ item: BaseItemDto) -> some View {
-        let image = CachedAsyncImage(
-            url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1500
+        HeroBackdropImage(
+            item: item,
+            isCompact: isCompact,
+            backdropHeight: backdropHeight,
+            reflectionHeight: reflectionHeight,
+            parallax: .horizontal(factor: parallaxFactor, overscan: overscanRatio)
         )
-
-        return VStack(spacing: 0) {
-            image
-                .scaledToFill()
-                // Draw the image wider than the page so the parallax pan never
-                // reveals a gap at the edges. The width is taken straight from the
-                // scroll container every layout pass, so it survives off-screen
-                // recycling (no zero-width collapse).
-                .containerRelativeFrame(.horizontal) { length, _ in length * overscanRatio }
-                .frame(height: backdropHeight, alignment: .top)
-                .clipped()
-
-            if isCompact {
-                image
-                    .scaledToFill()
-                    .containerRelativeFrame(.horizontal) { length, _ in length * overscanRatio }
-                    .frame(height: backdropHeight, alignment: .top)
-                    .scaleEffect(x: 1, y: -1, anchor: .center)
-                    .frame(height: reflectionHeight, alignment: .top)
-                    .clipped()
-            }
-        }
-        .visualEffect { content, proxy in
-            let minX = proxy.frame(in: .scrollView(axis: .horizontal)).minX
-            return content.offset(x: -minX * parallaxFactor)
-        }
-        .containerRelativeFrame(.horizontal)
-        .frame(height: pageHeight)
-        .clipped()
-        .overlay(alignment: .bottom) {
-            LinearGradient(
-                gradient: Gradient(stops: [
-                    .init(color: .black.opacity(isCompact ? 1.0 : 0.9), location: 0),
-                    .init(color: .black.opacity(isCompact ? 0.9 : 0.81), location: isCompact ? 0.7 : 0.4),
-                    .init(color: .black.opacity(0.0), location: 1.0)
-                ]),
-                startPoint: .bottom,
-                endPoint: .top
-            )
-            .frame(height: isCompact ? reflectionHeight + 150 : 300)
-            .allowsHitTesting(false)
-        }
     }
 
     /// The fixed foreground content (logo, actions, description, …). It never
