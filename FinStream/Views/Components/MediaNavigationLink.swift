@@ -13,24 +13,12 @@ struct MediaNavigationLink<Label: View>: View {
     @ViewBuilder let label: () -> Label
     
     var body: some View {
-        let navigationItem: any Hashable = {
-            if let item = item {
-                switch item.type {
-                case .person:
-                    return Person(from: item)
-                case .episode:
-                    return item.toSeries() ?? item
-                default:
-                    return item
-                }
-            }
-            else {
-                return BaseItemDto()
-            }
-        }()
+        if let item {
+            let destinationItem = item.type == .episode ? item.toSeries() ?? item : item
 
-        if item != nil {
-            NavigationLink(value: navigationItem) {
+            NavigationLink {
+                MediaDestinationView(item: destinationItem)
+            } label: {
                 label()
             }
             .adaptiveCardButtonStyle()
