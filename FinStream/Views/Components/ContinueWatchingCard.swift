@@ -43,7 +43,7 @@ struct ContinueWatchingCard: View {
                         }
 
                         if item.type == .episode {
-                            NavigationLink(value: item) {
+                            NavigationLink(value: NavigationRoute.media(item)) {
                                 Label("Go to Episode", systemImage: "play.rectangle")
                             }
                         }

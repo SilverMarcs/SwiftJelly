@@ -5,7 +5,7 @@ enum MediaNavigationDestinationBuilder {
     static func viewController(for item: BaseItemDto) -> UIViewController {
         let rootView = NavigationStack {
             MediaDestinationView(item: item)
-                .navigationDestinations()
+                .navigationRouteDestinations()
         }
         return UIHostingController(rootView: rootView)
     }

@@ -88,7 +88,7 @@ struct ContentView: View {
 
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
-            .navigationDestinations()
+            .navigationRouteDestinations()
         #if os(macOS)
             .frame(minWidth: 800)
         #endif
