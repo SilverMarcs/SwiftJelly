@@ -33,7 +33,7 @@ struct HeroCarouselNavigationButtons: View {
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
         .controlSize(.regular)
-        .tint(.primary)
+        .foregroundStyle(.primary)
     }
 }
 #endif

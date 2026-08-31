@@ -106,6 +106,7 @@ struct HeroCarouselView: View {
                 }
                 .buttonBorderShape(.circle)
                 .buttonStyle(.glass)
+                .foregroundStyle(.primary)
                 .controlSize(.large)
                 .padding(.horizontal, 16)
             }
