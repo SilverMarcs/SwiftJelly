@@ -14,6 +14,16 @@ enum FocusField {
 
 struct HomeView: View {
     @State private var showScrollEffect = false
+    @State private var dataManager = DataManager.shared
+    @AppStorage(HomeContentSettings.useModularHomeTrendingKey)
+    private var useModularHomeTrending = false
+
+    private var shouldUseModularHomeTrending: Bool {
+        HomeContentSettings.shouldUseModularHomeTrending(
+            flagEnabled: useModularHomeTrending,
+            serverURL: dataManager.server?.url
+        )
+    }
 
 #if os(tvOS)
     @State private var belowFold = false
@@ -38,18 +48,30 @@ struct HomeView: View {
 
                 GenreCarouselView()
 
-                MediaShelf(header: "Recently Added Movies") {
-                    try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
-                } destination: {
-                    FilteredMediaView(filter: .recentlyAdded(.movie))
+                if shouldUseModularHomeTrending {
+                    MediaShelf(header: "Trending Movies") {
+                        try await JFAPI.loadModularHomeTrending(.movies, limit: 15)
+                    }
+                } else {
+                    MediaShelf(header: "Recently Added Movies") {
+                        try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
+                    } destination: {
+                        FilteredMediaView(filter: .recentlyAdded(.movie))
+                    }
                 }
 
                 LibrariesView()
 
-                MediaShelf(header: "Recently Added Shows") {
-                    try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
-                } destination: {
-                    FilteredMediaView(filter: .recentlyAdded(.series))
+                if shouldUseModularHomeTrending {
+                    MediaShelf(header: "Trending Shows") {
+                        try await JFAPI.loadModularHomeTrending(.shows, limit: 15)
+                    }
+                } else {
+                    MediaShelf(header: "Recently Added Shows") {
+                        try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
+                    } destination: {
+                        FilteredMediaView(filter: .recentlyAdded(.series))
+                    }
                 }
             }
             .scenePadding(.bottom)

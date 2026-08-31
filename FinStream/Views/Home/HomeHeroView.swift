@@ -62,6 +62,9 @@ struct HomeHeroView: View {
                 itemTypes: [.movie, .tvProgram]
             ).shuffled()
             let filtered = loaded.filter { $0.type == .movie || $0.type == .series }
+            if !filtered.isEmpty {
+                TopShelfCache.save(items: filtered)
+            }
             await MainActor.run {
                 withAnimation {
                     fallbackItems = filtered

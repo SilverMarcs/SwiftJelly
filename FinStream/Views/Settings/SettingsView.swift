@@ -12,6 +12,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @AppStorage("showAppIconPicker") private var showAppIconPicker = false
+    @AppStorage(HomeContentSettings.useModularHomeTrendingKey)
+    private var useModularHomeTrending = false
     @State private var easterEggTapCount = 0
 
     var body: some View {
@@ -46,6 +48,14 @@ struct SettingsView: View {
             Section("View Options") {
                 ViewOptions()
                     .foregroundStyle(.primary)
+            }
+
+            if showAppIconPicker {
+                Section {
+                    Toggle("Use Modular Home Trending", isOn: $useModularHomeTrending)
+                } footer: {
+                    Text("Uses non-standard Home Screen Sections plugin feeds for the hero, Top Shelf, and trending rows.")
+                }
             }
 
             #if !os(macOS)
