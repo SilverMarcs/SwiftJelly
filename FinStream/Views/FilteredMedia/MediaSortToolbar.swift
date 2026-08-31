@@ -84,8 +84,6 @@ struct MediaSortMenu: View {
             .labelStyle(.iconOnly)
         }
         .disabled(viewModel.isLoading || viewModel.isSorting)
-        #if os(tvOS)
-        .tint(.primary)
-        #endif
+        .foregroundStyle(.primary)
     }
 }
