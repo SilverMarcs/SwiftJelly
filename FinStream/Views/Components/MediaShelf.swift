@@ -1,10 +1,11 @@
 import SwiftUI
 import JellyfinAPI
 
-struct MediaShelf<Destination: View>: View {
+struct MediaShelf: View {
     let header: String
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
-    private let destination: (() -> Destination)?
+    /// Filter backing the "see all" push, when the shelf has one.
+    private let destination: MediaFilter?
 
     @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 40)
     @State private var isLoading = false
@@ -14,17 +15,7 @@ struct MediaShelf<Destination: View>: View {
     init(
         header: String,
         loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto],
-        @ViewBuilder destination: @escaping () -> Destination
-    ) {
-        self.header = header
-        self.loadItemsAction = loadItemsAction
-        self.destination = destination
-    }
-
-    fileprivate init(
-        header: String,
-        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto],
-        destination: (() -> Destination)?
+        destination: MediaFilter? = nil
     ) {
         self.header = header
         self.loadItemsAction = loadItemsAction
@@ -47,9 +38,7 @@ struct MediaShelf<Destination: View>: View {
 
                 #if os(tvOS)
                 if let destination, hasResolvedItems {
-                    NavigationLink {
-                        destination()
-                    } label: {
+                    NavigationLink(value: NavigationRoute.filter(destination)) {
                         SeeAllCard()
                     }
                     .buttonStyle(.card)
@@ -62,9 +51,7 @@ struct MediaShelf<Destination: View>: View {
             Text(header)
             #else
             if let destination {
-                NavigationLink {
-                    destination()
-                } label: {
+                NavigationLink(value: NavigationRoute.filter(destination)) {
                     HStack(spacing: 4) {
                         Text(header)
                         Image(systemName: "chevron.right")
@@ -149,15 +136,6 @@ struct MediaShelf<Destination: View>: View {
         withAnimation {
             showPlaceholder = false
         }
-    }
-}
-
-extension MediaShelf where Destination == EmptyView {
-    init(
-        header: String,
-        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto]
-    ) {
-        self.init(header: header, loadItemsAction: loadItemsAction, destination: nil)
     }
 }
 

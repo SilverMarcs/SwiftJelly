@@ -40,11 +40,11 @@ struct HomeView: View {
                 
                 ContinueWatchingView()
 
-                MediaShelf(header: "Favorites") {
-                    try await JFAPI.loadFavoriteItems(limit: 15)
-                } destination: {
-                    FilteredMediaView(filter: .favorites)
-                }
+                MediaShelf(
+                    header: "Favorites",
+                    loadItemsAction: { try await JFAPI.loadFavoriteItems(limit: 15) },
+                    destination: .favorites
+                )
 
                 GenreCarouselView()
 
@@ -53,11 +53,13 @@ struct HomeView: View {
                         try await JFAPI.loadModularHomeTrending(.movies, limit: 15)
                     }
                 } else {
-                    MediaShelf(header: "Recently Added Movies") {
-                        try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
-                    } destination: {
-                        FilteredMediaView(filter: .recentlyAdded(.movie))
-                    }
+                    MediaShelf(
+                        header: "Recently Added Movies",
+                        loadItemsAction: {
+                            try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
+                        },
+                        destination: .recentlyAdded(.movie)
+                    )
                 }
 
                 LibrariesView()
@@ -67,11 +69,13 @@ struct HomeView: View {
                         try await JFAPI.loadModularHomeTrending(.shows, limit: 15)
                     }
                 } else {
-                    MediaShelf(header: "Recently Added Shows") {
-                        try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
-                    } destination: {
-                        FilteredMediaView(filter: .recentlyAdded(.series))
-                    }
+                    MediaShelf(
+                        header: "Recently Added Shows",
+                        loadItemsAction: {
+                            try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
+                        },
+                        destination: .recentlyAdded(.series)
+                    )
                 }
             }
             .scenePadding(.bottom)
