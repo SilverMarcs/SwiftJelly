@@ -65,6 +65,13 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         controller.delegate = context.coordinator
         controller.transportBarIncludesTitleView = true
         controller.allowsPictureInPicturePlayback = true
+        controller.speeds = [
+            AVPlaybackSpeed(rate: 0.5, localizedName: "0.5×"),
+            AVPlaybackSpeed(rate: 1.0, localizedName: "1×"),
+            AVPlaybackSpeed(rate: 1.25, localizedName: "1.25×"),
+            AVPlaybackSpeed(rate: 1.5, localizedName: "1.5×"),
+            AVPlaybackSpeed(rate: 2.0, localizedName: "2×")
+        ]
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: controller, coordinator: context.coordinator)

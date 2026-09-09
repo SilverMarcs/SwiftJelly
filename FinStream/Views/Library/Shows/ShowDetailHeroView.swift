@@ -24,7 +24,7 @@ struct ShowDetailHeroView: View {
         #elseif os(macOS)
         8
         #else
-        0
+        6
         #endif
     }
 }
