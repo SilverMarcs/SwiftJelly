@@ -54,7 +54,7 @@ struct SettingsView: View {
                 Section {
                     Toggle("Use Modular Home Trending", isOn: $useModularHomeTrending)
                 } footer: {
-                    Text("Uses non-standard Home Screen Sections plugin feeds for the hero, Top Shelf, and trending rows.")
+                    Text("Uses Modular Home trending for the Home hero and Top Shelf. Enabled automatically for LumiStream. Falls back to Seerr trending, then recently added titles.")
                 }
             }
 

@@ -32,9 +32,11 @@ final class TrendingInLibraryViewModel {
             hasLoaded = true
         }
 
+        items = []
+
         if usingModularHome {
             await loadModularHomeTrending()
-            return
+            if !items.isEmpty { return }
         }
 
         guard SeerrAPI.isConfigured else {
