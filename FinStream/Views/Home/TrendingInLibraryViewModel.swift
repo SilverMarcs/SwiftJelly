@@ -8,30 +8,41 @@
 import SwiftUI
 import JellyfinAPI
 
+@MainActor
 @Observable
 final class TrendingInLibraryViewModel {
     var items: [BaseItemDto] = []
     private(set) var isLoading = false
     private(set) var hasLoaded = false
+    private var loadedUsingModularHome: Bool?
 
-    func loadTrendingIfNeeded() async {
-        guard SeerrAPI.isConfigured else {
-            hasLoaded = true
-            return
-        }
-        guard items.isEmpty else { return }
-        await loadTrending()
+    func loadTrendingIfNeeded(usingModularHome: Bool) async {
+        guard loadedUsingModularHome != usingModularHome else { return }
+        await loadTrending(usingModularHome: usingModularHome)
     }
 
-    func loadTrending() async {
-        guard SeerrAPI.isConfigured else { return }
+    func loadTrending(usingModularHome: Bool) async {
         guard !isLoading else { return }
+
         isLoading = true
+        hasLoaded = false
+        loadedUsingModularHome = usingModularHome
         defer {
             isLoading = false
             hasLoaded = true
         }
 
+        items = []
+
+        if usingModularHome {
+            await loadModularHomeTrending()
+            if !items.isEmpty { return }
+        }
+
+        guard SeerrAPI.isConfigured else {
+            items = []
+            return
+        }
         guard let serverURL = URL(string: SeerrAuth.shared.serverURL) else { return }
 
         do {
@@ -64,6 +75,22 @@ final class TrendingInLibraryViewModel {
             }
         } catch {
             print("Error loading trending items: \(error)")
+        }
+    }
+
+    private func loadModularHomeTrending() async {
+        do {
+            let loadedItems = try await JFAPI.loadModularHomeTrending()
+            withAnimation {
+                items = loadedItems
+            }
+
+            if !items.isEmpty {
+                TopShelfCache.save(items: items)
+            }
+        } catch {
+            items = []
+            print("Error loading Modular Home trending items: \(error)")
         }
     }
 

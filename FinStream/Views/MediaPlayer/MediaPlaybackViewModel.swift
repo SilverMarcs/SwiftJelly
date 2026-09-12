@@ -11,6 +11,10 @@ import Observation
     var isAutoLoadingNext = false
     var playbackToken = UUID()
 
+    /// Set when `load` throws, so the UI/logs can tell a failed start apart
+    /// from a player that simply hasn't rendered yet.
+    var loadFailureMessage: String?
+
     var playbackInfo: PlaybackInfoResponse?
 
     var audioTracks: [PlaybackAudioTrack] = []
@@ -57,6 +61,7 @@ import Observation
         requestedAudioStreamIndex = audioIndex ?? requestedAudioStreamIndex
 
         hasReportedPlaybackStart = false
+        loadFailureMessage = nil
 
         stopObservingTime()
 
@@ -88,7 +93,12 @@ import Observation
             startObservingTime(for: session.player)
             loadMediaSegments(for: session.item, token: activePlaybackToken)
         } catch {
-            // Intentionally ignore; just stop loading.
+            // Playback could not be started at all (no media source, bad URL,
+            // network/auth failure). Surface it instead of silently showing an
+            // empty player.
+            loadFailureMessage = error.localizedDescription
+            PlaybackLog.error("Failed to start playback for \(item.name ?? "?") (\(item.id ?? "nil")): "
+                + PlaybackLog.describe(error: error))
         }
 
         isLoading = false

@@ -66,10 +66,16 @@ extension JFAPI {
             playbackInfoDto
         )
         
-        let response = try await context.client.send(request)
+        let response: JellyfinAPI.PlaybackInfoResponse
+        do {
+            response = try await send(request)
+        } catch {
+            PlaybackLog.error("getPlaybackInfo request failed for item \(itemID): \(PlaybackLog.describe(error: error))")
+            throw error
+        }
         
         return try PlaybackInfoResponse.from(
-            response: response.value,
+            response: response,
             item: item,
             client: context.client,
             audioStreamIndex: audioStreamIndex

@@ -10,6 +10,8 @@ import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
+    @AppStorage(HomeContentSettings.useModularHomeTrendingKey)
+    private var useModularHomeTrending = false
     
     @State private var dataManager = DataManager.shared
     @State private var playbackManager = PlaybackManager.shared
@@ -30,6 +32,13 @@ struct ContentView: View {
 
 
     @State private var trendingViewModel = TrendingInLibraryViewModel()
+
+    private var shouldUseModularHomeTrending: Bool {
+        HomeContentSettings.shouldUseModularHomeTrending(
+            flagEnabled: useModularHomeTrending,
+            serverURL: dataManager.server?.url
+        )
+    }
 
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -94,8 +103,10 @@ struct ContentView: View {
                 #endif
             }
             #endif
-            .task {
-                await trendingViewModel.loadTrendingIfNeeded()
+            .task(id: shouldUseModularHomeTrending) {
+                await trendingViewModel.loadTrendingIfNeeded(
+                    usingModularHome: shouldUseModularHomeTrending
+                )
             }
             .environment(trendingViewModel)
             #if os(iOS)
@@ -107,7 +118,7 @@ struct ContentView: View {
 
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
-            .navigationDestinations()
+            .navigationRouteDestinations()
         #if os(iOS)
             .toolbar {
                 if isCompactSize {

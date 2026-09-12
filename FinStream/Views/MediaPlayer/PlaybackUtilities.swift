@@ -8,6 +8,9 @@ struct PlaybackLoadResult {
 }
 
 struct PlaybackUtilities {
+    /// Keeps the diagnostics observers alive for the item currently loaded.
+    @MainActor private static var activeDiagnostics: PlaybackItemDiagnostics?
+
     /// Loads playback information and creates an AVPlayer
     static func loadPlaybackInfo(
         for item: BaseItemDto,
@@ -15,6 +18,13 @@ struct PlaybackUtilities {
         audioStreamIndex: Int? = nil,
         resumeSeconds: Double? = nil
     ) async throws -> PlaybackLoadResult {
+        PlaybackLog.log("loadPlaybackInfo item=\(item.name ?? "?") id=\(item.id ?? "nil") type=\(item.type?.rawValue ?? "nil") "
+            + "audioStreamIndex=\(audioStreamIndex.map(String.init) ?? "nil") "
+            + "resumeSeconds=\(resumeSeconds.map { String(Int($0)) } ?? "nil")")
+        if let source = item.mediaSources?.first {
+            PlaybackLog.log("Source as known before playback info: \(PlaybackLog.describe(mediaSource: source))")
+        }
+
         // Offline path: play from local file if a completed download exists.
         if let localURL: URL = await MainActor.run(body: {
             guard let id = item.id else { return nil as URL? }
@@ -160,6 +170,7 @@ struct PlaybackUtilities {
         let player = existingPlayer ?? AVPlayer()
         player.pause()
         player.replaceCurrentItem(with: playerItem)
+        attachDiagnostics(player: player, playerItem: playerItem, label: latestItem.name ?? latestItem.id ?? "item")
 
         #if !os(macOS)
         // Set externalMetadata AFTER replaceCurrentItem so AVPlayerViewController
@@ -199,9 +210,12 @@ struct PlaybackUtilities {
     ) async throws -> PlaybackLoadResult {
         let playerItem = AVPlayerItem(url: fileURL)
 
+        PlaybackLog.log("Playing local downloaded file for \(item.name ?? "?"): \(fileURL.lastPathComponent)")
+
         let player = existingPlayer ?? AVPlayer()
         player.pause()
         player.replaceCurrentItem(with: playerItem)
+        attachDiagnostics(player: player, playerItem: playerItem, label: (item.name ?? "item") + " [local]")
 
         #if !os(macOS)
         // Set externalMetadata AFTER replaceCurrentItem so AVPlayerViewController
@@ -232,6 +246,58 @@ struct PlaybackUtilities {
             playSessionId: nil
         )
         return PlaybackLoadResult(player: player, info: info, item: item)
+    }
+
+    @MainActor
+    private static func attachDiagnostics(player: AVPlayer, playerItem: AVPlayerItem, label: String) {
+        activeDiagnostics = PlaybackItemDiagnostics(player: player, playerItem: playerItem, label: label)
+        logAssetTracks(for: playerItem, label: label)
+    }
+
+    /// Asynchronously reports what AVFoundation actually managed to load from
+    /// the asset. A playable asset with no video track is the classic cause of
+    /// a blank/black video plane on tvOS.
+    private static func logAssetTracks(for playerItem: AVPlayerItem, label: String) {
+        let asset = playerItem.asset
+        Task.detached {
+            do {
+                let isPlayable = try await asset.load(.isPlayable)
+                let duration = try await asset.load(.duration)
+                let tracks = try await asset.load(.tracks)
+                let descriptions = try await withThrowingTaskGroup(of: String.self) { group -> [String] in
+                    for track in tracks {
+                        group.addTask {
+                            let formats = try await track.load(.formatDescriptions)
+                            let codecs = formats.map { format in
+                                let code = CMFormatDescriptionGetMediaSubType(format)
+                                return String(bytes: [
+                                    UInt8((code >> 24) & 0xFF),
+                                    UInt8((code >> 16) & 0xFF),
+                                    UInt8((code >> 8) & 0xFF),
+                                    UInt8(code & 0xFF)
+                                ], encoding: .ascii) ?? "\(code)"
+                            }
+                            let isTrackPlayable = try await track.load(.isPlayable)
+                            let size = try await track.load(.naturalSize)
+                            return "{media=\(track.mediaType.rawValue) id=\(track.trackID) playable=\(isTrackPlayable) "
+                                + "codecs=\(codecs.joined(separator: ",")) size=\(Int(size.width))x\(Int(size.height))}"
+                        }
+                    }
+                    var results: [String] = []
+                    for try await description in group { results.append(description) }
+                    return results
+                }
+
+                let hasVideo = tracks.contains { $0.mediaType == .video }
+                PlaybackLog.log("[\(label)] asset playable=\(isPlayable) duration=\(duration.seconds) "
+                    + "tracks=\(descriptions.isEmpty ? "none" : descriptions.joined(separator: " | "))")
+                if !hasVideo {
+                    PlaybackLog.error("[\(label)] asset has NO video track — this is why the video plane stays blank")
+                }
+            } catch {
+                PlaybackLog.error("[\(label)] failed to load asset properties: \(PlaybackLog.describe(error: error))")
+            }
+        }
     }
 
     /// Gets video dimensions for window sizing

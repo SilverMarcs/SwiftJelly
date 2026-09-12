@@ -14,7 +14,6 @@ enum FocusField {
 
 struct HomeView: View {
     @State private var showScrollEffect = false
-
 #if os(tvOS)
     @State private var belowFold = false
     @State private var scrollOffset: CGFloat = 0

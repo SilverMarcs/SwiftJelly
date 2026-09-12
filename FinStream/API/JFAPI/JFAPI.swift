@@ -63,8 +63,25 @@ enum JFAPI {
     /// Generic helper to send a request using the current API context
     static func send<T>(_ request: Request<T>) async throws -> T where T: Decodable {
         let context = try getAPIContext()
-        let response = try await context.client.send(request)
-        return response.value
+        let response = try await context.client.data(for: request)
+        let decoder = TolerantJSONDecoding.makeDecoder()
+
+        do {
+            return try decoder.decode(T.self, from: response.data)
+        } catch let error as DecodingError {
+            // A single unrecognized enum value (Jellyfin adds them regularly)
+            // otherwise fails the whole response. Retry once with unknown
+            // values rewritten; the substitutions are logged.
+            PlaybackLog.error("Decoding \(T.self) failed: \(PlaybackLog.describe(error: error))")
+            guard let sanitized = TolerantJSONDecoding.sanitize(response.data, label: "\(T.self)") else {
+                // Nothing recognizable to repair — dump the payload so the real
+                // cause is visible instead of a bare "data isn't in the correct
+                // format".
+                PlaybackLog.logRawPayload(response.data, label: "\(T.self)")
+                throw error
+            }
+            return try decoder.decode(T.self, from: sanitized)
+        }
     }
 }
 

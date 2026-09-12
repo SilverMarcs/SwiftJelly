@@ -53,6 +53,11 @@ struct HeroCarouselView: View {
     }
     #endif
 
+    #if os(tvOS)
+    @State private var navigationButtonToRetain: HeroCarouselNavigationButton?
+    @FocusState private var focusedNavigationButton: HeroCarouselNavigationButton?
+    #endif
+
     private var currentIndex: Int {
         guard let scrolledID else { return 0 }
         return items.firstIndex { $0.id == scrolledID } ?? 0
@@ -318,6 +323,7 @@ struct HeroCarouselView: View {
                 }
                 .buttonBorderShape(.circle)
                 .buttonStyle(.glass)
+                .foregroundStyle(.primary)
                 .controlSize(.large)
                 .padding(.horizontal, 16)
             }
@@ -371,23 +377,48 @@ struct HeroCarouselView: View {
         switch item.wrappedValue.type {
         case .movie:
             HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground) {
-                #if os(tvOS)
-                MovieHeroActions(movie: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
-                #else
-                MovieHeroActions(movie: item)
-                #endif
+                heroActionRow {
+                    #if os(tvOS)
+                    MovieHeroActions(movie: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
+                    #else
+                    MovieHeroActions(movie: item)
+                    #endif
+                }
             }
         case .series:
             HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground) {
-                #if os(tvOS)
-                ShowHeroActions(show: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
-                #else
-                ShowHeroActions(show: item)
-                #endif
+                heroActionRow {
+                    #if os(tvOS)
+                    ShowHeroActions(show: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
+                    #else
+                    ShowHeroActions(show: item)
+                    #endif
+                }
             }
         default:
             EmptyView()
         }
+    }
+
+    @ViewBuilder
+    private func heroActionRow<Actions: View>(@ViewBuilder actions: () -> Actions) -> some View {
+        #if os(tvOS)
+        HStack(spacing: 15) {
+            actions()
+
+            if items.count > 1 {
+                HeroCarouselNavigationButtons(
+                    focusedButton: $focusedNavigationButton,
+                    showsPrevious: currentIndex > 0,
+                    showsNext: currentIndex < items.count - 1,
+                    showPrevious: { navigate(using: .previous) },
+                    showNext: { navigate(using: .next) }
+                )
+            }
+        }
+        #else
+        actions()
+        #endif
     }
 
     private func activeItemBinding(for index: Int) -> Binding<BaseItemDto> {
@@ -454,6 +485,58 @@ struct HeroCarouselView: View {
         }
     }
 
+    #if os(tvOS)
+    private func navigate(using button: HeroCarouselNavigationButton) {
+        guard items.count > 1 else { return }
+
+        let destinationIndex: Int
+        switch button {
+        case .previous:
+            guard currentIndex > 0 else { return }
+            destinationIndex = currentIndex - 1
+        case .next:
+            guard currentIndex < items.count - 1 else { return }
+            destinationIndex = currentIndex + 1
+        }
+
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[destinationIndex].id
+        }
+        retainNavigationFocus(
+            on: navigationButtonToRetain(
+                preferred: button,
+                afterMovingTo: destinationIndex
+            )
+        )
+    }
+
+    private func navigationButtonToRetain(
+        preferred button: HeroCarouselNavigationButton,
+        afterMovingTo index: Int
+    ) -> HeroCarouselNavigationButton {
+        switch button {
+        case .previous where index > 0:
+            .previous
+        case .next where index < items.count - 1:
+            .next
+        case .previous:
+            .next
+        case .next:
+            .previous
+        }
+    }
+
+    private func retainNavigationFocus(on button: HeroCarouselNavigationButton) {
+        navigationButtonToRetain = button
+        Task { @MainActor in
+            await Task.yield()
+            guard navigationButtonToRetain == button else { return }
+            focusedNavigationButton = button
+            navigationButtonToRetain = nil
+        }
+    }
+    #endif
+
     private func startAutoScroll() {
         autoScrollTask?.cancel()
         guard items.count > 1 else { return }
@@ -467,9 +550,21 @@ struct HeroCarouselView: View {
                 guard belowFold else { continue }
                 #endif
                 let nextIndex = (currentIndex + 1) % items.count
+                let nextID = items[nextIndex].id
                 withAnimation(.easeInOut(duration: 0.6)) {
-                    scrolledID = items[nextIndex].id
+                    scrolledID = nextID
                 }
+
+                #if os(tvOS)
+                if let focusedNavigationButton {
+                    retainNavigationFocus(
+                        on: navigationButtonToRetain(
+                            preferred: focusedNavigationButton,
+                            afterMovingTo: nextIndex
+                        )
+                    )
+                }
+                #endif
             }
         }
     }

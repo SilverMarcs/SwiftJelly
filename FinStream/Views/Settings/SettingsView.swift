@@ -12,6 +12,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @AppStorage("showAppIconPicker") private var showAppIconPicker = false
+    @AppStorage(HomeContentSettings.useModularHomeTrendingKey)
+    private var useModularHomeTrending = false
     @State private var easterEggTapCount = 0
 
     var body: some View {
@@ -50,6 +52,14 @@ struct SettingsView: View {
             Section("View Options") {
                 ViewOptions()
                     .foregroundStyle(.primary)
+            }
+
+            if showAppIconPicker {
+                Section {
+                    Toggle("Use Modular Home Trending", isOn: $useModularHomeTrending)
+                } footer: {
+                    Text("Uses Modular Home trending for the Home hero and Top Shelf. Enabled automatically for LumiStream. Falls back to Seerr trending, then recently added titles.")
+                }
             }
 
             #if !os(macOS)

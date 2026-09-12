@@ -24,7 +24,7 @@ struct TopShelfItemSnapshot: Codable, Hashable {
 }
 
 enum TopShelfCache {
-    private static let appGroupID = "group.com.SilverMarcs.SwiftJelly"
+    private static let appGroupID = "group.com.julian-baumann.SwiftJelly"
     private static let itemsKey = "TopShelfContinueWatchingItems"
     private static let maxItems = 10
 
@@ -54,7 +54,7 @@ enum TopShelfCache {
                 durationSeconds: durationSeconds
             )
         }
-        let limited = Array(snapshots.shuffled().prefix(maxItems))
+        let limited = Array(snapshots.prefix(maxItems))
         
         do {
             let data = try JSONEncoder().encode(limited)

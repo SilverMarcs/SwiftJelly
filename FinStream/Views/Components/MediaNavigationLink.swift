@@ -36,18 +36,18 @@ struct MediaNavigationLink<Label: View>: View {
     var body: some View {
         // Compute an optional navigation value. When `item` is nil (placeholder),
         // the value is nil, which disables the NavigationLink. Keeping a single
-        // NavigationLink of one concrete value type (`MediaRoute`) for both states
-        // preserves the view identity so tvOS focus survives the placeholder →
-        // real-item swap.
-        let route: MediaRoute? = {
+        // NavigationLink of one concrete value type (`NavigationRoute`) for both
+        // states preserves the view identity so tvOS focus survives the
+        // placeholder → real-item swap.
+        let route: NavigationRoute? = {
             guard let item = item else { return nil }
             switch item.type {
             case .person:
                 return .person(Person(from: item))
             case .episode:
-                return .item(item.toSeries() ?? item)
+                return .media(item.toSeries() ?? item)
             default:
-                return .item(item)
+                return .media(item)
             }
         }()
 
@@ -58,42 +58,5 @@ struct MediaNavigationLink<Label: View>: View {
         #if os(iOS)
         .zoomTransitionSource(id: detailZoomID, in: detailZoomNamespace)
         #endif
-    }
-}
-
-/// A single concrete navigation value used by `MediaNavigationLink` so it can
-/// present either an item or a person through one link (and one stable view
-/// identity), rather than switching between value types.
-enum MediaRoute: Hashable {
-    case item(BaseItemDto)
-    case person(Person)
-}
-
-struct MediaNavigationDestinationModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .navigationDestination(for: MediaRoute.self) { route in
-                switch route {
-                case .item(let item):
-                    MediaDestinationView(item: item)
-                case .person(let person):
-                    FilteredMediaView(filter: .person(id: person.id, name: person.name))
-                }
-            }
-            .navigationDestination(for: BaseItemDto.self) { item in
-                MediaDestinationView(item: item)
-            }
-            .navigationDestination(for: Person.self) { person in
-                FilteredMediaView(filter: .person(id: person.id, name: person.name))
-            }
-            .navigationDestination(for: MediaFilter.self) { filter in
-                FilteredMediaView(filter: filter)
-            }
-    }
-}
-
-extension View {
-    public func navigationDestinations() -> some View {
-        modifier(MediaNavigationDestinationModifier())
     }
 }

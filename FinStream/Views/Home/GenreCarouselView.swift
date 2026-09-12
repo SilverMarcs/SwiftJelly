@@ -16,11 +16,10 @@ struct GenreCarouselView: View {
         SectionContainer {
             HorizontalShelf(spacing: spacing) {
                 ForEach(genres.shuffled()) { genre in
-                    NavigationLink(value: genre.base) {
+                    MediaNavigationLink(item: genre.base) {
                         GenreCardView(name: genre.base?.name ?? " ")
                     }
                     .id("\(genre.id)-\(genre.base?.name ?? "")")
-                    .adaptiveCardButtonStyle()
                 }
             }
         } header: {

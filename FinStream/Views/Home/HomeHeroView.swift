@@ -74,9 +74,12 @@ struct HomeHeroView: View {
         do {
             let loaded = try await JFAPI.loadLatestMediaInLibrary(
                 limit: 10,
-                itemTypes: [.movie, .tvProgram]
+                itemTypes: [.movie, .series]
             ).shuffled()
             let filtered = loaded.filter { $0.type == .movie || $0.type == .series }
+            if !filtered.isEmpty {
+                TopShelfCache.save(items: filtered)
+            }
             await MainActor.run {
                 withAnimation {
                     fallbackItems = filtered

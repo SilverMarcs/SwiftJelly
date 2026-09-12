@@ -6,7 +6,7 @@ struct MediaShelf: View {
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
     /// When set, a "See All" affordance pushes `FilteredMediaView(filter:)` via
     /// value-based navigation (the destination is registered by
-    /// `navigationDestinations()`). `nil` hides the affordance.
+    /// `navigationRouteDestinations()`). `nil` hides the affordance.
     private let filter: MediaFilter?
 
     @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 40)
@@ -40,7 +40,7 @@ struct MediaShelf: View {
 
                 #if os(tvOS)
                 if let filter, hasResolvedItems {
-                    NavigationLink(value: filter) {
+                    NavigationLink(value: NavigationRoute.filter(filter)) {
                         SeeAllCard()
                     }
                     .buttonStyle(.card)
@@ -53,7 +53,7 @@ struct MediaShelf: View {
             Text(header)
             #else
             if let filter {
-                NavigationLink(value: filter) {
+                NavigationLink(value: NavigationRoute.filter(filter)) {
                     HStack(spacing: 4) {
                         Text(header)
                         Image(systemName: "chevron.right")

@@ -6,7 +6,7 @@ struct PersonView: View {
     let person: Person
     
     var body: some View {
-        NavigationLink(value: person) {
+        NavigationLink(value: NavigationRoute.person(person)) {
             LabelStack {
                 if let url = ImageURLProvider.personImageURL(for: person.id) {
                     CachedAsyncImage(url: url, targetSize: Int(imageSize * 2)) {

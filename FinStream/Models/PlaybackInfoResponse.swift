@@ -28,10 +28,22 @@ extension PlaybackInfoResponse {
         audioStreamIndex: Int? = nil
     ) throws -> PlaybackInfoResponse {
         
+        PlaybackLog.log("getPlaybackInfo response for \(item.name ?? "?") (\(item.id ?? "?")): "
+            + "playSessionID=\(response.playSessionID ?? "nil") "
+            + "errorCode=\(response.errorCode?.rawValue ?? "none") "
+            + "mediaSources=\(response.mediaSources?.count ?? 0)")
+
+        if let errorCode = response.errorCode {
+            PlaybackLog.error("Server reported playback error code: \(errorCode.rawValue)")
+        }
+
         guard let mediaSources = response.mediaSources,
               let mediaSource = mediaSources.first else {
+            PlaybackLog.error("No media sources returned for item \(item.id ?? "nil")")
             throw PlaybackError.noMediaSources
         }
+
+        PlaybackLog.log("Selected \(PlaybackLog.describe(mediaSource: mediaSource))")
         
         let playbackURL: URL
         let playMethod: PlayMethod
@@ -39,6 +51,7 @@ extension PlaybackInfoResponse {
         // Check if we need to transcode
         if let transcodingURL = mediaSource.transcodingURL {
             guard let fullURL = client.fullURL(with: transcodingURL) else {
+                PlaybackLog.error("Could not build full URL from transcodingURL: \(transcodingURL)")
                 throw PlaybackError.invalidTranscodeURL
             }
             playbackURL = fullURL
@@ -63,6 +76,7 @@ extension PlaybackInfoResponse {
             )
             
             guard let fullURL = client.fullURL(with: streamRequest) else {
+                PlaybackLog.error("Could not build direct play stream URL for item \(itemID)")
                 throw PlaybackError.invalidStreamURL
             }
             
@@ -87,8 +101,10 @@ extension PlaybackInfoResponse {
         } else {
             print("Playback info subtitle streams: none")
         }
-        print("Playback method: \(playMethod == .transcode ? "transcode" : "direct")")
         #endif
+
+        PlaybackLog.log("Playback method=\(playMethod == .transcode ? "transcode" : "directPlay") "
+            + "url=\(PlaybackLog.sanitize(playbackURL))")
 
         return PlaybackInfoResponse(
             playbackURL: playbackURL,

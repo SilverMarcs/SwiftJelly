@@ -131,9 +131,7 @@ struct DiscoverFilterMenu: View {
             Label("Filter", systemImage: "line.3.horizontal.decrease")
             .labelStyle(.iconOnly)
         }
-        #if os(tvOS)
-        .tint(.primary)
-        #endif
+        .foregroundStyle(.primary)
         .disabled(vm.isLoading)
     }
 
