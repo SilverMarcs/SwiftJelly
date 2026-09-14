@@ -59,8 +59,9 @@ struct HomeView: View {
         }
         #if os(tvOS)
         .background(.background.secondary)
-        .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: 800))
+        .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: HeroLayoutMetrics.height()))
         #endif
+        .scrollEdgeEffectStyle(.soft, for: .all)
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
         .ignoresSafeArea(edges: .top)
         .scrollClipDisabled()

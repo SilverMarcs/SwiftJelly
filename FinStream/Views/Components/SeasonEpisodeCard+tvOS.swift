@@ -74,7 +74,7 @@ struct SeasonEpisodeCard: View {
             }
             .animation(.snappy, value: descriptionFocused)
             
-            Button(action: {}) {
+            NavigationLink(value: item.base.map { NavigationRoute.media($0) }) {
                 let isPlaceholder = item.base == nil
                 VStack(alignment: .leading, spacing: 0) {
                     Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "SEASON 1 EPISODE 1")
@@ -117,7 +117,7 @@ struct SeasonEpisodeCard: View {
             .animation(.snappy, value: episodeCardFocused)
             .animation(.snappy, value: descriptionFocused)
             .buttonStyle(.card)
-            .disabled(!episodeCardFocused && !descriptionFocused)
+            .disabled(item.base == nil || (!episodeCardFocused && !descriptionFocused))
             .buttonBorderShape(.roundedRectangle(radius: 25))
         }
         .focusSection()

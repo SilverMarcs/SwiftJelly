@@ -4,6 +4,9 @@ import JellyfinAPI
 
 struct DetailView<Content: View, ItemDetailContent: View>: View {
     @Environment(\.refresh) private var refresh
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
 
     let item: BaseItemDto
     @ViewBuilder let content: Content
@@ -11,6 +14,14 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
     
     var body: some View {
         layout
+    }
+
+    private var heroHeight: CGFloat {
+        #if os(iOS)
+        HeroLayoutMetrics.height(isCompact: horizontalSizeClass == .compact)
+        #else
+        HeroLayoutMetrics.height()
+        #endif
     }
     
 // TODO: Re-enable tvOS support with unified hero view
@@ -103,6 +114,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         ScrollView {
             VStack(spacing: 20) {
                 heroView
+                    .frame(height: heroHeight)
                     .onScrollVisibilityChange { isVisible in
                         showScrollEffect = isVisible
                     }

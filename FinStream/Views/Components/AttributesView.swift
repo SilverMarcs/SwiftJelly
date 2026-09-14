@@ -17,6 +17,7 @@ struct AttributesView: View {
         } else {
             Text("2024 \u{00B7} 1h 30m \u{00B7} PG-13")
                 .font(attributeFont)
+                .fontWeight(.medium)
                 .foregroundStyle(.white.opacity(0.9))
                 .redacted(reason: .placeholder)
         }
@@ -92,6 +93,7 @@ struct AttributesView: View {
             }
         }
         .font(attributeFont)
+        .fontWeight(.medium)
         .foregroundStyle(.white.opacity(0.9))
         .fixedSize(horizontal: false, vertical: true)
     }

@@ -7,8 +7,10 @@ private extension View {
     /// `containerRelativeFrame` is well-supported. macOS and iPadOS get a no-op since they
     /// can crash inside ScrollView + backgroundExtensionEffect compositions or bleed/exceed boundaries in split views.
     @ViewBuilder
-    func boundToContainerWidth() -> some View {
-        if Device.isMacOrPad {
+    func boundToContainerWidth(carouselWidth: CGFloat?) -> some View {
+        if let carouselWidth {
+            self.frame(width: carouselWidth)
+        } else if Device.isMacOrPad {
             self.frame(maxWidth: .infinity)
         } else {
             self.containerRelativeFrame(.horizontal)
@@ -23,18 +25,29 @@ struct HeroBackdropView<HeroActions: View>: View {
     let logoItem: BaseItemDto
     let genreItem: BaseItemDto
     let badge: String?
+    let contentOpacity: Double
+    let carouselWidth: CGFloat?
+    let tvOSBottomPadding: CGFloat
+
+    private var isCarousel: Bool { carouselWidth != nil }
 
     init(
         item: BaseItemDto,
         logoItem: BaseItemDto? = nil,
         genreItem: BaseItemDto? = nil,
         badge: String? = nil,
+        contentOpacity: Double = 1,
+        carouselWidth: CGFloat? = nil,
+        tvOSBottomPadding: CGFloat = 40,
         @ViewBuilder heroActions: () -> HeroActions
     ) {
         self.item = item
         self.logoItem = logoItem ?? item
         self.genreItem = genreItem ?? item
         self.badge = badge
+        self.contentOpacity = contentOpacity
+        self.carouselWidth = carouselWidth
+        self.tvOSBottomPadding = tvOSBottomPadding
         self.heroActions = heroActions()
     }
 
@@ -50,17 +63,29 @@ struct HeroBackdropView<HeroActions: View>: View {
     var body: some View {
     #if os(tvOS)
         largeScreenContent
-            .padding(40)
+            .modifier(HeroCarouselMetadataFade(opacity: contentOpacity, isCarousel: isCarousel))
+            .padding([.top, .horizontal], 40)
+            .padding(.bottom, tvOSBottomPadding)
             .environment(\.colorScheme, .dark)
     #else
         backdropImage
+            // Crop artwork to the viewport before sizing metadata; a scaled-to-fill image
+            // can otherwise report its wider intrinsic size to the overlay.
+            .frame(width: carouselWidth)
             .overlay(alignment: .bottomLeading) {
                 if isCompactSize {
                     overlayContent
+                        .modifier(HeroCarouselMetadataFade(opacity: contentOpacity, isCarousel: isCarousel))
                         .padding()
                 } else {
                     largeScreenContent
+                        .modifier(HeroCarouselMetadataFade(opacity: contentOpacity, isCarousel: isCarousel))
+                        #if os(macOS)
+                        .padding([.top, .horizontal])
+                        .padding(.bottom, 25)
+                        #else
                         .padding()
+                        #endif
                 }
             }
             .environment(\.colorScheme, .dark)
@@ -71,7 +96,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     @ViewBuilder
     private var backdropImage: some View {
-        let reflectionHeight: CGFloat = 200
+        let reflectionHeight = HeroLayoutMetrics.reflectionHeight
         let backdrop = CachedAsyncImage(
             url: ImageURLProvider.imageURL(for: item, type: .backdrop),
             targetSize: 1500
@@ -80,14 +105,14 @@ struct HeroBackdropView<HeroActions: View>: View {
         VStack(spacing: 0) {
             backdrop
                 .scaledToFill()
-                .boundToContainerWidth()
+                .boundToContainerWidth(carouselWidth: carouselWidth)
                 .frame(height: backdropHeight, alignment: .top)
                 .clipped()
 
             if isCompactSize {
                 backdrop
                     .scaledToFill()
-                    .boundToContainerWidth()
+                    .boundToContainerWidth(carouselWidth: carouselWidth)
                     .frame(height: backdropHeight, alignment: .top)
                     .scaleEffect(x: 1, y: -1, anchor: .center)
                     .frame(height: reflectionHeight, alignment: .top)
@@ -96,7 +121,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         }
             .scrollTransition(axis: .vertical) { content, phase in
                  content
-                    .offset(y: phase.isIdentity ? 0 : phase.value * -200)
+                    .offset(y: isCarousel || phase.isIdentity ? 0 : phase.value * -200)
              }
             .overlay(alignment: .bottom) {
                 if isCompactSize {
@@ -136,10 +161,7 @@ struct HeroBackdropView<HeroActions: View>: View {
                     #endif
                 }
             }
-        .backgroundExtensionEffect()
-        #if os(iOS)
-        .stretchy()
-        #endif
+        .modifier(HeroBackdropScrollEffects(isCarousel: isCarousel))
         .frame(height: isCompactSize ? backdropHeight + reflectionHeight : backdropHeight)
     }
     
@@ -207,7 +229,9 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             heroActions
 
-            OverviewView(item: item, compact: true)
+            if !isCarousel {
+                OverviewView(item: item, compact: true)
+            }
 
             AttributesView(item: item)
         }
@@ -221,7 +245,10 @@ struct HeroBackdropView<HeroActions: View>: View {
             : genres.joined(separator: " \u{00B7} ")
         return Text(display)
             .font(genreFont)
-            .foregroundStyle(.white.opacity(0.7))
+            .fontWeight(.medium)
+            .multilineTextAlignment(isCompactSize ? .center : .leading)
+            .lineLimit(isCompactSize ? 2 : nil)
+            .foregroundStyle(.primary)
             .redacted(reason: genres.isEmpty ? .placeholder : [])
     }
 
@@ -243,8 +270,10 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 30) {
-                    OverviewView(item: item)
-                        .frame(maxWidth: descriptionMaxWidth)
+                    if !isCarousel {
+                        OverviewView(item: item)
+                            .frame(maxWidth: descriptionMaxWidth)
+                    }
 
                     heroActions
                 }
@@ -319,7 +348,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     }
     
     private var backdropHeight: CGFloat {
-        isCompactSize ? 440 : 500
+        HeroLayoutMetrics.height(isCompact: isCompactSize)
+            - (isCompactSize ? HeroLayoutMetrics.reflectionHeight : 0)
     }
 }
-

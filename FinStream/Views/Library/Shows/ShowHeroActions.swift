@@ -3,13 +3,13 @@ import JellyfinAPI
 
 struct ShowHeroActions: View {
     @Binding private var show: BaseItemDto
-    let vm: ShowDetailViewModel
+    @State private var vm: ShowDetailViewModel
 
     @Namespace private var actionButtonsNamespace
 
     init(show: Binding<BaseItemDto>) {
         self._show = show
-        self.vm = ShowDetailViewModel(item: show.wrappedValue)
+        self._vm = State(initialValue: ShowDetailViewModel(item: show.wrappedValue))
     }
 
     var body: some View {

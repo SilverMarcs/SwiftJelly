@@ -31,7 +31,7 @@ struct HomeHeroView: View {
             } else if trendingViewModel.hasLoaded && hasFinishedFallbackLoad {
                 EmptyView()
             } else {
-                HeroBackdropView(item: BaseItemDto()) {
+                HeroBackdropView(item: BaseItemDto(), tvOSBottomPadding: 10) {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
             }
@@ -50,7 +50,7 @@ struct HomeHeroView: View {
             await loadFallback()
         }
         #if os(tvOS)
-        .frame(height: 800)
+        .frame(height: HeroLayoutMetrics.height())
         .ignoresSafeArea(edges: .horizontal)
         #endif
     }
