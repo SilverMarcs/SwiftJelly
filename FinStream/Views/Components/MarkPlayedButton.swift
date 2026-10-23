@@ -3,6 +3,8 @@ import JellyfinAPI
 
 struct MarkPlayedButton: View {
     var item: BaseItemDto?
+    var markAllEpisodesWatched: (() async -> Void)? = nil
+    var canMarkAllEpisodesWatched = true
     @Environment(\.refresh) private var refresh
     
     var isPlayed: Bool {
@@ -12,14 +14,18 @@ struct MarkPlayedButton: View {
     var body: some View {
         Button {
             Task {
-                await togglePlayedStatus()
+                if let markAllEpisodesWatched {
+                    await markAllEpisodesWatched()
+                } else {
+                    await togglePlayedStatus()
+                }
             }
         } label: {
-            Image(systemName: "checkmark")
-                .fontWeight(.medium)
-                .animation(.snappy, value: isPlayed)
+            Label(markAllEpisodesWatched == nil ? "Toggle Watched" : "Mark Season Watched", systemImage: "checkmark")
+                .labelStyle(.iconOnly)
                 .heroActionIcon()
         }
+        .disabled(markAllEpisodesWatched != nil && !canMarkAllEpisodesWatched)
         .foregroundStyle(isPlayed ? Color.green : Color.primary)
         #if os(tvOS)
         .controlSize(.regular)

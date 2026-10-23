@@ -20,7 +20,12 @@ import JellyfinAPI
 struct SeasonEpisodeCard: View {
     @Environment(\.refresh) var refresh
     let item: ViewListItem<BaseItemDto>
-    @FocusState private var episodeCardFocused: Bool
+    var focusedEpisodeID: FocusState<String?>.Binding? = nil
+    @FocusState private var localEpisodeID: String?
+
+    private var episodeCardFocused: Bool {
+        (focusedEpisodeID?.wrappedValue ?? localEpisodeID) == item.id
+    }
     @FocusState private var descriptionFocused: Bool
 
     private let cardWidth: CGFloat = 450
@@ -50,7 +55,7 @@ struct SeasonEpisodeCard: View {
                     }
                 }
             }
-            .focused($episodeCardFocused)
+            .focused(focusedEpisodeID ?? $localEpisodeID, equals: item.id)
             .buttonStyle(.card)
             .buttonBorderShape(.roundedRectangle(radius: 28))
             .contextMenu {

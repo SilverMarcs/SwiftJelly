@@ -9,7 +9,11 @@ struct ShowDetailHeroView: View {
             HStack(spacing: spacing) {
                 ShowPlayButton(vm: vm)
 
-                MarkPlayedButton(item: vm.selectedSeason)
+                MarkPlayedButton(
+                    item: vm.selectedSeason,
+                    markAllEpisodesWatched: vm.markSelectedSeasonWatched,
+                    canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched
+                )
                     .adaptiveDisabled(vm.playButtonDisabled)
 
                 FavoriteButton(item: vm.show)

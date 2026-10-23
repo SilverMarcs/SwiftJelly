@@ -9,6 +9,7 @@ struct HorizontalShelf<Content: View>: View {
             LazyHStack(spacing: spacing) {
                 content()
             }
+            .scrollTargetLayout()
             .scenePadding(.horizontal)
         }
         .scrollIndicators(.hidden)

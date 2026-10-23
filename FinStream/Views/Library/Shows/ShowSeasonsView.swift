@@ -10,11 +10,13 @@ struct ShowSeasonsView: View {
         SectionContainer {
             HorizontalShelf(spacing: episodeSpacing) {
                 ForEach(vm.episodes) { episode in
+                    #if os(tvOS)
+                    SeasonEpisodeCard(item: episode, focusedEpisodeID: $focusedEpisodeID)
+                        .id(episode.id)
+                    #else
                     SeasonEpisodeCard(item: episode)
                         .id(episode.id)
-                        #if os(tvOS)
-                        .focused($focusedEpisodeID, equals: episode.id)
-                        #endif
+                    #endif
                 }
             }
             .scrollPosition($episodeScrollPosition)
@@ -28,9 +30,15 @@ struct ShowSeasonsView: View {
         .task(id: vm.selectedSeason) {
             await vm.updateEpisodesForSelectedSeason()
         }
-        .onChange(of: vm.episodes.first?.base?.id, initial: true) {
-            guard vm.episodes.contains(where: { $0.base != nil }) else { return }
-            scrollToLatestEpisode()
+        .task(id: vm.episodeScrollTargetID) {
+            guard let targetID = vm.episodeScrollTargetID else { return }
+            episodeScrollPosition.scrollTo(id: targetID, anchor: .center)
+            #if os(tvOS)
+            // Let the lazy row lay out the requested card before moving focus.
+            await Task.yield()
+            guard !Task.isCancelled, vm.episodeScrollTargetID == targetID else { return }
+            focusedEpisodeID = targetID
+            #endif
         }
     }
     
@@ -59,34 +67,6 @@ struct ShowSeasonsView: View {
         #endif
     }
     
-    private func scrollToLatestEpisode() {
-        let episodes = vm.episodes
-        guard !episodes.isEmpty else { return }
-
-        let sortedEpisodes = episodes.sorted { ($0.base?.indexNumber ?? 0) < ($1.base?.indexNumber ?? 0) }
-        
-        
-        var targetEpisode: ViewListItem<BaseItemDto>? = sortedEpisodes.first { ep in
-            let hasProgress = (ep.base?.userData?.playbackPositionTicks ?? 0) > 0
-            let isFullyWatched = ep.base?.userData?.isPlayed == true || (ep.base?.playbackProgress ?? 0) >= 0.95
-            return hasProgress && !isFullyWatched
-        }
-
-        if targetEpisode == nil {
-            targetEpisode = sortedEpisodes.first { ep in
-                let isWatched = ep.base?.userData?.isPlayed == true || (ep.base?.playbackProgress ?? 0) >= 0.95
-                return !isWatched
-            }
-        }
-        if targetEpisode == nil { targetEpisode = sortedEpisodes.first } // why .last vs .first?
-        if let episode = targetEpisode {
-            withAnimation {
-                episodeScrollPosition.scrollTo(id: episode.id, anchor: .trailing) // trailing so it doesnt getcut off for smaller window sizes
-                focusedEpisodeID = episode.id
-            }
-        }
-    }
-
     private var episodeSpacing: CGFloat {
         #if os(tvOS)
         50

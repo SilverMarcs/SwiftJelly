@@ -6,6 +6,7 @@ struct EpisodeItem {
     var episodeItem: BaseItemDto?
 }
 
+@MainActor
 @Observable
 class ShowDetailViewModel {
     private static var episodesPlaceholder: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 6)
@@ -29,6 +30,49 @@ class ShowDetailViewModel {
 
     var playButtonDisabled: Bool { nextEpisode == nil || isLoading }
 
+    // Match the hero's resume/Next Up choice once it is available for this season.
+    var episodeScrollTargetID: String? {
+        if let nextID = nextEpisode?.id,
+           episodes.contains(where: { $0.base?.id == nextID }) {
+            return nextID
+        }
+        let loaded = episodes.filter { $0.base != nil }
+        let inProgress = loaded.first {
+            ($0.base?.userData?.playbackPositionTicks ?? 0) > 0 &&
+            $0.base?.userData?.isPlayed != true && ($0.base?.playbackProgress ?? 0) < 0.95
+        }
+        let unwatched = loaded.first {
+            $0.base?.userData?.isPlayed != true && ($0.base?.playbackProgress ?? 0) < 0.95
+        }
+        return (inProgress ?? unwatched ?? loaded.first)?.id
+    }
+
+    var canMarkSelectedSeasonWatched: Bool {
+        !isLoadingEpisodes && !isMarkingSeasonWatched && episodes.contains { $0.base != nil }
+    }
+
+    private(set) var isMarkingSeasonWatched = false
+    var seasonWatchError: String?
+
+    func markSelectedSeasonWatched() async {
+        guard canMarkSelectedSeasonWatched else { return }
+        let season = selectedSeason
+        let episodeIDs = episodes.compactMap { $0.base?.id }
+        isMarkingSeasonWatched = true
+        defer { isMarkingSeasonWatched = false }
+        do {
+            for id in episodeIDs {
+                try await JFAPI.markItemPlayed(itemId: id)
+            }
+        } catch {
+            seasonWatchError = "Some episodes could not be marked as watched. Please try again."
+        }
+        await refreshAll()
+        if let season = seasons.first(where: { $0.id == season?.id }) {
+            selectedSeason = season
+            await updateEpisodesForSelectedSeason()
+        }
+    }
     
     init(item: BaseItemDto) {
         self.show = item
@@ -60,6 +104,7 @@ class ShowDetailViewModel {
                     isLoading = false
                 }
 
+                await autoSelectSeasonAndEpisode()
                 return
             }
 
@@ -69,6 +114,7 @@ class ShowDetailViewModel {
                     nextEpisode = nextUp
                     isLoading = false
                 }
+                await autoSelectSeasonAndEpisode()
                 return
             }
 
