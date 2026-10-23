@@ -130,6 +130,7 @@ struct DetailView<Content: View, ItemDetailContent: View>: View {
         #endif
         .ignoresSafeArea(edges: .top)
         .toolbarTitleDisplayMode(.inline)
+        .scrollEdgeEffectStyle(.soft, for: .top)
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
     }
 #endif
