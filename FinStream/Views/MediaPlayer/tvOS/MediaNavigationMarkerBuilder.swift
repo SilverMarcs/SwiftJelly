@@ -8,7 +8,8 @@ enum MediaNavigationMarkerBuilder {
     static func makeNavigationMarkerGroups(
         for item: BaseItemDto,
         chapters: [ChapterInfo]?,
-        durationSeconds: Double?
+        durationSeconds: Double?,
+        includeArtwork: Bool = true
     ) async -> [AVNavigationMarkersGroup] {
         guard let chapters, !chapters.isEmpty else {
             return []
@@ -40,7 +41,7 @@ enum MediaNavigationMarkerBuilder {
         var timedGroups: [AVTimedMetadataGroup] = []
         timedGroups.reserveCapacity(normalized.count)
 
-        let artworkDataByIndex = await loadChapterArtworkData(for: item, chapters: normalized)
+        let artworkDataByIndex = includeArtwork ? await loadChapterArtworkData(for: item, chapters: normalized) : [:]
 
         for (offset, chapter) in normalized.enumerated() {
             let title = chapter.title.isEmpty ? "Chapter \(offset + 1)" : chapter.title

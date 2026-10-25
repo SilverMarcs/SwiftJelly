@@ -1,4 +1,5 @@
 import AVFoundation
+import AVKit
 import JellyfinAPI
 import Observation
 
@@ -23,6 +24,7 @@ import Observation
     @ObservationIgnored private var reportTask: Task<Void, Never>?
     @ObservationIgnored private var recoveryTask: Task<Void, Never>?
     @ObservationIgnored private var resumeTask: Task<Void, Never>?
+    @ObservationIgnored private var metadataTask: Task<Void, Never>?
     @ObservationIgnored private var resumeGeneration = UUID()
     @ObservationIgnored private var hasReportedStart = false
     @ObservationIgnored private var lastProgressDate = Date.distantPast
@@ -42,6 +44,9 @@ import Observation
         let item = prepared.playerItem
         player.pause()
         player.replaceCurrentItem(with: item)
+        #if !os(macOS)
+        configureMetadata()
+        #endif
         if let index = prepared.initialAudioIndex, let group = prepared.selection.audioGroup,
            let option = prepared.selection.audioIndices.first(where: { $0.value == index })?.key {
             item.select(option, in: group)
@@ -65,6 +70,39 @@ import Observation
         guard !isStopped, !Task.isCancelled, player.currentItem === item else { return }
         player.rate = rate
     }
+
+    #if !os(macOS)
+    private func configureMetadata() {
+        metadataTask?.cancel()
+        let prepared = prepared
+        let item = prepared.playerItem
+        // Publish text immediately; artwork must not delay playback or Info.
+        item.externalMetadata = prepared.item.createMetadataItems(artworkData: nil)
+        metadataTask = Task { [weak self] in
+            #if os(tvOS)
+            let chapters = await MediaNavigationMarkerBuilder.makeNavigationMarkerGroups(
+                for: prepared.item, chapters: prepared.item.chapters,
+                durationSeconds: self?.durationSeconds, includeArtwork: false
+            )
+            guard !Task.isCancelled, self?.player.currentItem === item else { return }
+            item.navigationMarkerGroups = chapters
+            #endif
+
+            let metadata = await prepared.item.createMetadataItems()
+            guard !Task.isCancelled, self?.player.currentItem === item else { return }
+            item.externalMetadata = metadata
+
+            #if os(tvOS)
+            let illustratedChapters = await MediaNavigationMarkerBuilder.makeNavigationMarkerGroups(
+                for: prepared.item, chapters: prepared.item.chapters,
+                durationSeconds: self?.durationSeconds
+            )
+            guard !Task.isCancelled, self?.player.currentItem === item else { return }
+            item.navigationMarkerGroups = illustratedChapters
+            #endif
+        }
+    }
+    #endif
 
     func stop() {
         guard !isStopped else { return }
@@ -273,6 +311,8 @@ import Observation
     }
 
     private func removeObservers() {
+        metadataTask?.cancel()
+        metadataTask = nil
         if let timeObserver { player.removeTimeObserver(timeObserver); self.timeObserver = nil }
         if let selectionObserver { NotificationCenter.default.removeObserver(selectionObserver); self.selectionObserver = nil }
         statusObserver?.invalidate()

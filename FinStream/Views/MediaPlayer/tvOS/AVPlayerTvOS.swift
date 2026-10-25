@@ -4,6 +4,7 @@ import UIKit
 import JellyfinAPI
 
 struct AVPlayerTvOS: UIViewControllerRepresentable {
+    @Environment(\.scenePhase) private var scenePhase
     let player: AVPlayer?
     let item: BaseItemDto
     let isTransitioning: Bool
@@ -22,6 +23,7 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         var activityIndicator: UIActivityIndicatorView?
         var infoTabController: UIViewController?
         var infoTabToken: String?
+        var lastScenePhase: ScenePhase?
         var onNextEpisode: (() -> Void)?
         var onDismiss: (() -> Void)?
 
@@ -218,10 +220,12 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
     }
 
     private func updateInfoTabs(for controller: AVPlayerViewController, coordinator: Coordinator) {
-        let token = String(describing: item.id)
+        let resumed = scenePhase == .active && coordinator.lastScenePhase != .active
+        coordinator.lastScenePhase = scenePhase
+        let token = "\(item.id ?? ""):\(item.seriesID ?? ""):\(item.seasonID ?? "")"
         guard coordinator.infoTabToken != token else {
-            if let cached = coordinator.infoTabController {
-                controller.customInfoViewControllers = [cached]
+            if resumed, let episodes = coordinator.infoTabController as? SeasonEpisodesViewController {
+                episodes.reloadIfEmpty()
             }
             return
         }
