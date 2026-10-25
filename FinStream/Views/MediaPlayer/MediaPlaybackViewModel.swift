@@ -81,6 +81,13 @@ import Observation
     func finishStoppingPlayback() async { await session?.finishStopping() }
     func reportProgress() async { await session?.reportProgress() }
 
+    func didEnterBackground() {
+        session?.didEnterBackground()
+        Task { await reportProgress() }
+    }
+
+    func didBecomeActive() { session?.didBecomeActive() }
+
     var skipIntroTargetSeconds: Double? {
         guard let introRange = markers.introRangeSeconds else { return nil }
         guard currentSeconds >= max(0, introRange.lowerBound - 2), currentSeconds < introRange.upperBound else { return nil }

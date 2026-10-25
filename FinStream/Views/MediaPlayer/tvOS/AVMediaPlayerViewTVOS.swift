@@ -30,11 +30,6 @@ struct AVMediaPlayerViewTVOS: View {
                 // TODO: fix this; setting an ID here will cause the video player to flicker, when a new episode is loaded.
                 // .id("\(model.item.id ?? "")_\(model.nextEpisode?.id ?? "none")")
                     .allowsTightening(!model.isAutoLoadingNext)
-                    .task(id: scenePhase) {
-                        if scenePhase == .background {
-                            await model.reportProgress()
-                        }
-                    }
             } else if let model = playbackManager.viewModel, model.isLoading {
                 ProgressView()
                     .tint(.white)
@@ -46,6 +41,10 @@ struct AVMediaPlayerViewTVOS: View {
                         await model.load()
                     }
             }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { playbackManager.viewModel?.didEnterBackground() }
+            else if phase == .active { playbackManager.viewModel?.didBecomeActive() }
         }
         .onDisappear { playbackManager.endPlayback() }
     }

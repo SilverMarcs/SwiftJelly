@@ -22,9 +22,13 @@ import Observation
     @ObservationIgnored private var controlObserver: NSKeyValueObservation?
     @ObservationIgnored private var reportTask: Task<Void, Never>?
     @ObservationIgnored private var recoveryTask: Task<Void, Never>?
+    @ObservationIgnored private var resumeTask: Task<Void, Never>?
+    @ObservationIgnored private var resumeGeneration = UUID()
     @ObservationIgnored private var hasReportedStart = false
     @ObservationIgnored private var lastProgressDate = Date.distantPast
     @ObservationIgnored private var recoveryAttempted = false
+    @ObservationIgnored private var isInBackground = false
+    @ObservationIgnored private var wasBackgrounded = false
 
     init(prepared: PreparedPlayback, player: AVPlayer) {
         self.prepared = prepared
@@ -33,7 +37,7 @@ import Observation
         durationSeconds = Double(prepared.info.mediaSource.runTimeTicks ?? prepared.item.runTimeTicks ?? 0) / 10_000_000
     }
 
-    func start() async {
+    func start(rate: Float = 1, subtitleIndex: Int? = nil) async {
         guard !isStopped else { return }
         let item = prepared.playerItem
         player.pause()
@@ -41,6 +45,12 @@ import Observation
         if let index = prepared.initialAudioIndex, let group = prepared.selection.audioGroup,
            let option = prepared.selection.audioIndices.first(where: { $0.value == index })?.key {
             item.select(option, in: group)
+        }
+        if let subtitleIndex, let group = prepared.selection.subtitleGroup {
+            if subtitleIndex == -1 { item.select(nil, in: group) }
+            else if let option = prepared.selection.subtitleIndices.first(where: { $0.value == subtitleIndex })?.key {
+                item.select(option, in: group)
+            }
         }
         player.automaticallyWaitsToMinimizeStalling = true
         item.preferredForwardBufferDuration = 30
@@ -52,8 +62,8 @@ import Observation
         #endif
         observePlayer()
         await player.seek(to: CMTime(seconds: max(0, prepared.resumeSeconds), preferredTimescale: 600))
-        guard !isStopped, player.currentItem === item else { return }
-        player.play()
+        guard !isStopped, !Task.isCancelled, player.currentItem === item else { return }
+        player.rate = rate
     }
 
     func stop() {
@@ -61,6 +71,7 @@ import Observation
         let snapshot = reportState()
         isStopped = true
         recoveryTask?.cancel()
+        resumeTask?.cancel()
         removeObservers()
         if player.currentItem === prepared.playerItem {
             player.pause()
@@ -80,6 +91,52 @@ import Observation
     }
 
     func finishStopping() async { await reportTask?.value }
+
+    func didEnterBackground() {
+        guard !isStopped else { return }
+        isInBackground = true
+        wasBackgrounded = true
+        resumeTask?.cancel()
+    }
+
+    func didBecomeActive() {
+        guard !isStopped, wasBackgrounded else { return }
+        isInBackground = false
+        wasBackgrounded = false
+        let previous = resumeTask
+        let generation = UUID()
+        resumeGeneration = generation
+        let item = prepared.playerItem
+        resumeTask = Task { [weak self] in
+            // Serialize rapid background/foreground transitions so cancellation
+            // of an older start cannot close the replacement listener.
+            await previous?.value
+            guard let self else { return }
+            defer { if self.resumeGeneration == generation { self.resumeTask = nil } }
+            guard !Task.isCancelled, !self.isStopped, !self.isInBackground, self.player.currentItem === item else { return }
+            do {
+                if let adapter = self.prepared.adapter {
+                    try await adapter.restart()
+                }
+                guard !Task.isCancelled, !self.isStopped, !self.isInBackground, self.player.currentItem === item else { return }
+                // A failed AVPlayerItem cannot be revived by a listener restart.
+                if item.status == .failed { self.recover(mode: .automatic) }
+                else if self.prepared.adapter != nil, self.player.timeControlStatus == .waitingToPlayAtSpecifiedRate {
+                    // Refresh waiting playback at its current position once
+                    // the local playlists are available again.
+                    let time = self.player.currentTime()
+                    let rate = self.player.rate > 0 ? self.player.rate : self.player.defaultRate
+                    let finished = await self.player.seek(to: time.seconds.isFinite ? time : CMTime(seconds: self.currentSeconds, preferredTimescale: 600))
+                    guard !Task.isCancelled, !self.isStopped, !self.isInBackground, self.player.currentItem === item else { return }
+                    if item.status == .failed { self.recover(mode: .automatic) }
+                    else if finished, self.player.timeControlStatus != .paused { self.player.playImmediately(atRate: rate) }
+                }
+            } catch {
+                guard !Task.isCancelled, !self.isStopped, !self.isInBackground, self.player.currentItem === item else { return }
+                self.recover(mode: .automatic)
+            }
+        }
+    }
 
     func reportProgress() async {
         guard !isStopped, hasReportedStart, let context = prepared.context else { return }
@@ -168,17 +225,29 @@ import Observation
     }
 
     private func handleFailure() {
+        // A suspended local listener or expired server stream needs fresh
+        // resources, rather than permanently abandoning native media selection.
+        guard !isInBackground, resumeTask == nil, recoveryTask == nil else { return }
         updateSelection()
         guard case .adapted = prepared.outcome, !recoveryAttempted else {
             errorDescription = "This video could not be played. Please try again."
             return
         }
         recoveryAttempted = true
+        recover(mode: .original)
+    }
+
+    private func recover(mode: PlaybackPreparer.Mode) {
+        guard !isStopped, recoveryTask == nil else { return }
+        updateSelection()
+        let savedSubtitleIndex = subtitleIndex
+        let savedRate = player.timeControlStatus == .paused ? 0 : (player.rate > 0 ? player.rate : player.defaultRate)
         recoveryTask = Task { [weak self] in
             guard let self else { return }
+            defer { self.recoveryTask = nil }
             do {
-                let replacement = try await PlaybackPreparer.prepare(for: self.prepared.item, preferredLanguage: self.audioLanguage, audioIndex: self.audioIndex, resumeSeconds: self.currentSeconds, context: self.prepared.context, mode: .original)
-                guard !self.isStopped, !Task.isCancelled else { replacement.discard(); return }
+                let replacement = try await PlaybackPreparer.prepare(for: self.prepared.item, preferredLanguage: self.audioLanguage, audioIndex: self.audioIndex, resumeSeconds: self.currentSeconds, context: self.prepared.context, mode: mode)
+                guard !self.isStopped, !self.isInBackground, !Task.isCancelled else { replacement.discard(); return }
                 if self.hasReportedStart, let context = self.prepared.context {
                     let snapshot = self.reportState()
                     let priorReport = self.reportTask
@@ -193,7 +262,9 @@ import Observation
                 self.removeObservers()
                 self.prepared.discard()
                 self.prepared = replacement
-                await self.start()
+                self.currentSeconds = replacement.resumeSeconds
+                self.errorDescription = nil
+                await self.start(rate: savedRate, subtitleIndex: savedSubtitleIndex)
             } catch {
                 guard !self.isStopped, !Task.isCancelled else { return }
                 self.errorDescription = "This video could not be played. Please try again."

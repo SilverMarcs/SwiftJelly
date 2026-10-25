@@ -6,12 +6,14 @@ import Network
 @MainActor
 final class LocalHLSAdapter {
     private let subtitleTimestamp: Int64?
-    private let listener: NWListener
+    private var listener: NWListener
+    private var listeningPort: NWEndpoint.Port?
     private let directory = "/\(UUID().uuidString)/"
     private var documents: [String: Data]
     private let subtitlePlaylists: [String: URL]
     private var subtitleSegments: [String: URL] = [:]
     private var startContinuation: CheckedContinuation<URL, Error>?
+    private var cancellationContinuation: CheckedContinuation<Void, Never>?
     private var timeout: Task<Void, Never>?
     private var connections: [UUID: NWConnection] = [:]
 
@@ -19,31 +21,78 @@ final class LocalHLSAdapter {
         self.subtitleTimestamp = subtitleTimestamp
         documents = ["master.m3u8": Data(manifest.utf8)]
         self.subtitlePlaylists = subtitlePlaylists
+        listener = try Self.makeListener(port: .any)
+    }
+
+    private static func makeListener(port: NWEndpoint.Port) throws -> NWListener {
         let parameters = NWParameters.tcp
-        parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(.loopback), port: .any)
-        listener = try NWListener(using: parameters)
+        parameters.allowLocalEndpointReuse = true
+        parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(.loopback), port: port)
+        return try NWListener(using: parameters)
     }
 
     func start() async throws -> URL {
-        try await withTaskCancellationHandler {
+        let activeListener = listener
+        return try await withTaskCancellationHandler {
             try Task.checkCancellation()
             return try await withCheckedThrowingContinuation { continuation in
                 startContinuation = continuation
-                listener.stateUpdateHandler = { [weak self] state in
-                    Task { @MainActor [weak self] in self?.stateChanged(state) }
+                activeListener.stateUpdateHandler = { [weak self, weak activeListener] state in
+                    Task { @MainActor [weak self] in
+                        guard let self, let activeListener, self.listener === activeListener else { return }
+                        self.stateChanged(state)
+                    }
                 }
-                listener.newConnectionHandler = { [weak self] connection in
-                    Task { @MainActor [weak self] in self?.accept(connection) }
+                activeListener.newConnectionHandler = { [weak self, weak activeListener] connection in
+                    Task { @MainActor [weak self] in
+                        guard let self, let activeListener, self.listener === activeListener else { connection.cancel(); return }
+                        self.accept(connection)
+                    }
                 }
-                timeout = Task { [weak self] in
+                timeout = Task { [weak self, weak activeListener] in
                     do { try await Task.sleep(for: .seconds(5)) } catch { return }
-                    self?.stop()
+                    guard let self, let activeListener, self.listener === activeListener else { return }
+                    self.stop()
                 }
-                listener.start(queue: .main)
+                activeListener.start(queue: .main)
             }
         } onCancel: {
-            Task { @MainActor [weak self] in self?.stop() }
+            Task { @MainActor [weak self, weak activeListener] in
+                guard let self, let activeListener, self.listener === activeListener else { return }
+                self.stop()
+            }
         }
+    }
+
+    /// Keep the URL already loaded by AVPlayer valid after suspension. Only the
+    /// listener and its connections are replaced; playlists and selections stay.
+    func restart() async throws {
+        try Task.checkCancellation()
+        guard let listeningPort else { throw URLError(.cannotConnectToHost) }
+        stop()
+        let previousListener = listener
+        await withCheckedContinuation { continuation in
+            cancellationContinuation = continuation
+            previousListener.stateUpdateHandler = { [weak self, weak previousListener] state in
+                guard case .cancelled = state else { return }
+                Task { @MainActor [weak self] in
+                    guard let previousListener else { return }
+                    self?.listenerDidCancel(previousListener)
+                }
+            }
+            // Cancellation may have completed before the handler was installed.
+            if case .cancelled = previousListener.state { listenerDidCancel(previousListener) }
+        }
+        previousListener.stateUpdateHandler = nil
+        try Task.checkCancellation()
+        listener = try Self.makeListener(port: listeningPort)
+        _ = try await start()
+    }
+
+    private func listenerDidCancel(_ cancelledListener: NWListener) {
+        guard listener === cancelledListener else { return }
+        cancellationContinuation?.resume()
+        cancellationContinuation = nil
     }
 
     func stop() {
@@ -51,6 +100,7 @@ final class LocalHLSAdapter {
         timeout = nil
         startContinuation?.resume(throwing: URLError(.cancelled))
         startContinuation = nil
+        listener.newConnectionHandler = nil
         listener.cancel()
         for connection in connections.values { connection.cancel() }
         connections.removeAll()
@@ -66,6 +116,7 @@ final class LocalHLSAdapter {
             }
             timeout?.cancel()
             timeout = nil
+            listeningPort = port
             startContinuation?.resume(returning: url)
             startContinuation = nil
         case .failed(let error):

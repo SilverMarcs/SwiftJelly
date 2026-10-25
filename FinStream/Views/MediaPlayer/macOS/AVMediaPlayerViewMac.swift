@@ -6,6 +6,7 @@ struct AVMediaPlayerViewMac: View {
     @State private var playbackManager = PlaybackManager.shared
     @State private var showInfoSheet = false
     @State private var didConfigureWindow = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -62,6 +63,10 @@ struct AVMediaPlayerViewMac: View {
         }
         .task(id: playbackManager.viewModel?.item.id) {
             configureWindow()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { playbackManager.viewModel?.didEnterBackground() }
+            else if phase == .active { playbackManager.viewModel?.didBecomeActive() }
         }
         .onDisappear {
             playbackManager.endPlayback()

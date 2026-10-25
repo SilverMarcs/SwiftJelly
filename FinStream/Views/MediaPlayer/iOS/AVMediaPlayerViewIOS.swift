@@ -16,11 +16,6 @@ struct AVMediaPlayerViewIOS: View {
                     .overlay {
                         MediaPlayerOverlayControls(model: model)
                     }
-                    .task(id: scenePhase) {
-                        if scenePhase == .background {
-                            await model.reportProgress()
-                        }
-                    }
             } else if let model = playbackManager.viewModel, model.isLoading {
                 ProgressView()
                     .tint(.white)
@@ -31,6 +26,10 @@ struct AVMediaPlayerViewIOS: View {
                         await model.load()
                     }
             }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { playbackManager.viewModel?.didEnterBackground() }
+            else if phase == .active { playbackManager.viewModel?.didBecomeActive() }
         }
         .onDisappear { playbackManager.endPlayback() }
     }
