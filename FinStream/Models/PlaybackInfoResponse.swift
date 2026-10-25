@@ -7,6 +7,7 @@ import Foundation
 import JellyfinAPI
 
 struct PlaybackInfoResponse {
+    let itemID: String
     let playbackURL: URL
     let mediaSource: MediaSourceInfo
     let playMethod: PlayMethod
@@ -28,6 +29,7 @@ extension PlaybackInfoResponse {
         audioStreamIndex: Int? = nil
     ) throws -> PlaybackInfoResponse {
         
+        guard let itemID = item.id else { throw PlaybackError.missingItemID }
         guard let mediaSources = response.mediaSources,
               let mediaSource = mediaSources.first else {
             throw PlaybackError.noMediaSources
@@ -45,10 +47,6 @@ extension PlaybackInfoResponse {
             playMethod = .transcode
         } else {
             // Direct play
-            guard let itemID = item.id else {
-                throw PlaybackError.missingItemID
-            }
-            
             let streamParameters = Paths.GetVideoStreamParameters(
                 isStatic: true,
                 tag: item.etag,
@@ -62,7 +60,7 @@ extension PlaybackInfoResponse {
                 parameters: streamParameters
             )
             
-            guard let fullURL = client.fullURL(with: streamRequest) else {
+            guard let fullURL = client.fullURL(with: streamRequest, queryAPIKey: true) else {
                 throw PlaybackError.invalidStreamURL
             }
             
@@ -70,27 +68,8 @@ extension PlaybackInfoResponse {
             playMethod = .directPlay
         }
 
-        #if DEBUG
-        let subtitleStreams = mediaSource.mediaStreams?
-            .filter { $0.type == .subtitle } ?? []
-        if !subtitleStreams.isEmpty {
-            let streamDescriptions = subtitleStreams.map { stream in
-                let index = stream.index.map(String.init) ?? "nil"
-                let codec = stream.codec ?? "nil"
-                let language = stream.language ?? "nil"
-                let title = stream.displayTitle ?? "nil"
-                return "index=\(index) codec=\(codec) lang=\(language) title=\(title)"
-            }
-            print(
-                "Playback info subtitle streams: \(streamDescriptions.joined(separator: " | "))"
-            )
-        } else {
-            print("Playback info subtitle streams: none")
-        }
-        print("Playback method: \(playMethod == .transcode ? "transcode" : "direct")")
-        #endif
-
         return PlaybackInfoResponse(
+            itemID: itemID,
             playbackURL: playbackURL,
             mediaSource: mediaSource,
             playMethod: playMethod,

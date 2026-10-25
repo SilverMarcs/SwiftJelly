@@ -9,14 +9,10 @@ import JellyfinAPI
 extension DeviceProfile {
     
     /// Builds a device profile for native AVPlayer with proper codec and subtitle support
-    /// Forces transcoding for all streams and limits resolution to 1080p max
     static func buildNativeProfile() -> DeviceProfile {
         var profile = DeviceProfile()
         
         profile.name = "FinStream Native"
-//        profile.maxStreamingBitrate = maxBitrate
-//        profile.maxStaticBitrate = maxBitrate
-//        profile.musicStreamingTranscodingBitrate = maxBitrate
         
         profile.directPlayProfiles = nativeDirectPlayProfiles
         profile.transcodingProfiles = nativeTranscodingProfiles
@@ -31,10 +27,10 @@ extension DeviceProfile {
     private static var nativeDirectPlayProfiles: [DirectPlayProfile] {
         [
             DirectPlayProfile(
-                audioCodec: nativeVideoAudioCodecList,
+                audioCodec: JellyfinPlaybackPolicy.audioCodecs,
                 container: "mp4,m4v,mov",
                 type: .video,
-                videoCodec: "h264,hevc"
+                videoCodec: JellyfinPlaybackPolicy.videoCodecs
             )
         ]
     }
@@ -45,7 +41,7 @@ extension DeviceProfile {
         [
             // Primary video+audio stream
             TranscodingProfile(
-                audioCodec: nativeVideoAudioCodecList,
+                audioCodec: JellyfinPlaybackPolicy.audioCodecs,
                 isBreakOnNonKeyFrames: true,
                 conditions: [
                     ProfileCondition(
@@ -65,43 +61,16 @@ extension DeviceProfile {
                 context: .streaming,
                 isCopyTimestamps: true,
                 enableSubtitlesInManifest: true,
-                maxAudioChannels: nativeMaxAudioChannels,
-                minSegments: 2,
+                maxAudioChannels: String(JellyfinPlaybackPolicy.maxAudioChannels),
+                minSegments: JellyfinPlaybackPolicy.minSegments,
                 protocol: .hls,
+                segmentLength: JellyfinPlaybackPolicy.segmentLength,
                 type: .video,
-                videoCodec: "h264"
-            ),
-
-            // Dedicated audio renditions so the manifest can expose named tracks
-            TranscodingProfile(
-                audioCodec: nativeAudioOnlyCodecList,
-                container: "aac",
-                context: .streaming,
-                isCopyTimestamps: true,
-                maxAudioChannels: nativeMaxAudioChannels,
-                minSegments: 2,
-                protocol: .hls,
-                type: .audio
+                videoCodec: JellyfinPlaybackPolicy.legacyHLSVideoCodecs
             )
         ]
     }
 
-    // Letting the server downmix 5.1/7.1 → 2ch produces noticeably quiet audio because
-    // Jellyfin's downmix doesn't apply loudness compensation. We let the source
-    // keep its native channel count and rely on CoreAudio/AVPlayer for downmix when needed
-    // across all platforms (macOS, iOS, tvOS, etc.).
-    private static var nativeMaxAudioChannels: String {
-        "8"
-    }
-
-    private static var nativeVideoAudioCodecList: String {
-        "aac,ac3,eac3,alac,flac,dts,opus"
-    }
-
-    private static var nativeAudioOnlyCodecList: String {
-        "aac,ac3,eac3,alac,flac,dts,opus"
-    }
-    
     // MARK: - Subtitle Profiles
     
     private static var nativeSubtitleProfiles: [SubtitleProfile] {

@@ -5,6 +5,7 @@
 //  Created by Zabir Raihan on 29/06/2025.
 //
 
+import OSLog
 import Get
 import Foundation
 import JellyfinAPI
@@ -12,10 +13,8 @@ import JellyfinAPI
 extension JFAPI {
     
     /// Gets playback info with device profile for AVPlayer-compatible streaming
-    /// Always requests transcoding with 1080p max resolution
     /// - Parameters:
     ///   - item: The BaseItemDto to get playback info for
-    ///   - maxBitrate: Maximum streaming bitrate (default: 10 Mbps)
     ///   - subtitleStreamIndex: Optional subtitle stream index to enable (nil = no subtitles)
     /// - Returns: PlaybackInfoResponse with playback URL and session info
     static func getPlaybackInfo(
@@ -23,13 +22,14 @@ extension JFAPI {
         subtitleStreamIndex: Int? = nil,
         audioStreamIndex: Int? = nil,
         startPositionTicks: Int64? = nil,
-        mediaSourceID: String? = nil
+        mediaSourceID: String? = nil,
+        context suppliedContext: APIContext? = nil
     ) async throws -> PlaybackInfoResponse {
         guard let itemID = item.id else {
             throw PlaybackError.missingItemID
         }
         
-        let context = try getAPIContext()
+        let context = try suppliedContext ?? getAPIContext()
         
         let deviceProfile = DeviceProfile.buildNativeProfile()
         
@@ -76,73 +76,44 @@ extension JFAPI {
         )
     }
 
-    static func reportPlaybackStart(
-        itemID: String,
-        mediaSourceID: String?,
-        playSessionID: String?,
-        playMethod: JellyfinAPI.PlayMethod?,
-        audioStreamIndex: Int?,
-        subtitleStreamIndex: Int?,
-        canSeek: Bool,
-        positionTicks: Int64?
-    ) async {
-        do {
-            let context = try getAPIContext()
-            var startInfo = PlaybackStartInfo()
-            startInfo.canSeek = canSeek
-            startInfo.itemID = itemID
-            startInfo.mediaSourceID = mediaSourceID
-            startInfo.audioStreamIndex = audioStreamIndex
-            startInfo.subtitleStreamIndex = subtitleStreamIndex
-            startInfo.positionTicks = positionTicks.map { Int($0) }
-            startInfo.playMethod = playMethod
-            startInfo.playSessionID = playSessionID
-            startInfo.isPaused = false
-            startInfo.isMuted = false
-            let request = Paths.reportPlaybackStart(startInfo)
-            _ = try await context.client.send(request)
-        } catch {
-            print("Failed to report playback start: \(error)")
+    static func reportPlaybackStart(context: APIContext, state: PlaybackProgressInfo) async {
+        var info = PlaybackStartInfo()
+        info.itemID = state.itemID
+        info.mediaSourceID = state.mediaSourceID
+        info.playSessionID = state.playSessionID
+        info.playMethod = state.playMethod
+        info.audioStreamIndex = state.audioStreamIndex
+        info.subtitleStreamIndex = state.subtitleStreamIndex
+        info.positionTicks = state.positionTicks
+        info.isPaused = state.isPaused
+        info.isMuted = state.isMuted
+        info.canSeek = state.canSeek
+        do { _ = try await context.client.send(Paths.reportPlaybackStart(info)) }
+        catch { playbackLogger.error("Playback start report failed: \(String(describing: type(of: error)), privacy: .public)") }
+    }
+
+    static func reportPlaybackProgress(context: APIContext, state: PlaybackProgressInfo) async {
+        do { _ = try await context.client.send(Paths.reportPlaybackProgress(state)) }
+        catch { playbackLogger.error("Playback progress report failed: \(String(describing: type(of: error)), privacy: .public)") }
+    }
+
+    static func reportPlaybackStopped(context: APIContext, state: PlaybackProgressInfo) async {
+        var info = PlaybackStopInfo()
+        info.itemID = state.itemID
+        info.mediaSourceID = state.mediaSourceID
+        info.playSessionID = state.playSessionID
+        info.positionTicks = state.positionTicks
+        do { _ = try await context.client.send(Paths.reportPlaybackStopped(info)) }
+        catch { playbackLogger.error("Playback stop report failed: \(String(describing: type(of: error)), privacy: .public)") }
+    }
+
+    static func stopPlaybackEncodings(context: APIContext, sessionIDs: [String]) async {
+        for id in Set(sessionIDs) {
+            let request = Request<Void>(path: "/Videos/ActiveEncodings", method: .delete, query: [("deviceId", context.server.id), ("playSessionId", id)])
+            do { _ = try await context.client.send(request) }
+            catch { playbackLogger.error("Encoding cleanup failed: \(String(describing: type(of: error)), privacy: .public)") }
         }
     }
-    
-    static func reportPlaybackProgress(
-        itemID: String,
-        mediaSourceID: String?,
-        positionTicks: Int64,
-        isPaused: Bool
-    ) async {
-        do {
-            let context = try getAPIContext()
-            var progressInfo = PlaybackProgressInfo()
-            progressInfo.isPaused = isPaused
-            progressInfo.itemID = itemID
-            progressInfo.mediaSourceID = mediaSourceID
-            progressInfo.positionTicks = Int(positionTicks)
-            let request = Paths.reportPlaybackProgress(progressInfo)
-            _ = try await context.client.send(request)
-        } catch {
-            print("Failed to report playback progress: \(error)")
-        }
-    }
-    
-    static func reportPlaybackStopped(
-        itemID: String,
-        mediaSourceID: String?,
-        playSessionID: String?,
-        positionTicks: Int64
-    ) async {
-        do {
-            let context = try getAPIContext()
-            var stopInfo = PlaybackStopInfo()
-            stopInfo.itemID = itemID
-            stopInfo.mediaSourceID = mediaSourceID
-            stopInfo.positionTicks = Int(positionTicks)
-            stopInfo.playSessionID = playSessionID
-            let request = Paths.reportPlaybackStopped(stopInfo)
-            _ = try await context.client.send(request)
-        } catch {
-            print("Failed to report playback stop: \(error)")
-        }
-    }
+
+    private static let playbackLogger = Logger(subsystem: "com.SilverMarcs.SwiftJelly", category: "Playback")
 }

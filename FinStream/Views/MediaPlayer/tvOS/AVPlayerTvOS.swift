@@ -8,13 +8,9 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
     let item: BaseItemDto
     let isTransitioning: Bool
     let showSkipIntro: Bool
-    let audioTracks: [PlaybackAudioTrack]
-    let selectedAudioTrack: PlaybackAudioTrack?
-    let isSwitchingAudio: Bool
     let nextEpisode: BaseItemDto?
     let creditsStartSeconds: Double?
     let onSkipIntro: () -> Void
-    let onSelectAudioTrack: (PlaybackAudioTrack) -> Void
     let onSelectEpisode: (BaseItemDto) -> Void
     let onNextEpisode: () -> Void
     let onDismiss: () -> Void
@@ -23,7 +19,6 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         var lastShowSkipIntro = false
         var lastIsTransitioning = false
         var lastNextEpisodeID: String?
-        var lastAudioMenuToken: String?
         var activityIndicator: UIActivityIndicatorView?
         var infoTabController: UIViewController?
         var infoTabToken: String?
@@ -75,7 +70,6 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: controller, coordinator: context.coordinator)
-        updateTransportBarMenuItems(for: controller, coordinator: context.coordinator)
         updateContextualActions(for: controller, coordinator: context.coordinator)
         updateTransitionOverlay(for: controller, coordinator: context.coordinator)
         updateContentProposal(for: controller, coordinator: context.coordinator)
@@ -89,7 +83,6 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: uiViewController, coordinator: context.coordinator)
-        updateTransportBarMenuItems(for: uiViewController, coordinator: context.coordinator)
         updateContextualActions(for: uiViewController, coordinator: context.coordinator)
         updateTransitionOverlay(for: uiViewController, coordinator: context.coordinator)
         updateContentProposal(for: uiViewController, coordinator: context.coordinator)
@@ -97,48 +90,6 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
-    }
-
-    private func updateTransportBarMenuItems(
-        for controller: AVPlayerViewController,
-        coordinator: Coordinator
-    ) {
-        let token = [
-            audioTracks.map(\.id).map(String.init).joined(separator: ","),
-            selectedAudioTrack?.id.description ?? "none",
-            selectedAudioTrack?.details ?? "Audio",
-            isSwitchingAudio.description
-        ].joined(separator: "|")
-
-        guard coordinator.lastAudioMenuToken != token else {
-            return
-        }
-        
-        coordinator.lastAudioMenuToken = token
-
-        guard audioTracks.count > 1 else {
-            controller.transportBarCustomMenuItems = []
-            return
-        }
-
-        let audioActions = audioTracks.map { track in
-            return UIAction(
-                title: track.displayName,
-                subtitle: track.details,
-                attributes: [],
-                state: track == selectedAudioTrack ? .on : .off
-            ) { _ in
-                onSelectAudioTrack(track)
-            }
-        }
-
-        let audioMenu = UIMenu(
-            title: "Audio Track",
-            image: UIImage(systemName: "speaker.wave.2.fill"),
-            children: audioActions
-        )
-
-        controller.transportBarCustomMenuItems = [audioMenu]
     }
 
     private func updateContextualActions(for controller: AVPlayerViewController, coordinator: Coordinator) {
