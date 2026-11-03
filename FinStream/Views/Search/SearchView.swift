@@ -27,6 +27,8 @@ struct SearchView: View {
             .focusSection()
             .onChange(of: searchText) { _, newValue in
                 searchTask?.cancel()
+                // Show the spinner immediately so "No Media" doesn't flash during the debounce.
+                isLoading = !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 searchTask = Task {
                     try? await Task.sleep(for: .milliseconds(800))
                     guard !Task.isCancelled else { return }
@@ -35,6 +37,7 @@ struct SearchView: View {
             }
             .onDisappear {
                 searchTask?.cancel()
+                isLoading = false
             }
             #else
             .searchScopes($searchScope) {
@@ -70,7 +73,6 @@ struct SearchView: View {
             return
         }
         isLoading = true
-        defer { isLoading = false }
         
         do {
             async let content = JFAPI.searchMedia(query: trimmedQuery)
@@ -80,8 +82,11 @@ struct SearchView: View {
             guard !Task.isCancelled else { return }
             mediaResults = contentResults + personResults
         } catch {
+            guard !Task.isCancelled else { return }
             print("Error Searching: \(error.localizedDescription)")
         }
+        // A cancelled search leaves isLoading alone; the newer search owns it.
+        isLoading = false
     }
     
     private var placement: SearchFieldPlacement {
