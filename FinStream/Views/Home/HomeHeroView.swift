@@ -9,11 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct HomeHeroView: View {
-    @Environment(TrendingInLibraryViewModel.self) private var trendingViewModel
-
-    @State private var fallbackItems: [BaseItemDto] = []
-    @State private var hasStartedFallbackLoad = false
-    @State private var hasFinishedFallbackLoad = false
+    @State private var viewModel = HomeHeroViewModel()
 
     @Binding var showScrollEffect: Bool
 
@@ -22,19 +18,17 @@ struct HomeHeroView: View {
     #endif
 
     var body: some View {
-        @Bindable var trendingViewModel = trendingViewModel
         Group {
-            if !trendingViewModel.items.isEmpty {
-                HeroCarouselView(items: $trendingViewModel.items)
-            } else if !fallbackItems.isEmpty {
-                HeroCarouselView(items: $fallbackItems)
-            } else if trendingViewModel.hasLoaded && hasFinishedFallbackLoad {
-                EmptyView()
-            } else {
+            if !viewModel.items.isEmpty {
+                HeroCarouselView(items: $viewModel.items)
+            } else if !viewModel.hasLoaded {
                 HeroBackdropView(item: BaseItemDto(), tvOSBottomPadding: 10) {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
             }
+        }
+        .task {
+            await viewModel.load()
         }
         .onScrollVisibilityChange { isVisible in
             showScrollEffect = isVisible
@@ -42,38 +36,9 @@ struct HomeHeroView: View {
             belowFold = !isVisible
             #endif
         }
-        .task(id: trendingViewModel.hasLoaded) {
-            guard trendingViewModel.hasLoaded,
-                  trendingViewModel.items.isEmpty,
-                  !hasStartedFallbackLoad else { return }
-            hasStartedFallbackLoad = true
-            await loadFallback()
-        }
         #if os(tvOS)
         .frame(height: HeroLayoutMetrics.height())
         .ignoresSafeArea(edges: .horizontal)
         #endif
-    }
-
-    private func loadFallback() async {
-        do {
-            let loaded = try await JFAPI.loadLatestMediaInLibrary(
-                limit: 10,
-                itemTypes: [.movie, .series]
-            ).shuffled()
-            let filtered = loaded.filter { $0.type == .movie || $0.type == .series }
-            if !filtered.isEmpty {
-                TopShelfCache.save(items: filtered)
-            }
-            await MainActor.run {
-                withAnimation {
-                    fallbackItems = filtered
-                    hasFinishedFallbackLoad = true
-                }
-            }
-        } catch {
-            print("Error loading featured items: \(error)")
-            await MainActor.run { hasFinishedFallbackLoad = true }
-        }
     }
 }

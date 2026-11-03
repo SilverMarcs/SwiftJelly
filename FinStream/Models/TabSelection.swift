@@ -15,20 +15,18 @@ enum TabSelection: String, CaseIterable {
     case movies = "movies"
     case shows = "shows"
     case libraries = "libraries"
-    case discover = "discover"
     case settings = "settings"
     case search = "search"
 
-    static let compactTabs: [TabSelection] = [.search, .home, .discover, .favorites, .libraries]
+    static let compactTabs: [TabSelection] = [.search, .home, .favorites, .libraries]
 
-    static let extendedTabs: [TabSelection] = [.search, .home, .discover, .favorites, .settings]
+    static let extendedTabs: [TabSelection] = [.search, .home, .favorites, .settings]
     static let extendedlibraryTabs: [TabSelection] = [.movies, .shows, .libraries]
 
     var title: String {
         switch self {
         case .home: return "Home"
         case .favorites: return "Favorites"
-        case .discover: return "Discover"
         case .settings: return "Settings"
         case .search: return "Search"
         case .shows: return "Shows"
@@ -41,7 +39,6 @@ enum TabSelection: String, CaseIterable {
         switch self {
         case .home: return "house"
         case .favorites: return "star"
-        case .discover: return "safari"
         case .settings: return "gear"
         case .search: return "magnifyingglass"
         case .shows: return "tv"
@@ -54,7 +51,6 @@ enum TabSelection: String, CaseIterable {
         switch self {
         case .home: return "1"
         case .favorites: return "2"
-        case .discover: return "d"
         case .settings: return ","
         case .search: return "f"
         case .shows: return "s"
@@ -63,12 +59,16 @@ enum TabSelection: String, CaseIterable {
         }
     }
 
+    /// Whether Settings, where the active server is switched, lives in this tab.
+    var hostsSettings: Bool {
+        self == .settings || self == .libraries
+    }
+
     @ViewBuilder
     var tabView: some View {
         switch self {
         case .home: HomeView()
         case .favorites: FilteredMediaView(filter: .favorites, largeTitle: true)
-        case .discover: DiscoverView()
         case .shows: FilteredMediaView(filter: .library(BaseItemDto(collectionType: .tvshows, name: "TV Shows")))
         case .movies: FilteredMediaView(filter: .library(BaseItemDto(collectionType: .movies, name: "Movies")))
         case .libraries: LibraryView()

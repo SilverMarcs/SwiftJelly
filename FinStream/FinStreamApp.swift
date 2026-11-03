@@ -40,7 +40,6 @@ struct FinStreamApp: App {
         try? session.setActive(true)
         #endif
         _ = PlaybackManager.shared
-        _ = SeerrAuth.shared
         #if os(iOS)
         // Register BGContinuedProcessingTask handler before any submit() call.
         DownloadActivityCoordinator.register()

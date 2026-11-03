@@ -10,9 +10,7 @@ import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
-    @AppStorage(HomeContentSettings.useModularHomeTrendingKey)
-    private var useModularHomeTrending = false
-    
+
     @State private var dataManager = DataManager.shared
     @State private var playbackManager = PlaybackManager.shared
     
@@ -20,16 +18,6 @@ struct ContentView: View {
     @State private var isTopShelfNavigationActive = false
     @State private var topShelfNavigationItem: BaseItemDto?
     #endif
-
-
-    @State private var trendingViewModel = TrendingInLibraryViewModel()
-
-    private var shouldUseModularHomeTrending: Bool {
-        HomeContentSettings.shouldUseModularHomeTrending(
-            flagEnabled: useModularHomeTrending,
-            serverURL: dataManager.server?.url
-        )
-    }
 
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -45,7 +33,7 @@ struct ContentView: View {
             NoServerView()
         } else {
             TabView(selection: $selectedTab) {
-                ForEach(primaryTabs, id: \.self) { tab in
+                ForEach(isCompactSize ? TabSelection.compactTabs : TabSelection.extendedTabs, id: \.self) { tab in
                     Tab(tab.title,
                         systemImage: tab.systemImage,
                         value: tab,
@@ -88,17 +76,15 @@ struct ContentView: View {
                 #endif
             }
             #endif
-            .task(id: shouldUseModularHomeTrending) {
-                await trendingViewModel.loadTrendingIfNeeded(
-                    usingModularHome: shouldUseModularHomeTrending
-                )
-            }
-            .environment(trendingViewModel)
         }
     }
 
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
+            // Rebuild content tabs when the active server changes so they reload.
+            // Tabs that host Settings reload in place instead, so switching
+            // servers doesn't pop the user out of the server list.
+            .id(tab.hostsSettings ? nil : dataManager.server?.id)
             .navigationRouteDestinations()
         #if os(macOS)
             .frame(minWidth: 800)
@@ -138,14 +124,6 @@ struct ContentView: View {
         }
     }
 
-    private var primaryTabs: [TabSelection] {
-        var tabs = isCompactSize ? TabSelection.compactTabs : TabSelection.extendedTabs
-        if !SeerrAPI.isConfigured {
-            tabs.removeAll { $0 == .discover }
-        }
-        return tabs
-    }
-    
     #if os(tvOS)
     private func handleTopShelfURL(_ url: URL) {
         guard let deepLink = TopShelfDeepLink.parse(url) else { return }
