@@ -12,10 +12,20 @@ import AVKit
 @main
 struct FinStreamApp: App {
     @State var selectedTab: TabSelection = .home
-    
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             ContentView(selectedTab: $selectedTab)
+                #if !os(macOS)
+                // App-level so playback floating in Picture in Picture, with
+                // the player closed, still sees suspension and activation.
+                .onChange(of: scenePhase) { _, phase in
+                    let model = PlaybackManager.shared.viewModel
+                    if phase == .background { model?.didEnterBackground() }
+                    else if phase == .active { model?.didBecomeActive() }
+                }
+                #endif
         }
         #if !os(tvOS)
         .commands {

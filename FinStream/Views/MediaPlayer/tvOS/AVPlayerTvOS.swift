@@ -6,6 +6,7 @@ import JellyfinAPI
 struct AVPlayerTvOS: UIViewControllerRepresentable {
     @Environment(\.scenePhase) private var scenePhase
     let player: AVPlayer?
+    let host: PlayerViewControllerHost
     let item: BaseItemDto
     let isTransitioning: Bool
     let showSkipIntro: Bool
@@ -56,42 +57,32 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         }
     }
 
-    func makeUIViewController(context: Context) -> AVPlayerViewController {
-        let controller = AVPlayerViewController()
-        controller.player = player
-        controller.delegate = context.coordinator
-        controller.transportBarIncludesTitleView = true
-        controller.allowsPictureInPicturePlayback = true
-        controller.speeds = [
-            AVPlaybackSpeed(rate: 0.5, localizedName: "0.5×"),
-            AVPlaybackSpeed(rate: 1.0, localizedName: "1×"),
-            AVPlaybackSpeed(rate: 1.25, localizedName: "1.25×"),
-            AVPlaybackSpeed(rate: 1.5, localizedName: "1.5×"),
-            AVPlaybackSpeed(rate: 2.0, localizedName: "2×")
-        ]
+    /// The controller lives as long as the playback, across presentations,
+    /// so the coordinator holding its applied state is kept on the host too.
+    func makeCoordinator() -> Coordinator {
+        if let existing = host.forwardingDelegate as? Coordinator { return existing }
+        let coordinator = Coordinator()
+        host.forwardingDelegate = coordinator
+        return coordinator
+    }
+
+    func makeUIViewController(context: Context) -> PlayerContainerViewController {
+        PlayerContainerViewController(host: host)
+    }
+
+    func updateUIViewController(_ containerViewController: PlayerContainerViewController, context: Context) {
+        host.setPlayer(player)
+        let controller = host.playerViewController
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: controller, coordinator: context.coordinator)
         updateContextualActions(for: controller, coordinator: context.coordinator)
         updateTransitionOverlay(for: controller, coordinator: context.coordinator)
         updateContentProposal(for: controller, coordinator: context.coordinator)
-        return controller
     }
 
-    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-        if uiViewController.player !== player {
-            uiViewController.player = player
-        }
-        context.coordinator.onNextEpisode = onNextEpisode
-        context.coordinator.onDismiss = onDismiss
-        updateInfoTabs(for: uiViewController, coordinator: context.coordinator)
-        updateContextualActions(for: uiViewController, coordinator: context.coordinator)
-        updateTransitionOverlay(for: uiViewController, coordinator: context.coordinator)
-        updateContentProposal(for: uiViewController, coordinator: context.coordinator)
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
+    static func dismantleUIViewController(_ uiViewController: PlayerContainerViewController, coordinator: Coordinator) {
+        uiViewController.releasePlayerViewController()
     }
 
     private func updateContextualActions(for controller: AVPlayerViewController, coordinator: Coordinator) {

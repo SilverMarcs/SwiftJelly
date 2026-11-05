@@ -4,7 +4,6 @@ import JellyfinAPI
 
 struct AVMediaPlayerViewTVOS: View {
     @State private var playbackManager = PlaybackManager.shared
-    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -13,6 +12,7 @@ struct AVMediaPlayerViewTVOS: View {
             } else if let model = playbackManager.viewModel, let player = model.player {
                 AVPlayerTvOS(
                     player: player,
+                    host: model.playerHost,
                     item: model.item,
                     isTransitioning: model.isAutoLoadingNext,
                     showSkipIntro: model.shouldShowSkipIntro,
@@ -24,7 +24,7 @@ struct AVMediaPlayerViewTVOS: View {
                     },
                     onNextEpisode: { Task { await model.transitionToNextEpisode() } },
                     onDismiss: {
-                        playbackManager.endPlayback()
+                        playbackManager.playerDidDisappear()
                     }
                 )
                 // TODO: fix this; setting an ID here will cause the video player to flicker, when a new episode is loaded.
@@ -42,10 +42,6 @@ struct AVMediaPlayerViewTVOS: View {
                     }
             }
         }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .background { playbackManager.viewModel?.didEnterBackground() }
-            else if phase == .active { playbackManager.viewModel?.didBecomeActive() }
-        }
-        .onDisappear { playbackManager.endPlayback() }
+        .onDisappear { playbackManager.playerDidDisappear() }
     }
 }

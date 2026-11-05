@@ -17,6 +17,12 @@ import Observation
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var markers = MediaChapterMarkers(introRangeSeconds: nil, creditsStartSeconds: nil)
 
+    #if os(iOS) || os(tvOS)
+    /// This playback's player view controller. It outlives the player UI so
+    /// Picture in Picture keeps going while the rest of the app is used.
+    @ObservationIgnored let playerHost = PlayerViewControllerHost()
+    #endif
+
     var player: AVPlayer? { session?.isStopped == false ? session?.player : nil }
     var currentSeconds: Double { session?.currentSeconds ?? 0 }
     var durationSeconds: Double { session?.durationSeconds ?? 0 }
@@ -49,7 +55,7 @@ import Observation
         do {
             let prepared = try await PlaybackPreparer.prepare(for: item, preferredLanguage: language, resumeSeconds: resume)
             guard !Task.isCancelled, generation == id else { prepared.discard(); return }
-            let player = session?.player ?? AVPlayer()
+            let player = session?.player ?? Self.makePlayer()
             session?.stop()
             let active = PlaybackSession(prepared: prepared, player: player)
             session = active
@@ -65,7 +71,24 @@ import Observation
         }
     }
 
-    func cleanupForSwitch() { stopPlaybackImmediately() }
+    private static func makePlayer() -> AVPlayer {
+        let player = AVPlayer()
+        #if os(iOS)
+        // The default policy pauses video when the app is backgrounded unless
+        // Picture in Picture starts; keep the audio going instead.
+        player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+        #endif
+        return player
+    }
+
+    /// Ends this playback for good. Detaching the player from its view
+    /// controller also closes a Picture in Picture window still showing it.
+    func stop() {
+        stopPlaybackImmediately()
+        #if os(iOS) || os(tvOS)
+        playerHost.setPlayer(nil)
+        #endif
+    }
 
     func stopPlaybackImmediately() {
         preferredAudioLanguage = session?.audioLanguage ?? preferredAudioLanguage
