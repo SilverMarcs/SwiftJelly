@@ -31,6 +31,17 @@ final class PlayerContainerViewController: UIViewController {
         host.containerDidAppear(self)
     }
 
+    #if os(iOS)
+    // A plain container answers system-overlay queries itself, which keeps the
+    // status bar and home indicator visible. Defer them to the player so they
+    // hide along with its playback controls, as they do when the player is
+    // presented directly.
+    override var childForStatusBarHidden: UIViewController? { host.playerViewController }
+    override var childForStatusBarStyle: UIViewController? { host.playerViewController }
+    override var childForHomeIndicatorAutoHidden: UIViewController? { host.playerViewController }
+    override var childForScreenEdgesDeferringSystemGestures: UIViewController? { host.playerViewController }
+    #endif
+
     #if os(tvOS)
     override var preferredFocusEnvironments: [any UIFocusEnvironment] {
         [host.playerViewController]

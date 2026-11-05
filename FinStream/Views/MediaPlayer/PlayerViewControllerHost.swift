@@ -69,6 +69,13 @@ final class PlayerViewControllerHost: NSObject {
         controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         container.view.addSubview(controller.view)
         controller.didMove(toParent: container)
+        #if os(iOS)
+        // The container forwards overlay visibility to this controller, so
+        // ask the system to re-query now that it is the child.
+        container.setNeedsStatusBarAppearanceUpdate()
+        container.setNeedsUpdateOfHomeIndicatorAutoHidden()
+        container.setNeedsUpdateOfScreenEdgesDeferringSystemGestures()
+        #endif
     }
 
     /// Only the container currently holding the controller may remove it; an
