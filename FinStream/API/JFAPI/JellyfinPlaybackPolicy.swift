@@ -11,6 +11,11 @@ enum JellyfinPlaybackPolicy {
     static let hlsAudioBitrate = 384_000
     // Preserve surround channels and let CoreAudio handle speaker downmixing.
     static let maxAudioChannels = 8
+    // Without an explicit ceiling Jellyfin assumes ~8 Mbps, re-encoding any
+    // higher-bitrate source instead of remuxing it. Some servers stop such
+    // converted streams shortly after playback is reported, which shows up as
+    // an endless stall ~20-30 seconds in.
+    static let maxStreamingBitrate = 120_000_000
     static let minSegments = 2
     static let segmentLength = 6
     static let segmentContainer = "mp4"

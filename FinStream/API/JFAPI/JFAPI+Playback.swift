@@ -41,6 +41,7 @@ extension JFAPI {
             enableDirectPlay: true,
             enableDirectStream: true,
             enableTranscoding: true,
+            maxStreamingBitrate: JellyfinPlaybackPolicy.maxStreamingBitrate,
             mediaSourceID: mediaSourceID ?? item.mediaSources?.first?.id,
             startTimeTicks: startPositionTicks.map { Int($0) },
             subtitleStreamIndex: subtitleStreamIndex,
@@ -49,6 +50,7 @@ extension JFAPI {
         
         let parameters = Paths.GetPostedPlaybackInfoParameters(
             userID: context.userID,
+            maxStreamingBitrate: JellyfinPlaybackPolicy.maxStreamingBitrate,
             startTimeTicks: startPositionTicks.map { Int($0) },
             audioStreamIndex: audioStreamIndex,
             subtitleStreamIndex: subtitleStreamIndex,
