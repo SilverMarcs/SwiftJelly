@@ -8,19 +8,13 @@
 import Foundation
 import JellyfinAPI
 
-/// Drives the Jellyfin Quick Connect authorization flow: requesting a code, polling until the
-/// user approves it on another device, and finally exchanging the secret for authentication data.
 @MainActor
 @Observable
 final class QuickConnectViewModel {
     enum Phase: Equatable {
-        /// Requesting a Quick Connect code from the server.
         case connecting
-        /// Waiting for the user to approve the displayed code on another device.
         case awaitingApproval(code: String)
-        /// Exchanging the approved secret for an access token.
         case authenticating
-        /// The flow failed with a user-facing message.
         case failed(String)
     }
 
@@ -35,11 +29,9 @@ final class QuickConnectViewModel {
 
     init(server: Server) {
         self.server = server
-        self.client = JFAPI.makeQuickConnectClient(for: server)
+        client = JFAPI.makeQuickConnectClient(for: server)
     }
 
-    /// Starts (or restarts) the Quick Connect flow, calling `onSuccess` with an authenticated
-    /// server once the request has been approved.
     func start(onSuccess: @escaping (Server) -> Void) {
         flowTask?.cancel()
         phase = .connecting
@@ -69,14 +61,12 @@ final class QuickConnectViewModel {
 
                 phase = .failed("Quick Connect timed out. Please try again.")
             } catch is CancellationError {
-                // The flow was cancelled intentionally, nothing to report.
             } catch {
                 phase = .failed(error.localizedDescription)
             }
         }
     }
 
-    /// Cancels any in-flight Quick Connect work, e.g. when the user dismisses the view.
     func cancel() {
         flowTask?.cancel()
         flowTask = nil

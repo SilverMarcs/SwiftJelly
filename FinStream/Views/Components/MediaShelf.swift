@@ -4,9 +4,7 @@ import JellyfinAPI
 struct MediaShelf: View {
     let header: String
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
-    /// When set, a "See All" affordance pushes `FilteredMediaView(filter:)` via
-    /// value-based navigation (the destination is registered by
-    /// `navigationRouteDestinations()`). `nil` hides the affordance.
+    /// Backs the "See All" push; `nil` hides it.
     private let filter: MediaFilter?
 
     @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 40)

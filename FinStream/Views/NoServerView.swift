@@ -9,15 +9,10 @@ import SwiftUI
 
 struct NoServerView: View {
     var body: some View {
-        #if os(tvOS)
-        // Route the empty state into the same "Profiles & Servers" picker used in
-        // settings, so login and management look consistent on tvOS. With no
-        // servers saved yet, `ServerList` shows just the "Add Server" card.
         NavigationStack {
+            #if os(tvOS)
             ServerList()
-        }
-        #else
-        NavigationStack {
+            #else
             ContentUnavailableView {
                 Label("No Server Found", systemImage: "server.rack")
             } description: {
@@ -32,12 +27,11 @@ struct NoServerView: View {
             .navigationDestination(for: NoServerRoute.self) { _ in
                 AddServerView()
             }
+            #endif
         }
-        #endif
     }
 }
 
-/// Navigation value for pushing the add-server screen from the empty state.
 enum NoServerRoute: Hashable {
     case addServer
 }

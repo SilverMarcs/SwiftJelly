@@ -23,10 +23,6 @@ class ShowDetailViewModel {
      
     // Next Episode / play button
     private(set) var nextEpisode: BaseItemDto? = nil
-
-    /// True once the next-episode lookup has finished, successfully or not.
-    /// The play button needs this to tell "still loading" apart from "there is
-    /// nothing to play", instead of spinning forever.
     private(set) var hasResolvedNextEpisode = false
     
     // Loading states
@@ -97,8 +93,6 @@ class ShowDetailViewModel {
     // Quick load just the next episode for hero/play button (no seasons/episodes)
     func loadQuickNextEpisode() async {
         isLoading = true
-        // Every exit path must clear these, otherwise the play button is stuck
-        // showing a spinner for the lifetime of the view.
         defer {
             isLoading = false
             hasResolvedNextEpisode = true
@@ -132,19 +126,9 @@ class ShowDetailViewModel {
                 await computeNextEpisode()
             }
 
-            // Neither resumable nor next-up: typically a fully watched series.
-            // Offer the first episode so the button becomes a replay rather
-            // than staying empty.
-            if nextEpisode == nil {
-                var seriesShow = show
-                if show.type == .episode {
-                    seriesShow = BaseItemDto()
-                    seriesShow.id = seriesID
-                }
-                if let firstEpisode = try await JFAPI.loadFirstEpisode(for: seriesShow) {
-                    withAnimation {
-                        nextEpisode = firstEpisode
-                    }
+            if nextEpisode == nil, let firstEpisode = try await JFAPI.loadFirstEpisode(seriesID: seriesID) {
+                withAnimation {
+                    nextEpisode = firstEpisode
                 }
             }
         } catch {

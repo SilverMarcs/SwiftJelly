@@ -13,7 +13,7 @@ struct ShowPlayButton: View {
                            .tint(.primary)
                            .controlSize(.mini)
                         #if os(tvOS)
-                           .frame(height: 35) // see              .heroActionIcon()
+                           .frame(height: 35)
                         #endif
 
                         Text("Loading…")
@@ -23,10 +23,6 @@ struct ShowPlayButton: View {
                     #endif
                     .transition(.opacity)
                     
-                } else if vm.nextEpisode == nil {
-                    // Resolved, but the series has nothing playable.
-                    Image(systemName: "play.fill")
-                        .transition(.opacity)
                 } else if let nextEpisode = vm.nextEpisode {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")
@@ -51,6 +47,9 @@ struct ShowPlayButton: View {
                         }
                     }
                     .transition(.opacity)
+                } else {
+                    Image(systemName: "play.fill")
+                        .transition(.opacity)
                 }
             }
             .font(.callout)

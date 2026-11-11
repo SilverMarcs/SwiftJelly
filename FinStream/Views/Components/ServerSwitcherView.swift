@@ -8,14 +8,9 @@
 import SwiftUI
 import SwiftMediaViewer
 
-/// Profile switcher used to change the active profile (and thereby the
-/// signed-in user). Profiles are shown as large circular avatars grouped under
-/// the server they belong to. Reused as a sheet (`ServerSwitcherView`) on
-/// macOS/iPadOS and as a sidebar page on tvOS.
 struct ServerSwitcherList: View {
     private var dataManager = DataManager.shared
 
-    /// Called after a profile is selected, e.g. to dismiss a presenting sheet.
     var onSelect: (() -> Void)?
 
     var body: some View {
@@ -104,42 +99,19 @@ struct ServerSwitcherList: View {
         .adaptiveButtonStyle()
     }
 
-    private var avatarSize: CGFloat {
-        #if os(tvOS)
-        240
-        #else
-        80
-        #endif
-    }
-
-    private var cardWidth: CGFloat {
-        #if os(tvOS)
-        320
-        #else
-        118
-        #endif
-    }
-
-    private var cardSpacing: CGFloat {
-        #if os(tvOS)
-        40
-        #else
-        20
-        #endif
-    }
-
-    private var sectionSpacing: CGFloat {
-        #if os(tvOS)
-        70
-        #else
-        32
-        #endif
-    }
+    #if os(tvOS)
+    private let avatarSize: CGFloat = 240
+    private let cardWidth: CGFloat = 320
+    private let cardSpacing: CGFloat = 40
+    private let sectionSpacing: CGFloat = 70
+    #else
+    private let avatarSize: CGFloat = 80
+    private let cardWidth: CGFloat = 118
+    private let cardSpacing: CGFloat = 20
+    private let sectionSpacing: CGFloat = 32
+    #endif
 }
 
-/// A single profile presented as a big circular avatar with the username below.
-/// The active profile is marked with a checkmark badge rather than a coloured
-/// ring, which reads cleanly against the tvOS focus highlight.
 private struct ProfileCard: View {
     let server: Server
     let isSelected: Bool
@@ -165,28 +137,21 @@ private struct ProfileCard: View {
         .adaptiveButtonStyle()
     }
 
-    // Mirrors `PersonView`'s avatar: on tvOS the image is left unclipped so the
-    // borderless button's circular border shape drives the focus highlight. A
-    // clipped/self-ringed avatar (like `UserAvatarView`) fights that effect.
+    // Unclipped on tvOS so the button's circular border shape drives the focus effect.
     private var avatar: some View {
         Group {
             if let url = ImageURLProvider.userImageURL(for: server) {
                 CachedAsyncImage(url: url, targetSize: Int(avatarSize * 2)) {
-                    Image(systemName: "person.fill")
-                        .font(.title)
-                        .foregroundStyle(.secondary)
+                    placeholder
                 }
                 .aspectRatio(contentMode: .fill)
             } else {
-                Image(systemName: "person.fill")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
+                placeholder
             }
         }
         .frame(width: avatarSize, height: avatarSize)
         .background(.background.secondary)
         .overlay {
-            // A ring stays inside the circular focus mask, unlike a corner badge.
             Circle().strokeBorder(
                 isSelected ? AnyShapeStyle(.green) : AnyShapeStyle(.tertiary),
                 lineWidth: isSelected ? max(4, avatarSize * 0.04) : 0.5
@@ -200,11 +165,14 @@ private struct ProfileCard: View {
         .clipped()
         #endif
     }
+
+    private var placeholder: some View {
+        Image(systemName: "person.fill")
+            .font(.title)
+            .foregroundStyle(.secondary)
+    }
 }
 
-/// A wrapping flow layout that centres each row horizontally, so a small number
-/// of profiles sit in the middle of the switcher rather than packed to the edge.
-/// Rows wrap when they exceed the available width.
 private struct CenteredFlowLayout: Layout {
     var spacing: CGFloat = 8
 
@@ -233,7 +201,6 @@ private struct CenteredFlowLayout: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        // Group subviews into rows that fit the available width.
         var rows: [[LayoutSubviews.Element]] = [[]]
         var rowWidth: CGFloat = 0
 
@@ -247,7 +214,6 @@ private struct CenteredFlowLayout: Layout {
             rowWidth += size.width + spacing
         }
 
-        // Place each row centred within the bounds.
         var y = bounds.minY
         for row in rows {
             let sizes = row.map { $0.sizeThatFits(.unspecified) }
@@ -267,14 +233,11 @@ private struct CenteredFlowLayout: Layout {
     }
 }
 
-/// Navigation values for the profile switcher: adding a whole new server, or
-/// adding another account to an existing one.
 enum ServerSwitcherRoute: Hashable {
     case addServer
     case addAccount(serverName: String, url: URL)
 }
 
-/// Sheet presentation of the profile switcher for macOS and iPadOS.
 struct ServerSwitcherView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -290,8 +253,7 @@ struct ServerSwitcherView: View {
                 }
         }
         #if os(tvOS)
-        // The full-screen cover has no backing surface of its own, so give the
-        // page an opaque frosted background instead of showing through.
+        // fullScreenCover has no backing surface on tvOS.
         .background(.regularMaterial, ignoresSafeAreaEdges: .all)
         #endif
     }

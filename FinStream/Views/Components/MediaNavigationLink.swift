@@ -16,41 +16,27 @@ struct MediaNavigationLink<Label: View>: View {
     let item: BaseItemDto?
     @ViewBuilder let label: () -> Label
 
-    #if os(iOS)
-    /// The zoom-transition source id, matching the id of the item the
-    /// destination will display (the series for episodes). Empty when there is
-    /// no zoomable destination.
-    private var detailZoomID: String {
-        guard let item else { return "" }
+    private var route: NavigationRoute? {
+        guard let item else { return nil }
         switch item.type {
         case .person:
-            return ""
+            return .person(Person(from: item))
         case .episode:
-            return item.toSeries()?.id ?? item.id ?? ""
+            return .media(item.toSeries() ?? item)
         default:
-            return item.id ?? ""
+            return .media(item)
         }
     }
-    #endif
-    
-    var body: some View {
-        // Compute an optional navigation value. When `item` is nil (placeholder),
-        // the value is nil, which disables the NavigationLink. Keeping a single
-        // NavigationLink of one concrete value type (`NavigationRoute`) for both
-        // states preserves the view identity so tvOS focus survives the
-        // placeholder → real-item swap.
-        let route: NavigationRoute? = {
-            guard let item = item else { return nil }
-            switch item.type {
-            case .person:
-                return .person(Person(from: item))
-            case .episode:
-                return .media(item.toSeries() ?? item)
-            default:
-                return .media(item)
-            }
-        }()
 
+    #if os(iOS)
+    private var detailZoomID: String {
+        guard case .media(let destination) = route else { return "" }
+        return destination.id ?? ""
+    }
+    #endif
+
+    var body: some View {
+        // One NavigationLink for placeholder and real item keeps view identity, so tvOS focus survives the swap.
         NavigationLink(value: route) {
             label()
         }

@@ -48,19 +48,10 @@ enum ImageURLProvider {
         return url(forItemID: id, imageType: .primary)
     }
 
-    /// Best-effort primary image URL for a server's authenticated user.
-    ///
-    /// Uses the stable `/Users/{userID}/Images/Primary` route served by all
-    /// Jellyfin versions. Callers should provide a fallback since a user may
-    /// not have a profile image set. Works for any server, not just the active
-    /// one, so it can be used in a server switcher.
+    /// Works for any server, not just the active one. The user may have no image set.
     static func userImageURL(for server: Server) -> URL? {
         guard let userID = server.jellyfinUserID else { return nil }
-        return server.url
-            .appendingPathComponent("Users")
-            .appendingPathComponent(userID)
-            .appendingPathComponent("Images")
-            .appendingPathComponent("Primary")
+        return server.url.appending(path: "Users/\(userID)/Images/Primary")
     }
 
     /// Builds a series image URL for episode items when available.

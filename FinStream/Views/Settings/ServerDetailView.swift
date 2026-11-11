@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-/// The accounts (profiles) signed in on a single server. Profiles can be
-/// switched to, removed, or a new account added — all scoped to this server.
 struct ServerDetailView: View {
     private var dataManager = DataManager.shared
 
@@ -17,8 +15,6 @@ struct ServerDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editingGroup: ServerGroup?
 
-    /// Recomputed from the live server list so adding/removing accounts updates
-    /// the view immediately.
     private var group: ServerGroup? {
         dataManager.serverGroups.first { $0.url == serverURL }
     }

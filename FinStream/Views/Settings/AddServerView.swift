@@ -6,8 +6,6 @@ struct AddServerView: View {
 
     private var dataManager = DataManager.shared
 
-    /// When adding an account to an existing server, its name and URL are fixed
-    /// and only credentials are requested.
     private let isAddingAccount: Bool
 
     @State private var serverName: String
@@ -20,11 +18,8 @@ struct AddServerView: View {
     @State private var alertMessage = ""
     @State private var showingAlert = false
 
-    /// The server being connected via Quick Connect, if any. Non-nil presents the Quick Connect sheet.
     @State private var quickConnectServer: Server?
 
-    /// Adds a brand-new server, or — when `existingServerURL` is supplied — a new
-    /// account (profile) to an already-saved server, reusing its name and URL.
     init(existingServerName: String? = nil, existingServerURL: URL? = nil) {
         _serverName = State(initialValue: existingServerName ?? "")
         _serverURL = State(initialValue: existingServerURL?.absoluteString ?? "")
@@ -73,8 +68,7 @@ struct AddServerView: View {
     }
 
     #if os(tvOS)
-    /// A clean, consistently-styled vertical layout for tvOS, where the grouped `Form`
-    /// renders inconsistent inline fields.
+    // A grouped `Form` renders text fields inconsistently on tvOS.
     private var formContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 40) {
@@ -126,8 +120,6 @@ struct AddServerView: View {
         }
     }
 
-    /// A clean, left-aligned summary of the fixed server when adding an account,
-    /// instead of sparse right-aligned `LabeledContent` rows.
     private var serverSummary: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(serverName)
@@ -212,11 +204,9 @@ struct AddServerView: View {
     }
 
     private func startQuickConnect() {
-        guard let server = makeServer() else { return }
-        quickConnectServer = server
+        quickConnectServer = makeServer()
     }
 
-    /// Builds a `Server` from the entered name and URL, surfacing an alert on an invalid URL.
     private func makeServer() -> Server? {
         guard let url = URL(string: serverURL) else {
             alertMessage = "Invalid URL"

@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-/// Presents the Jellyfin Quick Connect flow: displays the code the user must enter on another
-/// device and reports back an authenticated server once the request is approved.
 struct QuickConnectView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -38,9 +36,7 @@ struct QuickConnectView: View {
         .padding(60)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            viewModel.start { authenticatedServer in
-                onAuthenticated(authenticatedServer)
-            }
+            viewModel.start(onSuccess: onAuthenticated)
         }
         .onDisappear {
             viewModel.cancel()
@@ -96,9 +92,7 @@ struct QuickConnectView: View {
                     .frame(maxWidth: 700)
 
                 Button("Try Again") {
-                    viewModel.start { authenticatedServer in
-                        onAuthenticated(authenticatedServer)
-                    }
+                    viewModel.start(onSuccess: onAuthenticated)
                 }
             }
         }

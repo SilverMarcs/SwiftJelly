@@ -45,16 +45,11 @@ struct MoviePlayButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        // Unplayed
         MoviePlayButton(item: BaseItemDto(runTimeTicks: 72000000000))
-
-        // In progress
         MoviePlayButton(item: BaseItemDto(
             runTimeTicks: 72000000000,
             userData: UserItemDataDto(playbackPositionTicks: 30000000000)
         ))
-
-        // Played
         MoviePlayButton(item: BaseItemDto(
             runTimeTicks: 72000000000,
             userData: UserItemDataDto(isPlayed: true)

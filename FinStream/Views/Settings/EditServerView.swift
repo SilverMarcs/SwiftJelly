@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-/// Edits a server's stored data — its display name and URL — applying the change
-/// to every account signed in on that server. Credentials aren't editable here;
-/// add or remove accounts instead.
 struct EditServerView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -23,7 +20,7 @@ struct EditServerView: View {
     @State private var showingAlert = false
 
     init(group: ServerGroup) {
-        self.profiles = group.profiles
+        profiles = group.profiles
         _name = State(initialValue: group.name)
         _urlString = State(initialValue: group.url.absoluteString)
     }

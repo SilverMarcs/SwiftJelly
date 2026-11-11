@@ -10,18 +10,13 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-/// A full-screen backdrop for the tvOS home screen that sits behind the hero
-/// content *and* the peek of the first content shelf. It parallaxes upward at a
-/// fraction of the scroll speed and fades out as the user scrolls past the
-/// showcase, mirroring the Apple TV+ home experience.
 struct HeroParallaxBackground: View {
     let item: BaseItemDto?
     let scrollOffset: CGFloat
     let showcaseHeight: CGFloat
 
-    /// How much of the scroll distance the backdrop travels. Lower = more depth.
     private let parallaxFactor: CGFloat = 0.35
-    /// Extra height beyond the screen so the upward parallax never reveals a gap.
+    /// Extra height so the upward parallax never reveals a gap.
     private let overscan: CGFloat = 320
 
     var body: some View {
@@ -40,8 +35,6 @@ struct HeroParallaxBackground: View {
                         )
                         .clipped()
                         .overlay {
-                            // Darken the lower portion so hero text and the
-                            // shelf peek stay legible over bright artwork.
                             LinearGradient(
                                 gradient: Gradient(stops: [
                                     .init(color: .black, location: 0.0),

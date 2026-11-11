@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-/// Top level of the "Profiles & Servers" settings: one row per server. Tapping
-/// a server opens its accounts, where profiles can be switched, added or removed.
 struct ServerList: View {
     private var dataManager = DataManager.shared
 
@@ -50,13 +48,7 @@ struct ServerList: View {
         }
     }
 
-    // MARK: - tvOS
-
     #if os(tvOS)
-    /// A vertically-centered column of full-width server cards that fills the
-    /// content side of the split view, rather than the cramped grouped `Form`
-    /// tvOS renders. Selecting a server opens its accounts; "Add Server" pushes a
-    /// separate page.
     private var content: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -125,9 +117,6 @@ struct ServerList: View {
         .contentShape(.rect)
     }
     #else
-
-    // MARK: - iOS / macOS
-
     private var content: some View {
         Form {
             Section("Servers") {
@@ -174,7 +163,6 @@ struct ServerList: View {
     }
 }
 
-/// Navigation values for the "Profiles & Servers" settings stack.
 enum ServerListRoute: Hashable {
     case addServer
     case serverDetail(url: URL)

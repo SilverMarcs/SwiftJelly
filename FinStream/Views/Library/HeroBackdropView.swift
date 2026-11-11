@@ -9,7 +9,6 @@ struct HeroBackdropView<HeroActions: View>: View {
     let logoItem: BaseItemDto
     let genreItem: BaseItemDto
     let badge: String?
-    /// The iOS hero carousel draws its own parallax backdrop and only needs the overlay.
     let showsBackground: Bool
 
     init(
@@ -239,4 +238,3 @@ struct HeroBackdropView<HeroActions: View>: View {
             - (isCompactSize ? HeroLayoutMetrics.reflectionHeight : 0)
     }
 }
-

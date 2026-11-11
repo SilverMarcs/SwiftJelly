@@ -91,9 +91,7 @@ struct SeriesDownloadRow: View {
         }
     }
 }
-/// Navigation value for pushing a series' downloaded-episodes list. Registered
-/// once by the enclosing `DownloadsView` list rather than per row.
+
 enum DownloadRoute: Hashable {
     case series(seriesID: String, seriesName: String)
 }
-

@@ -7,12 +7,7 @@
 
 import Foundation
 
-/// A Jellyfin host and the profiles (user logins) saved against it.
-///
-/// Each `Server` entry is really a *profile*: a single user login. Several
-/// entries can share the same `url` — that's one physical server with multiple
-/// profiles. `ServerGroup` collapses those entries so the UI can present
-/// "Profiles & Servers" consistently.
+/// Saved `Server` entries (one per user login) that share a host URL.
 struct ServerGroup: Identifiable {
     let id: String
     let name: String
@@ -21,8 +16,7 @@ struct ServerGroup: Identifiable {
 }
 
 extension DataManager {
-    /// Saved profiles grouped by their Jellyfin host, preserving the order each
-    /// host first appears in `servers`.
+    /// Ordered by each host's first appearance in `servers`.
     var serverGroups: [ServerGroup] {
         var order: [String] = []
         var grouped: [String: [Server]] = [:]

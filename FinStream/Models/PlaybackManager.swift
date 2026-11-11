@@ -24,8 +24,6 @@ import AVFoundation
     var isPlayerPresented = false
 
     #if os(iOS)
-    /// Identifier of the view the player's zoom transition should originate
-    /// from. Set by the play button that starts playback.
     var zoomSourceID = ""
     #endif
 

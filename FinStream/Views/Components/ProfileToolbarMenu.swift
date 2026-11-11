@@ -9,20 +9,14 @@
 import SwiftUI
 import UIKit
 
-/// Toolbar profile control shown on every page in compact (iOS) layouts.
-/// Tapping the avatar opens a menu to switch servers or open Settings.
 struct ProfileToolbarMenu: View {
     @Binding var showingSettings: Bool
 
     private var dataManager = DataManager.shared
 
-    /// Server avatars prefetched as circular images. A `Menu` is backed by
-    /// UIKit's `UIMenu`, which only renders synchronously-available images, so
-    /// the async `CachedAsyncImage` used elsewhere can't be shown here.
+    /// `UIMenu` only renders synchronously available images, so avatars are prefetched.
     @State private var avatarImages: [String: UIImage] = [:]
 
-    /// Diameter, in points, the avatars are rendered at before UIKit scales
-    /// them to the menu row.
     private static let avatarDiameter: CGFloat = 40
 
     init(showingSettings: Binding<Bool>) {
@@ -36,15 +30,12 @@ struct ProfileToolbarMenu: View {
                     Button {
                         dataManager.selectServer(server)
                     } label: {
-                        // The `Label` (title + avatar) and the server-name `Text`
-                        // must be direct children of the button's label for UIKit
-                        // to render the name as a menu subtitle, so keep them
-                        // inline here rather than in a helper.
+                        // UIKit renders the trailing `Text` as a subtitle only when it's a direct child of the label.
                         Label {
                             Text(server.username ?? "User")
                         } icon: {
                             let avatar = avatarImages[server.id] ?? Self.fallbackAvatar
-                            Image(uiImage: isSelectedServer(server: server) ? Self.addingGreenBorder(to: avatar) : avatar)
+                            Image(uiImage: server.id == dataManager.activeServerID ? Self.addingGreenBorder(to: avatar) : avatar)
                         }
 
                         Text(server.name)
@@ -68,10 +59,6 @@ struct ProfileToolbarMenu: View {
         .task { await loadAvatars() }
     }
 
-    private func isSelectedServer(server: Server) -> Bool {
-        return server.id == dataManager.activeServerID
-    }
-
     private func loadAvatars() async {
         for server in dataManager.servers where avatarImages[server.id] == nil {
             guard let url = ImageURLProvider.userImageURL(for: server) else { continue }
@@ -81,58 +68,42 @@ struct ProfileToolbarMenu: View {
         }
     }
 
-    /// Downloads an avatar and renders it into a circular image suitable for a
-    /// menu icon. Returns `nil` when the user has no profile image so callers
-    /// can fall back to a symbol.
     private static func loadCircularImage(from url: URL) async -> UIImage? {
         guard let (data, _) = try? await URLSession.shared.data(from: url),
-              let uiImage = UIImage(data: data) else { return nil }
-        return circularImage(uiImage, diameter: avatarDiameter)
-    }
-
-    /// Placeholder avatar for users without a profile image, rendered at the
-    /// same diameter as real photos so both look identical in size.
-    private static let fallbackAvatar: UIImage = {
+              let image = UIImage(data: data) else { return nil }
         let diameter = avatarDiameter
-        let size = CGSize(width: diameter, height: diameter)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { _ in
-            let symbol = UIImage(systemName: "person.crop.circle.fill")?
-                .withTintColor(.secondaryLabel, renderingMode: .alwaysOriginal)
-            symbol?.draw(in: CGRect(origin: .zero, size: size))
-        }.withRenderingMode(.alwaysOriginal)
-    }()
-
-    private static func circularImage(_ image: UIImage, diameter: CGFloat) -> UIImage {
-        let size = CGSize(width: diameter, height: diameter)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { _ in
+        return renderAvatar { size in
             UIBezierPath(ovalIn: CGRect(origin: .zero, size: size)).addClip()
-            // Aspect-fill the circle so non-square avatars aren't distorted.
             let scale = max(diameter / image.size.width, diameter / image.size.height)
             let scaledSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
             let origin = CGPoint(x: (diameter - scaledSize.width) / 2, y: (diameter - scaledSize.height) / 2)
             image.draw(in: CGRect(origin: origin, size: scaledSize))
-        }.withRenderingMode(.alwaysOriginal)
+        }
     }
 
-    /// Bakes a green selection ring into the avatar. UIKit's menu ignores
-    /// SwiftUI overlay modifiers on icons, so the border must be drawn into the
-    /// image itself.
-    private static func addingGreenBorder(to image: UIImage, lineWidth: CGFloat = 2.5) -> UIImage {
-        let diameter = avatarDiameter
-        let size = CGSize(width: diameter, height: diameter)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { _ in
+    private static let fallbackAvatar = renderAvatar { size in
+        UIImage(systemName: "person.crop.circle.fill")?
+            .withTintColor(.secondaryLabel, renderingMode: .alwaysOriginal)
+            .draw(in: CGRect(origin: .zero, size: size))
+    }
+
+    /// `UIMenu` ignores SwiftUI overlays on icons, so the ring is drawn into the image.
+    private static func addingGreenBorder(to image: UIImage) -> UIImage {
+        let lineWidth: CGFloat = 2.5
+        return renderAvatar { size in
             image.draw(in: CGRect(origin: .zero, size: size))
-            let inset = lineWidth / 2
-            let ring = UIBezierPath(ovalIn: CGRect(x: inset, y: inset, width: diameter - lineWidth, height: diameter - lineWidth))
+            let ring = UIBezierPath(ovalIn: CGRect(origin: .zero, size: size).insetBy(dx: lineWidth / 2, dy: lineWidth / 2))
             ring.lineWidth = lineWidth
-            // Softened green so the selection ring reads as a gentle highlight
-            // rather than a harsh neon outline.
             UIColor.systemGreen.withAlphaComponent(0.7).setStroke()
             ring.stroke()
-        }.withRenderingMode(.alwaysOriginal)
+        }
+    }
+
+    private static func renderAvatar(_ draw: (CGSize) -> Void) -> UIImage {
+        let size = CGSize(width: avatarDiameter, height: avatarDiameter)
+        return UIGraphicsImageRenderer(size: size)
+            .image { _ in draw(size) }
+            .withRenderingMode(.alwaysOriginal)
     }
 }
 #endif

@@ -11,8 +11,6 @@ struct PlayMediaButton<Label: View>: View {
 
     #if os(iOS)
     @Environment(\.playerZoomNamespace) private var playerZoomNamespace
-    /// A stable identifier unique to this button, used as the source of the
-    /// zoom transition into the full screen player.
     @State private var zoomID = UUID().uuidString
     #endif
         

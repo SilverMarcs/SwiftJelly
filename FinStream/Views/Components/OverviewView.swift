@@ -42,10 +42,10 @@ struct OverviewView: View {
                                 .font(.caption)
                         }
                         .buttonStyle(.glass)
-                        #if !os(macOS)
-                        .tint(.primary)
-                        #else
+                        #if os(macOS)
                         .buttonBorderShape(.capsule)
+                        #else
+                        .tint(.primary)
                         #endif
                         .sheet(isPresented: $showFullOverview) {
                             OverviewSheetView(overview: realOverview)

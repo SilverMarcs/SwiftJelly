@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-/// Header button shown at the top of the tab view sidebar on macOS, iPadOS and
-/// tvOS. Displays the current user and server, and opens the server switcher.
 struct ProfileSidebarButton: View {
     private var dataManager = DataManager.shared
 

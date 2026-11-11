@@ -8,12 +8,9 @@
 import SwiftUI
 import SwiftMediaViewer
 
-/// Circular avatar for a server's authenticated user, falling back to a person
-/// icon when no profile image is available.
 struct UserAvatarView: View {
     let server: Server
     var size: CGFloat = 32
-    /// Draws a prominent green ring to mark the active profile.
     var isSelected: Bool = false
 
     var body: some View {

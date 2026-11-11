@@ -7,12 +7,7 @@
 
 import SwiftUI
 
-/// Lets a signed-in user pair a new device by authorizing the Quick Connect code that device
-/// is displaying. This is the counterpart to `QuickConnectView`, which is used when *this* device
-/// is the one being signed in.
 struct PairDeviceView: View {
-    @Environment(\.dismiss) private var dismiss
-
     @State private var code = ""
     @State private var phase: Phase = .idle
 
