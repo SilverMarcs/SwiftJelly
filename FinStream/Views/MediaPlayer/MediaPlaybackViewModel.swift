@@ -6,414 +6,218 @@ import Observation
 @MainActor
 @Observable final class MediaPlaybackViewModel {
     var item: BaseItemDto
-    var player: AVPlayer?
     var isLoading = true
     var isAutoLoadingNext = false
-    var playbackToken = UUID()
-
-    /// Set when `load` throws, so the UI/logs can tell a failed start apart
-    /// from a player that simply hasn't rendered yet.
-    var loadFailureMessage: String?
-
-    var playbackInfo: PlaybackInfoResponse?
-
-    var audioTracks: [PlaybackAudioTrack] = []
-    var selectedAudioTrack: PlaybackAudioTrack?
-    var preferredAudioLanguage: String?
-    var isSwitchingAudio = false
-
-    var currentSeconds: Double = 0
-    var durationSeconds: Double = 0
-
     var isFetchingNextEpisode = false
-
-    /// The prefetched next episode, if available.
     private(set) var nextEpisode: BaseItemDto?
-    
-    /// The time in seconds when credits start for the current item.
-    var creditsStartSeconds: Double? {
-        markers.creditsStartSeconds
-    }
-
+    private var session: PlaybackSession?
+    private var preparationError: String?
+    private var preferredAudioLanguage: String?
+    @ObservationIgnored private var loadTask: Task<Void, Never>?
+    @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var markers = MediaChapterMarkers(introRangeSeconds: nil, creditsStartSeconds: nil)
-    @ObservationIgnored private var timeObserverToken: Any?
-    @ObservationIgnored private var requestedAudioStreamIndex: Int?
-    @ObservationIgnored private var isLoadingTaskActive = false
+    #if os(macOS)
     @ObservationIgnored private var playbackEndObserver: NSObjectProtocol?
-    @ObservationIgnored private var hasReportedPlaybackStart = false
+    #endif
 
+    #if os(iOS) || os(tvOS)
+    /// This playback's player view controller. It outlives the player UI so
+    /// Picture in Picture keeps going while the rest of the app is used.
+    @ObservationIgnored let playerHost = PlayerViewControllerHost()
+    #endif
 
-    init(item: BaseItemDto) {
-        self.item = item
-    }
+    var player: AVPlayer? { session?.isStopped == false ? session?.player : nil }
+    var currentSeconds: Double { session?.currentSeconds ?? 0 }
+    var durationSeconds: Double { session?.durationSeconds ?? 0 }
+    var errorDescription: String? { preparationError ?? session?.errorDescription }
+    var creditsStartSeconds: Double? { markers.creditsStartSeconds }
+
+    init(item: BaseItemDto) { self.item = item }
 
     func load() async {
-        await load(audioIndex: requestedAudioStreamIndex, resumeSeconds: nil)
-    }
-
-    func load(audioIndex: Int?, resumeSeconds: Double?) async {
-        guard !isLoadingTaskActive else { return }
-        isLoadingTaskActive = true
-        defer { isLoadingTaskActive = false }
-        let activePlaybackToken = playbackToken
-
-        isLoading = true
-        requestedAudioStreamIndex = audioIndex ?? requestedAudioStreamIndex
-
-        hasReportedPlaybackStart = false
-        loadFailureMessage = nil
-
-        stopObservingTime()
-
-        do {
-            let session = try await PlaybackUtilities.loadPlaybackInfo(
-                for: item,
-                into: player,
-                audioStreamIndex: audioIndex,
-                resumeSeconds: resumeSeconds
-            )
-
-            guard activePlaybackToken == playbackToken else {
-                session.player.pause()
-                session.player.replaceCurrentItem(with: nil)
-                isLoading = false
-                return
-            }
-
-            player = session.player
-            playbackInfo = session.info
-            item = session.item
-            // Start with chapter-derived markers as a fallback, then refine
-            // with plugin-provided media segments (e.g. Intro Skipper) below.
-            markers = MediaChapterMarkerResolver.resolve(from: session.item.chapters)
-
-            audioTracks = PlaybackAudioTrack.tracks(from: session.info)
-            selectedAudioTrack = resolveSelectedTrack(preferredIndex: audioIndex)
-
-            startObservingTime(for: session.player)
-            loadMediaSegments(for: session.item, token: activePlaybackToken)
-        } catch {
-            // Playback could not be started at all (no media source, bad URL,
-            // network/auth failure). Surface it instead of silently showing an
-            // empty player.
-            loadFailureMessage = error.localizedDescription
-            PlaybackLog.error("Failed to start playback for \(item.name ?? "?") (\(item.id ?? "nil")): "
-                + PlaybackLog.describe(error: error))
-        }
-
-        isLoading = false
-    }
-
-    /// Fetches plugin-provided media segments (intro/outro ranges from the
-    /// Intro Skipper plugin) and refines the current markers with them. Runs
-    /// in the background so it never delays the start of playback. The chapter
-    /// fallback set in `load` remains in effect if no segments are available.
-    private func loadMediaSegments(for item: BaseItemDto, token: UUID) {
-        Task { @MainActor [weak self] in
+        if let loadTask { await loadTask.value; return }
+        let id = UUID()
+        generation = id
+        let task = Task<Void, Never> { [weak self] in
             guard let self else { return }
+            await self.prepareAndStart(generation: id)
+        }
+        // The view's loading indicator may disappear while start() is seeking.
+        // This task belongs to the model, not that temporary view's lifetime.
+        loadTask = task
+        await task.value
+        if generation == id { loadTask = nil }
+    }
 
-            let segments: [MediaSegmentDto]
-            do {
-                segments = try await JFAPI.getMediaSegments(for: item)
-            } catch {
-                print("[MediaSegments] fetch failed for \(item.name ?? "?") (\(item.id ?? "?")): \(error)")
-                return
+    private func prepareAndStart(generation id: UUID) async {
+        isLoading = true
+        preparationError = nil
+        defer { if generation == id { isLoading = false } }
+        let language = session?.audioLanguage ?? preferredAudioLanguage
+        let resume = session?.prepared.info.itemID == item.id ? session?.currentSeconds : nil
+        do {
+            let prepared = try await PlaybackPreparer.prepare(for: item, preferredLanguage: language, resumeSeconds: resume)
+            guard !Task.isCancelled, generation == id else { prepared.discard(); return }
+            let player = session?.player ?? Self.makePlayer()
+            session?.stop()
+            let active = PlaybackSession(prepared: prepared, player: player)
+            session = active
+            item = prepared.item
+            markers = MediaChapterMarkerResolver.resolve(from: prepared.item.chapters)
+            loadMediaSegments(for: prepared.item, generation: id)
+            #if os(macOS)
+            observePlaybackEnd(of: prepared.playerItem)
+            #endif
+            active.onTimeChanged = { [weak self] in
+                Task { @MainActor [weak self] in await self?.prefetchNextEpisodeIfNeeded() }
             }
+            await active.start()
+        } catch {
+            guard !Task.isCancelled, generation == id else { return }
+            preparationError = "This video could not be loaded. Please try again."
+        }
+    }
 
-            print("[MediaSegments] \(segments.count) segment(s) for \(item.name ?? "?"): " +
-                  segments.map { "\($0.type.rawValue)[\($0.startSeconds ?? -1)-\($0.endSeconds ?? -1)]" }.joined(separator: ", "))
-
-            guard !segments.isEmpty else { return }
-            guard token == self.playbackToken else { return }
-
+    /// Plugin segments (e.g. Intro Skipper) replace the chapter-based markers once they arrive.
+    private func loadMediaSegments(for item: BaseItemDto, generation id: UUID) {
+        Task { [weak self] in
+            guard let segments = try? await JFAPI.getMediaSegments(for: item), !segments.isEmpty else { return }
             let resolved = MediaChapterMarkerResolver.resolve(from: segments)
-            print("[MediaSegments] resolved intro=\(String(describing: resolved.introRangeSeconds)) credits=\(String(describing: resolved.creditsStartSeconds))")
-            guard resolved.introRangeSeconds != nil || resolved.creditsStartSeconds != nil else { return }
+            guard let self, self.generation == id,
+                  resolved.introRangeSeconds != nil || resolved.creditsStartSeconds != nil else { return }
             self.markers = resolved
         }
     }
 
-    /// Internal cleanup for switching items without triggering endPlayback.
-    func cleanupForSwitch() {
-        stopObservingTime()
-        nextEpisode = nil
-        isFetchingNextEpisode = false
-
-        if let player {
-            player.pause()
-            player.replaceCurrentItem(with: nil)
-        }
-    }
-
-    func stopPlaybackImmediately() {
-        stopObservingTime()
-        nextEpisode = nil
-        isFetchingNextEpisode = false
-        isLoading = false
-        playbackToken = UUID()
-
-        guard let player else { return }
-        player.pause()
-        player.replaceCurrentItem(with: nil)
-        self.player = nil
-    }
-
-    func finishStoppingPlayback() async {
-        await reportPlaybackStopped()
-    }
-
-    var skipIntroTargetSeconds: Double? {
-        guard let introRange = markers.introRangeSeconds else { return nil }
-        let leadInSeconds = 2.0
-        let showStart = max(0, introRange.lowerBound - leadInSeconds)
-        guard currentSeconds >= showStart, currentSeconds < introRange.upperBound else { return nil }
-        return introRange.upperBound
-    }
-
-    var shouldShowSkipIntro: Bool {
-        skipIntroTargetSeconds != nil
-    }
-
-    var shouldShowNextEpisode: Bool {
-        guard item.type == .episode else { return false }
-        guard !isAutoLoadingNext else { return false }
-        let duration = durationSeconds
-        guard duration > 0 else { return false }
-        let promptStartSeconds = markers.creditsStartSeconds ?? max(0, duration - 60)
-        return currentSeconds >= promptStartSeconds
-    }
-
-    func skipIntro() async {
-        guard let player, let targetSeconds = skipIntroTargetSeconds else { return }
-        let time = CMTime(seconds: targetSeconds, preferredTimescale: 600)
-        await withCheckedContinuation { continuation in
-            player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { _ in
-                continuation.resume()
-            }
-        }
-    }
-
-    func transitionToNextEpisode() async {
-        guard item.type == .episode, !isAutoLoadingNext else { return }
-        // Detach the finished item immediately. Otherwise AVKit's play() on
-        // proposal dismissal restarts the (ended) old item from 0 during the
-        // async load gap, so the old episode visibly replays before the swap.
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
-
-        isAutoLoadingNext = true
-        defer { isAutoLoadingNext = false }
-        
-        await reportPlaybackStopped()
-        stopObservingTime()
-
-        let finishedItem = item
-
-        let episodeToPlay: BaseItemDto?
-        if let cachedNextEpisode = nextEpisode {
-            episodeToPlay = cachedNextEpisode
-        } else {
-            episodeToPlay = try? await JFAPI.loadNextEpisode(after: finishedItem)
-        }
-
-        guard let episodeToPlay, episodeToPlay.id != finishedItem.id else { return }
-
-        nextEpisode = nil
-        item = episodeToPlay
-        await load(audioIndex: requestedAudioStreamIndex, resumeSeconds: nil)
-    }
-
-    func transition(to episode: BaseItemDto) async {
-        guard !isAutoLoadingNext else { return }
-
-        guard episode.id != item.id else {
-            player?.play()
-            return
-        }
-
-        player?.pause()
-        player?.replaceCurrentItem(with: nil)
-
-        isAutoLoadingNext = true
-        defer { isAutoLoadingNext = false }
-
-        await reportPlaybackStopped()
-        stopObservingTime()
-
-        nextEpisode = nil
-        item = episode
-        await load(audioIndex: requestedAudioStreamIndex, resumeSeconds: nil)
-    }
-
-    func switchAudioTrack(to track: PlaybackAudioTrack) async {
-        guard track != selectedAudioTrack else { return }
-        preferredAudioLanguage = track.languageCode ?? preferredAudioLanguage
-        requestedAudioStreamIndex = track.index
-
-        isSwitchingAudio = true
-        defer { isSwitchingAudio = false }
-
-        let resumeSeconds = player?.currentTime().seconds ?? 0
-        await load(audioIndex: track.index, resumeSeconds: resumeSeconds)
-    }
-
-    private func startObservingTime(for player: AVPlayer) {
-        let interval = CMTime(seconds: 1, preferredTimescale: 1)
-        timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let self else { return }
-            Task { @MainActor in
-                self.currentSeconds = time.seconds.isFinite ? max(0, time.seconds) : 0
-                self.durationSeconds = self.resolvedDurationSeconds(for: player)
-                await self.prefetchNextEpisodeIfNeeded()
-            }
-        }
-
-        #if os(macOS)
-        startObservingPlaybackEnd(for: player)
-        #endif
-    }
-
-    /// tvOS advances via `AVContentProposal`; macOS has no equivalent, so
-    /// auto-play the next episode when the current item reaches its end.
-    private func startObservingPlaybackEnd(for player: AVPlayer) {
-        stopObservingPlaybackEnd()
-        guard let currentItem = player.currentItem else { return }
-
+    #if os(macOS)
+    /// tvOS advances through `AVContentProposal`; macOS has no equivalent.
+    private func observePlaybackEnd(of playerItem: AVPlayerItem) {
+        removePlaybackEndObserver()
         playbackEndObserver = NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: currentItem,
+            forName: AVPlayerItem.didPlayToEndTimeNotification,
+            object: playerItem,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
-                await self?.handlePlaybackEnded()
-            }
+            Task { @MainActor [weak self] in await self?.playNextEpisodeAfterEnd() }
         }
     }
 
-    private func handlePlaybackEnded() async {
-        guard item.type == .episode, !isAutoLoadingNext else { return }
+    private func removePlaybackEndObserver() {
+        if let playbackEndObserver {
+            NotificationCenter.default.removeObserver(playbackEndObserver)
+        }
+        playbackEndObserver = nil
+    }
 
-        // Resolve the next episode before tearing down the finished one, so the
-        // last episode of a series stays on screen instead of going black.
+    /// Resolves the next episode before tearing down, so the last episode of a series stays on screen.
+    private func playNextEpisodeAfterEnd() async {
+        guard item.type == .episode, !isAutoLoadingNext else { return }
         if nextEpisode == nil {
             nextEpisode = try? await JFAPI.loadNextEpisode(after: item)
         }
         guard let nextEpisode, nextEpisode.id != item.id else { return }
-
         await transitionToNextEpisode()
     }
+    #endif
 
-    private func stopObservingTime() {
-        if let token = timeObserverToken {
-            player?.removeTimeObserver(token)
-            timeObserverToken = nil
-        }
-
-        stopObservingPlaybackEnd()
+    private static func makePlayer() -> AVPlayer {
+        let player = AVPlayer()
+        #if os(iOS)
+        // The default policy pauses video when the app is backgrounded unless
+        // Picture in Picture starts; keep the audio going instead.
+        player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+        #endif
+        return player
     }
-    
-    private func stopObservingPlaybackEnd() {
-       if let observer = playbackEndObserver {
-           NotificationCenter.default.removeObserver(observer)
-           playbackEndObserver = nil
-       }
-   }
 
-    private func resolvedDurationSeconds(for player: AVPlayer) -> Double {
-        if let duration = player.currentItem?.duration.seconds, duration.isFinite, duration > 0 {
-            return duration
-        }
-        if let ticks = playbackInfo?.mediaSource.runTimeTicks, ticks > 0 {
-            return Double(ticks) / 10_000_000
-        }
-        if let ticks = item.runTimeTicks, ticks > 0 {
-            return Double(ticks) / 10_000_000
-        }
-        return 0
+    /// Ends this playback for good. Detaching the player from its view
+    /// controller also closes a Picture in Picture window still showing it.
+    func stop() {
+        stopPlaybackImmediately()
+        #if os(iOS) || os(tvOS)
+        playerHost.setPlayer(nil)
+        #endif
+    }
+
+    func stopPlaybackImmediately() {
+        preferredAudioLanguage = session?.audioLanguage ?? preferredAudioLanguage
+        generation = UUID()
+        loadTask?.cancel()
+        loadTask = nil
+        session?.stop()
+        #if os(macOS)
+        removePlaybackEndObserver()
+        #endif
+        nextEpisode = nil
+        isFetchingNextEpisode = false
+        isLoading = false
+    }
+
+    func finishStoppingPlayback() async { await session?.finishStopping() }
+    func reportProgress() async { await session?.reportProgress() }
+
+    func didEnterBackground() {
+        session?.didEnterBackground()
+        Task { await reportProgress() }
+    }
+
+    func didBecomeActive() { session?.didBecomeActive() }
+
+    var skipIntroTargetSeconds: Double? {
+        guard let introRange = markers.introRangeSeconds else { return nil }
+        guard currentSeconds >= max(0, introRange.lowerBound - 2), currentSeconds < introRange.upperBound else { return nil }
+        return introRange.upperBound
+    }
+
+    var shouldShowSkipIntro: Bool { skipIntroTargetSeconds != nil }
+
+    var shouldShowNextEpisode: Bool {
+        guard item.type == .episode, !isAutoLoadingNext, durationSeconds > 0 else { return false }
+        return currentSeconds >= (markers.creditsStartSeconds ?? max(0, durationSeconds - 60))
+    }
+
+    func skipIntro() async {
+        guard let player, let seconds = skipIntroTargetSeconds else { return }
+        await player.seek(to: CMTime(seconds: seconds, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
+    }
+
+    func transitionToNextEpisode() async {
+        guard item.type == .episode, !isAutoLoadingNext else { return }
+        let next = nextEpisode
+        let finishedItem = item
+        // Stop before the async episode lookup so AVKit cannot restart the old item.
+        stopPlaybackImmediately()
+        let switchGeneration = generation
+        isAutoLoadingNext = true
+        defer { isAutoLoadingNext = false }
+        let episode: BaseItemDto?
+        if let next { episode = next }
+        else { episode = try? await JFAPI.loadNextEpisode(after: finishedItem) }
+        guard generation == switchGeneration, !Task.isCancelled,
+              let episode, episode.id != finishedItem.id else { return }
+        item = episode
+        await load()
+    }
+
+    func transition(to episode: BaseItemDto) async {
+        guard !isAutoLoadingNext else { return }
+        if episode.id == item.id { player?.play(); return }
+        stopPlaybackImmediately()
+        isAutoLoadingNext = true
+        defer { isAutoLoadingNext = false }
+        item = episode
+        await load()
     }
 
     private func prefetchNextEpisodeIfNeeded() async {
-        guard item.type == .episode else { return }
-        guard nextEpisode == nil, !isFetchingNextEpisode else { return }
-
-        let duration = durationSeconds
-        guard duration > 0 else { return }
-
-        let remainingSeconds = duration - currentSeconds
-        guard remainingSeconds <= 120 else { return }
-
-        print("[NextEpisode] Prefetching next episode - remaining: \(remainingSeconds)s")
+        guard item.type == .episode, nextEpisode == nil, !isFetchingNextEpisode,
+              durationSeconds > 0, durationSeconds - currentSeconds <= 120 else { return }
+        let id = item.id
+        let activeGeneration = generation
         isFetchingNextEpisode = true
-        defer { isFetchingNextEpisode = false }
-        nextEpisode = try? await JFAPI.loadNextEpisode(after: item)
-        print("[NextEpisode] Prefetch complete - nextEpisode: \(nextEpisode?.name ?? "nil")")
-    }
-
-    private func resolveSelectedTrack(preferredIndex: Int?) -> PlaybackAudioTrack? {
-        if let preferredIndex,
-           let match = audioTracks.first(where: { $0.index == preferredIndex }) {
-            preferredAudioLanguage = match.languageCode ?? preferredAudioLanguage
-            return match
-        }
-
-        if let preferredAudioLanguage,
-           let languageMatch = audioTracks.first(where: { $0.languageCode?.lowercased() == preferredAudioLanguage.lowercased() }) {
-            return languageMatch
-        }
-
-        if let defaultIndex = playbackInfo?.mediaSource.defaultAudioStreamIndex,
-           let defaultMatch = audioTracks.first(where: { $0.index == defaultIndex }) {
-            preferredAudioLanguage = defaultMatch.languageCode ?? preferredAudioLanguage
-            return defaultMatch
-        }
-
-        preferredAudioLanguage = audioTracks.first?.languageCode ?? preferredAudioLanguage
-        return audioTracks.first
-    }
-    
-    
-    // MARK: - Playback Progress Reporting
-
-    func reportPlaybackStart() async {
-        guard !hasReportedPlaybackStart, let itemID = item.id else { return }
-        hasReportedPlaybackStart = true
-
-        let positionTicks = Int64(currentSeconds * 10_000_000)
-
-        await JFAPI.reportPlaybackStart(
-            itemID: itemID,
-            mediaSourceID: playbackInfo?.mediaSource.id,
-            playSessionID: playbackInfo?.playSessionId,
-            playMethod: .transcode,
-            audioStreamIndex: selectedAudioTrack?.index,
-            subtitleStreamIndex: -1,
-            canSeek: true,
-            positionTicks: positionTicks
-        )
-    }
-
-    func reportProgress() async {
-        guard hasReportedPlaybackStart, let itemID = item.id else { return }
-        let positionTicks = Int64(currentSeconds * 10_000_000)
-        await JFAPI.reportPlaybackProgress(
-            itemID: itemID,
-            mediaSourceID: playbackInfo?.mediaSource.id ?? itemID,
-            positionTicks: positionTicks,
-            isPaused: true
-        )
-    }
-
-    func reportPlaybackStopped() async {
-        guard hasReportedPlaybackStart, let itemID = item.id else { return }
-
-        let positionTicks = Int64(currentSeconds * 10_000_000)
-        await JFAPI.reportPlaybackStopped(
-            itemID: itemID,
-            mediaSourceID: playbackInfo?.mediaSource.id,
-            playSessionID: playbackInfo?.playSessionId,
-            positionTicks: positionTicks
-        )
-
-        hasReportedPlaybackStart = false
+        let next = try? await JFAPI.loadNextEpisode(after: item)
+        guard generation == activeGeneration, item.id == id else { return }
+        isFetchingNextEpisode = false
+        nextEpisode = next
     }
 }

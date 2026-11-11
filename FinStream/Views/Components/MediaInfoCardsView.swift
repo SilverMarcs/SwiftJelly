@@ -42,9 +42,14 @@ struct MediaInfoCardsView: View {
 
 private struct InformationCard: View {
     let item: BaseItemDto
+    @State private var showDetails = false
 
     var body: some View {
-        MediaInfoCard(title: "Information") {
+        MediaInfoCard(title: "Information", action: {
+            #if os(tvOS)
+            showDetails = true
+            #endif
+        }) {
             if let year = item.productionYear {
                 MediaInfoRow(label: "Released", value: String(year))
             }
@@ -65,6 +70,13 @@ private struct InformationCard: View {
                 MediaInfoRow(label: "Region of Origin", value: location)
             }
         }
+        #if os(tvOS)
+        .sheet(isPresented: $showDetails) {
+            OverviewSheetView(
+                overview: item.overview ?? item.taglines?.first ?? ""
+            )
+        }
+        #endif
     }
 }
 
@@ -170,10 +182,11 @@ private struct VideoCard: View {
 /// On other platforms adds a material background with a subtle border.
 private struct MediaInfoCard<Content: View>: View {
     let title: String
+    var action: () -> Void = {}
     @ViewBuilder let content: Content
 
     var body: some View {
-        Button {} label: {
+        Button(action: action) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title)
                     .font(.headline)

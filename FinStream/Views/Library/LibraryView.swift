@@ -11,6 +11,8 @@ import JellyfinAPI
 struct LibraryView: View {
     @State private var libraries: [BaseItemDto] = []
     @State private var isLoading = false
+    @State private var loadedServerID: String?
+    private var dataManager = DataManager.shared
     #if os(iOS)
     @State private var downloadManager = DownloadManager.shared
     #endif
@@ -76,12 +78,14 @@ struct LibraryView: View {
             DownloadsView()
         }
         #endif
-        .task {
-            if libraries.isEmpty {
-                isLoading = true
-                await loadLibraries()
-                isLoading = false
-            }
+        .task(id: dataManager.server?.id) {
+            // Settings can be pushed from this tab, so it reloads in place
+            // when the server changes instead of being rebuilt.
+            guard loadedServerID != dataManager.server?.id else { return }
+            libraries = []
+            isLoading = true
+            await loadLibraries()
+            isLoading = false
         }
     }
     
@@ -91,6 +95,7 @@ struct LibraryView: View {
             withAnimation {
                 libraries = loaded
             }
+            loadedServerID = dataManager.server?.id
         } catch {
             print("Error loading Library: \(error.localizedDescription)")
         }

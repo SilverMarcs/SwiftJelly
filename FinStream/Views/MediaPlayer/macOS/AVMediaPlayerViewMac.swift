@@ -6,26 +6,22 @@ struct AVMediaPlayerViewMac: View {
     @State private var playbackManager = PlaybackManager.shared
     @State private var showInfoSheet = false
     @State private var didConfigureWindow = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
-            if let model = playbackManager.viewModel, let player = model.player {
+            if let model = playbackManager.viewModel, let error = model.errorDescription {
+                PlaybackFailureView(message: error) { Task { await model.load() } }
+            } else if let model = playbackManager.viewModel, let player = model.player {
                 AVPlayerMac(player: player) {
                     MediaPlayerOverlayControls(model: model)
-                }
-                .task(id: player.timeControlStatus) {
-                    if player.timeControlStatus == .playing {
-                        await model.reportPlaybackStart()
-                    } else {
-                        await model.reportProgress()
-                    }
                 }
             } else if let model = playbackManager.viewModel, model.isLoading {
                 ProgressView()
                     .controlSize(.large)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black, ignoresSafeAreaEdges: .all)
-                    .task(id: model.playbackToken) {
+                    .task(id: model.item.id) {
                         await model.load()
                     }
             }
@@ -58,20 +54,6 @@ struct AVMediaPlayerViewMac: View {
             } label: {
                 Image(systemName: "info")
             }
-
-            if let model = playbackManager.viewModel, model.audioTracks.count > 1 {
-                Menu {
-                    ForEach(model.audioTracks) { track in
-                        Button(track.displayName) {
-                            Task { await model.switchAudioTrack(to: track) }
-                        }
-                        .disabled(model.isSwitchingAudio || track == model.selectedAudioTrack)
-                    }
-                } label: {
-                    Label("Audio", systemImage: "speaker.wave.2.fill")
-                }
-                .menuIndicator(.hidden)
-            }
         }
         .onAppear {
             if !didConfigureWindow {
@@ -81,6 +63,10 @@ struct AVMediaPlayerViewMac: View {
         }
         .task(id: playbackManager.viewModel?.item.id) {
             configureWindow()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { playbackManager.viewModel?.didEnterBackground() }
+            else if phase == .active { playbackManager.viewModel?.didBecomeActive() }
         }
         .onDisappear {
             playbackManager.endPlayback()
@@ -99,7 +85,7 @@ struct AVMediaPlayerViewMac: View {
     private func configureWindow() {
         guard let model = playbackManager.viewModel else { return }
         if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "media-player-AppWindow-1" }) {
-            let (videoWidth, videoHeight) = PlaybackUtilities.getVideoDimensions(from: model.item)
+            let (videoWidth, videoHeight) = model.item.videoDimensions
 
             window.aspectRatio = NSSize(width: videoWidth, height: videoHeight)
             

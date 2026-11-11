@@ -61,8 +61,8 @@ enum JFAPI {
     }
 
     /// Generic helper to send a request using the current API context
-    static func send<T>(_ request: Request<T>) async throws -> T where T: Decodable {
-        let context = try getAPIContext()
+    static func send<T>(_ request: Request<T>, context: APIContext? = nil) async throws -> T where T: Decodable {
+        let context = try context ?? getAPIContext()
         let response = try await context.client.data(for: request)
         return try await TolerantJSONDecoding.decode(response.data)
     }

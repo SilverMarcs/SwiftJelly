@@ -12,16 +12,23 @@ import AVKit
 @main
 struct FinStreamApp: App {
     @State var selectedTab: TabSelection = .home
-    
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             ContentView(selectedTab: $selectedTab)
                 .preferredColorScheme(.dark)
+                #if !os(macOS)
+                // App-level so playback floating in Picture in Picture, with
+                // the player closed, still sees suspension and activation.
+                .onChange(of: scenePhase) { _, phase in
+                    let model = PlaybackManager.shared.viewModel
+                    if phase == .background { model?.didEnterBackground() }
+                    else if phase == .active { model?.didBecomeActive() }
+                }
+                #endif
         }
         #if os(macOS)
-        // Hide the titlebar backing so window content (e.g. the home hero
-        // artwork) fills the full window height, right up behind the traffic
-        // lights, instead of stopping below an empty translucent bar.
         .windowStyle(.hiddenTitleBar)
         #endif
         #if !os(tvOS)
@@ -48,7 +55,6 @@ struct FinStreamApp: App {
         try? session.setActive(true)
         #endif
         _ = PlaybackManager.shared
-        _ = SeerrAuth.shared
         #if os(iOS)
         // Register BGContinuedProcessingTask handler before any submit() call.
         DownloadActivityCoordinator.register()

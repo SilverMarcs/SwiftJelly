@@ -9,11 +9,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     let logoItem: BaseItemDto
     let genreItem: BaseItemDto
     let badge: String?
-
-    /// When `false`, the backdrop image is omitted and only the overlay content
-    /// (logo, genres, actions, overview, attributes) is rendered over a
-    /// transparent, flexible frame. Used by the iOS hero carousel, which draws a
-    /// separate parallax-scrolling backdrop behind a fixed, cross-fading overlay.
+    /// The iOS hero carousel draws its own parallax backdrop and only needs the overlay.
     let showsBackground: Bool
 
     init(
@@ -51,9 +47,6 @@ struct HeroBackdropView<HeroActions: View>: View {
             if showsBackground {
                 backdropImage
             } else {
-                // Overlay-only mode: a flexible, non-interactive frame so the
-                // details sit at the bottom, matching the height of the separate
-                // backdrop the carousel scrolls behind it.
                 Color.clear
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .allowsHitTesting(false)
@@ -65,44 +58,27 @@ struct HeroBackdropView<HeroActions: View>: View {
                     .padding()
             } else {
                 largeScreenContent
+                    #if os(macOS)
+                    .padding([.top, .horizontal])
+                    .padding(.bottom, 25)
+                    #else
                     .padding()
+                    #endif
             }
         }
         .environment(\.colorScheme, .dark)
     #endif
     }
     
-    // MARK: - Backdrop
-    
     private var backdropImage: some View {
         HeroBackdropImage(
             item: item,
             isCompact: isCompactSize,
             backdropHeight: backdropHeight,
-            reflectionHeight: 200,
+            reflectionHeight: HeroLayoutMetrics.reflectionHeight,
             parallax: .vertical
         )
     }
-    
-    let bottomGradient = LinearGradient(
-        gradient: Gradient(stops: [
-            .init(color: .black, location: 0),
-            .init(color: .black.opacity(0.9), location: 0.5),
-            .init(color: .black.opacity(0), location: 1.0)
-        ]),
-        startPoint: .bottom,
-        endPoint: .top
-    )
-    
-    private var height: CGFloat {
-        #if os(macOS)
-        480
-        #else
-        620
-        #endif
-    }
-    
-    // MARK: - Overlay Content
     
     @ViewBuilder
     private var logo: some View {
@@ -136,8 +112,6 @@ struct HeroBackdropView<HeroActions: View>: View {
                     .redacted(reason: name?.isEmpty == false ? [] : .placeholder)
             }
         }
-        // Purely decorative: never intercept touches, so swipes over the logo
-        // scroll the iOS hero carousel behind it.
         .allowsHitTesting(false)
     }
     
@@ -166,7 +140,10 @@ struct HeroBackdropView<HeroActions: View>: View {
             : genres.joined(separator: " \u{00B7} ")
         return Text(display)
             .font(genreFont)
-            .foregroundStyle(.white.opacity(0.7))
+            .fontWeight(.medium)
+            .multilineTextAlignment(isCompactSize ? .center : .leading)
+            .lineLimit(isCompactSize ? 2 : nil)
+            .foregroundStyle(.primary)
             .redacted(reason: genres.isEmpty ? .placeholder : [])
             .allowsHitTesting(false)
     }
@@ -257,16 +234,9 @@ struct HeroBackdropView<HeroActions: View>: View {
     #endif
     }
     
-    private var backdropTargetSize: CGFloat {
-    #if os(tvOS)
-        2000
-    #else
-        1080
-    #endif
-    }
-    
     private var backdropHeight: CGFloat {
-        isCompactSize ? 440 : 500
+        HeroLayoutMetrics.height(isCompact: isCompactSize)
+            - (isCompactSize ? HeroLayoutMetrics.reflectionHeight : 0)
     }
 }
 

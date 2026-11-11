@@ -6,6 +6,7 @@ final class SeasonEpisodesViewController: UIViewController {
     private let item: BaseItemDto
     private let onSelectEpisode: (BaseItemDto) -> Void
     private var items: [BaseItemDto] = []
+    private var isLoading = false
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -49,6 +50,7 @@ final class SeasonEpisodesViewController: UIViewController {
         self.onSelectEpisode = onSelectEpisode
         super.init(nibName: nil, bundle: nil)
         title = "Episodes"
+        preferredContentSize = CGSize(width: 0, height: 240)
     }
 
     @available(*, unavailable)
@@ -73,13 +75,28 @@ final class SeasonEpisodesViewController: UIViewController {
             emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+    }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        reloadIfEmpty()
+    }
+
+    func reloadIfEmpty() {
+        guard isViewLoaded, items.isEmpty, !isLoading else { return }
         Task { await loadItems() }
     }
 
     private func loadItems() async {
+        guard !isLoading else { return }
+        isLoading = true
+        emptyLabel.text = "No episodes available."
+        emptyLabel.isHidden = true
         loadingIndicator.startAnimating()
-        defer { loadingIndicator.stopAnimating() }
+        defer {
+            isLoading = false
+            loadingIndicator.stopAnimating()
+        }
 
         guard let seriesID = item.seriesID, let seasonID = item.seasonID else {
             items = []
@@ -97,6 +114,7 @@ final class SeasonEpisodesViewController: UIViewController {
             collectionView.reloadData()
             scrollToCurrentEpisode()
         } catch {
+            emptyLabel.text = "Episodes could not be loaded. Reopen this tab to try again."
             items = []
             collectionView.reloadData()
         }

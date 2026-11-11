@@ -28,6 +28,14 @@ struct ShowDetailView: View {
         .task {
             await vm.refreshAll()
         }
+        .alert("Unable to Mark Season Watched", isPresented: Binding(
+            get: { vm.seasonWatchError != nil },
+            set: { if !$0 { vm.seasonWatchError = nil } }
+        )) {
+            Button("OK", role: .cancel) { vm.seasonWatchError = nil }
+        } message: {
+            Text(vm.seasonWatchError ?? "")
+        }
         .refreshToolbar {
             await vm.refreshAll()
         }

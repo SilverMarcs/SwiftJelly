@@ -10,18 +10,13 @@ import JellyfinAPI
 
 struct ContentView: View {
     @Binding var selectedTab: TabSelection
-    @AppStorage(HomeContentSettings.useModularHomeTrendingKey)
-    private var useModularHomeTrending = false
-    
+
     @State private var dataManager = DataManager.shared
     @State private var playbackManager = PlaybackManager.shared
 
     #if os(iOS)
     @Namespace private var detailZoomNamespace
     @Namespace private var playerZoomNamespace
-    #endif
-
-    #if os(iOS)
     @State private var showingSettings = false
     #endif
     
@@ -29,16 +24,6 @@ struct ContentView: View {
     @State private var isTopShelfNavigationActive = false
     @State private var topShelfNavigationItem: BaseItemDto?
     #endif
-
-
-    @State private var trendingViewModel = TrendingInLibraryViewModel()
-
-    private var shouldUseModularHomeTrending: Bool {
-        HomeContentSettings.shouldUseModularHomeTrending(
-            flagEnabled: useModularHomeTrending,
-            serverURL: dataManager.server?.url
-        )
-    }
 
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -55,7 +40,15 @@ struct ContentView: View {
         } else {
             TabView(selection: $selectedTab) {
                 ForEach(primaryTabs, id: \.self) { tab in
-                    defaultTab(tab)
+                    Tab(tab.title,
+                        systemImage: tab.systemImage,
+                        value: tab,
+                        role: tab == .search ? .search : .none
+                    ) {
+                        NavigationStack {
+                            tabWithNavigationDestinations(tab: tab)
+                        }
+                    }
                 }
 
                 if !isCompactSize {
@@ -103,12 +96,6 @@ struct ContentView: View {
                 #endif
             }
             #endif
-            .task(id: shouldUseModularHomeTrending) {
-                await trendingViewModel.loadTrendingIfNeeded(
-                    usingModularHome: shouldUseModularHomeTrending
-                )
-            }
-            .environment(trendingViewModel)
             #if os(iOS)
             .environment(\.detailZoomNamespace, detailZoomNamespace)
             .environment(\.playerZoomNamespace, playerZoomNamespace)
@@ -118,6 +105,10 @@ struct ContentView: View {
 
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
+            // Rebuild content tabs when the active server changes so they reload.
+            // Tabs that host Settings reload in place instead, so switching
+            // servers doesn't pop the user out of the server list.
+            .id(tab.hostsSettings ? nil : dataManager.server?.id)
             .navigationRouteDestinations()
         #if os(iOS)
             .toolbar {
@@ -149,20 +140,6 @@ struct ContentView: View {
     }
     
     @TabContentBuilder<TabSelection>
-    private func defaultTab(_ tab: TabSelection) -> some TabContent<TabSelection> {
-        Tab(tab.title,
-            systemImage: tab.systemImage,
-            value: tab,
-            role: tab == .search ? .search : .none
-        ) {
-            NavigationStack {
-                tabWithNavigationDestinations(tab: tab)
-            }
-            .id(dataManager.activeServerID)
-        }
-    }
-
-    @TabContentBuilder<TabSelection>
     private func libraryTabs() -> some TabContent<TabSelection> {
         TabSection {
             ForEach(TabSelection.extendedlibraryTabs, id: \.self) { libraryTab in
@@ -173,7 +150,6 @@ struct ContentView: View {
                     NavigationStack {
                         tabWithNavigationDestinations(tab: libraryTab)
                     }
-                    .id(dataManager.activeServerID)
                 }
             }
         } header: {
@@ -182,20 +158,16 @@ struct ContentView: View {
     }
 
     private var primaryTabs: [TabSelection] {
-        var tabs = isCompactSize ? TabSelection.compactTabs : TabSelection.extendedTabs
-        if !SeerrAPI.isConfigured {
-            tabs.removeAll { $0 == .discover }
-        }
+        let tabs = isCompactSize ? TabSelection.compactTabs : TabSelection.extendedTabs
         #if os(tvOS)
-        // `tabViewSidebarHeader` is tvOS 27+. On older versions the profile can't
-        // live in the header, so fall back to it being the first sidebar tab.
+        // tabViewSidebarHeader requires tvOS 27, so older versions show the profile as a tab.
         if #unavailable(tvOS 27.0) {
-            tabs.insert(.profile, at: 0)
+            return [.profile] + tabs
         }
         #endif
         return tabs
     }
-    
+
     #if os(tvOS)
     private func handleTopShelfURL(_ url: URL) {
         guard let deepLink = TopShelfDeepLink.parse(url) else { return }
@@ -221,9 +193,6 @@ struct ContentView: View {
 }
 
 private extension View {
-    /// Places the profile button at the top of the tab view sidebar. The tvOS
-    /// header API requires tvOS 27; on older versions the profile is shown as
-    /// the first sidebar tab instead (see `ContentView.primaryTabs`).
     @ViewBuilder
     func profileSidebarHeader() -> some View {
         #if os(tvOS)

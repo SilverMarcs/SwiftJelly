@@ -8,20 +8,21 @@
 import SwiftUI
 import AVKit
 
+/// Shows the playback's shared player view controller.
 struct AVPlayerIos: UIViewControllerRepresentable {
     let player: AVPlayer?
+    let host: PlayerViewControllerHost
 
-    func makeUIViewController(context: Context) -> AVPlayerViewController {
-        let controller = AVPlayerViewController()
-        controller.player = player
-        #if os(tvOS)
-        controller.allowsPictureInPicturePlayback = false
-        #endif
-        controller.entersFullScreenWhenPlaybackBegins = true
-        controller.exitsFullScreenWhenPlaybackEnds = false
-        controller.updatesNowPlayingInfoCenter = true
-        return controller
+    func makeUIViewController(context: Context) -> PlayerContainerViewController {
+        host.setPlayer(player)
+        return PlayerContainerViewController(host: host)
     }
 
-    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: PlayerContainerViewController, context: Context) {
+        host.setPlayer(player)
+    }
+
+    static func dismantleUIViewController(_ uiViewController: PlayerContainerViewController, coordinator: ()) {
+        uiViewController.releasePlayerViewController()
+    }
 }

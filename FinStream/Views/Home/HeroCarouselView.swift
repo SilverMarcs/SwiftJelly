@@ -22,38 +22,16 @@ struct HeroCarouselView: View {
 
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    /// Horizontal content offset of the carousel, driven by the scroll gesture.
     @State private var scrollX: CGFloat = 0
-    /// Width of the scroll container, i.e. the width of a single page.
     @State private var containerWidth: CGFloat = 0
-    /// Whether the user (or a programmatic animation) is actively scrolling.
     @State private var isUserScrolling = false
-    /// Progress (0...1) of the current page's auto-scroll timer, driving the
-    /// paginator's fill. Resets whenever the settled page changes or the user
-    /// starts scrolling.
     @State private var pageProgress: CGFloat = 0
-    /// Seconds each page stays before the carousel auto-advances.
     private let autoScrollInterval: Double = 8
     #endif
 
     #if os(tvOS)
     @Namespace private var heroNamespace
     @FocusState private var playButtonFocused: Bool
-    #endif
-
-    #if os(tvOS)
-    init(items: Binding<[BaseItemDto]>, belowFold: Binding<Bool>, backdropItem: Binding<BaseItemDto?>) {
-        self._items = items
-        self._belowFold = belowFold
-        self._backdropItem = backdropItem
-    }
-    #else
-    init(items: Binding<[BaseItemDto]>) {
-        self._items = items
-    }
-    #endif
-
-    #if os(tvOS)
     @State private var navigationButtonToRetain: HeroCarouselNavigationButton?
     @FocusState private var focusedNavigationButton: HeroCarouselNavigationButton?
     #endif
@@ -65,59 +43,52 @@ struct HeroCarouselView: View {
 
     var body: some View {
         #if os(iOS)
-        iosCarouselBody
+        parallaxCarousel
         #else
-        legacyBody
+        crossFadeCarousel
         #endif
     }
 
-    // MARK: - iOS: gesture-driven parallax carousel
+    // MARK: - iOS
 
     #if os(iOS)
     private var isCompact: Bool { horizontalSizeClass == .compact }
-    private var backdropHeight: CGFloat { isCompact ? 440 : 500 }
-    private let reflectionHeight: CGFloat = 200
-    /// Full page height. On compact widths the artwork extends downward into a
-    /// reflection (matching `HeroBackdropView`), so the page is taller and shows a
-    /// larger image.
-    private var pageHeight: CGFloat { isCompact ? backdropHeight + reflectionHeight : backdropHeight }
+    private var pageHeight: CGFloat { HeroLayoutMetrics.height(isCompact: isCompact) }
+    private var backdropHeight: CGFloat {
+        pageHeight - (isCompact ? HeroLayoutMetrics.reflectionHeight : 0)
+    }
 
-    /// How much of the page translation the backdrop image absorbs, creating the
-    /// parallax lag relative to the fixed foreground content.
     private let parallaxFactor: CGFloat = 0.14
-    /// The backdrop image is drawn wider than its page so the parallax pan never
-    /// reveals a gap at the edges.
+    /// Draws the backdrop wider than its page so the parallax pan never reveals an edge.
     private let overscanRatio: CGFloat = 1.4
 
-    /// Virtual page position, e.g. `1.5` means halfway between pages 1 and 2.
+    /// Continuous page position, e.g. `1.5` is halfway between pages 1 and 2.
     private var fraction: CGFloat {
         guard containerWidth > 0 else { return 0 }
         return scrollX / containerWidth
     }
 
-    /// The page the carousel is settled on (or nearest to).
     private var nearestIndex: Int {
         guard !items.isEmpty else { return 0 }
-        let idx = Int(fraction.rounded())
-        return min(max(idx, 0), items.count - 1)
+        return min(max(Int(fraction.rounded()), 0), items.count - 1)
     }
 
-    private var iosCarouselBody: some View {
+    private var parallaxCarousel: some View {
         ScrollViewReader { proxy in
             ZStack(alignment: .bottom) {
                 ScrollView(.horizontal) {
                     LazyHStack(spacing: 0) {
-                        ForEach(Array(items.enumerated()), id: \.element.id) { _, item in
+                        ForEach(items, id: \.id) { item in
                             MediaNavigationLink(item: item) {
-                                parallaxBackdrop(item)
+                                HeroBackdropImage(
+                                    item: item,
+                                    isCompact: isCompact,
+                                    backdropHeight: backdropHeight,
+                                    reflectionHeight: HeroLayoutMetrics.reflectionHeight,
+                                    parallax: .horizontal(factor: parallaxFactor, overscan: overscanRatio)
+                                )
                             }
-                            // Size pages to the scroll container. Unlike a width
-                            // read from a `GeometryReader` rooting this lazy child
-                            // — which can stick at zero after the carousel is
-                            // recycled off-screen and leave every page blank when
-                            // scrolled back — `containerRelativeFrame` is resolved
-                            // by the layout system on every pass, so it is always
-                            // correct on reappear.
+                            // A GeometryReader width can stick at zero after the lazy page is recycled.
                             .containerRelativeFrame(.horizontal)
                             .id(item.id)
                         }
@@ -134,18 +105,13 @@ struct HeroCarouselView: View {
                 .onScrollPhaseChange { _, newPhase in
                     isUserScrolling = newPhase != .idle
                     if newPhase == .idle {
-                        startAutoScrollIOS(proxy: proxy)
+                        startAutoScroll(proxy: proxy)
                     } else {
-                        // The user (or a programmatic scroll) took over: halt
-                        // the timer and wind the fill back to empty. Retarget
-                        // via an explicit animation so the in-flight 8s fill is
-                        // cancelled immediately instead of running to completion.
                         stopAutoScroll()
+                        // An explicit animation cancels the in-flight fill instead of letting it finish.
                         withAnimation(.linear(duration: 0.2)) { pageProgress = 0 }
                     }
                 }
-                // Only the backdrop layer gets the rubber-band stretch when
-                // the home scroll is pulled down; the details stay put.
                 .stretchy()
 
                 detailsLayer
@@ -156,80 +122,48 @@ struct HeroCarouselView: View {
                 }
             }
             .onAppear {
-                startAutoScrollIOS(proxy: proxy)
+                startAutoScroll(proxy: proxy)
             }
         }
         .frame(height: pageHeight)
         .onDisappear { stopAutoScroll() }
     }
 
-    /// A single backdrop page, styled to match the detail hero (`HeroBackdropView`):
-    /// the artwork darkens under a gradient over the image plus a separate controls
-    /// gradient, and on compact widths extends into a reflection via
-    /// `backgroundExtensionEffect` (a `Spacer`, not a hand-mirrored copy). The image
-    /// pans slower than the page, producing horizontal parallax against its neighbours.
-    private func parallaxBackdrop(_ item: BaseItemDto) -> some View {
-        HeroBackdropImage(
-            item: item,
-            isCompact: isCompact,
-            backdropHeight: backdropHeight,
-            reflectionHeight: reflectionHeight,
-            parallax: .horizontal(factor: parallaxFactor, overscan: overscanRatio)
-        )
-    }
-
-    /// The fixed foreground content (logo, actions, description, …). It never
-    /// moves horizontally; instead the current and incoming items cross-fade as
-    /// a function of the scroll position.
+    /// Foreground content stays in place and cross-fades with the scroll position.
     private var detailsLayer: some View {
         ZStack {
-            ForEach(Array(items.enumerated()), id: \.element.id) { index, _ in
+            ForEach(items.indices, id: \.self) { index in
                 let distance = abs(CGFloat(index) - fraction)
                 if distance < 1 {
-                    hero(item: activeItemBinding(for: index), showsBackground: false)
+                    hero(item: itemBinding(at: index), showsBackground: false)
                         .opacity(Double(1 - distance * 2))
                         .allowsHitTesting(index == nearestIndex)
                 }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        // Lift the details so the attributes clear the paginator sitting below.
         .padding(.bottom, items.count > 1 ? 24 : 0)
-        // Let the swipe gesture reach the backdrop layer while scrolling; the
-        // decorative content is individually non-interactive, so only the action
-        // buttons intercept touches once settled.
         .allowsHitTesting(!isUserScrolling)
     }
 
-    /// App Store-style paginator: a dot per page, with the active page shown as a
-    /// capsule whose bright fill tracks the auto-scroll timer. The pill expands
-    /// and contracts continuously with the swipe via `fraction`.
     private var paginator: some View {
-        let dotHeight: CGFloat = 8
-        let dotWidth: CGFloat = 8
+        let dotSize: CGFloat = 8
         let activeWidth: CGFloat = 28
 
         return HStack(spacing: 6) {
             ForEach(items.indices, id: \.self) { index in
-                // Continuous "activeness": 1 when settled on this page, 0 a full
-                // page away. Driven by the live scroll fraction so the pill morphs
-                // smoothly under the finger instead of snapping at the midpoint.
                 let activeness = max(0, 1 - abs(fraction - CGFloat(index)))
-                let trackWidth = dotWidth + (activeWidth - dotWidth) * activeness
-                let isCurrent = index == nearestIndex
+                let trackWidth = dotSize + (activeWidth - dotSize) * activeness
 
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.white.opacity(0.35))
-                        .frame(width: trackWidth, height: dotHeight)
+                        .fill(.white.opacity(0.35))
+                        .frame(width: trackWidth, height: dotSize)
 
-                    if isCurrent {
-                        // Bright timer fill, clamped to a minimum so the active
-                        // page always reads as a solid nub that grows into a pill
-                        // rather than vanishing when the timer is near empty.
+                    if index == nearestIndex {
                         Capsule()
-                            .fill(Color.white)
-                            .frame(width: max(dotHeight, trackWidth * pageProgress), height: dotHeight)
+                            .fill(.white)
+                            .frame(width: max(dotSize, trackWidth * pageProgress), height: dotSize)
                     }
                 }
             }
@@ -237,16 +171,12 @@ struct HeroCarouselView: View {
         .allowsHitTesting(false)
     }
 
-    /// Resets the paginator fill to empty and animates it linearly across the
-    /// dwell interval, matching the pending auto-advance.
     private func restartPageProgress() {
         withAnimation(.linear(duration: 0.2)) { pageProgress = 0 }
-        withAnimation(.linear(duration: autoScrollInterval).delay(0.2)) {
-            pageProgress = 1
-        }
+        withAnimation(.linear(duration: autoScrollInterval).delay(0.2)) { pageProgress = 1 }
     }
 
-    private func startAutoScrollIOS(proxy: ScrollViewProxy) {
+    private func startAutoScroll(proxy: ScrollViewProxy) {
         autoScrollTask?.cancel()
         guard items.count > 1 else {
             pageProgress = 0
@@ -266,34 +196,31 @@ struct HeroCarouselView: View {
     }
     #endif
 
-    // MARK: - tvOS / macOS: single item with cross-fade + arrow controls
+    // MARK: - tvOS / macOS
 
     #if !os(iOS)
-    private var legacyBody: some View {
+    private var crossFadeCarousel: some View {
         ZStack {
-            if !items.isEmpty {
-                let activeIndex = currentIndex
-                if activeIndex >= 0 && activeIndex < items.count {
-                    let activeItem = items[activeIndex]
-                    let activeBinding = activeItemBinding(for: activeIndex)
+            if items.indices.contains(currentIndex) {
+                let activeItem = items[currentIndex]
+                let activeBinding = itemBinding(at: currentIndex)
 
-                    Group {
-                        #if os(tvOS)
-                        hero(item: activeBinding)
-                            .focusSection()
-                            .frame(maxHeight: .infinity)
-                            .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
-                                content.offset(y: phase.isIdentity ? 0 : -120)
-                            }
-                        #else
-                        MediaNavigationLink(item: activeItem) {
-                            hero(item: activeBinding)
+                Group {
+                    #if os(tvOS)
+                    hero(item: activeBinding)
+                        .focusSection()
+                        .frame(maxHeight: .infinity)
+                        .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
+                            content.offset(y: phase.isIdentity ? 0 : -120)
                         }
-                        #endif
+                    #else
+                    MediaNavigationLink(item: activeItem) {
+                        hero(item: activeBinding)
                     }
-                    .id(activeItem.id)
-                    .transition(.opacity)
+                    #endif
                 }
+                .id(activeItem.id)
+                .transition(.opacity)
             }
         }
         #if os(tvOS)
@@ -307,7 +234,8 @@ struct HeroCarouselView: View {
                         scrollToPrevious()
                         startAutoScroll()
                     } label: {
-                        Image(systemName: "chevron.left")
+                        Label("Previous Slide", systemImage: "chevron.left")
+                            .labelStyle(.iconOnly)
                     }
                     .disabled(currentIndex <= 0)
 
@@ -317,7 +245,8 @@ struct HeroCarouselView: View {
                         scrollToNext()
                         startAutoScroll()
                     } label: {
-                        Image(systemName: "chevron.right")
+                        Label("Next Slide", systemImage: "chevron.right")
+                            .labelStyle(.iconOnly)
                     }
                     .disabled(currentIndex >= items.count - 1)
                 }
@@ -330,9 +259,7 @@ struct HeroCarouselView: View {
         }
         #endif
         .onAppear {
-            if scrolledID == nil, !items.isEmpty {
-                scrolledID = items.first?.id
-            }
+            reconcileSelection()
             #if os(tvOS)
             updateBackdrop()
             if !belowFold { focusPlayButton() }
@@ -348,24 +275,65 @@ struct HeroCarouselView: View {
         }
         #if os(tvOS)
         .onChange(of: belowFold) { _, isBelow in
-            // Returning to the top: scroll-snapping moves the viewport but not
-            // focus (and the peeking shelf keeps the engine's focus on a card),
-            // so drive focus back onto the hero's Play button ourselves.
-            if !isBelow {
-                focusPlayButton()
-            }
+            // Fold snapping moves the viewport but not focus, so pull focus back onto the hero.
+            if !isBelow { focusPlayButton() }
             startAutoScroll()
         }
         #endif
-        .onChange(of: items.count) { _, newCount in
-            if scrolledID == nil, newCount > 0 {
-                scrolledID = items.first?.id
-            }
+        .onChange(of: items.count) { _, _ in
+            reconcileSelection()
             #if os(tvOS)
             updateBackdrop()
             if !belowFold { focusPlayButton() }
             #endif
             startAutoScroll()
+        }
+    }
+
+    private func reconcileSelection() {
+        if !items.contains(where: { $0.id == scrolledID }) {
+            scrolledID = items.first?.id
+        }
+    }
+
+    private func scrollToPrevious() {
+        guard currentIndex > 0 else { return }
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[currentIndex - 1].id
+        }
+    }
+
+    private func scrollToNext() {
+        guard currentIndex < items.count - 1 else { return }
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[currentIndex + 1].id
+        }
+    }
+
+    private func startAutoScroll() {
+        autoScrollTask?.cancel()
+        guard items.count > 1 else { return }
+        autoScrollTask = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(8))
+                guard !Task.isCancelled else { return }
+                #if os(tvOS)
+                // Rotating while the hero is visible would rebuild it and steal focus from Play.
+                guard belowFold else { continue }
+                #endif
+                let nextIndex = (currentIndex + 1) % items.count
+                withAnimation(.easeInOut(duration: 0.6)) {
+                    scrolledID = items[nextIndex].id
+                }
+
+                #if os(tvOS)
+                if let focusedNavigationButton {
+                    retainNavigationFocus(
+                        on: navigationButtonToRetain(preferred: focusedNavigationButton, afterMovingTo: nextIndex)
+                    )
+                }
+                #endif
+            }
         }
     }
     #endif
@@ -421,34 +389,25 @@ struct HeroCarouselView: View {
         #endif
     }
 
-    private func activeItemBinding(for index: Int) -> Binding<BaseItemDto> {
+    private func itemBinding(at index: Int) -> Binding<BaseItemDto> {
         Binding(
-            get: {
-                if index >= 0 && index < items.count {
-                    return items[index]
-                }
-                return BaseItemDto()
-            },
+            get: { items.indices.contains(index) ? items[index] : BaseItemDto() },
             set: { newValue in
-                if index >= 0 && index < items.count {
-                    items[index] = newValue
-                }
+                if items.indices.contains(index) { items[index] = newValue }
             }
         )
     }
 
+    private func stopAutoScroll() {
+        autoScrollTask?.cancel()
+        autoScrollTask = nil
+    }
+
     #if os(tvOS)
-    /// Drives focus onto the hero's Play button. `@FocusState` (unlike
-    /// `resetFocus`) can move focus across focus scopes, so this reliably pulls
-    /// focus off a Continue Watching card.
-    ///
-    /// `@FocusState` only moves focus on a *change* of value. After a navigation
-    /// round-trip the focus engine restores focus itself and leaves this binding
-    /// desynced — it can still read `true` while focus actually sits on another
-    /// action button. Assigning `true` again would then be a no-op and focus
-    /// would stay on the wrong button. So we first clear to `false`, then assert
-    /// `true` after a yield to guarantee a real `false -> true` edge, re-asserting
-    /// a couple of times so our request beats the focus engine's own update.
+    /// `@FocusState` only moves focus on a value change, and after a navigation round trip the
+    /// focus engine can leave it reading `true` while another button is focused. Clearing it first
+    /// guarantees a real `false -> true` edge; the repeated assignments win against the engine's
+    /// own restoration pass.
     private func focusPlayButton() {
         playButtonFocused = false
         Task { @MainActor in
@@ -462,30 +421,9 @@ struct HeroCarouselView: View {
     }
 
     private func updateBackdrop() {
-        if let scrolledID, let item = items.first(where: { $0.id == scrolledID }) {
-            backdropItem = item
-        } else {
-            backdropItem = items.first
-        }
-    }
-    #endif
-
-    #if !os(iOS)
-    private func scrollToPrevious() {
-        guard currentIndex > 0 else { return }
-        withAnimation(.easeInOut(duration: 0.6)) {
-            scrolledID = items[currentIndex - 1].id
-        }
+        backdropItem = items.first { $0.id == scrolledID } ?? items.first
     }
 
-    private func scrollToNext() {
-        guard currentIndex < items.count - 1 else { return }
-        withAnimation(.easeInOut(duration: 0.6)) {
-            scrolledID = items[currentIndex + 1].id
-        }
-    }
-
-    #if os(tvOS)
     private func navigate(using button: HeroCarouselNavigationButton) {
         guard items.count > 1 else { return }
 
@@ -502,12 +440,7 @@ struct HeroCarouselView: View {
         withAnimation(.easeInOut(duration: 0.6)) {
             scrolledID = items[destinationIndex].id
         }
-        retainNavigationFocus(
-            on: navigationButtonToRetain(
-                preferred: button,
-                afterMovingTo: destinationIndex
-            )
-        )
+        retainNavigationFocus(on: navigationButtonToRetain(preferred: button, afterMovingTo: destinationIndex))
     }
 
     private func navigationButtonToRetain(
@@ -536,42 +469,4 @@ struct HeroCarouselView: View {
         }
     }
     #endif
-
-    private func startAutoScroll() {
-        autoScrollTask?.cancel()
-        guard items.count > 1 else { return }
-        autoScrollTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(8))
-                guard !Task.isCancelled else { return }
-                #if os(tvOS)
-                // Only rotate while the hero is scrolled off-screen so the
-                // rebuild never steals focus from the hero's Play button.
-                guard belowFold else { continue }
-                #endif
-                let nextIndex = (currentIndex + 1) % items.count
-                let nextID = items[nextIndex].id
-                withAnimation(.easeInOut(duration: 0.6)) {
-                    scrolledID = nextID
-                }
-
-                #if os(tvOS)
-                if let focusedNavigationButton {
-                    retainNavigationFocus(
-                        on: navigationButtonToRetain(
-                            preferred: focusedNavigationButton,
-                            afterMovingTo: nextIndex
-                        )
-                    )
-                }
-                #endif
-            }
-        }
-    }
-    #endif
-
-    private func stopAutoScroll() {
-        autoScrollTask?.cancel()
-        autoScrollTask = nil
-    }
 }

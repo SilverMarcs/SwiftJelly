@@ -9,11 +9,7 @@ import SwiftUI
 import JellyfinAPI
 
 struct HomeHeroView: View {
-    @Environment(TrendingInLibraryViewModel.self) private var trendingViewModel
-
-    @State private var fallbackItems: [BaseItemDto] = []
-    @State private var hasStartedFallbackLoad = false
-    @State private var hasFinishedFallbackLoad = false
+    @State private var viewModel = HomeHeroViewModel()
 
     @Binding var showScrollEffect: Bool
 
@@ -23,33 +19,25 @@ struct HomeHeroView: View {
     #endif
 
     var body: some View {
-        @Bindable var trendingViewModel = trendingViewModel
         Group {
-            if !trendingViewModel.items.isEmpty {
+            if !viewModel.items.isEmpty {
                 #if os(tvOS)
-                HeroCarouselView(items: $trendingViewModel.items, belowFold: $belowFold, backdropItem: $backdropItem)
+                HeroCarouselView(items: $viewModel.items, belowFold: $belowFold, backdropItem: $backdropItem)
                 #else
-                HeroCarouselView(items: $trendingViewModel.items)
+                HeroCarouselView(items: $viewModel.items)
                 #endif
-            } else if !fallbackItems.isEmpty {
-                #if os(tvOS)
-                HeroCarouselView(items: $fallbackItems, belowFold: $belowFold, backdropItem: $backdropItem)
-                #else
-                HeroCarouselView(items: $fallbackItems)
-                #endif
-            } else if trendingViewModel.hasLoaded && hasFinishedFallbackLoad {
-                EmptyView()
-            } else {
+            } else if !viewModel.hasLoaded {
                 HeroBackdropView(item: BaseItemDto()) {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
                 #if os(tvOS)
-                // Match the horizontal inset `HeroCarouselView` adds around the
-                // real hero so the loading skeleton lines up with actual content.
                 .padding(.horizontal, 40)
                 .onAppear { backdropItem = nil }
                 #endif
             }
+        }
+        .task {
+            await viewModel.load()
         }
         .onScrollVisibilityChange { isVisible in
             showScrollEffect = isVisible
@@ -57,38 +45,9 @@ struct HomeHeroView: View {
             belowFold = !isVisible
             #endif
         }
-        .task(id: trendingViewModel.hasLoaded) {
-            guard trendingViewModel.hasLoaded,
-                  trendingViewModel.items.isEmpty,
-                  !hasStartedFallbackLoad else { return }
-            hasStartedFallbackLoad = true
-            await loadFallback()
-        }
         #if os(tvOS)
-        .frame(height: 800)
+        .frame(height: HeroLayoutMetrics.height())
         .ignoresSafeArea(edges: .horizontal)
         #endif
-    }
-
-    private func loadFallback() async {
-        do {
-            let loaded = try await JFAPI.loadLatestMediaInLibrary(
-                limit: 10,
-                itemTypes: [.movie, .series]
-            ).shuffled()
-            let filtered = loaded.filter { $0.type == .movie || $0.type == .series }
-            if !filtered.isEmpty {
-                TopShelfCache.save(items: filtered)
-            }
-            await MainActor.run {
-                withAnimation {
-                    fallbackItems = filtered
-                    hasFinishedFallbackLoad = true
-                }
-            }
-        } catch {
-            print("Error loading featured items: \(error)")
-            await MainActor.run { hasFinishedFallbackLoad = true }
-        }
     }
 }

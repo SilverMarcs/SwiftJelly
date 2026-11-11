@@ -12,6 +12,8 @@ struct ShowDetailHeroView: View {
                 infoItem: nil,
                 markPlayedItem: vm.selectedSeason,
                 markPlayedDisabled: vm.playButtonDisabled,
+                markAllEpisodesWatched: vm.markSelectedSeasonWatched,
+                canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched,
                 favoriteItem: vm.show
             ) {
                 ShowPlayButton(vm: vm)

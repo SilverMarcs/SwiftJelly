@@ -52,10 +52,34 @@ import AVFoundation
         }
         
         // Different item - clean up old playback silently and start new
-        viewModel?.cleanupForSwitch()
+        viewModel?.stop()
         refreshHandler = refresh
-        viewModel = MediaPlaybackViewModel(item: item)
+        viewModel = makeViewModel(for: item)
         isPlayerPresented = true
+    }
+
+    private func makeViewModel(for item: BaseItemDto) -> MediaPlaybackViewModel {
+        let model = MediaPlaybackViewModel(item: item)
+        #if os(iOS) || os(tvOS)
+        model.playerHost.onPresentationRequest = { [weak self] presented in
+            self?.isPlayerPresented = presented
+        }
+        model.playerHost.onPictureInPictureDismissed = { [weak self, weak model] in
+            // Closing the floating window ends this playback.
+            guard let self, self.viewModel === model else { return }
+            self.endPlayback()
+        }
+        #endif
+        return model
+    }
+
+    /// Called when the player UI goes away. A video floating in Picture in
+    /// Picture keeps playing; anything else ends playback.
+    func playerDidDisappear() {
+        #if os(iOS) || os(tvOS)
+        if viewModel?.playerHost.isPictureInPictureActive == true { return }
+        #endif
+        endPlayback()
     }
     
     /// Pauses the currently playing item if any.
@@ -81,7 +105,7 @@ import AVFoundation
         viewModel = nil
         isPlayerPresented = false
 
-        activeViewModel.stopPlaybackImmediately()
+        activeViewModel.stop()
 
         Task { @MainActor in
             await activeViewModel.finishStoppingPlayback()

@@ -7,6 +7,7 @@ import Foundation
 import JellyfinAPI
 
 struct PlaybackInfoResponse {
+    let itemID: String
     let playbackURL: URL
     let mediaSource: MediaSourceInfo
     let playMethod: PlayMethod
@@ -28,22 +29,11 @@ extension PlaybackInfoResponse {
         audioStreamIndex: Int? = nil
     ) throws -> PlaybackInfoResponse {
         
-        PlaybackLog.log("getPlaybackInfo response for \(item.name ?? "?") (\(item.id ?? "?")): "
-            + "playSessionID=\(response.playSessionID ?? "nil") "
-            + "errorCode=\(response.errorCode?.rawValue ?? "none") "
-            + "mediaSources=\(response.mediaSources?.count ?? 0)")
-
-        if let errorCode = response.errorCode {
-            PlaybackLog.error("Server reported playback error code: \(errorCode.rawValue)")
-        }
-
+        guard let itemID = item.id else { throw PlaybackError.missingItemID }
         guard let mediaSources = response.mediaSources,
               let mediaSource = mediaSources.first else {
-            PlaybackLog.error("No media sources returned for item \(item.id ?? "nil")")
             throw PlaybackError.noMediaSources
         }
-
-        PlaybackLog.log("Selected \(PlaybackLog.describe(mediaSource: mediaSource))")
         
         let playbackURL: URL
         let playMethod: PlayMethod
@@ -51,17 +41,12 @@ extension PlaybackInfoResponse {
         // Check if we need to transcode
         if let transcodingURL = mediaSource.transcodingURL {
             guard let fullURL = client.fullURL(with: transcodingURL) else {
-                PlaybackLog.error("Could not build full URL from transcodingURL: \(transcodingURL)")
                 throw PlaybackError.invalidTranscodeURL
             }
             playbackURL = fullURL
             playMethod = .transcode
         } else {
             // Direct play
-            guard let itemID = item.id else {
-                throw PlaybackError.missingItemID
-            }
-            
             let streamParameters = Paths.GetVideoStreamParameters(
                 isStatic: true,
                 tag: item.etag,
@@ -75,8 +60,7 @@ extension PlaybackInfoResponse {
                 parameters: streamParameters
             )
             
-            guard let fullURL = client.fullURL(with: streamRequest) else {
-                PlaybackLog.error("Could not build direct play stream URL for item \(itemID)")
+            guard let fullURL = client.fullURL(with: streamRequest, queryAPIKey: true) else {
                 throw PlaybackError.invalidStreamURL
             }
             
@@ -84,29 +68,8 @@ extension PlaybackInfoResponse {
             playMethod = .directPlay
         }
 
-        #if DEBUG
-        let subtitleStreams = mediaSource.mediaStreams?
-            .filter { $0.type == .subtitle } ?? []
-        if !subtitleStreams.isEmpty {
-            let streamDescriptions = subtitleStreams.map { stream in
-                let index = stream.index.map(String.init) ?? "nil"
-                let codec = stream.codec ?? "nil"
-                let language = stream.language ?? "nil"
-                let title = stream.displayTitle ?? "nil"
-                return "index=\(index) codec=\(codec) lang=\(language) title=\(title)"
-            }
-            print(
-                "Playback info subtitle streams: \(streamDescriptions.joined(separator: " | "))"
-            )
-        } else {
-            print("Playback info subtitle streams: none")
-        }
-        #endif
-
-        PlaybackLog.log("Playback method=\(playMethod == .transcode ? "transcode" : "directPlay") "
-            + "url=\(PlaybackLog.sanitize(playbackURL))")
-
         return PlaybackInfoResponse(
+            itemID: itemID,
             playbackURL: playbackURL,
             mediaSource: mediaSource,
             playMethod: playMethod,

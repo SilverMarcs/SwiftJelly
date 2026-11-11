@@ -14,10 +14,13 @@ extension BaseItemDto {
     /// AVKit surfaces (Now Playing strip, Info pane, AirPlay receivers) read
     /// different keys.
     func createMetadataItems() async -> [AVMetadataItem] {
+        createMetadataItems(artworkData: await loadArtwork())
+    }
+
+    func createMetadataItems(artworkData: Data?) -> [AVMetadataItem] {
         var metadata: [AVMetadataItem] = []
 
-        // Artwork (fetched first so it's the dominant image in the Info pane).
-        if let artworkData = await loadArtwork() {
+        if let artworkData {
             metadata.append(makeArtworkItem(artworkData))
         }
 

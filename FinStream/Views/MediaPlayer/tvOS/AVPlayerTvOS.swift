@@ -4,17 +4,15 @@ import UIKit
 import JellyfinAPI
 
 struct AVPlayerTvOS: UIViewControllerRepresentable {
+    @Environment(\.scenePhase) private var scenePhase
     let player: AVPlayer?
+    let host: PlayerViewControllerHost
     let item: BaseItemDto
     let isTransitioning: Bool
     let showSkipIntro: Bool
-    let audioTracks: [PlaybackAudioTrack]
-    let selectedAudioTrack: PlaybackAudioTrack?
-    let isSwitchingAudio: Bool
     let nextEpisode: BaseItemDto?
     let creditsStartSeconds: Double?
     let onSkipIntro: () -> Void
-    let onSelectAudioTrack: (PlaybackAudioTrack) -> Void
     let onSelectEpisode: (BaseItemDto) -> Void
     let onNextEpisode: () -> Void
     let onDismiss: () -> Void
@@ -23,10 +21,10 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         var lastShowSkipIntro = false
         var lastIsTransitioning = false
         var lastNextEpisodeID: String?
-        var lastAudioMenuToken: String?
         var activityIndicator: UIActivityIndicatorView?
         var infoTabController: UIViewController?
         var infoTabToken: String?
+        var lastScenePhase: ScenePhase?
         var onNextEpisode: (() -> Void)?
         var onDismiss: (() -> Void)?
 
@@ -59,86 +57,32 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
         }
     }
 
-    func makeUIViewController(context: Context) -> AVPlayerViewController {
-        let controller = AVPlayerViewController()
-        controller.player = player
-        controller.delegate = context.coordinator
-        controller.transportBarIncludesTitleView = true
-        controller.allowsPictureInPicturePlayback = true
-        controller.speeds = [
-            AVPlaybackSpeed(rate: 0.5, localizedName: "0.5×"),
-            AVPlaybackSpeed(rate: 1.0, localizedName: "1×"),
-            AVPlaybackSpeed(rate: 1.25, localizedName: "1.25×"),
-            AVPlaybackSpeed(rate: 1.5, localizedName: "1.5×"),
-            AVPlaybackSpeed(rate: 2.0, localizedName: "2×")
-        ]
+    /// The controller lives as long as the playback, across presentations,
+    /// so the coordinator holding its applied state is kept on the host too.
+    func makeCoordinator() -> Coordinator {
+        if let existing = host.forwardingDelegate as? Coordinator { return existing }
+        let coordinator = Coordinator()
+        host.forwardingDelegate = coordinator
+        return coordinator
+    }
+
+    func makeUIViewController(context: Context) -> PlayerContainerViewController {
+        PlayerContainerViewController(host: host)
+    }
+
+    func updateUIViewController(_ containerViewController: PlayerContainerViewController, context: Context) {
+        host.setPlayer(player)
+        let controller = host.playerViewController
         context.coordinator.onNextEpisode = onNextEpisode
         context.coordinator.onDismiss = onDismiss
         updateInfoTabs(for: controller, coordinator: context.coordinator)
-        updateTransportBarMenuItems(for: controller, coordinator: context.coordinator)
         updateContextualActions(for: controller, coordinator: context.coordinator)
         updateTransitionOverlay(for: controller, coordinator: context.coordinator)
         updateContentProposal(for: controller, coordinator: context.coordinator)
-        return controller
     }
 
-    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-        if uiViewController.player !== player {
-            uiViewController.player = player
-        }
-        context.coordinator.onNextEpisode = onNextEpisode
-        context.coordinator.onDismiss = onDismiss
-        updateInfoTabs(for: uiViewController, coordinator: context.coordinator)
-        updateTransportBarMenuItems(for: uiViewController, coordinator: context.coordinator)
-        updateContextualActions(for: uiViewController, coordinator: context.coordinator)
-        updateTransitionOverlay(for: uiViewController, coordinator: context.coordinator)
-        updateContentProposal(for: uiViewController, coordinator: context.coordinator)
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    private func updateTransportBarMenuItems(
-        for controller: AVPlayerViewController,
-        coordinator: Coordinator
-    ) {
-        let token = [
-            audioTracks.map(\.id).map(String.init).joined(separator: ","),
-            selectedAudioTrack?.id.description ?? "none",
-            selectedAudioTrack?.details ?? "Audio",
-            isSwitchingAudio.description
-        ].joined(separator: "|")
-
-        guard coordinator.lastAudioMenuToken != token else {
-            return
-        }
-        
-        coordinator.lastAudioMenuToken = token
-
-        guard audioTracks.count > 1 else {
-            controller.transportBarCustomMenuItems = []
-            return
-        }
-
-        let audioActions = audioTracks.map { track in
-            return UIAction(
-                title: track.displayName,
-                subtitle: track.details,
-                attributes: [],
-                state: track == selectedAudioTrack ? .on : .off
-            ) { _ in
-                onSelectAudioTrack(track)
-            }
-        }
-
-        let audioMenu = UIMenu(
-            title: "Audio Track",
-            image: UIImage(systemName: "speaker.wave.2.fill"),
-            children: audioActions
-        )
-
-        controller.transportBarCustomMenuItems = [audioMenu]
+    static func dismantleUIViewController(_ uiViewController: PlayerContainerViewController, coordinator: Coordinator) {
+        uiViewController.releasePlayerViewController()
     }
 
     private func updateContextualActions(for controller: AVPlayerViewController, coordinator: Coordinator) {
@@ -267,10 +211,12 @@ struct AVPlayerTvOS: UIViewControllerRepresentable {
     }
 
     private func updateInfoTabs(for controller: AVPlayerViewController, coordinator: Coordinator) {
-        let token = String(describing: item.id)
+        let resumed = scenePhase == .active && coordinator.lastScenePhase != .active
+        coordinator.lastScenePhase = scenePhase
+        let token = "\(item.id ?? ""):\(item.seriesID ?? ""):\(item.seasonID ?? "")"
         guard coordinator.infoTabToken != token else {
-            if let cached = coordinator.infoTabController {
-                controller.customInfoViewControllers = [cached]
+            if resumed, let episodes = coordinator.infoTabController as? SeasonEpisodesViewController {
+                episodes.reloadIfEmpty()
             }
             return
         }

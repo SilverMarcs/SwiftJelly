@@ -1,34 +1,18 @@
-//
-//  TolerantJSONDecoding.swift
-//  SwiftJelly
-//
-//  Jellyfin keeps adding values to the string enums in its API (for example
-//  `VideoRangeType.DOVIWithHDR10Plus` for Dolby Vision Profile 8 with an
-//  HDR10+ base layer). The generated SDK models decode those enums strictly,
-//  so a single unknown value makes an entire response fail to decode — which
-//  looks like a blank player or a missing item rather than a parse error.
-//
-//  These helpers retry a failed decode once with the unrecognized enum values
-//  rewritten to a safe fallback (or removed, leaving the optional property
-//  nil). Every substitution is logged so genuine schema drift stays visible
-//  instead of being silently swallowed.
-//
-
 import Foundation
 import JellyfinAPI
+import OSLog
 
-/// Mirrors Get's internal check for an optional response type, so an empty
-/// body still decodes to nil the way `APIClient.send` does.
 private protocol OptionalDecoding {}
 extension Optional: OptionalDecoding {}
 
+/// Jellyfin keeps adding values to the string enums in its API (e.g. `VideoRangeType.DOVIWithHDR10Plus`),
+/// and the SDK decodes them strictly, so one unknown value fails the whole response. Decoding is retried
+/// once with unknown enum values replaced by a fallback or removed.
 nonisolated enum TolerantJSONDecoding {
+    private static let logger = Logger(subsystem: "com.SilverMarcs.SwiftJelly", category: "Decoding")
 
-    /// Decodes `data` the way Get's `APIClient.send` would, retrying once with
-    /// unrecognized enum values rewritten. Decoding happens off the calling
-    /// actor, matching Get, so large payloads never block the main thread.
+    /// Mirrors Get's `APIClient.send`, including decoding off the calling actor.
     static func decode<T: Decodable>(_ data: Data, as type: T.Type = T.self) async throws -> T {
-        // These three cases are handled by Get before it reaches JSONDecoder.
         if data.isEmpty, T.self is OptionalDecoding.Type {
             return Optional<Decodable>.none as! T
         }
@@ -46,24 +30,12 @@ nonisolated enum TolerantJSONDecoding {
         do {
             return try await decodeDetached(T.self, from: data, using: decoder)
         } catch let error as DecodingError {
-            // A single unrecognized enum value (Jellyfin adds them regularly)
-            // would otherwise fail the whole response.
-            PlaybackLog.error("Decoding \(T.self) failed: \(PlaybackLog.describe(error: error))")
-            guard let sanitized = sanitize(data, label: "\(T.self)") else {
-                // Nothing recognizable to repair — dump the payload so the real
-                // cause is visible instead of a bare "data isn't in the correct
-                // format".
-                PlaybackLog.logRawPayload(data, label: "\(T.self)")
-                throw error
-            }
+            guard let sanitized = sanitize(data, label: "\(T.self)") else { throw error }
             return try await decodeDetached(T.self, from: sanitized, using: decoder)
         }
     }
 
-    /// Transports a decoded value out of the detached task. The models in the
-    /// Jellyfin SDK predate strict concurrency and aren't `Sendable`; the value
-    /// is created inside the task and handed over exactly once, so this is the
-    /// same guarantee Get relies on.
+    /// The SDK models aren't `Sendable`; the value is created inside the task and handed over once.
     private struct DecodedBox<Value>: @unchecked Sendable {
         let value: Value
     }
@@ -79,9 +51,7 @@ nonisolated enum TolerantJSONDecoding {
         return box.value
     }
 
-    /// Mirrors the decoder `JellyfinClient` configures for its own requests.
-    /// The SDK's `OpenISO8601DateFormatter` has an internal initializer, so the
-    /// same two formats (with and without fractional seconds) are rebuilt here.
+    /// Matches `JellyfinClient`'s decoder; the SDK's `OpenISO8601DateFormatter` initializer is internal.
     static func makeDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
@@ -118,9 +88,7 @@ nonisolated enum TolerantJSONDecoding {
 
     private struct EnumField {
         let allowed: Set<String>
-        /// Value to substitute when the server sends something unknown. When
-        /// nil the key is removed instead, so the optional property decodes as
-        /// nil rather than failing.
+        /// When nil, the key is removed so the optional property decodes as nil.
         let fallback: String?
 
         init<T: RawRepresentable & CaseIterable>(_ type: T.Type, fallback: String? = nil) where T.RawValue == String {
@@ -129,9 +97,7 @@ nonisolated enum TolerantJSONDecoding {
         }
     }
 
-    /// JSON keys whose values are strict string enums in the SDK. Only keys
-    /// that unambiguously map to one enum across Jellyfin payloads are listed;
-    /// generic keys like `Type` are deliberately left out.
+    /// Only keys that map to one enum across all payloads; generic keys like `Type` are left out.
     private static let enumFields: [String: EnumField] = [
         "VideoRange": EnumField(VideoRange.self, fallback: VideoRange.unknown.rawValue),
         "VideoRangeType": EnumField(VideoRangeType.self, fallback: VideoRangeType.unknown.rawValue),
@@ -147,8 +113,7 @@ nonisolated enum TolerantJSONDecoding {
         "ErrorCode": EnumField(PlaybackErrorCode.self)
     ]
 
-    /// Rewrites unrecognized enum values in `data`. Returns nil when nothing
-    /// needed changing, so the caller can rethrow the original error.
+    /// Returns nil when nothing needed changing.
     static func sanitize(_ data: Data, label: String) -> Data? {
         guard let json = try? JSONSerialization.jsonObject(with: data) else { return nil }
 
@@ -158,7 +123,7 @@ nonisolated enum TolerantJSONDecoding {
         guard !substitutions.isEmpty else { return nil }
 
         for substitution in substitutions {
-            PlaybackLog.error("[\(label)] unknown API enum value — \(substitution)")
+            logger.error("[\(label, privacy: .public)] unknown API enum value: \(substitution, privacy: .public)")
         }
 
         return try? JSONSerialization.data(withJSONObject: sanitized)

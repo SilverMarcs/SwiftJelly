@@ -3,17 +3,9 @@ import JellyfinAPI
 
 struct ShowHeroActions: View {
     @Binding private var show: BaseItemDto
-
-    /// Owned by the view so the loaded next episode survives the re-creations
-    /// that a carousel does on every layout pass.
+    /// Owned by the view so the loaded next episode survives the carousel recreating it.
     @State private var vm: ShowDetailViewModel
-
-    /// When provided, the hero's focus scope uses this namespace so a parent can
-    /// bias default focus onto the Play button.
     private let externalFocusNamespace: Namespace.ID?
-
-    /// When provided, lets a parent programmatically move focus onto the Play
-    /// button (e.g. when the hero scrolls back into view).
     private let playFocus: FocusState<Bool>.Binding?
 
     init(show: Binding<BaseItemDto>, externalFocusNamespace: Namespace.ID? = nil, playFocus: FocusState<Bool>.Binding? = nil) {
@@ -30,6 +22,8 @@ struct ShowHeroActions: View {
             infoItem: show,
             markPlayedItem: vm.selectedSeason,
             markPlayedDisabled: vm.playButtonDisabled,
+            markAllEpisodesWatched: vm.markSelectedSeasonWatched,
+            canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched,
             favoriteItem: vm.show,
             externalFocusNamespace: externalFocusNamespace,
             playFocus: playFocus
@@ -37,8 +31,6 @@ struct ShowHeroActions: View {
             ShowPlayButton(vm: vm)
         }
         .environment(\.refresh, refreshAllAndSync)
-        // Nothing else drives this view model in the carousel, so without this
-        // the play button never leaves its loading state.
         .task(id: show.id) {
             await vm.loadQuickNextEpisode()
         }

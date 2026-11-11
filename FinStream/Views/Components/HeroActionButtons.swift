@@ -1,38 +1,25 @@
 import SwiftUI
 import JellyfinAPI
 
-/// Shared play / mark-played / favorite action row used by both the Home hero
-/// carousel and the media detail views. The two contexts differ along fixed
-/// axes (Liquid-Glass container, tvOS info button + focus wiring, redaction and
-/// spacing), all captured here so the row is defined in a single place.
+/// Play, mark-played and favorite row shared by the Home hero carousel and the detail heroes.
 struct HeroActionButtons<Play: View>: View {
     enum Context {
-        /// Home hero carousel: glass container, tvOS focus scope + default focus,
-        /// tighter iOS spacing.
         case carousel
-        /// Media detail view: no focus wiring, wider iOS spacing.
         case detail
     }
 
     let context: Context
-    /// Whether to wrap the row in a `GlassEffectContainer`. Carousel always does;
-    /// in detail only the episode hero does.
     let usesGlassContainer: Bool
-    /// When non-nil and running on tvOS in the carousel, an info button linking to
-    /// the item's detail view is inserted after the play button.
+    /// Shown as an info button after Play in the tvOS carousel.
     let infoItem: BaseItemDto?
     let markPlayedItem: BaseItemDto?
-    var markPlayedDisabled: Bool = false
-    /// When nil, no favorite button is shown (episodes).
+    var markPlayedDisabled = false
+    var markAllEpisodesWatched: (() async -> Void)? = nil
+    var canMarkAllEpisodesWatched = true
     let favoriteItem: BaseItemDto?
-    /// When non-nil, the row is redacted with a placeholder while this item's
-    /// `name` is empty (movie carousel skeleton).
+    /// Redacts the row while this item has no name yet.
     var redactWhenEmpty: BaseItemDto? = nil
-    /// When provided, the hero's focus scope uses this namespace so a parent can
-    /// bias default focus onto the play button.
     var externalFocusNamespace: Namespace.ID? = nil
-    /// When provided, lets a parent programmatically move focus onto the play
-    /// button (e.g. when the hero scrolls back into view).
     var playFocus: FocusState<Bool>.Binding? = nil
     @ViewBuilder let play: Play
 
@@ -65,8 +52,12 @@ struct HeroActionButtons<Play: View>: View {
                 }
                 #endif
 
-                MarkPlayedButton(item: markPlayedItem)
-                    .adaptiveDisabled(markPlayedDisabled)
+                MarkPlayedButton(
+                    item: markPlayedItem,
+                    markAllEpisodesWatched: markAllEpisodesWatched,
+                    canMarkAllEpisodesWatched: canMarkAllEpisodesWatched
+                )
+                .adaptiveDisabled(markPlayedDisabled)
 
                 if let favoriteItem {
                     FavoriteButton(item: favoriteItem)
@@ -113,8 +104,6 @@ struct HeroActionButtons<Play: View>: View {
         #elseif os(macOS)
         8
         #else
-        // The glass container merges the buttons so they sit tighter; a plain
-        // row (movie/show detail) needs more breathing room.
         usesGlassContainer ? 6 : 10
         #endif
     }

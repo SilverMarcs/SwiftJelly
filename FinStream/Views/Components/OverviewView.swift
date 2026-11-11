@@ -26,6 +26,7 @@ struct OverviewView: View {
                 #else
                 .font(.callout)
                 #endif
+                .fontWeight(.medium)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.leading)
                 .lineLimit(2, reservesSpace: true)
@@ -47,11 +48,7 @@ struct OverviewView: View {
                         .buttonBorderShape(.capsule)
                         #endif
                         .sheet(isPresented: $showFullOverview) {
-                            OverviewSheetView(
-                                item: item,
-                                overview: realOverview,
-                                isPresented: $showFullOverview
-                            )
+                            OverviewSheetView(overview: realOverview)
                         }
                     }
                 }

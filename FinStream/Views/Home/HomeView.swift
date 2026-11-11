@@ -18,10 +18,6 @@ struct HomeView: View {
     @State private var belowFold = false
     @State private var scrollOffset: CGFloat = 0
     @State private var heroBackdropItem: BaseItemDto?
-
-    /// Height of the hero showcase. Kept in sync with `HomeHeroView`'s frame and
-    /// the fold-snapping behavior so the first shelf peeks below the hero.
-    private let showcaseHeight: CGFloat = 800
 #endif
 
     var body: some View {
@@ -30,7 +26,7 @@ struct HomeView: View {
             HeroParallaxBackground(
                 item: heroBackdropItem,
                 scrollOffset: scrollOffset,
-                showcaseHeight: showcaseHeight
+                showcaseHeight: HeroLayoutMetrics.height()
             )
 
             scrollContent
@@ -80,7 +76,10 @@ struct HomeView: View {
             .scenePadding(.bottom)
         }
         #if os(tvOS)
-        .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: showcaseHeight))
+        .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: HeroLayoutMetrics.height()))
+        .scrollEdgeEffectStyle(.soft, for: .all)
+        #else
+        .scrollEdgeEffectStyle(.soft, for: .top)
         #endif
         .scrollEdgeEffectHidden(showScrollEffect, for: .top)
         .ignoresSafeArea(edges: .top)

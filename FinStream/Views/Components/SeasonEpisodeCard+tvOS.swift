@@ -21,7 +21,12 @@ import JellyfinAPI
 struct SeasonEpisodeCard: View {
     @Environment(\.refresh) var refresh
     let item: ViewListItem<BaseItemDto>
-    @FocusState private var episodeCardFocused: Bool
+    var focusedEpisodeID: FocusState<String?>.Binding? = nil
+    @FocusState private var localEpisodeID: String?
+
+    private var episodeCardFocused: Bool {
+        (focusedEpisodeID?.wrappedValue ?? localEpisodeID) == item.id
+    }
     @FocusState private var descriptionFocused: Bool
 
     private let cardWidth: CGFloat = 450
@@ -51,7 +56,7 @@ struct SeasonEpisodeCard: View {
                     }
                 }
             }
-            .focused($episodeCardFocused)
+            .focused(focusedEpisodeID ?? $localEpisodeID, equals: item.id)
             .buttonStyle(.card)
             .buttonBorderShape(.roundedRectangle(radius: 28))
             .contextMenu {
@@ -69,7 +74,6 @@ struct SeasonEpisodeCard: View {
                     }
                 }
             }
-
             .visualEffect { content, geometry in
                 content.offset(y: descriptionFocused ? -25 : 0)
             }
@@ -84,7 +88,7 @@ struct SeasonEpisodeCard: View {
                 }
                 .animation(.snappy, value: episodeCardFocused)
                 .animation(.snappy, value: descriptionFocused)
-                .disabled(!episodeCardFocused && !descriptionFocused)
+                .disabled(item.base == nil || (!episodeCardFocused && !descriptionFocused))
                 .buttonBorderShape(.roundedRectangle(radius: 25))
         }
         .focusSection()
@@ -92,7 +96,7 @@ struct SeasonEpisodeCard: View {
 
     @ViewBuilder
     private var descriptionButton: some View {
-        Button(action: {}) {
+        NavigationLink(value: item.base.map { NavigationRoute.media($0) }) {
             let isPlaceholder = item.base == nil
             VStack(alignment: .leading, spacing: 0) {
                 Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "SEASON 1 EPISODE 1")
@@ -129,12 +133,9 @@ struct SeasonEpisodeCard: View {
     }
 }
 
-/// A card-like button style for the episode description.
-///
-/// It keeps the tvOS card focus motion via `.hoverEffect(.highlight)`, but draws its own
-/// platter so the background can be transparent while inactive and animate in when active.
+/// Keeps the tvOS card focus motion but draws its own platter, so the background can stay
+/// transparent until the episode card or the description is focused.
 private struct DescriptionCardButtonStyle: ButtonStyle {
-    /// Whether the parent episode card (or the description itself) is focused.
     let isActive: Bool
 
     func makeBody(configuration: Configuration) -> some View {
