@@ -4,8 +4,14 @@
 //
 //  Created by Julian Baumann on 06.02.26.
 //
-//  The description card is only focusable while its episode card is focused, so left/right moves between
-//  episode cards. Achieved by toggling `.disabled` on `!episodeCardFocused && !descriptionFocused`.
+//  Custom SeasonEpisodeCard for tvOS. It has a different layout for improved accessibility with a remote.
+//  Clicking on the episode card will play the episode.
+//  The item description has its own button, so it is easily selectable with a remote to open details for that episode.
+//  This component observes focus states and manipulates a few things manually to achieve the correct visual effetcs, for example:
+//    - the description card should only be accessable when the parent episode card is selected
+//    - scrolling left or right on the remote when the description card is selected should result in focusing the neighbour episode card instead of the description card
+//    - when the episode card is focused, the description card should adjust its y-offset to allow for a spacing between the episode card and the description
+//  Most of this behaviour is simply achieved by toggling `.disabled` of the description card based on `!episodeCardFocused && !descriptionFocused`
 //
 
 import SwiftUI
