@@ -7,7 +7,7 @@ struct ShowPlayButton: View {
     var body: some View {
         PlayMediaButton(item: vm.nextEpisode ?? BaseItemDto()) {
             ZStack {
-                if vm.nextEpisode == nil {
+                if vm.nextEpisode == nil, !vm.hasResolvedNextEpisode {
                     HStack(spacing: 8) {
                        ProgressView()
                            .tint(.primary)
@@ -23,6 +23,10 @@ struct ShowPlayButton: View {
                     #endif
                     .transition(.opacity)
                     
+                } else if vm.nextEpisode == nil {
+                    // Resolved, but the series has nothing playable.
+                    Image(systemName: "play.fill")
+                        .transition(.opacity)
                 } else if let nextEpisode = vm.nextEpisode {
                     HStack(spacing: 8) {
                         Image(systemName: "play.fill")

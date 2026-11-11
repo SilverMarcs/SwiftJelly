@@ -24,6 +24,21 @@ extension JFAPI {
         return try await send(request).items ?? []
     }
 
+    /// Loads the very first episode of a series. Used as the play-button target
+    /// for shows that have neither a resumable nor a next-up episode (typically
+    /// fully watched series), so the button can offer a replay instead of
+    /// spinning forever.
+    static func loadFirstEpisode(for show: BaseItemDto) async throws -> BaseItemDto? {
+        let context = try getAPIContext()
+        var parameters = Paths.GetEpisodesParameters()
+        parameters.userID = context.userID
+        parameters.limit = 1
+        parameters.enableUserData = true
+        parameters.fields = .MinimumFields
+        let request = Paths.getEpisodes(seriesID: show.id ?? "", parameters: parameters)
+        return try await send(request).items?.first
+    }
+
     static func loadEpisodes(for show: BaseItemDto, seasonID: String) async throws -> [BaseItemDto] {
         let context = try getAPIContext()
         var parameters = Paths.GetEpisodesParameters()

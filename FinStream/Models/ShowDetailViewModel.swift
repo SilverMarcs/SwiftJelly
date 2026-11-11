@@ -22,6 +22,11 @@ class ShowDetailViewModel {
      
     // Next Episode / play button
     private(set) var nextEpisode: BaseItemDto? = nil
+
+    /// True once the next-episode lookup has finished, successfully or not.
+    /// The play button needs this to tell "still loading" apart from "there is
+    /// nothing to play", instead of spinning forever.
+    private(set) var hasResolvedNextEpisode = false
     
     // Loading states
     var isLoading: Bool = false
@@ -48,6 +53,13 @@ class ShowDetailViewModel {
     // Quick load just the next episode for hero/play button (no seasons/episodes)
     func loadQuickNextEpisode() async {
         isLoading = true
+        // Every exit path must clear these, otherwise the play button is stuck
+        // showing a spinner for the lifetime of the view.
+        defer {
+            isLoading = false
+            hasResolvedNextEpisode = true
+        }
+
         do {
             let seriesID = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !seriesID.isEmpty else { return }
@@ -57,7 +69,6 @@ class ShowDetailViewModel {
                 .first(where: { $0.type == .episode }) {
                 withAnimation {
                     nextEpisode = resumed
-                    isLoading = false
                 }
 
                 return
@@ -67,13 +78,28 @@ class ShowDetailViewModel {
             if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
                 withAnimation {
                     nextEpisode = nextUp
-                    isLoading = false
                 }
                 return
             }
 
             if allEpisodes.count > 0 {
                 await computeNextEpisode()
+            }
+
+            // Neither resumable nor next-up: typically a fully watched series.
+            // Offer the first episode so the button becomes a replay rather
+            // than staying empty.
+            if nextEpisode == nil {
+                var seriesShow = show
+                if show.type == .episode {
+                    seriesShow = BaseItemDto()
+                    seriesShow.id = seriesID
+                }
+                if let firstEpisode = try await JFAPI.loadFirstEpisode(for: seriesShow) {
+                    withAnimation {
+                        nextEpisode = firstEpisode
+                    }
+                }
             }
         } catch {
             print("Quick next episode load failed: \(error)")
@@ -222,6 +248,7 @@ class ShowDetailViewModel {
             nextEpisode = computed
             isLoading = false
         }
+        hasResolvedNextEpisode = true
 
         await autoSelectSeasonAndEpisode()
     }

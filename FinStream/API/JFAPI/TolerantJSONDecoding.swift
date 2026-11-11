@@ -17,7 +17,67 @@
 import Foundation
 import JellyfinAPI
 
+/// Mirrors Get's internal check for an optional response type, so an empty
+/// body still decodes to nil the way `APIClient.send` does.
+private protocol OptionalDecoding {}
+extension Optional: OptionalDecoding {}
+
 nonisolated enum TolerantJSONDecoding {
+
+    /// Decodes `data` the way Get's `APIClient.send` would, retrying once with
+    /// unrecognized enum values rewritten. Decoding happens off the calling
+    /// actor, matching Get, so large payloads never block the main thread.
+    static func decode<T: Decodable>(_ data: Data, as type: T.Type = T.self) async throws -> T {
+        // These three cases are handled by Get before it reaches JSONDecoder.
+        if data.isEmpty, T.self is OptionalDecoding.Type {
+            return Optional<Decodable>.none as! T
+        }
+        if T.self == Data.self {
+            return data as! T
+        }
+        if T.self == String.self {
+            guard let string = String(data: data, encoding: .utf8) else {
+                throw URLError(.badServerResponse)
+            }
+            return string as! T
+        }
+
+        let decoder = makeDecoder()
+        do {
+            return try await decodeDetached(T.self, from: data, using: decoder)
+        } catch let error as DecodingError {
+            // A single unrecognized enum value (Jellyfin adds them regularly)
+            // would otherwise fail the whole response.
+            PlaybackLog.error("Decoding \(T.self) failed: \(PlaybackLog.describe(error: error))")
+            guard let sanitized = sanitize(data, label: "\(T.self)") else {
+                // Nothing recognizable to repair — dump the payload so the real
+                // cause is visible instead of a bare "data isn't in the correct
+                // format".
+                PlaybackLog.logRawPayload(data, label: "\(T.self)")
+                throw error
+            }
+            return try await decodeDetached(T.self, from: sanitized, using: decoder)
+        }
+    }
+
+    /// Transports a decoded value out of the detached task. The models in the
+    /// Jellyfin SDK predate strict concurrency and aren't `Sendable`; the value
+    /// is created inside the task and handed over exactly once, so this is the
+    /// same guarantee Get relies on.
+    private struct DecodedBox<Value>: @unchecked Sendable {
+        let value: Value
+    }
+
+    private static func decodeDetached<T: Decodable>(
+        _ type: T.Type,
+        from data: Data,
+        using decoder: JSONDecoder
+    ) async throws -> T {
+        let box = try await Task.detached {
+            DecodedBox(value: try decoder.decode(T.self, from: data))
+        }.value
+        return box.value
+    }
 
     /// Mirrors the decoder `JellyfinClient` configures for its own requests.
     /// The SDK's `OpenISO8601DateFormatter` has an internal initializer, so the

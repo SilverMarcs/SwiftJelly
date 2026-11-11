@@ -267,6 +267,40 @@ import Observation
                 await self.prefetchNextEpisodeIfNeeded()
             }
         }
+
+        #if os(macOS)
+        startObservingPlaybackEnd(for: player)
+        #endif
+    }
+
+    /// tvOS advances via `AVContentProposal`; macOS has no equivalent, so
+    /// auto-play the next episode when the current item reaches its end.
+    private func startObservingPlaybackEnd(for player: AVPlayer) {
+        stopObservingPlaybackEnd()
+        guard let currentItem = player.currentItem else { return }
+
+        playbackEndObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: currentItem,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                await self?.handlePlaybackEnded()
+            }
+        }
+    }
+
+    private func handlePlaybackEnded() async {
+        guard item.type == .episode, !isAutoLoadingNext else { return }
+
+        // Resolve the next episode before tearing down the finished one, so the
+        // last episode of a series stays on screen instead of going black.
+        if nextEpisode == nil {
+            nextEpisode = try? await JFAPI.loadNextEpisode(after: item)
+        }
+        guard let nextEpisode, nextEpisode.id != item.id else { return }
+
+        await transitionToNextEpisode()
     }
 
     private func stopObservingTime() {
