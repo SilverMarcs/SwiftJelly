@@ -15,6 +15,24 @@ private extension View {
     }
 }
 
+private extension View {
+    /// Masks the bottom of the backdrop so it fades to transparent instead of ending in a hard edge.
+    func fadeOutBottom() -> some View {
+        mask {
+            LinearGradient(
+                stops: [
+                    .init(color: .black, location: 0),
+                    .init(color: .black, location: 0.6),
+                    .init(color: .black.opacity(0.5), location: 0.82),
+                    .init(color: .clear, location: 1.0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+    }
+}
+
 struct HeroBackdropImage: View {
     enum Parallax {
         case vertical
@@ -51,7 +69,6 @@ struct HeroBackdropImage: View {
             content
                 .offset(y: phase.isIdentity ? 0 : phase.value * -200)
         }
-        .overlay(alignment: .bottom) { controlsGradient }
         .backgroundExtensionEffect()
         #if os(iOS)
         .stretchy()
@@ -70,7 +87,6 @@ struct HeroBackdropImage: View {
             let minX = proxy.frame(in: .scrollView(axis: .horizontal)).minX
             return content.offset(x: -minX * factor)
         }
-        .overlay(alignment: .bottom) { controlsGradient }
         .backgroundExtensionEffect()
         .containerRelativeFrame(.horizontal)
         .frame(height: totalHeight)
@@ -79,15 +95,23 @@ struct HeroBackdropImage: View {
 
     private func imageStack(_ image: some View) -> some View {
         VStack(spacing: 0) {
-            image
-                .frame(height: backdropHeight, alignment: .top)
-                .clipped()
-                .overlay(alignment: .bottom) { imageGradient }
-
             if isCompact {
+                // Fade the image itself out rather than darkening it, so there's no hard edge.
+                image
+                    .frame(height: backdropHeight, alignment: .top)
+                    .clipped()
+                    .fadeOutBottom()
+
                 Spacer(minLength: reflectionHeight)
+            } else {
+                image
+                    .frame(height: backdropHeight, alignment: .top)
+                    .clipped()
+                    .overlay(alignment: .bottom) { imageGradient }
             }
         }
+        // The hero is always dark, so the image fades into black in light mode too.
+        .background(isCompact ? .black : .clear)
     }
 
     private var backdropImage: some View {
@@ -109,22 +133,5 @@ struct HeroBackdropImage: View {
         )
         .frame(height: 300)
         .allowsHitTesting(false)
-    }
-
-    @ViewBuilder
-    private var controlsGradient: some View {
-        if isCompact {
-            LinearGradient(
-                gradient: Gradient(stops: [
-                    .init(color: .black.opacity(1), location: 0),
-                    .init(color: .black.opacity(0.8), location: 0.8),
-                    .init(color: .black.opacity(0), location: 1.0)
-                ]),
-                startPoint: .bottom,
-                endPoint: .top
-            )
-            .frame(height: reflectionHeight + 150)
-            .allowsHitTesting(false)
-        }
     }
 }

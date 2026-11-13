@@ -10,7 +10,7 @@ import SwiftUI
 import UIKit
 
 struct ProfileToolbarMenu: View {
-    @Binding var showingSettings: Bool
+    let showSettings: () -> Void
 
     private var dataManager = DataManager.shared
 
@@ -19,8 +19,8 @@ struct ProfileToolbarMenu: View {
 
     private static let avatarDiameter: CGFloat = 40
 
-    init(showingSettings: Binding<Bool>) {
-        _showingSettings = showingSettings
+    init(showSettings: @escaping () -> Void) {
+        self.showSettings = showSettings
     }
 
     var body: some View {
@@ -44,7 +44,7 @@ struct ProfileToolbarMenu: View {
             }
 
             Button {
-                showingSettings = true
+                showSettings()
             } label: {
                 Label("Settings", systemImage: "gear")
             }

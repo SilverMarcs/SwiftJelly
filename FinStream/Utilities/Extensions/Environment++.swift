@@ -14,9 +14,14 @@ extension EnvironmentValues {
 
     @Entry var isInSeasonView: Bool = false
 
+    /// Incremented each time the Search tab is selected or reselected, so `SearchView` can focus its field.
+    @Entry var searchFocusRequest: Int = 0
+
     #if os(iOS)
     @Entry var detailZoomNamespace: Namespace.ID? = nil
     @Entry var playerZoomNamespace: Namespace.ID? = nil
+    /// Opens Settings from the profile toolbar menu; `nil` when the profile menu shouldn't be shown.
+    @Entry var profileToolbarSettingsAction: (() -> Void)? = nil
     #endif
 }
 

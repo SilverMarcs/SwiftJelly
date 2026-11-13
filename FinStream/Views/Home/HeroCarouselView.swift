@@ -25,7 +25,10 @@ struct HeroCarouselView: View {
     @State private var scrollX: CGFloat = 0
     @State private var containerWidth: CGFloat = 0
     @State private var isUserScrolling = false
-    @State private var pageProgress: CGFloat = 0
+    @State private var isVisible = false
+    /// The page shown by the page control. Only updated once a swipe settles, so the control
+    /// isn't pulled back to the old page halfway through an animated scroll.
+    @State private var currentPage = 0
     private let autoScrollInterval: Double = 8
     #endif
 
@@ -105,11 +108,7 @@ struct HeroCarouselView: View {
                 .onScrollPhaseChange { _, newPhase in
                     isUserScrolling = newPhase != .idle
                     if newPhase == .idle {
-                        startAutoScroll(proxy: proxy)
-                    } else {
-                        stopAutoScroll()
-                        // An explicit animation cancels the in-flight fill instead of letting it finish.
-                        withAnimation(.linear(duration: 0.2)) { pageProgress = 0 }
+                        currentPage = nearestIndex
                     }
                 }
                 .stretchy()
@@ -117,16 +116,14 @@ struct HeroCarouselView: View {
                 detailsLayer
 
                 if items.count > 1 {
-                    paginator
-                        .padding(.bottom, 16)
+                    paginator(proxy: proxy)
+                        .padding(.bottom, 12)
                 }
-            }
-            .onAppear {
-                startAutoScroll(proxy: proxy)
             }
         }
         .frame(height: pageHeight)
-        .onDisappear { stopAutoScroll() }
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
     }
 
     /// Foreground content stays in place and cross-fades with the scroll position.
@@ -142,55 +139,27 @@ struct HeroCarouselView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .padding(.bottom, items.count > 1 ? 24 : 0)
+        .padding(.bottom, items.count > 1 ? 36 : 0)
         .allowsHitTesting(!isUserScrolling)
     }
 
-    private var paginator: some View {
-        let dotSize: CGFloat = 8
-        let activeWidth: CGFloat = 28
-
-        return HStack(spacing: 6) {
-            ForEach(items.indices, id: \.self) { index in
-                let activeness = max(0, 1 - abs(fraction - CGFloat(index)))
-                let trackWidth = dotSize + (activeWidth - dotSize) * activeness
-
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(.white.opacity(0.35))
-                        .frame(width: trackWidth, height: dotSize)
-
-                    if index == nearestIndex {
-                        Capsule()
-                            .fill(.white)
-                            .frame(width: max(dotSize, trackWidth * pageProgress), height: dotSize)
-                    }
-                }
-            }
-        }
-        .allowsHitTesting(false)
-    }
-
-    private func restartPageProgress() {
-        withAnimation(.linear(duration: 0.2)) { pageProgress = 0 }
-        withAnimation(.linear(duration: autoScrollInterval).delay(0.2)) { pageProgress = 1 }
-    }
-
-    private func startAutoScroll(proxy: ScrollViewProxy) {
-        autoScrollTask?.cancel()
-        guard items.count > 1 else {
-            pageProgress = 0
-            return
-        }
-        restartPageProgress()
-        autoScrollTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(autoScrollInterval))
-                guard !Task.isCancelled, !isUserScrolling else { continue }
-                let next = (nearestIndex + 1) % items.count
-                withAnimation(.easeInOut(duration: 0.6)) {
-                    proxy.scrollTo(items[next].id, anchor: .leading)
-                }
+    /// The system page control: its timer advances the carousel, and tapping or scrubbing the dots jumps to a page.
+    private func paginator(proxy: ScrollViewProxy) -> some View {
+        TimedPageControl(
+            numberOfPages: items.count,
+            currentPage: min(currentPage, max(items.count - 1, 0)),
+            duration: autoScrollInterval,
+            isPaused: isUserScrolling || !isVisible,
+            tint: .white
+        ) { newPage, isScrubbing in
+            guard items.indices.contains(newPage) else { return }
+            currentPage = newPage
+            // Scrubbing jumps straight to each page, like the Apple TV app; an animated scroll per
+            // step would settle on in-between pages and drag the control back.
+            var transaction = Transaction(animation: isScrubbing ? nil : .easeInOut(duration: 0.4))
+            transaction.disablesAnimations = isScrubbing
+            withTransaction(transaction) {
+                proxy.scrollTo(items[newPage].id, anchor: .leading)
             }
         }
     }
@@ -344,7 +313,7 @@ struct HeroCarouselView: View {
     private func hero(item: Binding<BaseItemDto>, showsBackground: Bool = true) -> some View {
         switch item.wrappedValue.type {
         case .movie:
-            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground) {
+            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground, showsOverview: false) {
                 heroActionRow {
                     #if os(tvOS)
                     MovieHeroActions(movie: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
@@ -354,7 +323,7 @@ struct HeroCarouselView: View {
                 }
             }
         case .series:
-            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground) {
+            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground, showsOverview: false) {
                 heroActionRow {
                     #if os(tvOS)
                     ShowHeroActions(show: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)

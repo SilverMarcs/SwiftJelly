@@ -38,7 +38,7 @@ struct OverviewView: View {
                         Button {
                             showFullOverview = true
                         } label: {
-                            Text("MORE...")
+                            Text("MORE")
                                 .font(.caption)
                         }
                         .buttonStyle(.glass)

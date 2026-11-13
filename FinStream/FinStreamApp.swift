@@ -17,7 +17,6 @@ struct FinStreamApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(selectedTab: $selectedTab)
-                .preferredColorScheme(.dark)
                 #if !os(macOS)
                 // App-level so playback floating in Picture in Picture, with
                 // the player closed, still sees suspension and activation.

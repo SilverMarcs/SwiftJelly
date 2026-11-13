@@ -27,7 +27,7 @@ struct HomeHeroView: View {
                 HeroCarouselView(items: $viewModel.items)
                 #endif
             } else if !viewModel.hasLoaded {
-                HeroBackdropView(item: BaseItemDto()) {
+                HeroBackdropView(item: BaseItemDto(), showsOverview: false) {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
                 #if os(tvOS)

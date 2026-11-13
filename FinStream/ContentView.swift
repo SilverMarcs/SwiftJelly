@@ -13,6 +13,7 @@ struct ContentView: View {
 
     @State private var dataManager = DataManager.shared
     @State private var playbackManager = PlaybackManager.shared
+    @State private var searchFocusRequest = 0
 
     #if os(iOS)
     @Namespace private var detailZoomNamespace
@@ -38,7 +39,7 @@ struct ContentView: View {
         if dataManager.servers.isEmpty {
             NoServerView()
         } else {
-            TabView(selection: $selectedTab) {
+            TabView(selection: tabSelection) {
                 ForEach(primaryTabs, id: \.self) { tab in
                     Tab(tab.title,
                         systemImage: tab.systemImage,
@@ -48,6 +49,7 @@ struct ContentView: View {
                         NavigationStack {
                             tabWithNavigationDestinations(tab: tab)
                         }
+                        .environment(\.searchFocusRequest, searchFocusRequest)
                     }
                 }
 
@@ -56,6 +58,11 @@ struct ContentView: View {
                 }
             }
             .profileSidebarHeader()
+            .onChange(of: selectedTab) { _, newTab in
+                if newTab == .search {
+                    searchFocusRequest += 1
+                }
+            }
             #if os(iOS)
             .sheet(isPresented: $showingSettings) {
                 NavigationStack {
@@ -103,6 +110,18 @@ struct ContentView: View {
         }
     }
 
+    /// Wraps the selection so reselecting the already-active Search tab also requests search focus.
+    private var tabSelection: Binding<TabSelection> {
+        Binding {
+            selectedTab
+        } set: { newTab in
+            if newTab == .search && selectedTab == .search {
+                searchFocusRequest += 1
+            }
+            selectedTab = newTab
+        }
+    }
+
     private func tabWithNavigationDestinations(tab: TabSelection) -> some View {
         tab.tabView
             // Rebuild content tabs when the active server changes so they reload.
@@ -111,13 +130,8 @@ struct ContentView: View {
             .id(tab.hostsSettings ? nil : dataManager.server?.id)
             .navigationRouteDestinations()
         #if os(iOS)
-            .toolbar {
-                if isCompactSize {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        ProfileToolbarMenu(showingSettings: $showingSettings)
-                    }
-                }
-            }
+            // Each tab root adds the profile menu to its own toolbar so it stays at the trailing edge.
+            .environment(\.profileToolbarSettingsAction, isCompactSize ? { showingSettings = true } : nil)
         #endif
         #if os(macOS)
             .frame(minWidth: 800)
