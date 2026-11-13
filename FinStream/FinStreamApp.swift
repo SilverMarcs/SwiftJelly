@@ -27,9 +27,6 @@ struct FinStreamApp: App {
                 }
                 #endif
         }
-        #if os(macOS)
-        .windowStyle(.hiddenTitleBar)
-        #endif
         #if !os(tvOS)
         .commands {
             AppCommands(selectedTab: $selectedTab)
