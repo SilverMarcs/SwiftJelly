@@ -52,6 +52,9 @@ struct SeerDetailView: View {
         .task {
             await vm.refresh()
         }
+        .task(id: vm.isProcessing) {
+            await vm.pollWhileProcessing()
+        }
         .refreshToolbar {
             await vm.refresh()
         }

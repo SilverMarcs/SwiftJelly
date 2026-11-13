@@ -16,6 +16,8 @@ struct MovieDetailHeroView: View {
                 MoviePlayButton(item: vm.movie)
             }
             .environment(\.refresh, vm.refresh)
+        } logoAccessory: {
+            SeerLibraryProcessingChip(item: vm.movie)
         }
     }
 }

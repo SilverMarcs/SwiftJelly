@@ -15,6 +15,10 @@ struct SeerDetailHeroView: View {
         HeroBackdropView(item: vm.item) {
             SeerHeroActions(model: vm.requestModel)
                 .redacted(reason: vm.item.name == nil ? .placeholder : [])
+        } logoAccessory: {
+            if vm.isProcessing {
+                SeerProcessingChip(progress: vm.downloadProgress)
+            }
         }
     }
 }

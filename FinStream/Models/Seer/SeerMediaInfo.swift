@@ -13,6 +13,8 @@ struct SeerMediaInfo: Decodable, Hashable {
     let status: SeerMediaStatus?
     let jellyfinMediaID: String?
     let seasons: [SeerSeasonStatus]?
+    let downloadStatus: [SeerDownloadStatus]?
+    let downloadStatus4k: [SeerDownloadStatus]?
 
     enum CodingKeys: String, CodingKey {
         case tmdbID = "tmdbId"
@@ -20,6 +22,14 @@ struct SeerMediaInfo: Decodable, Hashable {
         case status
         case jellyfinMediaID = "jellyfinMediaId"
         case seasons
+        case downloadStatus
+        case downloadStatus4k
+    }
+
+    /// Active downloads (regular and 4K), or `nil` if nothing is downloading.
+    var downloadProgress: SeerDownloadProgress? {
+        let progress = SeerDownloadProgress(statuses: (downloadStatus ?? []) + (downloadStatus4k ?? []))
+        return progress.isEmpty ? nil : progress
     }
 
     func status(forSeason seasonNumber: Int) -> SeerMediaStatus? {

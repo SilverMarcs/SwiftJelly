@@ -2,8 +2,9 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-struct HeroBackdropView<HeroActions: View>: View {
+struct HeroBackdropView<HeroActions: View, LogoAccessory: View>: View {
     @ViewBuilder let heroActions: HeroActions
+    @ViewBuilder let logoAccessory: LogoAccessory
 
     let item: BaseItemDto
     let logoItem: BaseItemDto
@@ -19,7 +20,8 @@ struct HeroBackdropView<HeroActions: View>: View {
         badge: String? = nil,
         showsBackground: Bool = true,
         showsOverview: Bool = true,
-        @ViewBuilder heroActions: () -> HeroActions
+        @ViewBuilder heroActions: () -> HeroActions,
+        @ViewBuilder logoAccessory: () -> LogoAccessory
     ) {
         self.item = item
         self.logoItem = logoItem ?? item
@@ -28,6 +30,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         self.showsBackground = showsBackground
         self.showsOverview = showsOverview
         self.heroActions = heroActions()
+        self.logoAccessory = logoAccessory()
     }
 
     #if os(iOS)
@@ -84,7 +87,24 @@ struct HeroBackdropView<HeroActions: View>: View {
     
     @ViewBuilder
     private var logo: some View {
-        
+        VStack(alignment: logoStackAlignment) {
+            // Interactive accessory (e.g. Seer processing chip) sits above the non-interactive logo.
+            logoAccessory
+
+            logoImage
+        }
+    }
+
+    private var logoStackAlignment: HorizontalAlignment {
+    #if os(tvOS)
+        .leading
+    #else
+        .center
+    #endif
+    }
+
+    @ViewBuilder
+    private var logoImage: some View {
         VStack(alignment: .center) {
             if let badge = badge {
                 Text(badge)
@@ -243,5 +263,28 @@ struct HeroBackdropView<HeroActions: View>: View {
     private var backdropHeight: CGFloat {
         HeroLayoutMetrics.height(isCompact: isCompactSize)
             - (isCompactSize ? HeroLayoutMetrics.reflectionHeight : 0)
+    }
+}
+
+extension HeroBackdropView where LogoAccessory == EmptyView {
+    init(
+        item: BaseItemDto,
+        logoItem: BaseItemDto? = nil,
+        genreItem: BaseItemDto? = nil,
+        badge: String? = nil,
+        showsBackground: Bool = true,
+        showsOverview: Bool = true,
+        @ViewBuilder heroActions: () -> HeroActions
+    ) {
+        self.init(
+            item: item,
+            logoItem: logoItem,
+            genreItem: genreItem,
+            badge: badge,
+            showsBackground: showsBackground,
+            showsOverview: showsOverview,
+            heroActions: heroActions,
+            logoAccessory: { EmptyView() }
+        )
     }
 }

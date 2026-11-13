@@ -68,6 +68,24 @@ final class SeerDetailViewModel {
         }
     }
 
+    var downloadProgress: SeerDownloadProgress? {
+        requestModel.mediaInfo?.downloadProgress
+    }
+
+    /// Whether the item is being fetched: either downloads are active or Seer reports it as processing.
+    var isProcessing: Bool {
+        downloadProgress != nil || requestModel.mediaInfo?.status == .processing
+    }
+
+    /// Re-fetches the item periodically while it is processing so download progress stays current.
+    func pollWhileProcessing() async {
+        while isProcessing, !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(15))
+            guard !Task.isCancelled else { return }
+            await refresh()
+        }
+    }
+
     func seasonStatus(for season: SeerSeasonSummary) -> SeerMediaStatus? {
         requestModel.mediaInfo?.status(forSeason: season.seasonNumber)
     }

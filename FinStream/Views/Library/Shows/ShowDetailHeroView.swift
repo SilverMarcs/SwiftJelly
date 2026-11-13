@@ -19,6 +19,8 @@ struct ShowDetailHeroView: View {
                 ShowPlayButton(vm: vm)
             }
             .environment(\.refresh, vm.refreshAll)
+        } logoAccessory: {
+            SeerLibraryProcessingChip(item: vm.show)
         }
     }
 }

@@ -30,16 +30,17 @@ struct SeerRequestCard: View {
     }
 
     private func overlay(for requestItem: SeerRequestItem) -> some View {
-        HStack(alignment: .bottom, spacing: 8) {
+        HStack(alignment: .center, spacing: 8) {
             Text(requestItem.item.name ?? "")
                 .font(.caption)
                 .bold()
                 .foregroundStyle(.white)
                 .lineLimit(1)
+                .layoutPriority(-1)
 
             Spacer(minLength: 0)
 
-            SeerRequestStatusBadge(status: requestItem.request.displayStatus)
+            SeerRequestStatusBadge(status: requestItem.request.displayStatus, downloadProgress: requestItem.request.media.downloadProgress)
         }
         .padding(.horizontal, overlayPadding)
         .padding(.vertical, overlayPadding - 5)
