@@ -26,7 +26,7 @@ struct MarkPlayedButton: View {
                 .heroActionIcon()
         }
         .disabled(markAllEpisodesWatched != nil && !canMarkAllEpisodesWatched)
-        .foregroundStyle(isPlayed ? Color.green : Color.primary)
+        .tint(isPlayed ? Color.green : nil)
         #if os(tvOS)
         .controlSize(.regular)
         #else

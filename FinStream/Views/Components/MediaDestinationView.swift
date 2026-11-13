@@ -9,9 +9,21 @@ import SwiftUI
 import JellyfinAPI
 
 struct MediaDestinationView: View {
+    #if os(iOS)
+    @Environment(\.detailZoomNamespace) private var detailZoomNamespace
+    #endif
+
     let item: BaseItemDto
 
     var body: some View {
+        destinationContent
+        #if os(iOS)
+            .zoomTransitionDestination(sourceID: item.id ?? "", in: detailZoomNamespace)
+        #endif
+    }
+
+    @ViewBuilder
+    private var destinationContent: some View {
         switch item.type {
         case .movie:
             MovieDetailView(item: item)

@@ -61,10 +61,10 @@ enum JFAPI {
     }
 
     /// Generic helper to send a request using the current API context
-    static func send<T>(_ request: Request<T>) async throws -> T where T: Decodable {
-        let context = try getAPIContext()
-        let response = try await context.client.send(request)
-        return response.value
+    static func send<T>(_ request: Request<T>, context: APIContext? = nil) async throws -> T where T: Decodable {
+        let context = try context ?? getAPIContext()
+        let response = try await context.client.data(for: request)
+        return try await TolerantJSONDecoding.decode(response.data)
     }
 }
 
@@ -73,7 +73,8 @@ enum JFAPIError: LocalizedError {
     case setupFailed
     case loginFailed
     case itemNotFound
-    
+    case quickConnectFailed
+
     var errorDescription: String? {
         switch self {
         case .setupFailed:
@@ -82,6 +83,8 @@ enum JFAPIError: LocalizedError {
             return "Login failed - invalid username or password"
         case .itemNotFound:
             return "The requested item could not be found"
+        case .quickConnectFailed:
+            return "Quick Connect is unavailable on this server"
         }
     }
 }

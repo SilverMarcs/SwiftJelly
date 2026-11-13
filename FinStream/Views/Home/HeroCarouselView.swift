@@ -12,18 +12,29 @@ import SwiftMediaViewer
 struct HeroCarouselView: View {
     @Binding var items: [BaseItemDto]
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    #if os(iOS)
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #if os(tvOS)
+    @Binding var belowFold: Bool
+    @Binding var backdropItem: BaseItemDto?
     #endif
 
-    @State private var scrollPhase: ScrollPhase = .idle
-    @State private var isVisible = false
     @State private var scrolledID: String?
     @State private var autoScrollTask: Task<Void, Never>?
-    @FocusState private var focusedHeroID: String?
+
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var scrollX: CGFloat = 0
+    @State private var containerWidth: CGFloat = 0
+    @State private var isUserScrolling = false
+    @State private var isVisible = false
+    /// The page shown by the page control. Only updated once a swipe settles, so the control
+    /// isn't pulled back to the old page halfway through an animated scroll.
+    @State private var currentPage = 0
+    private let autoScrollInterval: Double = 8
+    #endif
 
     #if os(tvOS)
+    @Namespace private var heroNamespace
+    @FocusState private var playButtonFocused: Bool
     @State private var navigationButtonToRetain: HeroCarouselNavigationButton?
     @FocusState private var focusedNavigationButton: HeroCarouselNavigationButton?
     #endif
@@ -33,56 +44,158 @@ struct HeroCarouselView: View {
         return items.firstIndex { $0.id == scrolledID } ?? 0
     }
 
-    private var itemIDs: [String] { items.compactMap(\.id) }
-
-    private var carouselHeight: CGFloat {
-        #if os(iOS)
-        HeroLayoutMetrics.height(isCompact: horizontalSizeClass == .compact)
-        #else
-        HeroLayoutMetrics.height()
-        #endif
-    }
-
-    private var pageAnimation: Animation {
-        #if os(tvOS)
-        .easeInOut(duration: 0.6)
-        #else
-        .easeInOut(duration: reduceMotion ? 0.2 : 0.6)
-        #endif
-    }
-
     var body: some View {
-        #if os(tvOS)
-        tvOSCarousel
+        #if os(iOS)
+        parallaxCarousel
         #else
-        scrollCarousel
+        crossFadeCarousel
         #endif
     }
 
-    #if !os(tvOS)
-    private var scrollCarousel: some View {
-        LayeredPagingCarousel(ids: itemIDs, selection: $scrolledID, scrollPhase: $scrollPhase) { id, size in
-            if let index = items.firstIndex(where: { $0.id == id }) {
-                let item = items[index]
-                let isActive = id == (scrolledID ?? itemIDs.first)
-                MediaNavigationLink(item: item) {
-                    scrollHero(item: itemBinding(for: id), isActive: isActive, width: size.width)
+    // MARK: - iOS
+
+    #if os(iOS)
+    private var isCompact: Bool { horizontalSizeClass == .compact }
+    private var pageHeight: CGFloat { HeroLayoutMetrics.height(isCompact: isCompact) }
+    private var backdropHeight: CGFloat {
+        pageHeight - (isCompact ? HeroLayoutMetrics.reflectionHeight : 0)
+    }
+
+    private let parallaxFactor: CGFloat = 0.14
+    /// Draws the backdrop wider than its page so the parallax pan never reveals an edge.
+    private let overscanRatio: CGFloat = 1.4
+
+    /// Continuous page position, e.g. `1.5` is halfway between pages 1 and 2.
+    private var fraction: CGFloat {
+        guard containerWidth > 0 else { return 0 }
+        return scrollX / containerWidth
+    }
+
+    private var nearestIndex: Int {
+        guard !items.isEmpty else { return 0 }
+        return min(max(Int(fraction.rounded()), 0), items.count - 1)
+    }
+
+    private var parallaxCarousel: some View {
+        ScrollViewReader { proxy in
+            ZStack(alignment: .bottom) {
+                ScrollView(.horizontal) {
+                    LazyHStack(spacing: 0) {
+                        ForEach(items, id: \.id) { item in
+                            MediaNavigationLink(item: item) {
+                                HeroBackdropImage(
+                                    item: item,
+                                    isCompact: isCompact,
+                                    backdropHeight: backdropHeight,
+                                    reflectionHeight: HeroLayoutMetrics.reflectionHeight,
+                                    parallax: .horizontal(factor: parallaxFactor, overscan: overscanRatio)
+                                )
+                            }
+                            // A GeometryReader width can stick at zero after the lazy page is recycled.
+                            .containerRelativeFrame(.horizontal)
+                            .id(item.id)
+                        }
+                    }
                 }
-                .allowsHitTesting(isActive)
-                .disabled(!isActive)
-                .accessibilityHidden(!isActive)
+                .scrollIndicators(.hidden)
+                .scrollTargetBehavior(.paging)
+                .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.x } action: { _, newX in
+                    scrollX = newX
+                }
+                .onScrollGeometryChange(for: CGFloat.self) { $0.containerSize.width } action: { _, newWidth in
+                    containerWidth = newWidth
+                }
+                .onScrollPhaseChange { _, newPhase in
+                    isUserScrolling = newPhase != .idle
+                    if newPhase == .idle {
+                        currentPage = nearestIndex
+                    }
+                }
+                .stretchy()
+
+                detailsLayer
+
+                if items.count > 1 {
+                    paginator(proxy: proxy)
+                        .padding(.bottom, 12)
+                }
             }
         }
-        .frame(height: carouselHeight)
-        .background {
-            if Device.isMacOrPad, items.indices.contains(currentIndex) {
-                HeroCarouselSidebarBackdrop(item: items[currentIndex])
+        .frame(height: pageHeight)
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
+    }
+
+    /// Foreground content stays in place and cross-fades with the scroll position.
+    private var detailsLayer: some View {
+        ZStack {
+            ForEach(items.indices, id: \.self) { index in
+                let distance = abs(CGFloat(index) - fraction)
+                if distance < 1 {
+                    hero(item: itemBinding(at: index), showsBackground: false)
+                        .opacity(Double(1 - distance * 2))
+                        .allowsHitTesting(index == nearestIndex)
+                }
             }
         }
-        #if os(iOS)
-        .stretchy()
-        #endif
-        #if os(macOS) || os(iOS)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .padding(.bottom, items.count > 1 ? 36 : 0)
+        .allowsHitTesting(!isUserScrolling)
+    }
+
+    /// The system page control: its timer advances the carousel, and tapping or scrubbing the dots jumps to a page.
+    private func paginator(proxy: ScrollViewProxy) -> some View {
+        TimedPageControl(
+            numberOfPages: items.count,
+            currentPage: min(currentPage, max(items.count - 1, 0)),
+            duration: autoScrollInterval,
+            isPaused: isUserScrolling || !isVisible,
+            tint: .white
+        ) { newPage, isScrubbing in
+            guard items.indices.contains(newPage) else { return }
+            currentPage = newPage
+            // Scrubbing jumps straight to each page, like the Apple TV app; an animated scroll per
+            // step would settle on in-between pages and drag the control back.
+            var transaction = Transaction(animation: isScrubbing ? nil : .easeInOut(duration: 0.4))
+            transaction.disablesAnimations = isScrubbing
+            withTransaction(transaction) {
+                proxy.scrollTo(items[newPage].id, anchor: .leading)
+            }
+        }
+    }
+    #endif
+
+    // MARK: - tvOS / macOS
+
+    #if !os(iOS)
+    private var crossFadeCarousel: some View {
+        ZStack {
+            if items.indices.contains(currentIndex) {
+                let activeItem = items[currentIndex]
+                let activeBinding = itemBinding(at: currentIndex)
+
+                Group {
+                    #if os(tvOS)
+                    hero(item: activeBinding)
+                        .focusSection()
+                        .frame(maxHeight: .infinity)
+                        .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
+                            content.offset(y: phase.isIdentity ? 0 : -120)
+                        }
+                    #else
+                    MediaNavigationLink(item: activeItem) {
+                        hero(item: activeBinding)
+                    }
+                    #endif
+                }
+                .id(activeItem.id)
+                .transition(.opacity)
+            }
+        }
+        #if os(tvOS)
+        .padding(.horizontal, 40)
+        .ignoresSafeArea()
+        #else
         .overlay {
             if items.count > 1 {
                 HStack {
@@ -90,10 +203,8 @@ struct HeroCarouselView: View {
                         scrollToPrevious()
                         startAutoScroll()
                     } label: {
-                        Label("Previous Slide", systemImage: "chevron.compact.left")
+                        Label("Previous Slide", systemImage: "chevron.left")
                             .labelStyle(.iconOnly)
-                            .padding()
-                            .contentShape(.rect)
                     }
                     .disabled(currentIndex <= 0)
 
@@ -103,178 +214,128 @@ struct HeroCarouselView: View {
                         scrollToNext()
                         startAutoScroll()
                     } label: {
-                        Label("Next Slide", systemImage: "chevron.compact.right")
+                        Label("Next Slide", systemImage: "chevron.right")
                             .labelStyle(.iconOnly)
-                            .padding()
-                            .contentShape(.rect)
                     }
                     .disabled(currentIndex >= items.count - 1)
                 }
-                .buttonStyle(.plain)
-                .font(.title.weight(.light))
-                .foregroundStyle(.white.opacity(0.7))
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
+                .foregroundStyle(.primary)
+                .controlSize(.large)
+                .padding(.horizontal, 16)
             }
         }
         #endif
         .onAppear {
-            isVisible = true
             reconcileSelection()
-            startAutoScroll()
-        }
-        .onDisappear {
-            isVisible = false
-            stopAutoScroll()
-        }
-        .onChange(of: scrolledID) { _, _ in startAutoScroll() }
-        .onChange(of: focusedHeroID) { _, newID in
-            guard let newID, !newID.isEmpty, newID != scrolledID else { return }
-            withAnimation(pageAnimation) { scrolledID = newID }
-        }
-        .onChange(of: itemIDs) { _, _ in
-            reconcileSelection()
-            startAutoScroll()
-        }
-        .onChange(of: scrollPhase) { _, phase in
-            if phase == .idle {
-                startAutoScroll()
-            } else {
-                stopAutoScroll()
-            }
-        }
-        .onChange(of: reduceMotion) { _, _ in startAutoScroll() }
-    }
-    #endif
-
-    #if os(tvOS)
-    private var tvOSCarousel: some View {
-        ZStack {
-            if !items.isEmpty, items.indices.contains(currentIndex) {
-                let activeItem = items[currentIndex]
-                let activeBinding = activeItemBinding(for: currentIndex)
-
-                legacyTVHero(item: activeBinding)
-                    .focusSection()
-                    .focused($focusedHeroID, equals: activeItem.id ?? "")
-                    .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
-                        content.offset(y: phase.isIdentity ? 0 : -200)
-                    }
-                    .frame(maxHeight: .infinity)
-                    .background {
-                        GeometryReader { geometry in
-                            if let url = ImageURLProvider.imageURL(for: activeItem, type: .backdrop) {
-                                CachedAsyncImage(url: url, targetSize: 1920)
-                                    .overlay(alignment: .bottom) {
-                                        LinearGradient(
-                                            gradient: Gradient(stops: [
-                                                .init(color: .black, location: 0),
-                                                .init(color: .black.opacity(0.6), location: 0.8),
-                                                .init(color: .black.opacity(0), location: 1.0)
-                                            ]),
-                                            startPoint: .bottom,
-                                            endPoint: .top
-                                        )
-                                        .frame(height: geometry.size.height / 2 + 200)
-                                    }
-                                    .scaledToFill()
-                                    .scrollTransition(.interactive(timingCurve: .easeOut), axis: .vertical) { content, phase in
-                                        content.offset(y: phase.isIdentity ? (geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom) : -700)
-                                    }
-                            }
-                        }
-                    }
-                    .id(activeItem.id)
-                    .transition(.opacity)
-            }
-        }
-        .ignoresSafeArea()
-        .onAppear {
-            if scrolledID == nil, !items.isEmpty {
-                scrolledID = items.first?.id
-            }
+            #if os(tvOS)
+            updateBackdrop()
+            if !belowFold { focusPlayButton() }
+            #endif
             startAutoScroll()
         }
         .onDisappear { stopAutoScroll() }
-        .onChange(of: scrolledID) { _, _ in startAutoScroll() }
-        .onChange(of: focusedHeroID) { _, newID in
-            guard let newID, !newID.isEmpty, newID != scrolledID else { return }
-            withAnimation(pageAnimation) { scrolledID = newID }
+        .onChange(of: scrolledID) { _, _ in
+            #if os(tvOS)
+            updateBackdrop()
+            #endif
+            startAutoScroll()
         }
-        .onChange(of: items.count) { _, newCount in
-            if scrolledID == nil, newCount > 1 {
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(300))
-                    withAnimation(pageAnimation) { scrolledID = items[1].id }
-                }
-            }
+        #if os(tvOS)
+        .onChange(of: belowFold) { _, isBelow in
+            // Fold snapping moves the viewport but not focus, so pull focus back onto the hero.
+            if !isBelow { focusPlayButton() }
+            startAutoScroll()
+        }
+        #endif
+        .onChange(of: items.count) { _, _ in
+            reconcileSelection()
+            #if os(tvOS)
+            updateBackdrop()
+            if !belowFold { focusPlayButton() }
+            #endif
             startAutoScroll()
         }
     }
-    #endif
 
     private func reconcileSelection() {
-        if !itemIDs.contains(scrolledID ?? "") {
-            scrolledID = itemIDs.first
+        if !items.contains(where: { $0.id == scrolledID }) {
+            scrolledID = items.first?.id
         }
     }
 
-    @ViewBuilder
-    private func scrollHero(item: Binding<BaseItemDto>, isActive: Bool, width: CGFloat) -> some View {
-        switch item.wrappedValue.type {
-        case .movie:
-            HeroBackdropView(
-                item: item.wrappedValue,
-                contentOpacity: isActive && scrollPhase != .interacting ? 1 : 0,
-                carouselWidth: width
-            ) {
-                if isActive {
-                    heroActionRow {
-                        MovieHeroActions(movie: item)
-                    }
+    private func scrollToPrevious() {
+        guard currentIndex > 0 else { return }
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[currentIndex - 1].id
+        }
+    }
+
+    private func scrollToNext() {
+        guard currentIndex < items.count - 1 else { return }
+        withAnimation(.easeInOut(duration: 0.6)) {
+            scrolledID = items[currentIndex + 1].id
+        }
+    }
+
+    private func startAutoScroll() {
+        autoScrollTask?.cancel()
+        guard items.count > 1 else { return }
+        autoScrollTask = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(8))
+                guard !Task.isCancelled else { return }
+                #if os(tvOS)
+                // Rotating while the hero is visible would rebuild it and steal focus from Play.
+                guard belowFold else { continue }
+                #endif
+                let nextIndex = (currentIndex + 1) % items.count
+                withAnimation(.easeInOut(duration: 0.6)) {
+                    scrolledID = items[nextIndex].id
                 }
-            }
-        case .series:
-            HeroBackdropView(
-                item: item.wrappedValue,
-                contentOpacity: isActive && scrollPhase != .interacting ? 1 : 0,
-                carouselWidth: width
-            ) {
-                if isActive {
-                    heroActionRow {
-                        ShowHeroActions(show: item)
-                    }
+
+                #if os(tvOS)
+                if let focusedNavigationButton {
+                    retainNavigationFocus(
+                        on: navigationButtonToRetain(preferred: focusedNavigationButton, afterMovingTo: nextIndex)
+                    )
                 }
+                #endif
             }
-        default:
-            EmptyView()
         }
-    }
-
-    #if os(tvOS)
-    @ViewBuilder
-    private func legacyTVHero(item: Binding<BaseItemDto>) -> some View {
-        switch item.wrappedValue.type {
-        case .movie:
-            HeroBackdropView(item: item.wrappedValue, tvOSBottomPadding: 10) {
-                heroActionRow { MovieHeroActions(movie: item) }
-            }
-        case .series:
-            HeroBackdropView(item: item.wrappedValue, tvOSBottomPadding: 10) {
-                heroActionRow { ShowHeroActions(show: item) }
-            }
-        default:
-            EmptyView()
-        }
-    }
-
-    private func activeItemBinding(for index: Int) -> Binding<BaseItemDto> {
-        Binding(
-            get: { items.indices.contains(index) ? items[index] : BaseItemDto() },
-            set: { newValue in
-                if items.indices.contains(index) { items[index] = newValue }
-            }
-        )
     }
     #endif
+
+    // MARK: - Shared
+
+    @ViewBuilder
+    private func hero(item: Binding<BaseItemDto>, showsBackground: Bool = true) -> some View {
+        switch item.wrappedValue.type {
+        case .movie:
+            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground, showsOverview: false) {
+                heroActionRow {
+                    #if os(tvOS)
+                    MovieHeroActions(movie: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
+                    #else
+                    MovieHeroActions(movie: item)
+                    #endif
+                }
+            }
+        case .series:
+            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground, showsOverview: false) {
+                heroActionRow {
+                    #if os(tvOS)
+                    ShowHeroActions(show: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
+                    #else
+                    ShowHeroActions(show: item)
+                    #endif
+                }
+            }
+        default:
+            EmptyView()
+        }
+    }
 
     @ViewBuilder
     private func heroActionRow<Actions: View>(@ViewBuilder actions: () -> Actions) -> some View {
@@ -297,32 +358,41 @@ struct HeroCarouselView: View {
         #endif
     }
 
-    private func itemBinding(for id: String) -> Binding<BaseItemDto> {
+    private func itemBinding(at index: Int) -> Binding<BaseItemDto> {
         Binding(
-            get: { items.first { $0.id == id } ?? BaseItemDto() },
+            get: { items.indices.contains(index) ? items[index] : BaseItemDto() },
             set: { newValue in
-                if let index = items.firstIndex(where: { $0.id == id }) {
-                    items[index] = newValue
-                }
+                if items.indices.contains(index) { items[index] = newValue }
             }
         )
     }
 
-    private func scrollToPrevious() {
-        guard currentIndex > 0 else { return }
-        withAnimation(pageAnimation) {
-            scrolledID = items[currentIndex - 1].id
-        }
-    }
-
-    private func scrollToNext() {
-        guard currentIndex < items.count - 1 else { return }
-        withAnimation(pageAnimation) {
-            scrolledID = items[currentIndex + 1].id
-        }
+    private func stopAutoScroll() {
+        autoScrollTask?.cancel()
+        autoScrollTask = nil
     }
 
     #if os(tvOS)
+    /// `@FocusState` only moves focus on a value change, and after a navigation round trip the
+    /// focus engine can leave it reading `true` while another button is focused. Clearing it first
+    /// guarantees a real `false -> true` edge; the repeated assignments win against the engine's
+    /// own restoration pass.
+    private func focusPlayButton() {
+        playButtonFocused = false
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(20))
+            playButtonFocused = true
+            try? await Task.sleep(for: .milliseconds(120))
+            playButtonFocused = true
+            try? await Task.sleep(for: .milliseconds(200))
+            playButtonFocused = true
+        }
+    }
+
+    private func updateBackdrop() {
+        backdropItem = items.first { $0.id == scrolledID } ?? items.first
+    }
+
     private func navigate(using button: HeroCarouselNavigationButton) {
         guard items.count > 1 else { return }
 
@@ -336,15 +406,10 @@ struct HeroCarouselView: View {
             destinationIndex = currentIndex + 1
         }
 
-        withAnimation(pageAnimation) {
+        withAnimation(.easeInOut(duration: 0.6)) {
             scrolledID = items[destinationIndex].id
         }
-        retainNavigationFocus(
-            on: navigationButtonToRetain(
-                preferred: button,
-                afterMovingTo: destinationIndex
-            )
-        )
+        retainNavigationFocus(on: navigationButtonToRetain(preferred: button, afterMovingTo: destinationIndex))
     }
 
     private func navigationButtonToRetain(
@@ -373,48 +438,4 @@ struct HeroCarouselView: View {
         }
     }
     #endif
-
-    private func startAutoScroll() {
-        autoScrollTask?.cancel()
-        #if os(tvOS)
-        guard items.count > 1 else { return }
-        autoScrollTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(10))
-                guard !Task.isCancelled else { return }
-                let nextIndex = (currentIndex + 1) % items.count
-                let nextID = items[nextIndex].id
-                withAnimation(pageAnimation) { scrolledID = nextID }
-
-                if let focusedNavigationButton {
-                    retainNavigationFocus(
-                        on: navigationButtonToRetain(
-                            preferred: focusedNavigationButton,
-                            afterMovingTo: nextIndex
-                        )
-                    )
-                }
-                if focusedHeroID != nil { focusedHeroID = nextID }
-            }
-        }
-        #else
-        guard isVisible, items.count > 1, scrollPhase == .idle, !reduceMotion else { return }
-        autoScrollTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(10))
-                guard !Task.isCancelled, items.count > 1 else { return }
-                let nextIndex = (currentIndex + 1) % items.count
-                let nextID = items[nextIndex].id
-                withAnimation(pageAnimation) {
-                    scrolledID = nextID
-                }
-            }
-        }
-        #endif
-    }
-
-    private func stopAutoScroll() {
-        autoScrollTask?.cancel()
-        autoScrollTask = nil
-    }
 }

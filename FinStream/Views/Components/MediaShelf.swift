@@ -4,8 +4,8 @@ import JellyfinAPI
 struct MediaShelf: View {
     let header: String
     let loadItemsAction: @Sendable () async throws -> [BaseItemDto]
-    /// Filter backing the "see all" push, when the shelf has one.
-    private let destination: MediaFilter?
+    /// Backs the "See All" push; `nil` hides it.
+    private let filter: MediaFilter?
 
     @State private var items: [ViewListItem<BaseItemDto>] = withPlaceholderItems(size: 40)
     @State private var isLoading = false
@@ -14,12 +14,12 @@ struct MediaShelf: View {
 
     init(
         header: String,
-        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto],
-        destination: MediaFilter? = nil
+        filter: MediaFilter? = nil,
+        loadItemsAction: @escaping @Sendable () async throws -> [BaseItemDto]
     ) {
         self.header = header
+        self.filter = filter
         self.loadItemsAction = loadItemsAction
-        self.destination = destination
     }
 
     var body: some View {
@@ -37,8 +37,8 @@ struct MediaShelf: View {
                 }
 
                 #if os(tvOS)
-                if let destination, hasResolvedItems {
-                    NavigationLink(value: NavigationRoute.filter(destination)) {
+                if let filter, hasResolvedItems {
+                    NavigationLink(value: NavigationRoute.filter(filter)) {
                         SeeAllCard()
                     }
                     .buttonStyle(.card)
@@ -50,8 +50,8 @@ struct MediaShelf: View {
             #if os(tvOS)
             Text(header)
             #else
-            if let destination {
-                NavigationLink(value: NavigationRoute.filter(destination)) {
+            if let filter {
+                NavigationLink(value: NavigationRoute.filter(filter)) {
                     HStack(spacing: 4) {
                         Text(header)
                         Image(systemName: "chevron.right")

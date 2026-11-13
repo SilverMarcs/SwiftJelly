@@ -59,15 +59,7 @@ struct LibraryView: View {
             }
         }
         .platformTopBar("Libraries") {
-            #if os(iOS)
-            NavigationLink {
-                SettingsView()
-            } label: {
-                Label("Settings", systemImage: "gear")
-                    .labelStyle(.iconOnly)
-            }
-            .tint(.primary)
-            #elseif os(macOS)
+            #if os(macOS)
             Button {
                 Task { await loadLibraries() }
             } label: {
@@ -81,6 +73,11 @@ struct LibraryView: View {
         .refreshable {
             await loadLibraries()
         }
+        #if os(iOS)
+        .navigationDestination(for: LibraryRoute.self) { _ in
+            DownloadsView()
+        }
+        #endif
         .task(id: dataManager.server?.id) {
             // Settings can be pushed from this tab, so it reloads in place
             // when the server changes instead of being rebuilt.
@@ -117,9 +114,7 @@ struct LibraryView: View {
 
     #if os(iOS)
     private var downloadsLink: some View {
-        NavigationLink {
-            DownloadsView()
-        } label: {
+        NavigationLink(value: LibraryRoute.downloads) {
             libraryCardShape {
                 DownloadsLibraryCard()
             }
@@ -155,3 +150,10 @@ struct LibraryView: View {
         #endif
     }
 }
+#if os(iOS)
+/// Navigation value for pushing the downloads screen from the library grid.
+enum LibraryRoute: Hashable {
+    case downloads
+}
+#endif
+

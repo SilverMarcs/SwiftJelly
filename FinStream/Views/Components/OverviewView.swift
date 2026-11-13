@@ -33,15 +33,20 @@ struct OverviewView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .redacted(reason: overview == nil ? .placeholder : [])
                 #if !os(tvOS)
-                .overlay(alignment: .bottomTrailing) {
+                .overlay(alignment: Alignment(horizontal: .trailing, vertical: .lastTextBaseline)) {
                     if let realOverview = overview {
                         Button {
                             showFullOverview = true
                         } label: {
-                            Text("More")
+                            Text("MORE")
                                 .font(.caption)
                         }
                         .buttonStyle(.glass)
+                        #if os(macOS)
+                        .buttonBorderShape(.capsule)
+                        #else
+                        .tint(.primary)
+                        #endif
                         .sheet(isPresented: $showFullOverview) {
                             OverviewSheetView(overview: realOverview)
                         }

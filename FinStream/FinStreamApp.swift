@@ -36,6 +36,7 @@ struct FinStreamApp: App {
         #if os(macOS)
         Window("Media Player", id: "media-player") {
             AVMediaPlayerViewMac()
+                .preferredColorScheme(.dark)
         }
         .defaultSize(width: 1024, height: 576)
         .restorationBehavior(.disabled)

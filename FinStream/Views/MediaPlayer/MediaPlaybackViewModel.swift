@@ -16,6 +16,9 @@ import Observation
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var markers = MediaChapterMarkers(introRangeSeconds: nil, creditsStartSeconds: nil)
+    #if os(macOS)
+    @ObservationIgnored private var playbackEndObserver: NSObjectProtocol?
+    #endif
 
     #if os(iOS) || os(tvOS)
     /// This playback's player view controller. It outlives the player UI so
@@ -61,6 +64,10 @@ import Observation
             session = active
             item = prepared.item
             markers = MediaChapterMarkerResolver.resolve(from: prepared.item.chapters)
+            loadMediaSegments(for: prepared.item, generation: id)
+            #if os(macOS)
+            observePlaybackEnd(of: prepared.playerItem)
+            #endif
             active.onTimeChanged = { [weak self] in
                 Task { @MainActor [weak self] in await self?.prefetchNextEpisodeIfNeeded() }
             }
@@ -70,6 +77,48 @@ import Observation
             preparationError = "This video could not be loaded. Please try again."
         }
     }
+
+    /// Plugin segments (e.g. Intro Skipper) replace the chapter-based markers once they arrive.
+    private func loadMediaSegments(for item: BaseItemDto, generation id: UUID) {
+        Task { [weak self] in
+            guard let segments = try? await JFAPI.getMediaSegments(for: item), !segments.isEmpty else { return }
+            let resolved = MediaChapterMarkerResolver.resolve(from: segments)
+            guard let self, self.generation == id,
+                  resolved.introRangeSeconds != nil || resolved.creditsStartSeconds != nil else { return }
+            self.markers = resolved
+        }
+    }
+
+    #if os(macOS)
+    /// tvOS advances through `AVContentProposal`; macOS has no equivalent.
+    private func observePlaybackEnd(of playerItem: AVPlayerItem) {
+        removePlaybackEndObserver()
+        playbackEndObserver = NotificationCenter.default.addObserver(
+            forName: AVPlayerItem.didPlayToEndTimeNotification,
+            object: playerItem,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in await self?.playNextEpisodeAfterEnd() }
+        }
+    }
+
+    private func removePlaybackEndObserver() {
+        if let playbackEndObserver {
+            NotificationCenter.default.removeObserver(playbackEndObserver)
+        }
+        playbackEndObserver = nil
+    }
+
+    /// Resolves the next episode before tearing down, so the last episode of a series stays on screen.
+    private func playNextEpisodeAfterEnd() async {
+        guard item.type == .episode, !isAutoLoadingNext else { return }
+        if nextEpisode == nil {
+            nextEpisode = try? await JFAPI.loadNextEpisode(after: item)
+        }
+        guard let nextEpisode, nextEpisode.id != item.id else { return }
+        await transitionToNextEpisode()
+    }
+    #endif
 
     private static func makePlayer() -> AVPlayer {
         let player = AVPlayer()
@@ -96,6 +145,9 @@ import Observation
         loadTask?.cancel()
         loadTask = nil
         session?.stop()
+        #if os(macOS)
+        removePlaybackEndObserver()
+        #endif
         nextEpisode = nil
         isFetchingNextEpisode = false
         isLoading = false

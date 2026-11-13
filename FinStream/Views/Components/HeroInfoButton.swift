@@ -20,12 +20,12 @@ struct HeroInfoButton: View {
                 .heroActionIcon()
         }
         .buttonStyle(.glass)
-        .foregroundStyle(.primary)
         .buttonBorderShape(.circle)
         #if os(tvOS)
         .controlSize(.regular)
         #else
         .controlSize(.extraLarge)
+        .tint(.primary)
         #endif
     }
 }

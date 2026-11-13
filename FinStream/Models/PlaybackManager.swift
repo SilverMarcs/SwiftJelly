@@ -23,6 +23,10 @@ import AVFoundation
     /// Whether the player UI should be presented (non-macOS platforms).
     var isPlayerPresented = false
 
+    #if os(iOS)
+    var zoomSourceID = ""
+    #endif
+
     /// The currently playing item, if any.
     var currentItem: BaseItemDto? {
         viewModel?.item

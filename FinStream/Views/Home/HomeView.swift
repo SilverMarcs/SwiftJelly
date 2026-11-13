@@ -16,49 +16,66 @@ struct HomeView: View {
     @State private var showScrollEffect = false
 #if os(tvOS)
     @State private var belowFold = false
+    @State private var scrollOffset: CGFloat = 0
+    @State private var heroBackdropItem: BaseItemDto?
 #endif
 
     var body: some View {
+#if os(tvOS)
+        ZStack(alignment: .top) {
+            HeroParallaxBackground(
+                item: heroBackdropItem,
+                scrollOffset: scrollOffset,
+                showcaseHeight: HeroLayoutMetrics.height()
+            )
+
+            scrollContent
+                .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                    geometry.contentOffset.y + geometry.contentInsets.top
+                } action: { _, newValue in
+                    scrollOffset = newValue
+                }
+        }
+        .ignoresSafeArea(edges: .top)
+#else
+        scrollContent
+#endif
+    }
+
+    private var scrollContent: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing) {
                 #if os(tvOS)
-                HomeHeroView(showScrollEffect: $showScrollEffect, belowFold: $belowFold)
+                HomeHeroView(
+                    showScrollEffect: $showScrollEffect,
+                    belowFold: $belowFold,
+                    backdropItem: $heroBackdropItem
+                )
                 #else
                 HomeHeroView(showScrollEffect: $showScrollEffect)
                 #endif
-                
+
                 ContinueWatchingView()
 
-                MediaShelf(
-                    header: "Favorites",
-                    loadItemsAction: { try await JFAPI.loadFavoriteItems(limit: 15) },
-                    destination: .favorites
-                )
+                MediaShelf(header: "Favorites", filter: .favorites) {
+                    try await JFAPI.loadFavoriteItems(limit: 15)
+                }
 
                 GenreCarouselView()
 
-                MediaShelf(
-                    header: "Recently Added Movies",
-                    loadItemsAction: {
-                        try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
-                    },
-                    destination: .recentlyAdded(.movie)
-                )
+                MediaShelf(header: "Recently Added Movies", filter: .recentlyAdded(.movie)) {
+                    try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.movie])
+                }
 
                 LibrariesView()
 
-                MediaShelf(
-                    header: "Recently Added Shows",
-                    loadItemsAction: {
-                        try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
-                    },
-                    destination: .recentlyAdded(.series)
-                )
+                MediaShelf(header: "Recently Added Shows", filter: .recentlyAdded(.series)) {
+                    try await JFAPI.loadLatestMediaInLibrary(limit: 15, itemTypes: [.series])
+                }
             }
             .scenePadding(.bottom)
         }
         #if os(tvOS)
-        .background(.background.secondary)
         .scrollTargetBehavior(FoldSnappingScrollTargetBehavior(aboveFold: !belowFold, showcaseHeight: HeroLayoutMetrics.height()))
         .scrollEdgeEffectStyle(.soft, for: .all)
         #else
@@ -69,8 +86,14 @@ struct HomeView: View {
         .scrollClipDisabled()
         .navigationTitle(showScrollEffect ? "" : "Home")
         .platformNavigationToolbar()
+        #if os(macOS)
+        .toolbarBackgroundVisibility(showScrollEffect ? .hidden : .automatic, for: .windowToolbar)
+        #endif
+        #if os(iOS)
+        .profileToolbarItem()
+        #endif
     }
-    
+
     private var spacing: CGFloat {
         #if os(tvOS)
         80

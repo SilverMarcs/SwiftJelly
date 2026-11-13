@@ -7,13 +7,13 @@ struct ShowPlayButton: View {
     var body: some View {
         PlayMediaButton(item: vm.nextEpisode ?? BaseItemDto()) {
             ZStack {
-                if vm.nextEpisode == nil {
+                if vm.nextEpisode == nil, !vm.hasResolvedNextEpisode {
                     HStack(spacing: 8) {
                        ProgressView()
                            .tint(.primary)
                            .controlSize(.mini)
                         #if os(tvOS)
-                           .frame(height: 35) // see              .heroActionIcon()
+                           .frame(height: 35)
                         #endif
 
                         Text("Loading…")
@@ -47,16 +47,19 @@ struct ShowPlayButton: View {
                         }
                     }
                     .transition(.opacity)
+                } else {
+                    Image(systemName: "play.fill")
+                        .transition(.opacity)
                 }
             }
             .font(.callout)
             .fontWeight(.semibold)
         }
-        .tint(Color(.accent).secondary)
         .buttonBorderShape(.capsule)
         #if os(tvOS)
         .controlSize(.regular)
         #else
+        .tint(Color(.accent).secondary)
         .controlSize(.extraLarge)
         #endif
         .buttonStyle(.glassProminent)

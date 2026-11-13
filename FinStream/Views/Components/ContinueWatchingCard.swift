@@ -29,6 +29,7 @@ struct ContinueWatchingCard: View {
                     ProgressBarOverlay(item: item)
                         .padding(.horizontal, overlayPadding)
                         .padding(.vertical, overlayPadding - 5)
+                        .background(LinearGradient(colors: [.clear, .black.opacity(0.7), .black.opacity(0.9)], startPoint: .top, endPoint: .bottom))
                 }
             }
             .cardBorder()

@@ -8,17 +8,22 @@ struct SearchView: View {
     @State private var isLoading = false
     @State private var searchTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
+    @Environment(\.searchFocusRequest) private var searchFocusRequest
     
     var body: some View {
         MediaGrid(items: filteredMediaResults, isLoading: isLoading)
             .navigationTitle("Search")
             .platformNavigationToolbar()
+            #if os(iOS)
+            .profileToolbarItem()
+            #endif
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
             
             .searchPresentationToolbarBehavior(.avoidHidingContent)
-            #if os(macOS)
+            #if !os(tvOS)
             .searchFocused($isSearchFocused)
-            .task {
+            // Focus the field whenever the Search tab is activated or reselected.
+            .onChange(of: searchFocusRequest, initial: true) {
                 isSearchFocused = true
             }
             #endif

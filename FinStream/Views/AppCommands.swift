@@ -13,7 +13,7 @@ struct AppCommands: Commands {
     
     var body: some Commands {
         CommandGroup(before: .toolbar) {
-            ForEach(TabSelection.allCases, id: \.self) { tab in
+            ForEach(TabSelection.allCases.filter { $0.shortcutKey != nil }, id: \.self) { tab in
                 Button {
                     selectedTab = tab
                 } label: {

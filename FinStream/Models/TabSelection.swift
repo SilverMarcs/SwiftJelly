@@ -17,6 +17,7 @@ enum TabSelection: String, CaseIterable {
     case libraries = "libraries"
     case settings = "settings"
     case search = "search"
+    case profile = "profile"
 
     static let compactTabs: [TabSelection] = [.search, .home, .favorites, .libraries]
 
@@ -32,6 +33,7 @@ enum TabSelection: String, CaseIterable {
         case .shows: return "Shows"
         case .movies: return "Movies"
         case .libraries: return "Libraries"
+        case .profile: return "Profile"
         }
     }
 
@@ -44,6 +46,7 @@ enum TabSelection: String, CaseIterable {
         case .shows: return "tv"
         case .movies: return "movieclapper"
         case .libraries: return "rectangle.stack"
+        case .profile: return "person.crop.circle"
         }
     }
 
@@ -56,12 +59,13 @@ enum TabSelection: String, CaseIterable {
         case .shows: return "s"
         case .movies: return "m"
         case .libraries: return "3"
+        case .profile: return nil
         }
     }
 
-    /// Whether Settings, where the active server is switched, lives in this tab.
+    /// Whether Settings or the profile switcher, where the active server is switched, lives in this tab.
     var hostsSettings: Bool {
-        self == .settings || self == .libraries
+        self == .settings || self == .libraries || self == .profile
     }
 
     @ViewBuilder
@@ -74,6 +78,9 @@ enum TabSelection: String, CaseIterable {
         case .libraries: LibraryView()
         case .settings: SettingsView()
         case .search: SearchView()
+        case .profile:
+            ServerSwitcherList()
+                .platformTopBar("Profile")
         }
     }
 }

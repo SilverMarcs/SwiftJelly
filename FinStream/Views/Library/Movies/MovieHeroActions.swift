@@ -3,30 +3,22 @@ import JellyfinAPI
 
 struct MovieHeroActions: View {
     @Binding var movie: BaseItemDto
-
-    @Namespace private var actionButtonsNamespace
+    var externalFocusNamespace: Namespace.ID? = nil
+    var playFocus: FocusState<Bool>.Binding? = nil
 
     var body: some View {
-        GlassEffectContainer(spacing: spacing) {
-            HStack(spacing: spacing) {
-                MoviePlayButton(item: movie)
-#if os(tvOS)
-                    .prefersDefaultFocus(in: actionButtonsNamespace)
-#endif
-
-                #if os(tvOS)
-                HeroInfoButton(item: movie)
-                #endif
-
-                MarkPlayedButton(item: movie)
-
-                FavoriteButton(item: movie)
-            }
+        HeroActionButtons(
+            context: .carousel,
+            usesGlassContainer: true,
+            infoItem: movie,
+            markPlayedItem: movie,
+            favoriteItem: movie,
+            redactWhenEmpty: movie,
+            externalFocusNamespace: externalFocusNamespace,
+            playFocus: playFocus
+        ) {
+            MoviePlayButton(item: movie)
         }
-        .redacted(reason: movie.name?.isEmpty == false ? [] : .placeholder)
-#if os(tvOS)
-        .focusScope(actionButtonsNamespace)
-#endif
         .environment(\.refresh, refresh)
     }
 
@@ -37,15 +29,5 @@ struct MovieHeroActions: View {
         } catch {
             print("Error refreshing movie: \(error)")
         }
-    }
-
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        15
-        #elseif os(macOS)
-        8
-        #else
-        6
-        #endif
     }
 }

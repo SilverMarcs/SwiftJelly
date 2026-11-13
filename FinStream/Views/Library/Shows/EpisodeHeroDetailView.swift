@@ -11,24 +11,16 @@ struct EpisodeHeroDetailView: View {
             genreItem: (vm.episode.genres?.isEmpty ?? true) ? vm.show : vm.episode,
             badge: vm.episode.seasonEpisodeString
         ) {
-            GlassEffectContainer(spacing: spacing) {
-                HStack(spacing: spacing) {
-                    EpisodePlayButton(item: vm.episode)
-
-                    MarkPlayedButton(item: vm.episode)
-                }
+            HeroActionButtons(
+                context: .detail,
+                usesGlassContainer: true,
+                infoItem: nil,
+                markPlayedItem: vm.episode,
+                favoriteItem: nil
+            ) {
+                EpisodePlayButton(item: vm.episode)
             }
             .environment(\.refresh, vm.refresh)
         }
-    }
-
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        15
-        #elseif os(macOS)
-        8
-        #else
-        6
-        #endif
     }
 }

@@ -17,21 +17,18 @@ struct ProgressBarOverlay: View {
     var body: some View {
         HStack(spacing: 12) {
             ProgressIcon(isPlayed: item.userData?.isPlayed ?? false)
-                .textShadow()
 
             ProgressGauge(progress: item.playbackProgress)
                 .offset(y: 1)
 
             Text(item.totalDurationString ?? "--")
                 .font(.caption2)
-                .textShadow()
 
             Spacer()
 
             if showEpisodeInformation, let episodeText = isInSeasonView ? item.episodeOnlyString : item.seasonEpisodeString {
                 Text(episodeText)
                     .font(.caption2)
-                    .textShadow()
             }
         }
         .foregroundStyle(.white)

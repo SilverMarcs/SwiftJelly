@@ -15,16 +15,25 @@ struct HomeHeroView: View {
 
     #if os(tvOS)
     @Binding var belowFold: Bool
+    @Binding var backdropItem: BaseItemDto?
     #endif
 
     var body: some View {
         Group {
             if !viewModel.items.isEmpty {
+                #if os(tvOS)
+                HeroCarouselView(items: $viewModel.items, belowFold: $belowFold, backdropItem: $backdropItem)
+                #else
                 HeroCarouselView(items: $viewModel.items)
+                #endif
             } else if !viewModel.hasLoaded {
-                HeroBackdropView(item: BaseItemDto(), tvOSBottomPadding: 10) {
+                HeroBackdropView(item: BaseItemDto(), showsOverview: false) {
                     MovieHeroActions(movie: .constant(BaseItemDto()))
                 }
+                #if os(tvOS)
+                .padding(.horizontal, 40)
+                .onAppear { backdropItem = nil }
+                #endif
             }
         }
         .task {
