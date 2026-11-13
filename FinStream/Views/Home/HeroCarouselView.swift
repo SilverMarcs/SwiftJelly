@@ -342,6 +342,23 @@ struct HeroCarouselView: View {
 
     @ViewBuilder
     private func hero(item: Binding<BaseItemDto>, showsBackground: Bool = true) -> some View {
+        if let reference = item.wrappedValue.seerReference {
+            HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground) {
+                heroActionRow {
+                    #if os(tvOS)
+                    SeerCarouselHeroActions(item: item.wrappedValue, reference: reference, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
+                    #else
+                    SeerCarouselHeroActions(item: item.wrappedValue, reference: reference)
+                    #endif
+                }
+            }
+        } else {
+            jellyfinHero(item: item, showsBackground: showsBackground)
+        }
+    }
+
+    @ViewBuilder
+    private func jellyfinHero(item: Binding<BaseItemDto>, showsBackground: Bool) -> some View {
         switch item.wrappedValue.type {
         case .movie:
             HeroBackdropView(item: item.wrappedValue, showsBackground: showsBackground) {
@@ -360,6 +377,22 @@ struct HeroCarouselView: View {
                     ShowHeroActions(show: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
                     #else
                     ShowHeroActions(show: item)
+                    #endif
+                }
+            }
+        case .episode:
+            HeroBackdropView(
+                item: item.wrappedValue,
+                logoItem: item.wrappedValue.heroSeriesItem,
+                genreItem: item.wrappedValue.heroSeriesItem,
+                badge: item.wrappedValue.seasonEpisodeString,
+                showsBackground: showsBackground
+            ) {
+                heroActionRow {
+                    #if os(tvOS)
+                    EpisodeHeroActions(episode: item, externalFocusNamespace: heroNamespace, playFocus: $playButtonFocused)
+                    #else
+                    EpisodeHeroActions(episode: item)
                     #endif
                 }
             }

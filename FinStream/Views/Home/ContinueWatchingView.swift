@@ -10,15 +10,24 @@ import JellyfinAPI
 
 struct ContinueWatchingView: View {
     @AppStorage("continueWatchingStyle") private var continueWatchingStyle: ContinueWatchingStyle = .combined
+    @AppStorage("heroCarouselSource") private var heroCarouselSource: HeroCarouselSource = .jellyfinPopular
+
+    private var isShownInHero: Bool {
+        heroCarouselSource == .continueWatching
+    }
 
     var body: some View {
         if continueWatchingStyle == .combined {
-            Shelf(header: "Continue Watching") {
-                try await JFAPI.loadContinueWatchingSmart()
+            if !isShownInHero {
+                Shelf(header: "Continue Watching") {
+                    try await JFAPI.loadContinueWatchingSmart()
+                }
             }
         } else {
-            Shelf(header: "Continue Watching") {
-                try await JFAPI.loadResumeItems(limit: 20)
+            if !isShownInHero {
+                Shelf(header: "Continue Watching") {
+                    try await JFAPI.loadResumeItems(limit: 20)
+                }
             }
 
             Shelf(header: "Next Up") {

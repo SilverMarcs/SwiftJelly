@@ -48,6 +48,11 @@ struct SettingsView: View {
                     .foregroundStyle(.primary)
             }
 
+            Section("Appearance") {
+                AppearanceOptions()
+                    .foregroundStyle(.primary)
+            }
+
             #if !os(macOS)
             if showAppIconPicker {
                 Section {

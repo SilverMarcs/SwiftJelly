@@ -31,6 +31,8 @@ struct ServerList: View {
                 ServerDetailView(serverURL: url)
             case .addAccount(let name, let url):
                 AddServerView(existingServerName: name, existingServerURL: url)
+            case .seerAccount(let profileID):
+                SeerAccountView(profileID: profileID)
             }
         }
     }
@@ -167,6 +169,7 @@ enum ServerListRoute: Hashable {
     case addServer
     case serverDetail(url: URL)
     case addAccount(serverName: String, url: URL)
+    case seerAccount(profileID: String)
 }
 
 #Preview {

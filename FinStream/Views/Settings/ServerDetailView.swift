@@ -33,6 +33,18 @@ struct ServerDetailView: View {
                 }
 
                 Section {
+                    ForEach(group.profiles) { profile in
+                        NavigationLink(value: ServerListRoute.seerAccount(profileID: profile.id)) {
+                            SeerProfileRow(profile: profile)
+                        }
+                    }
+                } header: {
+                    Text("Seer")
+                } footer: {
+                    Text("Each profile signs in to Seer separately. The matching Seer account is used automatically when switching profiles.")
+                }
+
+                Section {
                     Button(role: .destructive) {
                         for profile in group.profiles {
                             dataManager.deleteServer(profile)

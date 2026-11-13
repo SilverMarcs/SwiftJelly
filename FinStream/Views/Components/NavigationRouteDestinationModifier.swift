@@ -17,6 +17,8 @@ struct NavigationRouteDestinationView: View {
             FilteredMediaView(filter: .person(id: person.id, name: person.name))
         case .filter(let filter):
             FilteredMediaView(filter: filter)
+        case .seer(let reference):
+            SeerDetailView(reference: reference)
         }
     }
 }

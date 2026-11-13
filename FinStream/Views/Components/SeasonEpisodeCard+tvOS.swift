@@ -21,7 +21,9 @@ struct SeasonEpisodeCard: View {
     @Environment(\.refresh) var refresh
     let item: ViewListItem<BaseItemDto>
     var focusedEpisodeID: FocusState<String?>.Binding? = nil
+    var isPlayable = true
     @FocusState private var localEpisodeID: String?
+    @State private var showOverview = false
 
     private var episodeCardFocused: Bool {
         (focusedEpisodeID?.wrappedValue ?? localEpisodeID) == item.id
@@ -36,30 +38,12 @@ struct SeasonEpisodeCard: View {
         let descriptionFocused = descriptionFocused
         
         VStack(spacing: 5) {
-            PlayMediaButton(item: item.base) {
-                LandscapeImageView(item: item.base) {
-                    Image(systemName: "ellipsis")
-                        .font(.title)
-                        .frame(width: cardWidth, height: cardHeight, alignment: .center)
-                        .foregroundStyle(.secondary)
-                }
-                .scaledToFill()
-                .frame(width: cardWidth, height: cardHeight, alignment: .top)
-                .background(.background.secondary)
-                .clipped()
-                .overlay(alignment: .bottom) {
-                    if let episodeItem = item.base {
-                        ProgressBarOverlay(item: episodeItem, showEpisodeInformation: false)
-                            .padding(.vertical, 15)
-                            .padding(.horizontal, 20)
-                    }
-                }
-            }
+            cardButton
             .focused(focusedEpisodeID ?? $localEpisodeID, equals: item.id)
             .buttonStyle(.card)
             .buttonBorderShape(.roundedRectangle(radius: 28))
             .contextMenu {
-                if let episodeItem = item.base {
+                if isPlayable, let episodeItem = item.base {
                     Button {
                         Task {
                             try? await JFAPI.toggleItemPlayedStatus(item: episodeItem)
@@ -91,12 +75,74 @@ struct SeasonEpisodeCard: View {
                 .buttonBorderShape(.roundedRectangle(radius: 25))
         }
         .focusSection()
+        .sheet(isPresented: $showOverview) {
+            OverviewSheetView(overview: item.base?.overview ?? "")
+        }
     }
 
+    @ViewBuilder
+    private var cardButton: some View {
+        if isPlayable {
+            PlayMediaButton(item: item.base) {
+                cardImage
+            }
+        } else {
+            Button {
+                showOverview = item.base?.overview?.isEmpty == false
+            } label: {
+                cardImage
+            }
+        }
+    }
+
+    private var cardImage: some View {
+        LandscapeImageView(item: item.base) {
+            Image(systemName: "ellipsis")
+                .font(.title)
+                .frame(width: cardWidth, height: cardHeight, alignment: .center)
+                .foregroundStyle(.secondary)
+        }
+        .scaledToFill()
+        .frame(width: cardWidth, height: cardHeight, alignment: .top)
+        .background(.background.secondary)
+        .clipped()
+        .overlay(alignment: .bottom) {
+            if let episodeItem = item.base {
+                Group {
+                    if isPlayable {
+                        ProgressBarOverlay(item: episodeItem, showEpisodeInformation: false)
+                    } else {
+                        EpisodeAirDateOverlay(item: episodeItem, showEpisodeInformation: false)
+                    }
+                }
+                .padding(.vertical, 15)
+                .padding(.horizontal, 20)
+            }
+        }
+    }
+
+    @ViewBuilder
     private var descriptionButton: some View {
-        NavigationLink(value: item.base.map { NavigationRoute.media($0) }) {
-            let isPlaceholder = item.base == nil
-            VStack(alignment: .leading, spacing: 0) {
+        if isPlayable {
+            NavigationLink(value: item.base.map { NavigationRoute.media($0) }) {
+                descriptionLabel
+            }
+            .focused($descriptionFocused)
+            .frame(maxWidth: cardWidth + 30)
+        } else {
+            Button {
+                showOverview = item.base?.overview?.isEmpty == false
+            } label: {
+                descriptionLabel
+            }
+            .focused($descriptionFocused)
+            .frame(maxWidth: cardWidth + 30)
+        }
+    }
+
+    private var descriptionLabel: some View {
+        let isPlaceholder = item.base == nil
+        return VStack(alignment: .leading, spacing: 0) {
                 Text(item.base?.longEpisodeOnlyString?.uppercased() ?? "SEASON 1 EPISODE 1")
                     .foregroundStyle(.white)
                     .font(.caption2.scaled(by: 0.7))
@@ -125,9 +171,6 @@ struct SeasonEpisodeCard: View {
             }
             .padding(24)
             .frame(height: 170)
-        }
-        .focused($descriptionFocused)
-        .frame(maxWidth: cardWidth + 30)
     }
 }
 

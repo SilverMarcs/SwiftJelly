@@ -18,6 +18,9 @@ struct MediaNavigationLink<Label: View>: View {
 
     private var route: NavigationRoute? {
         guard let item else { return nil }
+        if let reference = item.seerReference {
+            return .seer(reference)
+        }
         switch item.type {
         case .person:
             return .person(Person(from: item))
@@ -30,8 +33,11 @@ struct MediaNavigationLink<Label: View>: View {
 
     #if os(iOS)
     private var detailZoomID: String {
-        guard case .media(let destination) = route else { return "" }
-        return destination.id ?? ""
+        switch route {
+        case .media(let destination): destination.id ?? ""
+        case .seer(let reference): reference.itemID
+        default: ""
+        }
     }
     #endif
 

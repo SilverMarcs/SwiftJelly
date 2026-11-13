@@ -42,6 +42,7 @@ import JellyfinAPI
     }
 
     func deleteServer(_ server: Server) {
+        SeerCredentialStore.deletePassword(for: server.id)
         servers.removeAll { $0.id == server.id }
         if activeServerID == server.id {
             activeServerID = servers.first?.id

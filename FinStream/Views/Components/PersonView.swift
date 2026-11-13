@@ -7,57 +7,15 @@ struct PersonView: View {
     
     var body: some View {
         NavigationLink(value: NavigationRoute.person(person)) {
-            LabelStack {
-                if let url = ImageURLProvider.personImageURL(for: person.id) {
-                    CachedAsyncImage(url: url, targetSize: Int(imageSize * 2)) {
-                        Image(systemName: "person.fill")
-                            .font(.title)
-                            .foregroundStyle(.secondary)
-                    }
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: imageSize, height: imageSize)
-                    .background(.background.secondary)
-                    .overlay {
-                        Circle()
-                            .strokeBorder(.tertiary, lineWidth: 0.5)
-                    }
-                    #if !os(macOS)
-                    .hoverEffect(.highlight)
-                    #endif
-                    #if !os(tvOS)
-                    .clipShape(.circle)
-                    .clipped()
-                    #endif
-                }
-                
-                Text(person.name)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                
-                if let subtitle = person.subtitle, !subtitle.isEmpty {
-                    Text(subtitle)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-     
-                }
-            }
+            PersonLabel(
+                imageURL: ImageURLProvider.personImageURL(for: person.id),
+                name: person.name,
+                subtitle: person.subtitle
+            )
         }
-        .frame(maxWidth: imageSize)
+        .frame(maxWidth: PersonLabel.imageSize)
         .buttonBorderShape(.circle)
         .adaptiveButtonStyle()
-    }
-    
-    private var imageSize: CGFloat {
-        #if os(tvOS)
-        200
-        #else
-        100
-        #endif
     }
 }
 

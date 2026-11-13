@@ -4,18 +4,24 @@ import JellyfinAPI
 struct SearchView: View {
     @State var searchText: String = ""
     @State private var searchScope: SearchScope = .all
-    @State private var mediaResults: [BaseItemDto] = []
-    @State private var isLoading = false
+    @State private var searchSource: SearchSource = .all
+    @State private var viewModel = SearchViewModel()
     @State private var searchTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
-    
+
+    private var isSeerConfigured: Bool {
+        DataManager.shared.server?.seer?.isAuthenticated == true
+    }
+
     var body: some View {
-        MediaGrid(items: filteredMediaResults, isLoading: isLoading)
+        MediaGrid(items: viewModel.results(for: searchScope), isLoading: viewModel.isLoading)
             .navigationTitle("Search")
             .platformNavigationToolbar()
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
-            
             .searchPresentationToolbarBehavior(.avoidHidingContent)
+            .onChange(of: searchSource) { _, _ in
+                scheduleSearch(debounce: false)
+            }
             #if os(macOS)
             .searchFocused($isSearchFocused)
             .task {
@@ -23,72 +29,54 @@ struct SearchView: View {
             }
             #endif
             #if os(tvOS)
+            .safeAreaInset(edge: .top) {
+                if isSeerConfigured {
+                    SearchSourcePicker(source: $searchSource)
+                        .frame(maxWidth: 900)
+                        .focusSection()
+                }
+            }
             .frame(maxWidth: .infinity, alignment: .leading)
             .focusSection()
-            .onChange(of: searchText) { _, newValue in
-                searchTask?.cancel()
-                // Show the spinner immediately so "No Media" doesn't flash during the debounce.
-                isLoading = !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                searchTask = Task {
-                    try? await Task.sleep(for: .milliseconds(800))
-                    guard !Task.isCancelled else { return }
-                    await performSearch(for: newValue)
-                }
+            .onChange(of: searchText) { _, _ in
+                scheduleSearch(debounce: true)
             }
             .onDisappear {
                 searchTask?.cancel()
-                isLoading = false
+                viewModel.isLoading = false
             }
             #else
+            .toolbar {
+                if isSeerConfigured {
+                    ToolbarItem(placement: .primaryAction) {
+                        SearchSourcePicker(source: $searchSource)
+                    }
+                }
+            }
             .searchScopes($searchScope) {
                 ForEach(SearchScope.allCases) { scope in
                     Text(scope.rawValue).tag(scope)
                 }
             }
             .onSubmit(of: .search) {
-                Task {
-                    await performSearch(for: searchText)
-                }
+                scheduleSearch(debounce: false)
             }
             #endif
     }
-    private var filteredMediaResults: [BaseItemDto] {
-        switch searchScope {
-        case .all:
-            return mediaResults
-        case .movies:
-            return mediaResults.filter { $0.type == .movie }
-        case .shows:
-            return mediaResults.filter { $0.type == .series }
-        case .people:
-            return mediaResults.filter { $0.type == .person }
+
+    private func scheduleSearch(debounce: Bool) {
+        searchTask?.cancel()
+        let query = searchText
+        viewModel.isLoading = !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        searchTask = Task {
+            if debounce {
+                try? await Task.sleep(for: .milliseconds(800))
+            }
+            guard !Task.isCancelled else { return }
+            await viewModel.search(for: query, source: searchSource)
         }
     }
-    
-    private func performSearch(for query: String) async {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else {
-            mediaResults = []
-            isLoading = false
-            return
-        }
-        isLoading = true
-        
-        do {
-            async let content = JFAPI.searchMedia(query: trimmedQuery)
-            async let persons = JFAPI.searchPersons(query: trimmedQuery)
-            
-            let (contentResults, personResults) = try await (content, persons)
-            guard !Task.isCancelled else { return }
-            mediaResults = contentResults + personResults
-        } catch {
-            guard !Task.isCancelled else { return }
-            print("Error Searching: \(error.localizedDescription)")
-        }
-        // A cancelled search leaves isLoading alone; the newer search owns it.
-        isLoading = false
-    }
-    
+
     private var placement: SearchFieldPlacement {
         #if os(tvOS)
         .automatic
@@ -96,12 +84,4 @@ struct SearchView: View {
         .toolbarPrincipal
         #endif
     }
-}
-
-enum SearchScope: String, CaseIterable, Identifiable {
-    case all = "All"
-    case movies = "Movies"
-    case shows = "Shows"
-    case people = "People"
-    var id: String { rawValue }
 }

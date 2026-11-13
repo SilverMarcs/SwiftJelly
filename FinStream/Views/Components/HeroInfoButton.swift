@@ -14,7 +14,7 @@ struct HeroInfoButton: View {
     let item: BaseItemDto
 
     var body: some View {
-        NavigationLink(value: NavigationRoute.media(item)) {
+        NavigationLink(value: item.seerReference.map(NavigationRoute.seer) ?? .media(item)) {
             Label("Show Details", systemImage: "info")
                 .labelStyle(.iconOnly)
                 .heroActionIcon()

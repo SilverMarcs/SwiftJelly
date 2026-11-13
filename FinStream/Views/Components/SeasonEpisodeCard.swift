@@ -11,69 +11,24 @@ import JellyfinAPI
 struct SeasonEpisodeCard: View {
     @Environment(\.refresh) var refresh
     let item: ViewListItem<BaseItemDto>
-    
-    private let largeGradient = LinearGradient(
-        gradient: Gradient(stops: [
-            .init(color: .white, location: 0),
-            .init(color: .white.opacity(0.9), location: 0.8),
-            .init(color: .white.opacity(0), location: 1.0)
-        ]),
-        startPoint: .bottom,
-        endPoint: .top
-    )
+    var isPlayable = true
 
     var body: some View {
-        
-        
-        
-        
-        PlayMediaButton(item: item.base) {
-            LandscapeImageView(item: item.base) {
-                Image(systemName: "ellipsis")
-                    .font(.title)
-                    .frame(width: cardWidth, height: cardHeight, alignment: .center)
-                    .foregroundStyle(.secondary)
+        if isPlayable {
+            playableCard
+        } else {
+            SeasonEpisodeCardLabel(item: item.base) { episode in
+                EpisodeAirDateOverlay(item: episode)
             }
-            .scaledToFill()
-            .frame(width: cardWidth, height: cardHeight, alignment: .top)
-            .background(.background.secondary)
-            .clipped()
-            .overlay(alignment: .bottomLeading) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.base?.name ?? "")
-                        .foregroundStyle(.white)
-                        .font(.subheadline)
-                        .bold()
-                        .lineLimit(1)
-                        .padding(.top, 20)
-                        .truncationMode(.middle)
-                        .multilineTextAlignment(.leading)
+            .foregroundStyle(.primary)
+            .cardBorder(cornerRadius: 15)
+        }
+    }
 
-                    if let overview = item.base?.overview, !overview.isEmpty {
-                        Text(overview)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.footnote)
-                            .opacity(0.9)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(3, reservesSpace: true)
-                    }
-
-                    if let episodeItem = item.base {
-                        ProgressBarOverlay(item: episodeItem)
-                            .padding(.top, 5)
-                    }
-                }
-                .padding(.horizontal, overlayPadding)
-                .padding(.vertical, overlayPadding - 5)
-                
-                .background {
-                    if item.base != nil {
-                        Rectangle()
-                            .fill(.ultraThinMaterial)
-                            .mask(largeGradient)
-                    }
-                }
+    private var playableCard: some View {
+        PlayMediaButton(item: item.base) {
+            SeasonEpisodeCardLabel(item: item.base) { episode in
+                ProgressBarOverlay(item: episode)
             }
         }
         .foregroundStyle(.primary)
@@ -104,30 +59,6 @@ struct SeasonEpisodeCard: View {
                 #endif
             }
         }
-    }
-    
-    private var cardWidth: CGFloat {
-        #if os(tvOS)
-        550
-        #else
-        230
-        #endif
-    }
-    
-    private var cardHeight: CGFloat {
-        #if os(tvOS)
-        483
-        #else
-        230
-        #endif
-    }
-    
-    private var overlayPadding: CGFloat {
-        #if os(tvOS)
-        30
-        #else
-        15
-        #endif
     }
 }
 

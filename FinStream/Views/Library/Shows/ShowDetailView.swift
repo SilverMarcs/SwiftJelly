@@ -3,6 +3,7 @@ import JellyfinAPI
 
 struct ShowDetailView: View {
     @State private var vm: ShowDetailViewModel
+    @State private var seerRequests = SeerSeriesRequestViewModel()
     
     init(item: BaseItemDto) {
         self._vm = State(initialValue: ShowDetailViewModel(item: item))
@@ -12,6 +13,10 @@ struct ShowDetailView: View {
         DetailView(item: vm.show) {
             VStack(spacing: spacing) {
                 ShowSeasonsView(vm: vm)
+
+                if seerRequests.showsRequestMore, let requestModel = seerRequests.requestModel {
+                    SeerRequestMoreView(model: requestModel)
+                }
 
                 #if !os(tvOS)
                 TrailersShelfView(item: vm.show)
@@ -27,6 +32,9 @@ struct ShowDetailView: View {
         .environment(\.refresh, vm.refreshAll)
         .task {
             await vm.refreshAll()
+        }
+        .task(id: vm.show.id) {
+            await seerRequests.load(for: vm.show)
         }
         .alert("Unable to Mark Season Watched", isPresented: Binding(
             get: { vm.seasonWatchError != nil },

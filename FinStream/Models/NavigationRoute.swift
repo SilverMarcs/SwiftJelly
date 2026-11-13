@@ -21,6 +21,7 @@ enum NavigationRoute: Hashable {
     case media(BaseItemDto)
     case person(Person)
     case filter(MediaFilter)
+    case seer(SeerMediaReference)
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
@@ -33,6 +34,8 @@ enum NavigationRoute: Hashable {
             return lhsPerson.id == rhsPerson.id && lhsPerson.name == rhsPerson.name
         case let (.filter(lhsFilter), .filter(rhsFilter)):
             return lhsFilter == rhsFilter
+        case let (.seer(lhsReference), .seer(rhsReference)):
+            return lhsReference == rhsReference
         default:
             return false
         }
@@ -55,6 +58,9 @@ enum NavigationRoute: Hashable {
         case .filter(let filter):
             hasher.combine(2)
             hasher.combine(filter)
+        case .seer(let reference):
+            hasher.combine(3)
+            hasher.combine(reference)
         }
     }
 }

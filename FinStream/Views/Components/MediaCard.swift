@@ -32,6 +32,11 @@ struct MediaCard: View {
                         .padding(12)
                 }
             }
+            .overlay(alignment: .topLeading) {
+                if item?.isSeerItem == true {
+                    SeerSourceBadge()
+                }
+            }
         }
     }
 }

@@ -19,6 +19,17 @@ extension JFAPI {
         return item
     }
     
+    static func loadItems(ids: [String], fields: [ItemFields]? = nil) async throws -> [BaseItemDto] {
+        let context = try getAPIContext()
+        var parameters = Paths.GetItemsByUserIDParameters()
+        parameters.fields = fields ?? .MinimumFields
+        parameters.ids = ids
+        parameters.enableUserData = true
+
+        let request = Paths.getItemsByUserID(userID: context.userID, parameters: parameters)
+        return try await send(request).items ?? []
+    }
+
     /// Loads similar/recommended items for a given item
     static func loadSimilarItems(for item: BaseItemDto, limit: Int = 20) async throws -> [BaseItemDto] {
         let context = try getAPIContext()

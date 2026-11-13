@@ -31,6 +31,28 @@ enum ContinueWatchingStyle: String, CaseIterable {
     }
 }
 
+enum HeroCarouselSource: String, CaseIterable {
+    case jellyfinPopular
+    case seerPopular
+    case continueWatching
+
+    var title: String {
+        switch self {
+        case .jellyfinPopular: "Popular on Jellyfin"
+        case .seerPopular: "Popular on Seer"
+        case .continueWatching: "Continue Watching"
+        }
+    }
+
+    static func availableCases(isSeerConfigured: Bool) -> [HeroCarouselSource] {
+        allCases.filter { $0 != .seerPopular || isSeerConfigured }
+    }
+
+    func effective(isSeerConfigured: Bool) -> HeroCarouselSource {
+        self == .seerPopular && !isSeerConfigured ? .jellyfinPopular : self
+    }
+}
+
 extension CaseIterable where Self: Equatable {
     func next() -> Self {
         let all = Self.allCases

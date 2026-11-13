@@ -20,6 +20,10 @@ enum ImageURLProvider {
     ) -> URL? {
         guard let id = item.id else { return nil }
 
+        if item.isSeerItem {
+            return SeerImageURL.url(for: item, type: type)
+        }
+
         // Episodes always use primary
         let imageType = (item.type == .episode || item.collectionType != nil) ? .primary : type
         

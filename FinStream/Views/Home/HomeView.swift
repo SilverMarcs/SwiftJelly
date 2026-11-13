@@ -57,6 +57,8 @@ struct HomeView: View {
 
                 ContinueWatchingView()
 
+                SeerRequestsShelf()
+
                 MediaShelf(header: "Favorites", filter: .favorites) {
                     try await JFAPI.loadFavoriteItems(limit: 15)
                 }

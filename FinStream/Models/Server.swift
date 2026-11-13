@@ -17,17 +17,20 @@ struct Server: Identifiable, Codable, Hashable {
     var accessToken: String?
     var jellyfinUserID: String? // The actual Jellyfin user ID from authentication
 
+    var seer: SeerAccount?
+
     // Computed property to check if user is authenticated
     var isAuthenticated: Bool {
         return username != nil && accessToken != nil && jellyfinUserID != nil
     }
 
-    init(id: String = UUID().uuidString, name: String, url: URL, username: String? = nil, accessToken: String? = nil, jellyfinUserID: String? = nil) {
+    init(id: String = UUID().uuidString, name: String, url: URL, username: String? = nil, accessToken: String? = nil, jellyfinUserID: String? = nil, seer: SeerAccount? = nil) {
         self.id = id
         self.name = name
         self.url = url
         self.username = username
         self.accessToken = accessToken
         self.jellyfinUserID = jellyfinUserID
+        self.seer = seer
     }
 }
