@@ -88,6 +88,12 @@ struct HomeView: View {
         .scrollClipDisabled()
         .navigationTitle(showScrollEffect ? "" : "Home")
         .platformNavigationToolbar()
+        #if os(macOS)
+        .toolbarBackgroundVisibility(showScrollEffect ? .hidden : .automatic, for: .windowToolbar)
+        #endif
+        #if os(iOS)
+        .profileToolbarItem()
+        #endif
     }
 
     private var spacing: CGFloat {

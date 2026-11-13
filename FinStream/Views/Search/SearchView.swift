@@ -8,6 +8,7 @@ struct SearchView: View {
     @State private var viewModel = SearchViewModel()
     @State private var searchTask: Task<Void, Never>?
     @FocusState private var isSearchFocused: Bool
+    @Environment(\.searchFocusRequest) private var searchFocusRequest
 
     private var isSeerConfigured: Bool {
         DataManager.shared.server?.seer?.isAuthenticated == true
@@ -17,14 +18,18 @@ struct SearchView: View {
         MediaGrid(items: viewModel.results(for: searchScope), isLoading: viewModel.isLoading)
             .navigationTitle("Search")
             .platformNavigationToolbar()
+            #if os(iOS)
+            .profileToolbarItem()
+            #endif
             .searchable(text: $searchText, placement: placement, prompt: "Search movies, shows, or people")
             .searchPresentationToolbarBehavior(.avoidHidingContent)
             .onChange(of: searchSource) { _, _ in
                 scheduleSearch(debounce: false)
             }
-            #if os(macOS)
+            #if !os(tvOS)
             .searchFocused($isSearchFocused)
-            .task {
+            // Focus the field whenever the Search tab is activated or reselected.
+            .onChange(of: searchFocusRequest, initial: true) {
                 isSearchFocused = true
             }
             #endif

@@ -10,6 +10,7 @@ struct HeroBackdropView<HeroActions: View>: View {
     let genreItem: BaseItemDto
     let badge: String?
     let showsBackground: Bool
+    let showsOverview: Bool
 
     init(
         item: BaseItemDto,
@@ -17,6 +18,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         genreItem: BaseItemDto? = nil,
         badge: String? = nil,
         showsBackground: Bool = true,
+        showsOverview: Bool = true,
         @ViewBuilder heroActions: () -> HeroActions
     ) {
         self.item = item
@@ -24,6 +26,7 @@ struct HeroBackdropView<HeroActions: View>: View {
         self.genreItem = genreItem ?? item
         self.badge = badge
         self.showsBackground = showsBackground
+        self.showsOverview = showsOverview
         self.heroActions = heroActions()
     }
 
@@ -124,7 +127,9 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             heroActions
 
-            OverviewView(item: item, compact: true)
+            if showsOverview {
+                OverviewView(item: item, compact: true)
+            }
 
             AttributesView(item: item)
                 .allowsHitTesting(false)
@@ -165,8 +170,10 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 30) {
-                    OverviewView(item: item)
-                        .frame(maxWidth: descriptionMaxWidth)
+                    if showsOverview {
+                        OverviewView(item: item)
+                            .frame(maxWidth: descriptionMaxWidth)
+                    }
 
                     heroActions
                 }
