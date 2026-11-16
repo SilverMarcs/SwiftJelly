@@ -179,6 +179,28 @@ extension PlayerViewControllerHost: AVPlayerViewControllerDelegate {
         }
     }
 
+    #if os(iOS)
+    func playerViewController(
+        _ playerViewController: AVPlayerViewController,
+        willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        coordinator.animate(alongsideTransition: nil) { context in
+            guard !context.isCancelled else { return }
+            AppDelegate.setFullScreenLandscape(true, in: playerViewController.view.window?.windowScene)
+        }
+    }
+
+    func playerViewController(
+        _ playerViewController: AVPlayerViewController,
+        willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        coordinator.animate(alongsideTransition: nil) { context in
+            guard !context.isCancelled else { return }
+            AppDelegate.setFullScreenLandscape(false, in: playerViewController.view.window?.windowScene)
+        }
+    }
+    #endif
+
     #if os(tvOS)
     func playerViewController(
         _ playerViewController: AVPlayerViewController,

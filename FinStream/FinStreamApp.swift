@@ -11,6 +11,9 @@ import AVKit
 
 @main
 struct FinStreamApp: App {
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
+    #endif
     @State var selectedTab: TabSelection = .home
     @Environment(\.scenePhase) private var scenePhase
 
