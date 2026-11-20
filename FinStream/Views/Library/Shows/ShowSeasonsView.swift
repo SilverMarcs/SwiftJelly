@@ -5,6 +5,7 @@ struct ShowSeasonsView: View {
     @Bindable var vm: ShowDetailViewModel
     @State private var episodeScrollPosition = ScrollPosition(idType: String.self)
     @FocusState private var focusedEpisodeID: String?
+    @State private var hasUserSelectedSeason = false
     
     var body: some View {
         SectionContainer {
@@ -31,7 +32,7 @@ struct ShowSeasonsView: View {
             await vm.updateEpisodesForSelectedSeason()
         }
         .task(id: vm.episodeScrollTargetID) {
-            guard let targetID = vm.episodeScrollTargetID else { return }
+            guard !hasUserSelectedSeason, let targetID = vm.episodeScrollTargetID else { return }
             episodeScrollPosition.scrollTo(id: targetID, anchor: .center)
             #if os(tvOS)
             // Let the lazy row lay out the requested card before moving focus.
@@ -44,7 +45,7 @@ struct ShowSeasonsView: View {
     
     @ViewBuilder
     private var seasonPicker: some View {
-        Picker("Season", selection: $vm.selectedSeason) {
+        Picker("Season", selection: seasonSelection) {
             if vm.selectedSeason == nil {
                 Text("Seasons").tag(nil as BaseItemDto?)
             }
@@ -66,6 +67,17 @@ struct ShowSeasonsView: View {
         .focusSection()
         #endif
     }
+
+    /// Only the picker writes through this binding, so programmatic season changes keep auto-scrolling.
+    private var seasonSelection: Binding<BaseItemDto?> {
+        Binding(
+            get: { vm.selectedSeason },
+            set: { newValue in
+                hasUserSelectedSeason = true
+                vm.selectedSeason = newValue
+            }
+        )
+    }
     
     private var episodeSpacing: CGFloat {
         #if os(tvOS)
@@ -74,5 +86,4 @@ struct ShowSeasonsView: View {
         8
         #endif
     }
-
 }

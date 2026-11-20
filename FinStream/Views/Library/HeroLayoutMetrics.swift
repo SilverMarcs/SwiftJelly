@@ -5,7 +5,7 @@ enum HeroLayoutMetrics {
 
     static func height(isCompact: Bool = false) -> CGFloat {
         #if os(tvOS)
-        880
+        800
         #elseif os(iOS)
         isCompact ? 672 : 525
         #elseif os(macOS)

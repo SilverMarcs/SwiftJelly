@@ -68,10 +68,10 @@ extension JFAPI {
             playbackInfoDto
         )
         
-        let response = try await context.client.send(request)
+        let response = try await send(request, context: context)
         
         return try PlaybackInfoResponse.from(
-            response: response.value,
+            response: response,
             item: item,
             client: context.client,
             audioStreamIndex: audioStreamIndex

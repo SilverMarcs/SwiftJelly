@@ -23,6 +23,7 @@ class ShowDetailViewModel {
      
     // Next Episode / play button
     private(set) var nextEpisode: BaseItemDto? = nil
+    private(set) var hasResolvedNextEpisode = false
     
     // Loading states
     var isLoading: Bool = false
@@ -92,6 +93,11 @@ class ShowDetailViewModel {
     // Quick load just the next episode for hero/play button (no seasons/episodes)
     func loadQuickNextEpisode() async {
         isLoading = true
+        defer {
+            isLoading = false
+            hasResolvedNextEpisode = true
+        }
+
         do {
             let seriesID = show.type == .episode ? (show.seriesID ?? show.id ?? "") : (show.id ?? "")
             guard !seriesID.isEmpty else { return }
@@ -101,7 +107,6 @@ class ShowDetailViewModel {
                 .first(where: { $0.type == .episode }) {
                 withAnimation {
                     nextEpisode = resumed
-                    isLoading = false
                 }
 
                 await autoSelectSeasonAndEpisode()
@@ -112,7 +117,6 @@ class ShowDetailViewModel {
             if let nextUp = try await JFAPI.loadNextUpItems(limit: 1, seriesID: seriesID).first {
                 withAnimation {
                     nextEpisode = nextUp
-                    isLoading = false
                 }
                 await autoSelectSeasonAndEpisode()
                 return
@@ -120,6 +124,12 @@ class ShowDetailViewModel {
 
             if allEpisodes.count > 0 {
                 await computeNextEpisode()
+            }
+
+            if nextEpisode == nil, let firstEpisode = try await JFAPI.loadFirstEpisode(seriesID: seriesID) {
+                withAnimation {
+                    nextEpisode = firstEpisode
+                }
             }
         } catch {
             print("Quick next episode load failed: \(error)")
@@ -268,6 +278,7 @@ class ShowDetailViewModel {
             nextEpisode = computed
             isLoading = false
         }
+        hasResolvedNextEpisode = true
 
         await autoSelectSeasonAndEpisode()
     }

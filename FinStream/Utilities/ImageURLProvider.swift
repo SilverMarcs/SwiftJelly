@@ -48,6 +48,12 @@ enum ImageURLProvider {
         return url(forItemID: id, imageType: .primary)
     }
 
+    /// Works for any server, not just the active one. The user may have no image set.
+    static func userImageURL(for server: Server) -> URL? {
+        guard let userID = server.jellyfinUserID else { return nil }
+        return server.url.appending(path: "Users/\(userID)/Images/Primary")
+    }
+
     /// Builds a series image URL for episode items when available.
     static func seriesImageURL(for item: BaseItemDto) -> URL? {
         if let tag = item.parentThumbImageTag,

@@ -6,29 +6,19 @@ struct ShowDetailHeroView: View {
 
     var body: some View {
         HeroBackdropView(item: vm.show) {
-            HStack(spacing: spacing) {
+            HeroActionButtons(
+                context: .detail,
+                usesGlassContainer: false,
+                infoItem: nil,
+                markPlayedItem: vm.selectedSeason,
+                markPlayedDisabled: vm.playButtonDisabled,
+                markAllEpisodesWatched: vm.markSelectedSeasonWatched,
+                canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched,
+                favoriteItem: vm.show
+            ) {
                 ShowPlayButton(vm: vm)
-
-                MarkPlayedButton(
-                    item: vm.selectedSeason,
-                    markAllEpisodesWatched: vm.markSelectedSeasonWatched,
-                    canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched
-                )
-                    .adaptiveDisabled(vm.playButtonDisabled)
-
-                FavoriteButton(item: vm.show)
             }
             .environment(\.refresh, vm.refreshAll)
         }
-    }
-
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        15
-        #elseif os(macOS)
-        8
-        #else
-        6
-        #endif
     }
 }

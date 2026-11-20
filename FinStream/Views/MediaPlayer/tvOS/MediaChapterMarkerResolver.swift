@@ -7,6 +7,28 @@ struct MediaChapterMarkers: Equatable, Sendable {
 }
 
 enum MediaChapterMarkerResolver {
+    static func resolve(from segments: [MediaSegmentDto]) -> MediaChapterMarkers {
+        let introRangeSeconds: Range<Double>? = segments
+            .filter { $0.type == .intro || $0.type == .recap }
+            .compactMap { segment -> Range<Double>? in
+                guard let start = segment.startSeconds,
+                      let end = segment.endSeconds,
+                      start.isFinite, end.isFinite, end > start else { return nil }
+                return start..<end
+            }
+            .min(by: { $0.lowerBound < $1.lowerBound })
+
+        let creditsStartSeconds: Double? = segments
+            .filter { $0.type == .outro }
+            .compactMap { segment -> Double? in
+                guard let start = segment.startSeconds, start.isFinite, start >= 0 else { return nil }
+                return start
+            }
+            .min()
+
+        return .init(introRangeSeconds: introRangeSeconds, creditsStartSeconds: creditsStartSeconds)
+    }
+
     static func resolve(from chapters: [ChapterInfo]?) -> MediaChapterMarkers {
         guard let chapters, !chapters.isEmpty else {
             return .init(introRangeSeconds: nil, creditsStartSeconds: nil)

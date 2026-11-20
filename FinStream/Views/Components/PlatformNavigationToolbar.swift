@@ -43,6 +43,11 @@ private struct PlatformTopBarModifier<Trailing: View>: ViewModifier {
     let titleDisplayMode: ToolbarTitleDisplayMode
     let trailing: Trailing
 
+    #if os(iOS)
+    @Environment(\.profileToolbarSettingsAction) private var profileToolbarSettingsAction
+    @Environment(\.isPresented) private var isPresented
+    #endif
+
     func body(content: Content) -> some View {
         #if os(tvOS)
         VStack(spacing: 0) {
@@ -66,6 +71,11 @@ private struct PlatformTopBarModifier<Trailing: View>: ViewModifier {
             .toolbarTitleDisplayMode(titleDisplayMode)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) { trailing }
+                #if os(iOS)
+                // Declared after `trailing` so the profile menu sits at the trailing edge.
+                // Only tab root screens show it, not screens pushed onto them.
+                ProfileToolbarItem(showSettings: isPresented ? nil : profileToolbarSettingsAction)
+                #endif
             }
         #endif
     }

@@ -18,7 +18,7 @@ struct AttributesView: View {
             Text("2024 \u{00B7} 1h 30m \u{00B7} PG-13")
                 .font(attributeFont)
                 .fontWeight(.medium)
-                .foregroundStyle(.white.opacity(0.9))
+                .foregroundStyle(.primary.opacity(0.9))
                 .redacted(reason: .placeholder)
         }
     }
@@ -94,7 +94,7 @@ struct AttributesView: View {
         }
         .font(attributeFont)
         .fontWeight(.medium)
-        .foregroundStyle(.white.opacity(0.9))
+        .foregroundStyle(.primary.opacity(0.9))
         .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -102,7 +102,7 @@ struct AttributesView: View {
 
     private var dotSeparator: some View {
         Text("•")
-            .foregroundStyle(.white.opacity(0.5))
+            .foregroundStyle(.primary.opacity(0.5))
     }
 
     private var attributeFont: Font {
@@ -223,7 +223,7 @@ private struct BorderedBadge: View {
             .padding(.vertical, 3)
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(.white.opacity(0.5), lineWidth: 1.5)
+                    .stroke(.primary.opacity(0.5), lineWidth: 1.5)
             )
             #else
             .font(.system(size: 8, weight: .medium))
@@ -231,7 +231,7 @@ private struct BorderedBadge: View {
             .padding(.vertical, 1.5)
             .overlay(
                 RoundedRectangle(cornerRadius: 3)
-                    .stroke(.white.opacity(0.5), lineWidth: 0.75)
+                    .stroke(.primary.opacity(0.5), lineWidth: 0.75)
             )
             #endif
     }
@@ -252,7 +252,7 @@ private struct AudioBadgeView: View {
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .background(.white.opacity(0.15))
+            .background(.primary.opacity(0.15))
             .clipShape(RoundedRectangle(cornerRadius: 4))
 
             if info != .dolbyDigital {
@@ -261,7 +261,7 @@ private struct AudioBadgeView: View {
                     .font(.system(size: 9))
                     .padding(.horizontal, 5)
                     .padding(.vertical, 3)
-                    .background(.white.opacity(0.15))
+                    .background(.primary.opacity(0.15))
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             }
         } else {
@@ -269,7 +269,7 @@ private struct AudioBadgeView: View {
                 .fontWeight(.bold)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
-                .background(.white.opacity(0.15))
+                .background(.primary.opacity(0.15))
                 .clipShape(RoundedRectangle(cornerRadius: 4))
         }
     }

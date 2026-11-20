@@ -3,52 +3,39 @@ import JellyfinAPI
 
 struct ShowHeroActions: View {
     @Binding private var show: BaseItemDto
+    /// Owned by the view so the loaded next episode survives the carousel recreating it.
     @State private var vm: ShowDetailViewModel
+    private let externalFocusNamespace: Namespace.ID?
+    private let playFocus: FocusState<Bool>.Binding?
 
-    @Namespace private var actionButtonsNamespace
-
-    init(show: Binding<BaseItemDto>) {
+    init(show: Binding<BaseItemDto>, externalFocusNamespace: Namespace.ID? = nil, playFocus: FocusState<Bool>.Binding? = nil) {
         self._show = show
         self._vm = State(initialValue: ShowDetailViewModel(item: show.wrappedValue))
+        self.externalFocusNamespace = externalFocusNamespace
+        self.playFocus = playFocus
     }
 
     var body: some View {
-        GlassEffectContainer(spacing: spacing) {
-            HStack(spacing: spacing) {
-                ShowPlayButton(vm: vm)
-#if os(tvOS)
-                    .prefersDefaultFocus(in: actionButtonsNamespace)
-#endif
-                #if os(tvOS)
-                HeroInfoButton(item: show)
-                #endif
-
-                MarkPlayedButton(
-                    item: vm.selectedSeason,
-                    markAllEpisodesWatched: vm.markSelectedSeasonWatched,
-                    canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched
-                )
-                    .adaptiveDisabled(vm.playButtonDisabled)
-
-                FavoriteButton(item: vm.show)
-            }
+        HeroActionButtons(
+            context: .carousel,
+            usesGlassContainer: true,
+            infoItem: show,
+            markPlayedItem: vm.selectedSeason,
+            markPlayedDisabled: vm.playButtonDisabled,
+            markAllEpisodesWatched: vm.markSelectedSeasonWatched,
+            canMarkAllEpisodesWatched: vm.canMarkSelectedSeasonWatched,
+            favoriteItem: vm.show,
+            externalFocusNamespace: externalFocusNamespace,
+            playFocus: playFocus
+        ) {
+            ShowPlayButton(vm: vm)
         }
-#if os(tvOS)
-        .focusScope(actionButtonsNamespace)
-#endif
         .environment(\.refresh, refreshAllAndSync)
+        .task(id: show.id) {
+            await vm.loadQuickNextEpisode()
+        }
     }
 
-    private var spacing: CGFloat {
-        #if os(tvOS)
-        15
-        #elseif os(macOS)
-        8
-        #else
-        6
-        #endif
-    }
-    
     private func refreshAllAndSync() async {
         await vm.refreshAll()
         show = vm.show

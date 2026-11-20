@@ -16,7 +16,7 @@ struct FavoriteButton: View {
                 .animation(.snappy, value: item.userData?.isFavorite)
                 .heroActionIcon()
         }
-        .foregroundStyle((item.userData?.isFavorite == true) ? Color.yellow : Color.primary)
+        .tint((item.userData?.isFavorite == true) ? .yellow : nil)
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
         #if os(tvOS)

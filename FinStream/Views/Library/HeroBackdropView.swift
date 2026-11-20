@@ -2,22 +2,6 @@ import SwiftUI
 import JellyfinAPI
 import SwiftMediaViewer
 
-private extension View {
-    /// Constrains width to the enclosing scroll container on platforms where
-    /// `containerRelativeFrame` is well-supported. macOS and iPadOS get a no-op since they
-    /// can crash inside ScrollView + backgroundExtensionEffect compositions or bleed/exceed boundaries in split views.
-    @ViewBuilder
-    func boundToContainerWidth(carouselWidth: CGFloat?) -> some View {
-        if let carouselWidth {
-            self.frame(width: carouselWidth)
-        } else if Device.isMacOrPad {
-            self.frame(maxWidth: .infinity)
-        } else {
-            self.containerRelativeFrame(.horizontal)
-        }
-    }
-}
-
 struct HeroBackdropView<HeroActions: View>: View {
     @ViewBuilder let heroActions: HeroActions
 
@@ -25,29 +9,24 @@ struct HeroBackdropView<HeroActions: View>: View {
     let logoItem: BaseItemDto
     let genreItem: BaseItemDto
     let badge: String?
-    let contentOpacity: Double
-    let carouselWidth: CGFloat?
-    let tvOSBottomPadding: CGFloat
-
-    private var isCarousel: Bool { carouselWidth != nil }
+    let showsBackground: Bool
+    let showsOverview: Bool
 
     init(
         item: BaseItemDto,
         logoItem: BaseItemDto? = nil,
         genreItem: BaseItemDto? = nil,
         badge: String? = nil,
-        contentOpacity: Double = 1,
-        carouselWidth: CGFloat? = nil,
-        tvOSBottomPadding: CGFloat = 40,
+        showsBackground: Bool = true,
+        showsOverview: Bool = true,
         @ViewBuilder heroActions: () -> HeroActions
     ) {
         self.item = item
         self.logoItem = logoItem ?? item
         self.genreItem = genreItem ?? item
         self.badge = badge
-        self.contentOpacity = contentOpacity
-        self.carouselWidth = carouselWidth
-        self.tvOSBottomPadding = tvOSBottomPadding
+        self.showsBackground = showsBackground
+        self.showsOverview = showsOverview
         self.heroActions = heroActions()
     }
 
@@ -63,127 +42,45 @@ struct HeroBackdropView<HeroActions: View>: View {
     var body: some View {
     #if os(tvOS)
         largeScreenContent
-            .modifier(HeroCarouselMetadataFade(opacity: contentOpacity, isCarousel: isCarousel))
-            .padding([.top, .horizontal], 40)
-            .padding(.bottom, tvOSBottomPadding)
+            .padding(40)
             .environment(\.colorScheme, .dark)
     #else
-        backdropImage
-            // Crop artwork to the viewport before sizing metadata; a scaled-to-fill image
-            // can otherwise report its wider intrinsic size to the overlay.
-            .frame(width: carouselWidth)
-            .overlay(alignment: .bottomLeading) {
-                if isCompactSize {
-                    overlayContent
-                        .modifier(HeroCarouselMetadataFade(opacity: contentOpacity, isCarousel: isCarousel))
-                        .padding()
-                } else {
-                    largeScreenContent
-                        .modifier(HeroCarouselMetadataFade(opacity: contentOpacity, isCarousel: isCarousel))
-                        #if os(macOS)
-                        .padding([.top, .horizontal])
-                        .padding(.bottom, 25)
-                        #else
-                        .padding()
-                        #endif
-                }
+        Group {
+            if showsBackground {
+                backdropImage
+            } else {
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(false)
             }
-            .environment(\.colorScheme, .dark)
+        }
+        .overlay(alignment: .bottomLeading) {
+            if isCompactSize {
+                overlayContent
+                    .padding()
+            } else {
+                largeScreenContent
+                    #if os(macOS)
+                    .padding([.top, .horizontal])
+                    .padding(.bottom, 25)
+                    #else
+                    .padding()
+                    #endif
+            }
+        }
+        .environment(\.colorScheme, .dark)
     #endif
     }
     
-    // MARK: - Backdrop
-    
-    @ViewBuilder
     private var backdropImage: some View {
-        let reflectionHeight = HeroLayoutMetrics.reflectionHeight
-        let backdrop = CachedAsyncImage(
-            url: ImageURLProvider.imageURL(for: item, type: .backdrop),
-            targetSize: 1500
+        HeroBackdropImage(
+            item: item,
+            isCompact: isCompactSize,
+            backdropHeight: backdropHeight,
+            reflectionHeight: HeroLayoutMetrics.reflectionHeight,
+            parallax: .vertical
         )
-        
-        VStack(spacing: 0) {
-            backdrop
-                .scaledToFill()
-                .boundToContainerWidth(carouselWidth: carouselWidth)
-                .frame(height: backdropHeight, alignment: .top)
-                .clipped()
-
-            if isCompactSize {
-                backdrop
-                    .scaledToFill()
-                    .boundToContainerWidth(carouselWidth: carouselWidth)
-                    .frame(height: backdropHeight, alignment: .top)
-                    .scaleEffect(x: 1, y: -1, anchor: .center)
-                    .frame(height: reflectionHeight, alignment: .top)
-                    .clipped()
-            }
-        }
-            .scrollTransition(axis: .vertical) { content, phase in
-                 content
-                    .offset(y: isCarousel || phase.isIdentity ? 0 : phase.value * -200)
-             }
-            .overlay(alignment: .bottom) {
-                if isCompactSize {
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .black.opacity(0.9), location: 0),
-                            .init(color: .black.opacity(0.81), location: 0.4),
-                            .init(color: .black.opacity(0), location: 1.0)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                    .frame(height: reflectionHeight + 150)
-                } else {
-                    #if os(macOS)
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .black, location: 0),
-                            .init(color: .black.opacity(0.5), location: 0.4),
-                            .init(color: .black.opacity(0), location: 1.0)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                        .frame(height: 300)
-                    #else
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .black.opacity(0.9), location: 0),
-                            .init(color: .black.opacity(0.81), location: 0.4),
-                            .init(color: .black.opacity(0), location: 1.0)
-                        ]),
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                        .frame(height: 300)
-                    #endif
-                }
-            }
-        .modifier(HeroBackdropScrollEffects(isCarousel: isCarousel))
-        .frame(height: isCompactSize ? backdropHeight + reflectionHeight : backdropHeight)
     }
-    
-    let bottomGradient = LinearGradient(
-        gradient: Gradient(stops: [
-            .init(color: .black, location: 0),
-            .init(color: .black.opacity(0.9), location: 0.5),
-            .init(color: .black.opacity(0), location: 1.0)
-        ]),
-        startPoint: .bottom,
-        endPoint: .top
-    )
-    
-    private var height: CGFloat {
-        #if os(macOS)
-        480
-        #else
-        620
-        #endif
-    }
-    
-    // MARK: - Overlay Content
     
     @ViewBuilder
     private var logo: some View {
@@ -217,6 +114,7 @@ struct HeroBackdropView<HeroActions: View>: View {
                     .redacted(reason: name?.isEmpty == false ? [] : .placeholder)
             }
         }
+        .allowsHitTesting(false)
     }
     
     private var overlayContent: some View {
@@ -229,11 +127,12 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             heroActions
 
-            if !isCarousel {
+            if showsOverview {
                 OverviewView(item: item, compact: true)
             }
 
             AttributesView(item: item)
+                .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, alignment: overallAlignment)
     }
@@ -250,6 +149,7 @@ struct HeroBackdropView<HeroActions: View>: View {
             .lineLimit(isCompactSize ? 2 : nil)
             .foregroundStyle(.primary)
             .redacted(reason: genres.isEmpty ? .placeholder : [])
+            .allowsHitTesting(false)
     }
 
     private var genreFont: Font {
@@ -270,7 +170,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 30) {
-                    if !isCarousel {
+                    if showsOverview {
                         OverviewView(item: item)
                             .frame(maxWidth: descriptionMaxWidth)
                     }
@@ -282,6 +182,7 @@ struct HeroBackdropView<HeroActions: View>: View {
 
                 VStack(alignment: .trailing, spacing: 12) {
                     AttributesView(item: item)
+                        .allowsHitTesting(false)
                     genreList
                 }
             }
@@ -336,14 +237,6 @@ struct HeroBackdropView<HeroActions: View>: View {
         250
     #else
         140
-    #endif
-    }
-    
-    private var backdropTargetSize: CGFloat {
-    #if os(tvOS)
-        2000
-    #else
-        1080
     #endif
     }
     
