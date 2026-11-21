@@ -28,6 +28,10 @@ final class PlayerViewControllerHost: NSObject {
 
     private var pendingRestoreCompletion: ((Bool) -> Void)?
     private var restoreTimeoutTask: Task<Void, Never>?
+    #if os(iOS)
+    private weak var fullScreenWindowScene: UIWindowScene?
+    private var sceneActivationObserver: NSObjectProtocol?
+    #endif
 
     override init() {
         super.init()
@@ -49,7 +53,28 @@ final class PlayerViewControllerHost: NSObject {
         controller.exitsFullScreenWhenPlaybackEnds = false
         controller.updatesNowPlayingInfoCenter = true
         #endif
+        #if os(iOS)
+        sceneActivationObserver = NotificationCenter.default.addObserver(
+            forName: UIScene.didActivateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            MainActor.assumeIsolated {
+                guard let scene = notification.object as? UIWindowScene,
+                      scene === self?.fullScreenWindowScene else { return }
+                AppDelegate.reapplyFullScreenLandscape(in: scene)
+            }
+        }
+        #endif
     }
+
+    #if os(iOS)
+    isolated deinit {
+        if let sceneActivationObserver {
+            NotificationCenter.default.removeObserver(sceneActivationObserver)
+        }
+    }
+    #endif
 
     func setPlayer(_ player: AVPlayer?) {
         guard playerViewController.player !== player else { return }
@@ -186,7 +211,8 @@ extension PlayerViewControllerHost: AVPlayerViewControllerDelegate {
     ) {
         coordinator.animate(alongsideTransition: nil) { context in
             guard !context.isCancelled else { return }
-            AppDelegate.setFullScreenLandscape(true, in: playerViewController.view.window?.windowScene)
+            self.fullScreenWindowScene = playerViewController.view.window?.windowScene
+            AppDelegate.setFullScreenLandscape(true, in: self.fullScreenWindowScene)
         }
     }
 
@@ -196,7 +222,9 @@ extension PlayerViewControllerHost: AVPlayerViewControllerDelegate {
     ) {
         coordinator.animate(alongsideTransition: nil) { context in
             guard !context.isCancelled else { return }
-            AppDelegate.setFullScreenLandscape(false, in: playerViewController.view.window?.windowScene)
+            let scene = self.fullScreenWindowScene ?? playerViewController.view.window?.windowScene
+            AppDelegate.setFullScreenLandscape(false, in: scene)
+            self.fullScreenWindowScene = nil
         }
     }
     #endif
