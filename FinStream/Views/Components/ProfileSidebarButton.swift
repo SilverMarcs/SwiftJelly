@@ -43,12 +43,13 @@ struct ProfileSidebarButton: View {
             }
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
         #if os(tvOS)
+        .buttonStyle(SidebarHeaderButtonStyle())
         .fullScreenCover(isPresented: $showingSwitcher) {
             ServerSwitcherView()
         }
         #else
+        .buttonStyle(.plain)
         .sheet(isPresented: $showingSwitcher) {
             ServerSwitcherView()
         }
@@ -63,3 +64,35 @@ struct ProfileSidebarButton: View {
         #endif
     }
 }
+
+#if os(tvOS)
+/// Matches the system sidebar rows: an in-bounds highlight on focus instead of
+/// the plain style's lift, which scaled the full-width row past the sidebar edges.
+private struct SidebarHeaderButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        SidebarHeaderButtonBody(configuration: configuration)
+    }
+}
+
+private struct SidebarHeaderButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    @Environment(\.isFocused) private var isFocused
+
+    var body: some View {
+        configuration.label
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .foregroundStyle(isFocused ? Color.black : Color.primary)
+            .background {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(.white)
+                    .shadow(color: .black.opacity(0.35), radius: 12, y: 8)
+                    .opacity(isFocused ? 1 : 0)
+            }
+            // Same small lift as the system rows (320pt → 328pt), which keeps it inside the sidebar.
+            .scaleEffect(configuration.isPressed ? 0.97 : (isFocused ? 1.025 : 1))
+            .animation(.easeOut(duration: 0.15), value: isFocused)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+#endif

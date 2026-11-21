@@ -212,8 +212,10 @@ private extension View {
         #if os(tvOS)
         if #available(tvOS 27.0, *) {
             tabViewSidebarHeader {
+                // No horizontal padding: the button's own highlight insets its
+                // content and lines up with the system sidebar rows.
                 ProfileSidebarButton()
-                    .padding()
+                    .padding(.top, 8)
             }
         } else {
             self
